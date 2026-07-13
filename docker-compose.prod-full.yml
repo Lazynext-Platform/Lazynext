@@ -317,7 +317,6 @@ services:
       - STORAGE_PROVIDER=${STORAGE_PROVIDER:-azure}
       - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING:-}
       - OPENAI_API_KEY_FILE=/run/secrets/openai_api_key
-      - FAL_KEY_FILE=/run/secrets/fal_key
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318/v1/traces
       - OTEL_SERVICE_NAME=pre-processing
       - OTEL_ENABLED=true
@@ -335,8 +334,6 @@ services:
     secrets:
       - source: lazynext_openai_api_key
         target: openai_api_key
-      - source: lazynext_fal_key
-        target: fal_key
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.preprocessing.rule=Host(`api.${DOMAIN:-lazynext.com}`) && PathPrefix(`/preprocessing`)"
@@ -375,7 +372,6 @@ services:
       - TRANSFORMERS_CACHE=/tmp/huggingface
       - MEDIA_BUCKET=${MEDIA_BUCKET:-lazynext-media-prod}
       - STORAGE_PROVIDER=${STORAGE_PROVIDER:-azure}
-      - FAL_KEY_FILE=/run/secrets/fal_key
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318/v1/traces
       - OTEL_SERVICE_NAME=generative-studio
       - OTEL_ENABLED=true
@@ -391,8 +387,6 @@ services:
       timeout: 10s
       retries: 5
     secrets:
-      - source: lazynext_fal_key
-        target: fal_key
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.generative.rule=Host(`api.${DOMAIN:-lazynext.com}`) && PathPrefix(`/generative`)"
@@ -1241,7 +1235,6 @@ secrets:
     external: true
   lazynext_gemini_api_key:
     external: true
-  lazynext_fal_key:
     external: true
   lazynext_freesound_client_id:
     external: true

@@ -254,7 +254,7 @@ services:
       - PYTHONUNBUFFERED=1
       - NUMBA_CACHE_DIR=/tmp
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - FAL_KEY=${FAL_KEY:-}
+      - PYTHONUNBUFFERED=1
       - MEDIA_BUCKET=${MEDIA_BUCKET:-lazynext-media-dev}
     networks:
       - lazynext-network
@@ -279,7 +279,7 @@ services:
       - "8001:8001"
     environment:
       - PYTHONUNBUFFERED=1
-      - FAL_KEY=${FAL_KEY:-}
+      - PYTHONUNBUFFERED=1
       - HF_HOME=/tmp/huggingface
       - TRANSFORMERS_CACHE=/tmp/huggingface
     networks:

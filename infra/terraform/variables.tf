@@ -85,13 +85,6 @@ variable "better_auth_secret" {
 # API Keys
 # ─────────────────────────────────────────────────────────────────────────────
 
-variable "fal_key" {
-  description = "API key for Fal.ai (Kling 3.0 video generation)"
-  type        = string
-  sensitive   = true
-  default     = "UNSET_SECRET"
-}
-
 variable "openai_api_key" {
   description = "API key for OpenAI (Whisper, GPT)"
   type        = string

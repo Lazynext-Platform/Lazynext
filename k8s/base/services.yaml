@@ -530,11 +530,9 @@ spec:
                   name: lazynext-secrets
                   key: OPENAI_API_KEY
                   optional: true
-            - name: FAL_KEY
               valueFrom:
                 secretKeyRef:
                   name: lazynext-secrets
-                  key: FAL_KEY
                   optional: true
 ---
 apiVersion: v1
@@ -629,11 +627,9 @@ spec:
           env:
             - name: PYTHONUNBUFFERED
               value: "1"
-            - name: FAL_KEY
               valueFrom:
                 secretKeyRef:
                   name: lazynext-secrets
-                  key: FAL_KEY
                   optional: true
           volumeMounts:
             - name: hf-cache

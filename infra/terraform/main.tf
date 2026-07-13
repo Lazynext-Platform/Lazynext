@@ -163,7 +163,6 @@ locals {
     "openai-api-key",
     "anthropic-api-key",
     "gemini-api-key",
-    "fal-key",
     "dodo-api-key",
     "dodo-webhook-secret",
     "resend-api-key",

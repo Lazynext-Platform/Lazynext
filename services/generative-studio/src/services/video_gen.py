@@ -23,11 +23,6 @@ from upscale_pipeline import UpscalePipeline, UpscaleConfig
 HF_VIDEO_SPACE = os.getenv("HF_VIDEO_SPACE", "Wan-AI/Wan2.1")
 HF_VIDEO_MODEL = os.getenv("HF_VIDEO_MODEL", "Wan-AI/Wan2.2-TI2V-5B")
 
-FAL_INPAINT_MODEL = os.getenv(
-	"FAL_INPAINT_MODEL",
-	"fal-ai/propainter"
-)
-
 
 async def generate_video_service(req: DiffusionRequest):
 	"""Generate video from text via Hugging Face Spaces (free, no API key).
@@ -287,39 +282,7 @@ async def generative_fill_service(req: GenerativeFillRequest):
 	mask_path = f"/tmp/{req.video_id}_mask.png"
 	output_path = f"/tmp/{req.video_id}_filled.mp4"
 
-	fal_key = os.getenv("FAL_KEY") or os.getenv("FAL_API_KEY")
-
-	if fal_key:
-		try:
-			async with httpx.AsyncClient() as client:
-				queue_url = f"https://queue.fal.run/{FAL_INPAINT_MODEL}"
-				response = await client.post(
-					queue_url,
-					headers={
-						"Authorization": f"Key {fal_key}",
-						"Content-Type": "application/json",
-					},
-					json={
-						"video_url": f"file://{video_path}",
-						"mask_url": f"file://{mask_path}" if os.path.exists(mask_path) else None,
-						"prompt": req.prompt,
-					},
-					timeout=30.0,
-				)
-				response.raise_for_status()
-				data = response.json()
-
-				return {
-					"success": True,
-					"video_id": req.video_id,
-					"source": "fal-inpaint",
-					"request_id": data.get("request_id"),
-					"status_url": f"https://queue.fal.run/{FAL_INPAINT_MODEL}/requests/{data.get('request_id')}/status",
-				}
-		except Exception as e:
-			print(f"[GenerativeStudio] Fal.ai inpainting error: {e}")
-
-	# Fallback: OpenCV Navier-Stokes inpainting
+	# OpenCV Navier-Stokes inpainting (free, CPU)
 	if os.path.exists(video_path):
 		try:
 			import cv2
@@ -398,7 +361,7 @@ async def generative_fill_service(req: GenerativeFillRequest):
 
 	raise HTTPException(
 		status_code=503,
-		detail="Generative fill unavailable — configure FAL_KEY or install opencv-python with ffmpeg",
+		detail="Generative fill unavailable — install opencv-python-headless with ffmpeg",
 	)
 
 

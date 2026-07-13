@@ -15,9 +15,8 @@ def test_read_root():
     assert response.json() == {"status": "ok", "service": "generative-studio"}
 
 def test_generate_video_no_key(monkeypatch):
-    """/generate-video returns 503 when the Fal.ai key is absent."""
-    monkeypatch.delenv("FAL_KEY", raising=False)
-    monkeypatch.delenv("FAL_API_KEY", raising=False)
+    """/generate-video returns 503 when video generation backends are unavailable."""
+    monkeypatch.delenv("HF_TOKEN", raising=False)
     response = client.post("/generate-video", json={
         "prompt": "a beautiful sunset",
         "width": 1024,
@@ -25,7 +24,7 @@ def test_generate_video_no_key(monkeypatch):
         "num_frames": 24
     })
     assert response.status_code == 503
-    assert "FAL_KEY not configured" in response.json()["detail"]
+    assert "gradio_client" in response.json()["detail"].lower() or "unavailable" in response.json()["detail"].lower()
 
 def test_dub_video_no_key(monkeypatch):
     """/dub returns 503 when dubbing backends/keys are unavailable."""

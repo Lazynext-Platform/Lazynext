@@ -168,9 +168,6 @@ spec:
     - secretKey: GEMINI_API_KEY
       remoteRef:
         key: gemini--api--key
-    - secretKey: FAL_KEY
-      remoteRef:
-        key: fal--key
     - secretKey: DODO_API_KEY
       remoteRef:
         key: dodo--api--key

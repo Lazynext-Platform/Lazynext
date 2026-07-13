@@ -291,11 +291,9 @@ spec:
               value: "/models/huggingface"
             - name: TRANSFORMERS_CACHE
               value: "/models/huggingface"
-            - name: FAL_KEY
               valueFrom:
                 secretKeyRef:
                   name: lazynext-secrets
-                  key: FAL_KEY
                   optional: true
           livenessProbe:
             httpGet:

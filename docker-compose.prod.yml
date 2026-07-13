@@ -22,7 +22,6 @@
 #   lazynext_openai_api_key
 #   lazynext_anthropic_api_key
 #   lazynext_gemini_api_key
-#   lazynext_fal_key
 #   lazynext_upstash_redis_token
 #   lazynext_grafana_admin_password
 #   lazynext_freesound_client_id
@@ -398,12 +397,9 @@ services:
     secrets:
       - source: lazynext_openai_api_key
         target: openai_api_key
-      - source: lazynext_fal_key
-        target: fal_key
     environment:
       - PYTHONUNBUFFERED=1
       - OPENAI_API_KEY_FILE=/run/secrets/openai_api_key
-      - FAL_KEY_FILE=/run/secrets/fal_key
       - MEDIA_BUCKET=lazynext-media-prod
       - OMP_NUM_THREADS=2
       - MKL_NUM_THREADS=2
@@ -428,11 +424,8 @@ services:
       retries: 5
       start_period: 180s
     secrets:
-      - source: lazynext_fal_key
-        target: fal_key
     environment:
       - PYTHONUNBUFFERED=1
-      - FAL_KEY_FILE=/run/secrets/fal_key
       - HF_HOME=/tmp/huggingface
       - TRANSFORMERS_CACHE=/tmp/huggingface
     volumes:
@@ -713,7 +706,6 @@ secrets:
     external: true
   lazynext_gemini_api_key:
     external: true
-  lazynext_fal_key:
     external: true
   lazynext_upstash_redis_token:
     external: true

@@ -403,10 +403,6 @@ resource "azurerm_container_app" "pre_processing" {
         name        = "OPENAI_API_KEY"
         secret_name = "openai-api-key"
       }
-      env {
-        name        = "FAL_KEY"
-        secret_name = "fal-key"
-      }
     }
 
     min_replicas = local.container_apps["pre_processing"].min
@@ -428,10 +424,6 @@ resource "azurerm_container_app" "pre_processing" {
   secret {
     name  = "openai-api-key"
     value = var.openai_api_key
-  }
-  secret {
-    name  = "fal-key"
-    value = var.fal_key
   }
 
   secret {
@@ -489,10 +481,6 @@ resource "azurerm_container_app" "generative_studio" {
         name  = "TRANSFORMERS_CACHE"
         value = "/tmp/huggingface"
       }
-      env {
-        name        = "FAL_KEY"
-        secret_name = "fal-key"
-      }
     }
 
     min_replicas = local.container_apps["generative_studio"].min
@@ -509,11 +497,6 @@ resource "azurerm_container_app" "generative_studio" {
       percentage      = 100
       latest_revision = true
     }
-  }
-
-  secret {
-    name  = "fal-key"
-    value = var.fal_key
   }
 
   secret {
