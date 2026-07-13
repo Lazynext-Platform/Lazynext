@@ -1,13 +1,13 @@
 """
-Video generation services: text-to-video via Hugging Face Spaces (free),
+Video generation services: text-to-video via Modal (CogVideoX-2B),
 upscaling, style transfer, generative fill, and AI avatar generation.
 
-HF Spaces + Wan 2.1 — completely free, no API key, GPU-accelerated.
-5-15 min on shared GPU. RealESRGAN for upscaling, Edge TTS for avatars,
-OpenCV for effects.
+Modal + CogVideoX-2B: $30/mo free credits, ~35s gen, 5 concurrent, A10G GPU.
+RealESRGAN for upscaling, Edge TTS for avatars, OpenCV for effects.
 """
 
 import asyncio
+import base64
 import os
 import httpx
 from fastapi import HTTPException
@@ -20,57 +20,69 @@ from upscale_pipeline import UpscalePipeline, UpscaleConfig
 
 
 async def generate_video_service(req: DiffusionRequest):
-	"""Generate video via Hugging Face Spaces + Wan 2.1 (free, no API key).
+	"""Generate video via Modal + CogVideoX-2B.
 
-	Connects to the Wan 2.1 Gradio Space on shared HF GPU.
-	Completely free — no API key, no payment required.
-	Typical generation: 5-15 minutes on shared infrastructure.
+	Requires MODAL_VIDEO_ENDPOINT env var.
+	Modal: $30/mo free credits, ~35s per video, 5 concurrent.
 	"""
-	try:
-		from gradio_client import Client
-	except ImportError:
+	endpoint = os.getenv("MODAL_VIDEO_ENDPOINT", "")
+
+	if not endpoint:
 		raise HTTPException(
 			status_code=503,
-			detail="Video generation unavailable — install gradio_client: pip install gradio_client",
+			detail="Video generation unavailable — set MODAL_VIDEO_ENDPOINT. "
+			"Deploy: modal deploy scripts/modal-video-gen.py",
 		)
 
 	try:
-		print("[GenerativeStudio] Connecting to HF Spaces Wan 2.1...")
-		client = Client("Wan-AI/Wan2.1")
-		client.predict(prompt=req.prompt, api_name="/t2v_generation_async")
+		async with httpx.AsyncClient(timeout=600.0) as client:
+			resp = await client.post(
+				endpoint,
+				json={
+					"prompt": req.prompt,
+					"width": req.width,
+					"height": req.height,
+					"num_frames": req.num_frames,
+				},
+			)
+			resp.raise_for_status()
+			data = resp.json()
 
-		for i in range(90):
-			await asyncio.sleep(10)
-			video, _c, _w, _p = client.predict(api_name="/status_refresh")
-			if video and isinstance(video, dict) and video.get("video"):
-				vp = video["video"]
-				if os.path.exists(vp):
-					out = f"/tmp/generated_{hash(req.prompt)}.mp4"
-					os.rename(vp, out)
-					return {
-						"success": True,
-						"prompt": req.prompt,
-						"source": "hf-spaces-wan21",
-						"video_url": f"file://{out}",
-					}
-			if i % 6 == 0:
-				print(f"[GenerativeStudio] Waiting... ({i*10}s)")
+			if not data.get("success"):
+				raise HTTPException(
+					status_code=502,
+					detail=f"Modal error: {data.get('error', 'unknown')}",
+				)
 
-		raise HTTPException(
-			status_code=504,
-			detail="Video generation timed out after 15 minutes — HF Spaces queue is full. Try again.",
-		)
+			video_b64 = data.get("video_base64", "")
+			if not video_b64:
+				raise HTTPException(status_code=502, detail="Modal returned no video")
+
+			video_bytes = base64.b64decode(video_b64)
+			output_path = f"/tmp/generated_{hash(req.prompt)}.mp4"
+			with open(output_path, "wb") as f:
+				f.write(video_bytes)
+
+			return {
+				"success": True,
+				"prompt": req.prompt,
+				"source": "modal-cogvideox",
+				"video_url": f"file://{output_path}",
+				"stats": {
+					"load_time": data.get("load_time"),
+					"gen_time": data.get("gen_time"),
+					"size": data.get("size"),
+				},
+			}
 
 	except HTTPException:
 		raise
 	except Exception as e:
-		raise HTTPException(
-			status_code=502,
-			detail=f"HF Spaces video generation failed: {e}",
-		)
+		raise HTTPException(status_code=502, detail=f"Modal API error: {e}")
 
 
 async def upscale_video_service(req: UpscaleRequest):
+	"""Upscale video resolution using RealESRGAN (2x or 4x)."""
 	video_path = f"/tmp/{req.video_id}.mp4"
 	output_path = f"/tmp/{req.video_id}_{req.scale}x.mp4"
 	config = UpscaleConfig(scale=req.scale, model="RealESRGAN_x4plus" if req.scale == 4 else "RealESRGAN_x2plus")
@@ -87,13 +99,13 @@ async def extract_nerf_service(req: NeRFRequest):
 
 async def style_transfer_service(req: StyleTransferRequest):
 	video_path = f"/tmp/{req.video_id}.mp4"; output_path = f"/tmp/{req.video_id}_styled.mp4"
-	if not os.path.exists(video_path): raise HTTPException(status_code=500, detail="Style transfer failed — video not found")
+	if not os.path.exists(video_path): raise HTTPException(status_code=500, detail="Video not found")
 	try:
 		import cv2, numpy as np, subprocess, tempfile
 		cap = cv2.VideoCapture(video_path)
 		if not cap.isOpened(): raise HTTPException(status_code=400, detail="Cannot open video")
 		fps = cap.get(cv2.CAP_PROP_FPS) or 24.0; total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)); step = max(1, total // 30)
-		td = tempfile.mkdtemp(prefix="style_"); oi = 0; fi = 0
+		td = tempfile.mkdtemp(prefix="style_"); oi = fi = 0
 		while True:
 			ret, frame = cap.read()
 			if not ret: break

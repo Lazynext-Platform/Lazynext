@@ -29,6 +29,7 @@ image = (
         "imageio-ffmpeg",
         "fastapi",
         "tiktoken",
+        "sentencepiece",
     )
     .apt_install("ffmpeg")
 )
@@ -45,7 +46,7 @@ def generate_video(prompt: str = "a beautiful sunset",
     from diffusers import CogVideoXPipeline
     from diffusers.utils import export_to_video
 
-    model_id = "THUDM/CogVideoX-5b"
+    model_id = "THUDM/CogVideoX-2b"
 
     print(f"[Modal] Loading {model_id}...")
     t0 = time.time()
@@ -53,7 +54,10 @@ def generate_video(prompt: str = "a beautiful sunset",
     pipe = CogVideoXPipeline.from_pretrained(
         model_id,
         torch_dtype=torch.bfloat16,
-    ).to("cuda")
+    )
+    pipe.enable_model_cpu_offload()
+    pipe.vae.enable_slicing()
+    pipe.vae.enable_tiling()
 
     load_time = time.time() - t0
     print(f"[Modal] Loaded in {load_time:.1f}s")
@@ -64,16 +68,19 @@ def generate_video(prompt: str = "a beautiful sunset",
     output = pipe(
         prompt=prompt,
         num_videos_per_prompt=1,
-        num_inference_steps=50,
-        num_frames=min(num_frames, 49),
+        num_inference_steps=20,
+        num_frames=min(num_frames, 17),
         guidance_scale=6.0,
         generator=torch.Generator(device="cuda").manual_seed(42),
     )
     video_frames = output.frames[0]
 
     gen_time = time.time() - t1
-    video_bytes = export_to_video(video_frames)
-    video_b64 = base64.b64encode(video_bytes).decode()
+    tmp = "/tmp/video.mp4"
+    export_to_video(video_frames, tmp, fps=8)
+    with open(tmp, "rb") as f:
+        video_bytes = f.read()
+    video_b64 = base64.b64encode(video_bytes).decode("utf-8")
 
     print(f"[Modal] Done! Load: {load_time:.1f}s Gen: {gen_time:.1f}s Size: {len(video_bytes)}B")
 
