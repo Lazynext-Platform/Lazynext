@@ -27,7 +27,6 @@ app.get("/health", (_req, res) => {
 		service: "ai-agents",
 		routing: "intelligent-multi-provider",
 		providers: {
-			deepseek: !!process.env.DEEPSEEK_API_KEY,
 			openai: !!process.env.OPENAI_API_KEY,
 			anthropic: !!process.env.ANTHROPIC_API_KEY,
 			gemini: "available",
@@ -189,6 +188,6 @@ httpServer.listen(port, () => {
     `🤖 Lazynext AI-Agents Orchestrator & Sync Server running on port ${port}`,
   );
   console.log(
-    `   LLM: ${process.env.LLM_PROVIDER || "deepseek"} | DeepSeek: ${process.env.DEEPSEEK_API_KEY ? "✓" : "✗"} | OpenAI: ${process.env.OPENAI_API_KEY ? "✓" : "✗"}`,
+    `   LLM: ${process.env.LLM_PROVIDER || "rule-based"} | OpenAI: ${process.env.OPENAI_API_KEY ? "✓" : "✗"}`,
   );
 });

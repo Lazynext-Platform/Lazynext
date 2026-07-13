@@ -441,12 +441,78 @@ services:
       timeout: 5s
       retries: 3
 
+  # ── Self-Hosted Analytics ────────────────────────────────────
+  # Umami — privacy-first web analytics (80MB Docker, 200MB RAM)
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    ports:
+      - "8093:3000"
+    environment:
+      DATABASE_URL: postgresql://lazynext:${DB_PASSWORD:-changeme}@db:5432/umami
+      DATABASE_TYPE: postgresql
+      APP_SECRET: ${UMAMI_APP_SECRET:-change-me-umami-secret-64}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles: [analytics, full]
+
+  # Matomo — full-featured analytics (funnels, goals, ecommerce, heatmaps)
+  matomo:
+    image: matomo:5-fpm
+    ports:
+      - "8094:80"
+    environment:
+      MATOMO_DATABASE_HOST: db
+      MATOMO_DATABASE_ADAPTER: pdo_pgsql
+      MATOMO_DATABASE_TABLES_PREFIX: matomo_
+      MATOMO_DATABASE_USERNAME: lazynext
+      MATOMO_DATABASE_PASSWORD: ${DB_PASSWORD:-changeme}
+      MATOMO_DATABASE_DBNAME: matomo
+    volumes:
+      - matomo_data:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles: [analytics, full]
+
+  # OpenPanel — modern product analytics (event tracking, dashboards)
+  openpanel:
+    image: openpanel/openpanel:latest
+    ports:
+      - "8095:3000"
+    environment:
+      DATABASE_URL: postgresql://lazynext:${DB_PASSWORD:-changeme}@db:5432/openpanel
+      NEXTAUTH_SECRET: ${OPENPANEL_SECRET:-change-me-openpanel-secret-64}
+      NEXTAUTH_URL: http://localhost:8095
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles: [analytics, full]
+
+  # Countly — mobile & web analytics (push, crashes, events)
+  countly:
+    image: countly/server:latest
+    ports:
+      - "8096:80"
+    environment:
+      COUNTLY_CONFIG_HOST: db
+      COUNTLY_CONFIG__MONGODB: mongodb://db:27017/countly
+    volumes:
+      - countly_data:/var/lib/countly
+    restart: unless-stopped
+    profiles: [analytics, full]
+
 volumes:
   redis_data:
   prometheus_data:
   grafana_data:
   loki_data:
   tempo_data:
+  matomo_data:
+  countly_data:
 
 networks:
   lazynext-network:

@@ -70,18 +70,18 @@ const ALLOWED_MCP_SERVERS = new Set(["playwright", "firecrawl", "context7"]);
 /**
  * Determine the most efficient provider based on prompt characteristics.
  */
-function routePromptToProvider(prompt: string): "deepseek" | "openai" | "anthropic" | "gemini" {
+function routePromptToProvider(prompt: string): "openai" | "anthropic"  | "gemini" {
   const lower = prompt.toLowerCase();
-
+  
   if (lower.includes("private") || lower.includes("local") || lower.includes("secure") || lower.includes("confidential")) {
     return "gemini";
   }
-
+  
   if (lower.includes("write") || lower.includes("story") || lower.includes("draft") || lower.includes("creative") || prompt.length > 2000) {
     return "anthropic";
   }
-
-  return "deepseek"; // Default — best quality/price ratio
+  
+  return "openai"; // Default for logic, reasoning, and planning
 }
 
 /**
@@ -121,7 +121,6 @@ export async function decomposeIntent(
     };
   }
   const provider = routePromptToProvider(sanitized);
-  const deepseekKey = process.env.DEEPSEEK_API_KEY;
   const openaiKey = process.env.OPENAI_API_KEY;
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
@@ -129,9 +128,7 @@ export async function decomposeIntent(
   const mcpTools = await getAllMcpTools();
 
   try {
-    if (provider === "deepseek" && deepseekKey) {
-      return await decomposeWithLLM(sanitized, deepseekKey, "deepseek", mcpTools);
-    } else if (provider === "openai" && openaiKey) {
+    if (provider === "openai" && openaiKey) {
       return await decomposeWithLLM(sanitized, openaiKey, "openai", mcpTools);
     } else if (provider === "anthropic" && anthropicKey) {
       return await decomposeWithLLM(sanitized, anthropicKey, "anthropic", mcpTools);
@@ -272,14 +269,11 @@ Respond ONLY with a JSON object:
       };
     }
 
-    // OpenAI-compatible path (DeepSeek, OpenAI, Gemini)
+    // OpenAI-compatible path (OpenAI, Gemini via compatible endpoint)
     let endpoint = "https://api.openai.com/v1/chat/completions";
     let modelName = process.env.OPENAI_MODEL || "gpt-4o";
 
-    if (provider === "deepseek") {
-      endpoint = "https://api.deepseek.com/v1/chat/completions";
-      modelName = process.env.DEEPSEEK_MODEL || "deepseek-chat";
-    } else if (provider === "gemini") {
+    if (provider === "gemini") {
       endpoint = `${process.env.GEMINI_API_BASE || "https://generativelanguage.googleapis.com/v1beta/openai"}/chat/completions`;
       modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
     }

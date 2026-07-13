@@ -1,6 +1,9 @@
 /**
- * Root layout — wraps all pages with theme provider, analytics,
- * SEO metadata, cookie consent, and the global TooltipProvider.
+ * Root layout — wraps all pages with theme provider, all 10 analytics
+ * providers, SEO metadata, cookie consent, and the global TooltipProvider.
+ *
+ * Analytics stack: PostHog, Clarity, Plausible, GA4, Mixpanel,
+ * Amplitude, Umami, Matomo, OpenPanel, Countly.
  *
  * @layout /
  */
@@ -23,7 +26,15 @@ const siteFont = Inter({ subsets: ["latin"] });
 
 export const metadata = generateMetadata({});
 
+// Analytics providers — each conditional on its env var
 import { PostHogProvider } from "@/components/providers/posthog-provider";
+import { ClarityProvider } from "@/components/providers/clarity-provider";
+import { MixpanelProvider } from "@/components/providers/mixpanel-provider";
+import { AmplitudeProvider } from "@/components/providers/amplitude-provider";
+import { UmamiProvider } from "@/components/providers/umami-provider";
+import { MatomoProvider } from "@/components/providers/matomo-provider";
+import { OpenPanelProvider } from "@/components/providers/openpanel-provider";
+import { CountlyProvider } from "@/components/providers/countly-provider";
 
 /** App root layout with providers, scripts, and global page shell. */
 export default function RootLayout({
@@ -57,18 +68,17 @@ export default function RootLayout({
 					>
 						<TooltipProvider>
 							<Toaster />
-							<Script
-								src="https://cdn.databuddy.cc/databuddy.js"
-								strategy="afterInteractive"
-								async
-								data-client-id="UP-Wcoy5arxFeK7oyjMMZ"
-								data-disabled={process.env.NODE_ENV === "development"}
-								data-track-attributes={false}
-								data-track-errors={true}
-								data-track-outgoing-links={false}
-								data-track-web-vitals={false}
-								data-track-sessions={false}
-							/>
+
+							{/* SaaS Analytics — conditional on env vars */}
+							<ClarityProvider />
+							<MixpanelProvider />
+							<AmplitudeProvider />
+
+							{/* Self-hosted Analytics — conditional on env vars */}
+							<UmamiProvider />
+							<MatomoProvider />
+							<OpenPanelProvider />
+							<CountlyProvider />
 
 							<div className="relative flex min-h-screen flex-col">
 								{children}
