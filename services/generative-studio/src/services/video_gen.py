@@ -1,14 +1,13 @@
 """
-Video generation services: text-to-video via Modal (Wan 2.2) or HF Spaces,
+Video generation services: text-to-video via Hugging Face Spaces (free),
 upscaling, style transfer, generative fill, and AI avatar generation.
 
-Modal + Wan 2.2: $30/mo free credits, ~30-60s, auto-scaling, 5 concurrent.
-HF Spaces fallback: free, no API key, 5-15 min (when Modal not configured).
-RealESRGAN for upscaling, Edge TTS for avatars, OpenCV for effects.
+HF Spaces + Wan 2.1 — completely free, no API key, GPU-accelerated.
+5-15 min on shared GPU. RealESRGAN for upscaling, Edge TTS for avatars,
+OpenCV for effects.
 """
 
 import asyncio
-import base64
 import os
 import httpx
 from fastapi import HTTPException
@@ -21,75 +20,54 @@ from upscale_pipeline import UpscalePipeline, UpscaleConfig
 
 
 async def generate_video_service(req: DiffusionRequest):
-	"""Generate video via Modal (fast, $30/mo free) or HF Spaces (free fallback).
+	"""Generate video via Hugging Face Spaces + Wan 2.1 (free, no API key).
 
-	Priority: Modal if MODAL_VIDEO_ENDPOINT is set (Wan 2.2, 30-60s, 5 concurrent).
-	Fallback: HF Spaces Wan 2.1 (free, 5-15 min, 1 concurrent).
+	Connects to the Wan 2.1 Gradio Space on shared HF GPU.
+	Completely free — no API key, no payment required.
+	Typical generation: 5-15 minutes on shared infrastructure.
 	"""
-	modal_url = os.getenv("MODAL_VIDEO_ENDPOINT", "")
-
-	if modal_url:
-		try:
-			return await _modal_generate(req, modal_url)
-		except HTTPException:
-			raise
-		except Exception as e:
-			print(f"[GenerativeStudio] Modal error: {e}, falling back to HF Spaces...")
-
-	print("[GenerativeStudio] Using HF Spaces (free)...")
 	try:
-		return await _hf_generate(req)
+		from gradio_client import Client
 	except ImportError:
-		raise HTTPException(status_code=503, detail="install gradio_client or set MODAL_VIDEO_ENDPOINT")
+		raise HTTPException(
+			status_code=503,
+			detail="Video generation unavailable — install gradio_client: pip install gradio_client",
+		)
+
+	try:
+		print("[GenerativeStudio] Connecting to HF Spaces Wan 2.1...")
+		client = Client("Wan-AI/Wan2.1")
+		client.predict(prompt=req.prompt, api_name="/t2v_generation_async")
+
+		for i in range(90):
+			await asyncio.sleep(10)
+			video, _c, _w, _p = client.predict(api_name="/status_refresh")
+			if video and isinstance(video, dict) and video.get("video"):
+				vp = video["video"]
+				if os.path.exists(vp):
+					out = f"/tmp/generated_{hash(req.prompt)}.mp4"
+					os.rename(vp, out)
+					return {
+						"success": True,
+						"prompt": req.prompt,
+						"source": "hf-spaces-wan21",
+						"video_url": f"file://{out}",
+					}
+			if i % 6 == 0:
+				print(f"[GenerativeStudio] Waiting... ({i*10}s)")
+
+		raise HTTPException(
+			status_code=504,
+			detail="Video generation timed out after 15 minutes — HF Spaces queue is full. Try again.",
+		)
+
 	except HTTPException:
 		raise
 	except Exception as e:
-		raise HTTPException(status_code=502, detail=f"Video generation failed: {e}")
-
-
-async def _modal_generate(req, endpoint):
-	async with httpx.AsyncClient(timeout=600.0) as client:
-		resp = await client.post(
-			endpoint,
-			json={"prompt": req.prompt, "width": req.width, "height": req.height, "num_frames": req.num_frames},
+		raise HTTPException(
+			status_code=502,
+			detail=f"HF Spaces video generation failed: {e}",
 		)
-		resp.raise_for_status()
-		data = resp.json()
-		if not data.get("success"):
-			raise HTTPException(status_code=502, detail=f"Modal error: {data.get('error','unknown')}")
-
-		video_b64 = data.get("video_base64", "")
-		if not video_b64:
-			raise HTTPException(status_code=502, detail="Modal returned no video")
-
-		video_bytes = base64.b64decode(video_b64)
-		output_path = f"/tmp/generated_{hash(req.prompt)}.mp4"
-		with open(output_path, "wb") as f:
-			f.write(video_bytes)
-
-		return {
-			"success": True,
-			"prompt": req.prompt,
-			"source": "modal-wan22",
-			"video_url": f"file://{output_path}",
-			"stats": {"load_time": data.get("load_time"), "gen_time": data.get("gen_time")},
-		}
-
-
-async def _hf_generate(req):
-	from gradio_client import Client
-	client = Client("Wan-AI/Wan2.1")
-	client.predict(prompt=req.prompt, api_name="/t2v_generation_async")
-	for i in range(90):
-		await asyncio.sleep(10)
-		video, _c, _w, _p = client.predict(api_name="/status_refresh")
-		if video and isinstance(video, dict) and video.get("video"):
-			vp = video["video"]
-			if os.path.exists(vp):
-				out = f"/tmp/generated_{hash(req.prompt)}.mp4"
-				os.rename(vp, out)
-				return {"success": True, "prompt": req.prompt, "source": "hf-spaces-wan21", "video_url": f"file://{out}"}
-	raise HTTPException(status_code=504, detail="Video generation timed out (15 min)")
 
 
 async def upscale_video_service(req: UpscaleRequest):
