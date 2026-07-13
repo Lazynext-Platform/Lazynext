@@ -3,6 +3,6 @@
 # Python 3.13 has incomplete pre-built wheel support for these.
 scipy>=1.14,<1.15
 opencv-python>=5.0.0.93
-onnxruntime>=1.20,<1.21
+onnxruntime>=1.27.0,<1.28
 rembg>=2.0.76
 
