@@ -20,7 +20,7 @@ from upscale_pipeline import UpscalePipeline, UpscaleConfig
 
 
 async def generate_video_service(req: DiffusionRequest):
-	"""Generate video via Modal + CogVideoX-2B.
+	"""Generate video via Modal + CogVideoX-5B.
 
 	Requires MODAL_VIDEO_ENDPOINT env var.
 	Modal: $30/mo free credits, ~35s per video, 5 concurrent.
