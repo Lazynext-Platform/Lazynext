@@ -1,6 +1,6 @@
 //! Generative AI pipeline for video and audio synthesis via external APIs.
 //!
-//! Provides models for text-to-video generation (Hugging Face Spaces, free)
+//! Provides models for text-to-video generation (Modal + Wan 2.2, $30/mo free)
 //! and text-to-speech synthesis (delegated to generative-studio service
 //! which uses Edge TTS — free, unlimited, 300+ voices).
 
@@ -8,8 +8,8 @@ use serde::{Deserialize, Serialize};
 
 /// Configuration for AI-powered text-to-video generation.
 ///
-/// Delegated to the generative-studio service which uses Hugging Face
-/// Spaces (Wan 2.1) — free, no API key, GPU-accelerated.
+/// Delegated to the generative-studio service which uses Modal
+/// (Wan 2.2) — $30/mo free credits, 30-60s, 5 concurrent.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VideoGenerationOptions {
 	/// Natural-language prompt describing the desired video content.
