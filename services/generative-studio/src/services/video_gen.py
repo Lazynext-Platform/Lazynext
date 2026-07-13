@@ -1,15 +1,13 @@
 """
-Video generation services: text-to-video via Together AI + HF Spaces fallback,
+Video generation services: text-to-video via RunPod Serverless (Wan 2.2),
 upscaling, style transfer, generative fill, and AI avatar generation.
 
-Together AI + Wan 2.2 for fast video ($0.66/video, ~30-60s).
-HF Spaces fallback when no API key (free, 5-15 min).
+RunPod Serverless + Wan 2.2 — ~$0.30/video, ~30-60 seconds.
 RealESRGAN for upscaling, Edge TTS for avatars, OpenCV for effects.
 """
 
 import asyncio
 import os
-import time
 import httpx
 from fastapi import HTTPException
 from fastapi.responses import JSONResponse
@@ -19,85 +17,109 @@ from src.models import (
 )
 from upscale_pipeline import UpscalePipeline, UpscaleConfig
 
-TOGETHER_API = "https://api.together.ai/v1"
-TOGETHER_VIDEO_MODEL = os.getenv("TOGETHER_VIDEO_MODEL", "Wan-AI/Wan2.2-TI2V-5B")
-
-
-async def _generate_via_together(req: DiffusionRequest, api_key: str):
-	payload = {
-		"model": TOGETHER_VIDEO_MODEL,
-		"prompt": req.prompt,
-		"steps": min(req.num_frames if req.num_frames > 0 else 30, 50),
-		"width": req.width,
-		"height": req.height,
-	}
-	async with httpx.AsyncClient(timeout=120.0) as client:
-		resp = await client.post(
-			f"{TOGETHER_API}/images/generations",
-			headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-			json=payload,
-		)
-		resp.raise_for_status()
-		data = resp.json()
-		output = data.get("output") or data.get("data", [{}])[0]
-		video_url = output.get("url") if isinstance(output, dict) else (output if isinstance(output, str) else None)
-		if not video_url and data.get("id"):
-			for i in range(30):
-				await asyncio.sleep(2)
-				status = await client.get(f"{TOGETHER_API}/images/generations/{data['id']}", headers={"Authorization": f"Bearer {api_key}"})
-				if status.status_code != 200: continue
-				sd = status.json()
-				so = sd.get("output") or sd.get("data", [{}])[0]
-				video_url = so.get("url") if isinstance(so, dict) else (so if isinstance(so, str) else None)
-				if video_url: break
-		if not video_url:
-			raise HTTPException(status_code=502, detail="Together AI returned no video URL")
-		vr = await client.get(video_url)
-		vr.raise_for_status()
-		b = vr.content
-		if len(b) < 1000: raise HTTPException(status_code=502, detail="Empty video")
-		p = f"/tmp/generated_{hash(req.prompt)}.mp4"
-		with open(p, "wb") as f: f.write(b)
-		return {"success": True, "prompt": req.prompt, "source": "together-ai-wan22", "video_url": f"file://{p}"}
-
-
-async def _generate_via_hf_spaces(req: DiffusionRequest):
-	from gradio_client import Client
-	client = Client("Wan-AI/Wan2.1")
-	client.predict(prompt=req.prompt, api_name="/t2v_generation_async")
-	for i in range(90):
-		await asyncio.sleep(10)
-		video, _cost, _wait, _prog = client.predict(api_name="/status_refresh")
-		if video and isinstance(video, dict) and video.get("video"):
-			vp = video["video"]
-			if os.path.exists(vp):
-				out = f"/tmp/generated_{hash(req.prompt)}.mp4"
-				os.rename(vp, out)
-				return {"success": True, "prompt": req.prompt, "source": "hf-spaces-wan21", "video_url": f"file://{out}"}
-	raise HTTPException(status_code=504, detail="Video generation timed out (15 min)")
+# RunPod Serverless — Wan 2.2 video generation
+RUNPOD_ENDPOINT = os.getenv("RUNPOD_ENDPOINT_ID", "")
+RUNPOD_API = "https://api.runpod.ai/v2"
 
 
 async def generate_video_service(req: DiffusionRequest):
-	"""Generate video via Together AI (fast) or HF Spaces (free fallback)."""
-	api_key = os.getenv("TOGETHER_API_KEY", "")
+	"""Generate video from text via RunPod Serverless + Wan 2.2.
 
-	if api_key:
-		try:
-			return await _generate_via_together(req, api_key)
-		except HTTPException:
-			raise
-		except Exception as e:
-			print(f"[GenerativeStudio] Together AI error: {e}, trying HF Spaces...")
+	Requires RUNPOD_API_KEY and RUNPOD_ENDPOINT_ID env vars.
+	Cost: ~$0.30/video, speed: ~30-60 seconds.
 
-	print("[GenerativeStudio] Using HF Spaces fallback (free, slower)...")
+	Setup:
+		1. Sign up at https://runpod.io
+		2. Create Serverless endpoint with Wan 2.2 template
+		3. Set RUNPOD_API_KEY + RUNPOD_ENDPOINT_ID
+	"""
+	api_key = os.getenv("RUNPOD_API_KEY", "")
+	endpoint = os.getenv("RUNPOD_ENDPOINT_ID", "")
+
+	if not api_key or not endpoint:
+		raise HTTPException(
+			status_code=503,
+			detail="Video generation unavailable — set RUNPOD_API_KEY and RUNPOD_ENDPOINT_ID. "
+			"Sign up at https://runpod.io, create a Wan 2.2 serverless endpoint.",
+		)
+
+	payload = {
+		"input": {
+			"prompt": req.prompt,
+			"num_frames": req.num_frames if req.num_frames > 0 else 24,
+			"width": req.width,
+			"height": req.height,
+		}
+	}
+
 	try:
-		return await _generate_via_hf_spaces(req)
-	except ImportError:
-		raise HTTPException(status_code=503, detail="install gradio_client or set TOGETHER_API_KEY")
+		async with httpx.AsyncClient(timeout=120.0) as client:
+			# Submit async job
+			resp = await client.post(
+				f"{RUNPOD_API}/{endpoint}/run",
+				headers={
+					"Authorization": f"Bearer {api_key}",
+					"Content-Type": "application/json",
+				},
+				json=payload,
+			)
+			resp.raise_for_status()
+			data = resp.json()
+			job_id = data.get("id")
+
+			if not job_id:
+				raise HTTPException(status_code=502, detail="RunPod returned no job ID")
+
+			print(f"[GenerativeStudio] RunPod job {job_id} submitted. Polling...")
+
+			# Poll for result
+			for i in range(60):
+				await asyncio.sleep(5)
+				status_resp = await client.get(
+					f"{RUNPOD_API}/{endpoint}/status/{job_id}",
+					headers={"Authorization": f"Bearer {api_key}"},
+				)
+				status_resp.raise_for_status()
+				status_data = status_resp.json()
+				status = status_data.get("status", "")
+
+				if status == "COMPLETED":
+					output = status_data.get("output", {})
+					video_url = None
+					if isinstance(output, dict):
+						video_url = output.get("video_url") or output.get("url") or output.get("output")
+					elif isinstance(output, str):
+						video_url = output
+
+					if video_url:
+						video_resp = await client.get(video_url)
+						video_resp.raise_for_status()
+						video_bytes = video_resp.content
+						if len(video_bytes) > 1000:
+							p = f"/tmp/generated_{hash(req.prompt)}.mp4"
+							with open(p, "wb") as f:
+								f.write(video_bytes)
+							return {
+								"success": True,
+								"prompt": req.prompt,
+								"source": "runpod-wan22",
+								"video_url": f"file://{p}",
+							}
+						raise HTTPException(status_code=502, detail="RunPod returned empty video")
+
+				elif status in ("FAILED", "CANCELLED"):
+					err = status_data.get("error", "unknown")
+					raise HTTPException(status_code=502, detail=f"RunPod job {status}: {err}")
+
+				if i % 6 == 0:
+					print(f"[GenerativeStudio] RunPod status: {status}")
+
+			raise HTTPException(status_code=504, detail="Video generation timed out after 5 minutes")
+
 	except HTTPException:
 		raise
 	except Exception as e:
-		raise HTTPException(status_code=502, detail=f"Video generation failed: {e}")
+		raise HTTPException(status_code=502, detail=f"RunPod API error: {e}")
 
 
 async def upscale_video_service(req: UpscaleRequest):
