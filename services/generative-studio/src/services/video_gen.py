@@ -1,10 +1,10 @@
 """
-Video generation services: text-to-video via RunPod Serverless or HF Spaces,
+Video generation services: text-to-video via Hugging Face Spaces (free),
 upscaling, style transfer, generative fill, and AI avatar generation.
 
-RunPod Serverless + Wan 2.2: ~$0.30/video, ~30-60s (when configured).
-HF Spaces fallback: free, no API key, 5-15 min (automatic default).
-RealESRGAN for upscaling, Edge TTS for avatars, OpenCV for effects.
+HF Spaces + Wan 2.1 — completely free, no API key, GPU-accelerated.
+5-15 min on shared GPU. RealESRGAN for upscaling, Edge TTS for avatars,
+OpenCV for effects.
 """
 
 import asyncio
@@ -18,79 +18,56 @@ from src.models import (
 )
 from upscale_pipeline import UpscalePipeline, UpscaleConfig
 
-RUNPOD_API = "https://api.runpod.ai/v2"
-
 
 async def generate_video_service(req: DiffusionRequest):
-	"""Generate video via RunPod (fast) or HF Spaces (free fallback).
+	"""Generate video via Hugging Face Spaces + Wan 2.1 (free, no API key).
 
-	Priority: RunPod if RUNPOD_API_KEY + RUNPOD_ENDPOINT_ID are set.
-	Fallback: HF Spaces Wan 2.1 — free, no API key, 5-15 min.
+	Connects to the Wan 2.1 Gradio Space on shared HF GPU.
+	Completely free — no API key, no payment required.
+	Typical generation: 5-15 minutes on shared infrastructure.
 	"""
-	api_key = os.getenv("RUNPOD_API_KEY", "")
-	endpoint = os.getenv("RUNPOD_ENDPOINT_ID", "")
-
-	if api_key and endpoint:
-		try:
-			return await _runpod_generate(req, api_key, endpoint)
-		except HTTPException:
-			raise
-		except Exception as e:
-			print(f"[GenerativeStudio] RunPod error: {e}, falling back to HF Spaces...")
-
-	print("[GenerativeStudio] Using HF Spaces (free, no API key)...")
 	try:
-		return await _hf_spaces_generate(req)
+		from gradio_client import Client
 	except ImportError:
-		raise HTTPException(status_code=503, detail="install gradio_client or set RUNPOD_API_KEY")
+		raise HTTPException(
+			status_code=503,
+			detail="Video generation unavailable — install gradio_client: pip install gradio_client",
+		)
+
+	try:
+		print("[GenerativeStudio] Connecting to HF Spaces Wan 2.1...")
+		client = Client("Wan-AI/Wan2.1")
+		client.predict(prompt=req.prompt, api_name="/t2v_generation_async")
+
+		for i in range(90):
+			await asyncio.sleep(10)
+			video, _c, _w, _p = client.predict(api_name="/status_refresh")
+			if video and isinstance(video, dict) and video.get("video"):
+				vp = video["video"]
+				if os.path.exists(vp):
+					out = f"/tmp/generated_{hash(req.prompt)}.mp4"
+					os.rename(vp, out)
+					return {
+						"success": True,
+						"prompt": req.prompt,
+						"source": "hf-spaces-wan21",
+						"video_url": f"file://{out}",
+					}
+			if i % 6 == 0:
+				print(f"[GenerativeStudio] Waiting... ({i*10}s)")
+
+		raise HTTPException(
+			status_code=504,
+			detail="Video generation timed out after 15 minutes — HF Spaces queue is full. Try again.",
+		)
+
 	except HTTPException:
 		raise
 	except Exception as e:
-		raise HTTPException(status_code=502, detail=f"Video generation failed: {e}")
-
-
-async def _runpod_generate(req, api_key, endpoint):
-	payload = {"input": {"prompt": req.prompt, "num_frames": req.num_frames if req.num_frames > 0 else 24, "width": req.width, "height": req.height}}
-	async with httpx.AsyncClient(timeout=120.0) as client:
-		resp = await client.post(f"{RUNPOD_API}/{endpoint}/run", headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}, json=payload)
-		resp.raise_for_status()
-		data = resp.json()
-		job_id = data.get("id")
-		if not job_id: raise HTTPException(status_code=502, detail="RunPod returned no job ID")
-		print(f"[GenerativeStudio] RunPod job {job_id} submitted. Polling...")
-		for i in range(72):
-			await asyncio.sleep(5)
-			sr = await client.get(f"{RUNPOD_API}/{endpoint}/status/{job_id}", headers={"Authorization": f"Bearer {api_key}"})
-			sr.raise_for_status()
-			sd = sr.json()
-			status = sd.get("status", "")
-			if status == "COMPLETED":
-				out = sd.get("output", {}); vu = out.get("video_url") if isinstance(out, dict) else (out if isinstance(out, str) else None)
-				if not vu: raise HTTPException(status_code=502, detail="RunPod returned no video URL")
-				vr = await client.get(vu); vr.raise_for_status(); vb = vr.content
-				if len(vb) < 1000: raise HTTPException(status_code=502, detail="Empty video")
-				p = f"/tmp/generated_{hash(req.prompt)}.mp4"
-				with open(p, "wb") as f: f.write(vb)
-				return {"success": True, "prompt": req.prompt, "source": "runpod-wan22", "video_url": f"file://{p}"}
-			elif status in ("FAILED", "CANCELLED"):
-				raise HTTPException(status_code=502, detail=f"RunPod job {status}: {sd.get('error','unknown')}")
-		raise HTTPException(status_code=504, detail="Video generation timed out (6 min)")
-
-
-async def _hf_spaces_generate(req):
-	from gradio_client import Client
-	client = Client("Wan-AI/Wan2.1")
-	client.predict(prompt=req.prompt, api_name="/t2v_generation_async")
-	for i in range(90):
-		await asyncio.sleep(10)
-		video, _c, _w, _p = client.predict(api_name="/status_refresh")
-		if video and isinstance(video, dict) and video.get("video"):
-			vp = video["video"]
-			if os.path.exists(vp):
-				out = f"/tmp/generated_{hash(req.prompt)}.mp4"
-				os.rename(vp, out)
-				return {"success": True, "prompt": req.prompt, "source": "hf-spaces-wan21", "video_url": f"file://{out}"}
-	raise HTTPException(status_code=504, detail="Video generation timed out (15 min)")
+		raise HTTPException(
+			status_code=502,
+			detail=f"HF Spaces video generation failed: {e}",
+		)
 
 
 async def upscale_video_service(req: UpscaleRequest):
