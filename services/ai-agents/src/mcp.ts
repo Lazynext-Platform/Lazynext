@@ -15,8 +15,6 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 const WHITELISTED_ENV_VARS = new Set([
 	"HOME", "PATH", "USER", "LANG", "TMPDIR", "TEMP", "TMP",
 	"FIRECRAWL_API_KEY",
-	"OPENAI_API_KEY",
-	"ANTHROPIC_API_KEY",
 ]);
 
 function buildSubprocessEnv(extra?: Record<string, string>): Record<string, string> {

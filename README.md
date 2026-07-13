@@ -298,7 +298,7 @@ See `.env.example` for the full list. Key variables:
 | `DATABASE_URL` | Yes | PostgreSQL connection string |
 | `BETTER_AUTH_SECRET` | Yes | Auth secret (64 chars) |
 | `STORAGE_PROVIDER` | No | `local` (default) or `azure` |
-| `LLM_PROVIDER` | No | `openai`, `anthropic`, `gemini`, or `ollama` |
+| `LLM_PROVIDER | No | gemini (default)` |
 | `OPENAI_API_KEY` | No | Whisper + GPT-4o features |
 | `ANTHROPIC_API_KEY` | No | Claude-powered Chronos |
 | `FAL_KEY` | No | Kling 3.0 video generation |

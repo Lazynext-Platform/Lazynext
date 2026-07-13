@@ -68,20 +68,10 @@ const RENDER_SERVICE_URL =
 const ALLOWED_MCP_SERVERS = new Set(["playwright", "firecrawl", "context7"]);
 
 /**
- * Determine the most efficient provider based on prompt characteristics.
+ * All prompts routed to Gemini 2.5 Flash.
  */
-function routePromptToProvider(prompt: string): "openai" | "anthropic"  | "gemini" {
-  const lower = prompt.toLowerCase();
-  
-  if (lower.includes("private") || lower.includes("local") || lower.includes("secure") || lower.includes("confidential")) {
-    return "gemini";
-  }
-  
-  if (lower.includes("write") || lower.includes("story") || lower.includes("draft") || lower.includes("creative") || prompt.length > 2000) {
-    return "anthropic";
-  }
-  
-  return "openai"; // Default for logic, reasoning, and planning
+function routePromptToProvider(_prompt: string): "gemini" {
+  return "gemini";
 }
 
 /**
@@ -121,19 +111,13 @@ export async function decomposeIntent(
     };
   }
   const provider = routePromptToProvider(sanitized);
-  const openaiKey = process.env.OPENAI_API_KEY;
-  const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
-  console.log(`[Orchestrator] Intelligent router selected provider: ${provider}`);
+  console.log(`[Orchestrator] Using provider: ${provider}`);
   const mcpTools = await getAllMcpTools();
 
   try {
-    if (provider === "openai" && openaiKey) {
-      return await decomposeWithLLM(sanitized, openaiKey, "openai", mcpTools);
-    } else if (provider === "anthropic" && anthropicKey) {
-      return await decomposeWithLLM(sanitized, anthropicKey, "anthropic", mcpTools);
-    } else if (provider === "gemini") {
-      return await decomposeWithLLM(sanitized, "gemini-local", "gemini", mcpTools);
+    if (provider === "gemini") {
+      return await decomposeWithLLM(sanitized, "gemini-key", "gemini", mcpTools);
     }
   } catch (err) {
     console.warn(
@@ -226,57 +210,9 @@ Respond ONLY with a JSON object:
   
   try {
 
-    if (provider === "anthropic") {
-      // Use the native Anthropic Messages API
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: process.env.ANTHROPIC_MODEL || "claude-3-5-sonnet-20240620",
-          max_tokens: 4096,
-          system: systemPrompt,
-          messages: [{ role: "user", content: prompt }],
-        }),
-        signal: controller.signal,
-      });
-
-      if (!response.ok) {
-        throw new Error(`Anthropic API error: ${response.status}`);
-      }
-
-      const data = (await response.json()) as {
-        content: Array<{ type: string; text: string }>;
-      };
-      const raw = data.content
-        .filter((c) => c.type === "text")
-        .map((c) => c.text)
-        .join("");
-      // Anthropic may wrap JSON in markdown — strip ``` fences
-      const json = raw.replace(/^```(?:json)?\s*\n?/, "").replace(/\n?```$/, "");
-      const parsed = JSON.parse(json) as {
-        reasoning: string;
-        steps: OrchestrationStep[];
-      };
-
-      clearTimeout(timeoutId);
-      return {
-        steps: parsed.steps || [],
-        reasoning: parsed.reasoning || "No reasoning provided",
-      };
-    }
-
-    // OpenAI-compatible path (OpenAI, Gemini via compatible endpoint)
-    let endpoint = "https://api.openai.com/v1/chat/completions";
-    let modelName = process.env.OPENAI_MODEL || "gpt-4o";
-
-    if (provider === "gemini") {
-      endpoint = `${process.env.GEMINI_API_BASE || "https://generativelanguage.googleapis.com/v1beta/openai"}/chat/completions`;
-      modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
-    }
+    // Gemini via OpenAI-compatible endpoint
+    let endpoint = `${process.env.GEMINI_API_BASE || "https://generativelanguage.googleapis.com/v1beta/openai"}/chat/completions`;
+    let modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
     const response = await fetch(endpoint, {
       method: "POST",

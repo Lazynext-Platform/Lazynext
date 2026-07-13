@@ -27,8 +27,6 @@ app.get("/health", (_req, res) => {
 		service: "ai-agents",
 		routing: "intelligent-multi-provider",
 		providers: {
-			openai: !!process.env.OPENAI_API_KEY,
-			anthropic: !!process.env.ANTHROPIC_API_KEY,
 			gemini: "available",
 		},
 		services: {

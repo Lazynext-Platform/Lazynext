@@ -29,7 +29,7 @@ const webEnvSchema = z.object({
 	DODO_API_KEY: z.string().optional(),
 	DODO_WEBHOOK_SECRET: z.string().optional(),
 	RESEND_API_KEY: z.string().optional(),
-	LLM_PROVIDER: z.enum(["openai", "anthropic", "gemini"]).optional(),
+	LLM_PROVIDER: z.enum(["gemini"]).optional(),
 	RUST_API_GATEWAY_URL: z.string().optional(),
 	STORAGE_PROVIDER: z.enum(["local", "azure", "s3"]).optional(),
 });

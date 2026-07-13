@@ -382,7 +382,7 @@ groups:
         expr: |
           up{service=~"pre-processing|generative-studio"} == 0
           or
-          external_api_status{service=~"fal|gemini|openai"} == 0
+          external_api_status{service=~"fal|gemini"} == 0
         for: 10m
         labels:
           severity: warning

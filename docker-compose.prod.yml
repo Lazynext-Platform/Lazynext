@@ -19,8 +19,6 @@
 #   lazynext_dodo_api_key
 #   lazynext_dodo_webhook_secret
 #   lazynext_resend_api_key
-#   lazynext_openai_api_key
-#   lazynext_anthropic_api_key
 #   lazynext_gemini_api_key
 #   lazynext_upstash_redis_token
 #   lazynext_grafana_admin_password
@@ -276,10 +274,6 @@ services:
       retries: 3
       start_period: 15s
     secrets:
-      - source: lazynext_openai_api_key
-        target: openai_api_key
-      - source: lazynext_anthropic_api_key
-        target: anthropic_api_key
       - source: lazynext_gemini_api_key
         target: gemini_api_key
       - source: lazynext_postgres_password
@@ -288,10 +282,8 @@ services:
       - NODE_ENV=production
       - PORT=8002
       - DATABASE_URL=postgresql://lazynext:${DB_PASSWORD}@db:5432/lazynext
-      - OPENAI_API_KEY_FILE=/run/secrets/openai_api_key
-      - ANTHROPIC_API_KEY_FILE=/run/secrets/anthropic_api_key
       - GEMINI_API_KEY_FILE=/run/secrets/gemini_api_key
-      - LLM_PROVIDER=anthropic
+      - LLM_PROVIDER=gemini
     volumes:
       - /data/ai-agents-cache:/app/cache
 
@@ -395,11 +387,8 @@ services:
       retries: 5
       start_period: 120s
     secrets:
-      - source: lazynext_openai_api_key
-        target: openai_api_key
     environment:
       - PYTHONUNBUFFERED=1
-      - OPENAI_API_KEY_FILE=/run/secrets/openai_api_key
       - MEDIA_BUCKET=lazynext-media-prod
       - OMP_NUM_THREADS=2
       - MKL_NUM_THREADS=2
@@ -675,8 +664,6 @@ services:
           memory: 512M
     secrets:
       - lazynext_better_auth_secret
-      - lazynext_openai_api_key
-      - lazynext_anthropic_api_key
       - lazynext_gemini_api_key
     environment:
       - RUST_LOG=info
@@ -700,9 +687,7 @@ secrets:
     external: true
   lazynext_resend_api_key:
     external: true
-  lazynext_openai_api_key:
     external: true
-  lazynext_anthropic_api_key:
     external: true
   lazynext_gemini_api_key:
     external: true

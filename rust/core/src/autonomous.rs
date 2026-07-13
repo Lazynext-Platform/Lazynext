@@ -1,5 +1,5 @@
 //! Autonomous AI editor that translates natural language intents into NLE timeline
-//! operations. Supports multiple LLM providers (OpenAI, Anthropic, Gemini)
+//! operations. Uses Gemini 2.5 Flash as the LLM provider.
 //! with deterministic local fallback when no API key is available.
 
 use crate::NLEState;
@@ -106,14 +106,10 @@ impl AutonomousEditor {
         })
     }
 
-    /// Asynchronously modifies the NLEState by making a real LLM API call.
+    /// Asynchronously modifies the NLEState by making an LLM API call.
     ///
-    /// Provider selection via env vars:
-    ///   LLM_PROVIDER = openai | anthropic | gemini (default)
-    ///   OPENAI_API_KEY / ANTHROPIC_API_KEY / GEMINI_API_KEY
-    ///
-    /// Falls back to a deterministic local plan if no API key is available
-    /// or if the HTTP call fails (never blocks the user with an error).
+    /// Uses Gemini 2.5 Flash via GEMINI_API_KEY.
+    /// Falls back to a deterministic local plan if no API key is available.
     pub async fn process_intent_with_llm(
         &self,
         nle_state: &mut NLEState,
@@ -121,23 +117,9 @@ impl AutonomousEditor {
     ) -> Result<String, String> {
         println!("🧠 [AI Engine] Reasoning about intent: {}", intent.prompt);
 
-        // 1. Read provider settings
-        let provider = intent
-            .llm_provider
-            .clone()
-            .unwrap_or_else(|| env::var("LLM_PROVIDER").unwrap_or_else(|_| "gemini".to_string()));
-        let (api_url, api_key, model) = match provider.as_str() {
-            "openai" => (
-                "https://api.openai.com/v1/chat/completions".to_string(),
-                env::var("OPENAI_API_KEY").unwrap_or_default(),
-                "gpt-4o".to_string(),
-            ),
-            "anthropic" => (
-                "https://api.anthropic.com/v1/messages".to_string(),
-                env::var("ANTHROPIC_API_KEY").unwrap_or_default(),
-                "claude-3-5-sonnet-20240620".to_string(),
-            ),
-            "gemini" => {
+        // 1. Read Gemini API key
+        let provider = env::var("GEMINI_API_KEY").ok().map(|_| "gemini").unwrap_or("local");
+        let (api_url, api_key, model) = {
                 let key = env::var("GEMINI_API_KEY").unwrap_or_default();
                 let url = if key.is_empty() {
                     "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent".to_string()
@@ -148,13 +130,7 @@ impl AutonomousEditor {
                     )
                 };
                 (url, key, "gemini-2.5-flash".to_string())
-            }
-            _ => (
-                "http://localhost:11434/api/chat".to_string(),
-                String::new(),
-                "llama3".to_string(),
-            ),
-        };
+            };
 
         println!(
             "🔗 [AI Engine] Routing request to: {} (Model: {})",
@@ -493,20 +469,10 @@ impl AutonomousEditor {
         system_prompt: &str,
         user_prompt: &str,
     ) -> Result<Value, String> {
-        // Determine if this is an Anthropic endpoint (different payload format)
-        let is_anthropic = api_url.contains("anthropic.com");
+        // Determine if this is a Gemini endpoint
         let is_gemini = api_url.contains("generativelanguage.googleapis.com");
 
-        let payload = if is_anthropic {
-            json!({
-                "model": model,
-                "max_tokens": 1024,
-                "system": system_prompt,
-                "messages": [
-                    {"role": "user", "content": user_prompt}
-                ]
-            })
-        } else if is_gemini {
+        let payload = if is_gemini {
             json!({
                 "contents": [
                     {
@@ -540,11 +506,8 @@ impl AutonomousEditor {
             .timeout(std::time::Duration::from_secs(60));
 
         if !api_key.is_empty() {
-            if is_anthropic {
-                req = req.header("x-api-key", api_key);
-                req = req.header("anthropic-version", "2023-06-01");
-            } else if !is_gemini {
-                req = req.header("Authorization", format!("Bearer {}", api_key));
+            if is_gemini {
+                req = req.header("Content-Type", "application/json");
             }
         }
 
@@ -567,16 +530,8 @@ impl AutonomousEditor {
             ));
         }
 
-        // Extract content from provider-specific response shapes
-        let content = if is_anthropic {
-            body["content"]
-                .as_array()
-                .and_then(|blocks| blocks.first())
-                .and_then(|block| block["text"].as_str())
-                .unwrap_or("{}")
-                .to_string()
-        } else if api_url.contains("generativelanguage") {
-            // Gemini
+        // Extract content from Gemini response
+        let content = if api_url.contains("generativelanguage") {
             body["candidates"]
                 .as_array()
                 .and_then(|cands| cands.first())
@@ -586,7 +541,7 @@ impl AutonomousEditor {
                 .unwrap_or("{}")
                 .to_string()
         } else {
-            // OpenAI
+            // OpenAI-compatible fallback
             body["choices"]
                 .as_array()
                 .and_then(|choices| choices.first())

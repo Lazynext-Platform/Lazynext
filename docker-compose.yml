@@ -172,10 +172,8 @@ services:
       - NODE_ENV=production
       - PORT=8002
       - DATABASE_URL=postgresql://${DB_USER:-lazynext}:${DB_PASSWORD:-changeme}@db:5432/lazynext
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
-      - LLM_PROVIDER=${LLM_PROVIDER:-anthropic}
+      - LLM_PROVIDER=${LLM_PROVIDER:-gemini}
       - INTERNAL_API_KEY=${INTERNAL_API_KEY:-lazynext-internal-dev-key}
       - GENERATIVE_STUDIO_URL=http://generative-studio:8001
       - PRE_PROCESSING_URL=http://pre-processing:8000
@@ -253,7 +251,6 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - NUMBA_CACHE_DIR=/tmp
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - PYTHONUNBUFFERED=1
       - MEDIA_BUCKET=${MEDIA_BUCKET:-lazynext-media-dev}
     networks:
