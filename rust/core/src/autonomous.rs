@@ -1,5 +1,5 @@
 //! Autonomous AI editor that translates natural language intents into NLE timeline
-//! operations. Uses Gemini 2.5 Flash as the LLM provider.
+//! operations. Uses Gemini 2.5 Flash/Pro with intelligent switching.
 //! with deterministic local fallback when no API key is available.
 
 use crate::NLEState;
@@ -117,24 +117,40 @@ impl AutonomousEditor {
     ) -> Result<String, String> {
         println!("🧠 [AI Engine] Reasoning about intent: {}", intent.prompt);
 
-        // 1. Read Gemini API key
+        // 1. Intelligent model selection — Flash vs Pro
+        let prompt = &intent.prompt;
+        let use_pro = prompt.len() > 500
+            || prompt.contains("complex")
+            || prompt.contains("multi")
+            || prompt.contains("analyze")
+            || prompt.contains("explain")
+            || prompt.contains("detailed")
+            || prompt.contains("compare")
+            || prompt.contains("review");
+
+        let model_name = if use_pro {
+            "gemini-2.5-pro"
+        } else {
+            "gemini-2.5-flash"
+        };
+
         let provider = env::var("GEMINI_API_KEY").ok().map(|_| "gemini").unwrap_or("local");
         let (api_url, api_key, model) = {
                 let key = env::var("GEMINI_API_KEY").unwrap_or_default();
                 let url = if key.is_empty() {
-                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent".to_string()
+                    format!("https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent", model_name)
                 } else {
                     format!(
-                        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={}",
-                        key
+                        "https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent?key={}",
+                        model_name, key
                     )
                 };
-                (url, key, "gemini-2.5-flash".to_string())
+                (url, key, model_name.to_string())
             };
 
         println!(
-            "🔗 [AI Engine] Routing request to: {} (Model: {})",
-            provider, model
+            "🔗 [AI Engine] Routing to: {} (Model: {})",
+            provider, model_name
         );
 
         // 2. Build the system prompt with current timeline state

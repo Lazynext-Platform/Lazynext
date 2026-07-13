@@ -68,10 +68,26 @@ const RENDER_SERVICE_URL =
 const ALLOWED_MCP_SERVERS = new Set(["playwright", "firecrawl", "context7"]);
 
 /**
- * All prompts routed to Gemini 2.5 Flash.
+ * Intelligent model selection — Flash vs Pro based on prompt complexity.
+ * Flash: simple tasks, quick edits, short prompts
+ * Pro: complex reasoning, multi-step, long prompts, analysis
  */
-function routePromptToProvider(_prompt: string): "gemini" {
-  return "gemini";
+function selectModel(prompt: string): string {
+  const lower = prompt.toLowerCase();
+  if (
+    prompt.length > 500 ||
+    lower.includes("complex") ||
+    lower.includes("multi") ||
+    lower.includes("analyze") ||
+    lower.includes("explain") ||
+    lower.includes("detailed") ||
+    lower.includes("compare") ||
+    lower.includes("review") ||
+    lower.includes("reasoning")
+  ) {
+    return "gemini-2.5-pro";
+  }
+  return "gemini-2.5-flash";
 }
 
 /**
@@ -110,15 +126,13 @@ export async function decomposeIntent(
       reasoning: `Invalid prompt: ${error}`,
     };
   }
-  const provider = routePromptToProvider(sanitized);
+  const model = selectModel(sanitized);
 
-  console.log(`[Orchestrator] Using provider: ${provider}`);
+  console.log(`[Orchestrator] Model: ${model}`);
   const mcpTools = await getAllMcpTools();
 
   try {
-    if (provider === "gemini") {
-      return await decomposeWithLLM(sanitized, "gemini-key", "gemini", mcpTools);
-    }
+    return await decomposeWithLLM(sanitized, "gemini-key", model, mcpTools);
   } catch (err) {
     console.warn(
       `[Orchestrator] LLM decomposition failed (${err}). Using rule-based fallback.`,
@@ -211,8 +225,8 @@ Respond ONLY with a JSON object:
   try {
 
     // Gemini via OpenAI-compatible endpoint
-    let endpoint = `${process.env.GEMINI_API_BASE || "https://generativelanguage.googleapis.com/v1beta/openai"}/chat/completions`;
-    let modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+    const endpoint = `${process.env.GEMINI_API_BASE || "https://generativelanguage.googleapis.com/v1beta/openai"}/chat/completions`;
+    const modelName = provider || process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
     const response = await fetch(endpoint, {
       method: "POST",
