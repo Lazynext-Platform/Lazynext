@@ -30,4 +30,4 @@ opentelemetry-sdk
 opentelemetry-instrumentation-fastapi
 opentelemetry-exporter-otlp-proto-grpc
 # Computer Vision
-opencv-python>=4.13.0.92,<5
+opencv-python>=5.0.0.93,<6
