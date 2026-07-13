@@ -1,10 +1,10 @@
 """
-Video generation services: text-to-video via Hugging Face Spaces (free),
+Video generation services: text-to-video via Together AI (Wan 2.2),
 upscaling, style transfer, generative fill, and AI avatar generation.
 
-Uses HF Spaces + Wan 2.1 for text-to-video — completely free, no API key,
-no GPU required. Falls back to local image generation if Spaces unavailable.
-RealESRGAN for upscaling, Edge TTS for avatar narration, OpenCV for effects.
+Uses Together AI + Wan 2.2 for fast video generation — $0.66/video T2V,
+$0.31/video I2V, ~30-60 seconds. RealESRGAN for upscaling,
+Edge TTS for avatar narration, OpenCV for effects.
 """
 
 import asyncio
@@ -19,95 +19,102 @@ from src.models import (
 )
 from upscale_pipeline import UpscalePipeline, UpscaleConfig
 
-# Hugging Face Spaces — free, no API key, GPU-accelerated
-HF_VIDEO_SPACE = os.getenv("HF_VIDEO_SPACE", "Wan-AI/Wan2.1")
-HF_VIDEO_MODEL = os.getenv("HF_VIDEO_MODEL", "Wan-AI/Wan2.2-TI2V-5B")
+# Together AI — Wan 2.2 video generation
+TOGETHER_API = "https://api.together.ai/v1"
+TOGETHER_VIDEO_MODEL = os.getenv("TOGETHER_VIDEO_MODEL", "Wan-AI/Wan2.2-TI2V-5B")
+TOGETHER_VIDEO_MODEL_I2V = os.getenv("TOGETHER_I2V_MODEL", "Wan-AI/Wan2.2-I2V-5B")
 
 
 async def generate_video_service(req: DiffusionRequest):
-	"""Generate video from text via Hugging Face Spaces (free, no API key).
+	"""Generate video from text via Together AI + Wan 2.2.
 
-	Uses Wan 2.1 HF Space for GPU-accelerated text-to-video generation.
-	Completely free — runs on shared HF GPU infrastructure.
-	Async with polling (~2-5 min per generation).
+	Together AI Wan 2.2 text-to-video: $0.66/video, ~30-60 seconds.
+	Simple REST API — submit, poll, download video.
 
 	Raises:
-		HTTPException: 502 on Spaces error, 503 if Spaces unavailable.
+		HTTPException: 503 if TOGETHER_API_KEY missing, 502 on API error.
 	"""
-	# Try HF Spaces first (free, no API key)
-	try:
-		from gradio_client import Client
-
-		client = Client(HF_VIDEO_SPACE)
-		prompt = req.prompt
-
-		# Submit generation
-		print(f"[GenerativeStudio] Submitting to HF Space '{HF_VIDEO_SPACE}'...")
-		client.predict(prompt=prompt, api_name="/t2v_generation_async")
-
-		# Poll for result (up to 15 minutes for HF Spaces free tier)
-		for i in range(90):
-			await asyncio.sleep(10)
-			video, _cost, _wait, _prog = client.predict(api_name="/status_refresh")
-			if video and isinstance(video, dict) and video.get("video"):
-				video_path = video["video"]
-				if os.path.exists(video_path):
-					output = f"/tmp/generated_{hash(prompt)}.mp4"
-					os.rename(video_path, output)
-					return {
-						"success": True,
-						"prompt": prompt,
-						"source": "hf-spaces-wan21",
-						"video_url": f"file://{output}",
-					}
-			if i % 6 == 0:
-				print(f"[GenerativeStudio] Waiting for video... ({i*10}s)")
-
+	api_key = os.getenv("TOGETHER_API_KEY", "")
+	if not api_key:
 		raise HTTPException(
-			status_code=504,
-			detail="Video generation timed out after 10 minutes",
+			status_code=503,
+			detail="Video generation unavailable — set TOGETHER_API_KEY. "
+			"Get one at https://api.together.ai/settings/api-keys",
 		)
 
-	except ImportError:
-		print("[GenerativeStudio] gradio_client not installed, trying HF Inference API...")
+	payload = {
+		"model": TOGETHER_VIDEO_MODEL,
+		"prompt": req.prompt,
+		"steps": min(req.num_frames if req.num_frames > 0 else 30, 50),
+		"width": req.width,
+		"height": req.height,
+	}
+
+	try:
+		async with httpx.AsyncClient(timeout=120.0) as client:
+			resp = await client.post(
+				f"{TOGETHER_API}/images/generations",
+				headers={
+					"Authorization": f"Bearer {api_key}",
+					"Content-Type": "application/json",
+				},
+				json=payload,
+			)
+			resp.raise_for_status()
+			data = resp.json()
+
+			output = data.get("output") or data.get("data", [{}])[0]
+			video_url = None
+			if isinstance(output, dict):
+				video_url = output.get("url") or output.get("video_url")
+			elif isinstance(output, str):
+				video_url = output
+
+			job_id = data.get("id")
+			if not video_url and job_id:
+				print(f"[GenerativeStudio] Polling Together AI job {job_id}...")
+				for i in range(30):
+					await asyncio.sleep(2)
+					status_resp = await client.get(
+						f"{TOGETHER_API}/images/generations/{job_id}",
+						headers={"Authorization": f"Bearer {api_key}"},
+					)
+					if status_resp.status_code != 200:
+						continue
+					status_data = status_resp.json()
+					status_output = status_data.get("output") or status_data.get("data", [{}])[0]
+					if isinstance(status_output, dict):
+						video_url = status_output.get("url") or status_output.get("video_url")
+					elif isinstance(status_output, str):
+						video_url = status_output
+					if video_url:
+						break
+
+			if not video_url:
+				raise HTTPException(status_code=502, detail="Together AI returned no video URL")
+
+			video_resp = await client.get(video_url)
+			video_resp.raise_for_status()
+			video_bytes = video_resp.content
+
+			if len(video_bytes) < 1000:
+				raise HTTPException(status_code=502, detail="Together AI returned empty video")
+
+			output_path = f"/tmp/generated_{hash(req.prompt)}.mp4"
+			with open(output_path, "wb") as f:
+				f.write(video_bytes)
+
+			return {
+				"success": True,
+				"prompt": req.prompt,
+				"source": "together-ai-wan22",
+				"video_url": f"file://{output_path}",
+			}
+
 	except HTTPException:
 		raise
 	except Exception as e:
-		print(f"[GenerativeStudio] HF Spaces error: {e}")
-
-	# Fallback: HF Inference API (direct API call, needs HF_TOKEN optionally)
-	hf_token = os.getenv("HF_TOKEN", "")
-	try:
-		headers = {"Content-Type": "application/json"}
-		if hf_token:
-			headers["Authorization"] = f"Bearer {hf_token}"
-
-		async with httpx.AsyncClient(timeout=120.0) as client:
-			resp = await client.post(
-				f"https://api-inference.huggingface.co/models/{HF_VIDEO_MODEL}",
-				headers=headers,
-				json={"inputs": req.prompt},
-			)
-			if resp.status_code == 200:
-				video_bytes = resp.content
-				if len(video_bytes) > 1000:
-					output = f"/tmp/generated_{hash(req.prompt)}.mp4"
-					with open(output, "wb") as f:
-						f.write(video_bytes)
-					return {
-						"success": True,
-						"prompt": req.prompt,
-						"source": "hf-inference",
-						"video_url": f"file://{output}",
-					}
-			print(f"[GenerativeStudio] HF Inference returned {resp.status_code}")
-	except Exception as e:
-		print(f"[GenerativeStudio] HF Inference error: {e}")
-
-	raise HTTPException(
-		status_code=503,
-		detail="Video generation unavailable — install gradio_client (pip install gradio_client) or set HF_TOKEN",
-	)
+		raise HTTPException(status_code=502, detail=f"Together AI API error: {e}")
 
 
 async def upscale_video_service(req: UpscaleRequest):
@@ -273,16 +280,11 @@ async def style_transfer_service(req: StyleTransferRequest):
 
 
 async def generative_fill_service(req: GenerativeFillRequest):
-	"""Fill masked regions in video using Fal.ai inpainting or local OpenCV.
-
-	Falls back to local OpenCV Navier-Stokes inpainting when API key
-	is not configured, or returns HTTP 503 when neither is available.
-	"""
+	"""Fill masked regions in video using local OpenCV inpainting."""
 	video_path = f"/tmp/{req.video_id}.mp4"
 	mask_path = f"/tmp/{req.video_id}_mask.png"
 	output_path = f"/tmp/{req.video_id}_filled.mp4"
 
-	# OpenCV Navier-Stokes inpainting (free, CPU)
 	if os.path.exists(video_path):
 		try:
 			import cv2

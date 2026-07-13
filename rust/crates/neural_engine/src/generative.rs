@@ -1,6 +1,6 @@
 //! Generative AI pipeline for video and audio synthesis via external APIs.
 //!
-//! Provides models for text-to-video generation (Hugging Face Spaces, free)
+//! Provides models for text-to-video generation (Together AI + Wan 2.2)
 //! and text-to-speech synthesis (delegated to generative-studio service
 //! which uses Edge TTS — free, unlimited, 300+ voices).
 
@@ -8,8 +8,8 @@ use serde::{Deserialize, Serialize};
 
 /// Configuration for AI-powered text-to-video generation.
 ///
-/// Delegated to the generative-studio service which uses Hugging Face
-/// Spaces (Wan 2.1) — free, no API key, GPU-accelerated.
+/// Delegated to the generative-studio service which uses Together AI
+/// (Wan 2.2) — fast video generation, $0.66/video.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VideoGenerationOptions {
 	/// Natural-language prompt describing the desired video content.
@@ -37,7 +37,7 @@ pub struct AudioGenerationOptions {
 }
 
 /// Generative AI model that orchestrates text-to-video and text-to-speech
-/// generation via external APIs (HF Spaces + Edge TTS via generative-studio).
+/// generation via external APIs (Together AI + Edge TTS via generative-studio).
 ///
 /// Gracefully degrades when services are not reachable by returning
 /// descriptive errors instead of panicking.
@@ -62,7 +62,7 @@ impl GenerativeModel {
 	/// Generates a video via the generative-studio service (HF Spaces).
 	///
 	/// Delegates to the Python generative-studio service which uses
-	/// Hugging Face Spaces — free, no API key, GPU-accelerated.
+	/// Together AI — fast Wan 2.2 video, $0.66/video, ~30-60 sec.
 	pub async fn generate_video(&self, options: &VideoGenerationOptions) -> Result<String, String> {
 		let gs_url = std::env::var("GENERATIVE_STUDIO_URL")
 			.unwrap_or_else(|_| "http://localhost:8001".to_string());
