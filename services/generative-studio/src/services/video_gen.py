@@ -1,8 +1,9 @@
 """
-Video generation services: text-to-video via RunPod Serverless (Wan 2.2),
+Video generation services: text-to-video via RunPod Serverless or HF Spaces,
 upscaling, style transfer, generative fill, and AI avatar generation.
 
-RunPod Serverless + Wan 2.2 — ~$0.30/video, ~30-60 seconds.
+RunPod Serverless + Wan 2.2: ~$0.30/video, ~30-60s (when configured).
+HF Spaces fallback: free, no API key, 5-15 min (automatic default).
 RealESRGAN for upscaling, Edge TTS for avatars, OpenCV for effects.
 """
 
@@ -17,144 +18,105 @@ from src.models import (
 )
 from upscale_pipeline import UpscalePipeline, UpscaleConfig
 
-# RunPod Serverless — Wan 2.2 video generation
-RUNPOD_ENDPOINT = os.getenv("RUNPOD_ENDPOINT_ID", "")
 RUNPOD_API = "https://api.runpod.ai/v2"
 
 
 async def generate_video_service(req: DiffusionRequest):
-	"""Generate video from text via RunPod Serverless + Wan 2.2.
+	"""Generate video via RunPod (fast) or HF Spaces (free fallback).
 
-	Requires RUNPOD_API_KEY and RUNPOD_ENDPOINT_ID env vars.
-	Cost: ~$0.30/video, speed: ~30-60 seconds.
-
-	Setup:
-		1. Sign up at https://runpod.io
-		2. Create Serverless endpoint with Wan 2.2 template
-		3. Set RUNPOD_API_KEY + RUNPOD_ENDPOINT_ID
+	Priority: RunPod if RUNPOD_API_KEY + RUNPOD_ENDPOINT_ID are set.
+	Fallback: HF Spaces Wan 2.1 — free, no API key, 5-15 min.
 	"""
 	api_key = os.getenv("RUNPOD_API_KEY", "")
 	endpoint = os.getenv("RUNPOD_ENDPOINT_ID", "")
 
-	if not api_key or not endpoint:
-		raise HTTPException(
-			status_code=503,
-			detail="Video generation unavailable — set RUNPOD_API_KEY and RUNPOD_ENDPOINT_ID. "
-			"Sign up at https://runpod.io, create a Wan 2.2 serverless endpoint.",
-		)
+	if api_key and endpoint:
+		try:
+			return await _runpod_generate(req, api_key, endpoint)
+		except HTTPException:
+			raise
+		except Exception as e:
+			print(f"[GenerativeStudio] RunPod error: {e}, falling back to HF Spaces...")
 
-	payload = {
-		"input": {
-			"prompt": req.prompt,
-			"num_frames": req.num_frames if req.num_frames > 0 else 24,
-			"width": req.width,
-			"height": req.height,
-		}
-	}
-
+	print("[GenerativeStudio] Using HF Spaces (free, no API key)...")
 	try:
-		async with httpx.AsyncClient(timeout=120.0) as client:
-			# Submit async job
-			resp = await client.post(
-				f"{RUNPOD_API}/{endpoint}/run",
-				headers={
-					"Authorization": f"Bearer {api_key}",
-					"Content-Type": "application/json",
-				},
-				json=payload,
-			)
-			resp.raise_for_status()
-			data = resp.json()
-			job_id = data.get("id")
-
-			if not job_id:
-				raise HTTPException(status_code=502, detail="RunPod returned no job ID")
-
-			print(f"[GenerativeStudio] RunPod job {job_id} submitted. Polling...")
-
-			# Poll for result
-			for i in range(60):
-				await asyncio.sleep(5)
-				status_resp = await client.get(
-					f"{RUNPOD_API}/{endpoint}/status/{job_id}",
-					headers={"Authorization": f"Bearer {api_key}"},
-				)
-				status_resp.raise_for_status()
-				status_data = status_resp.json()
-				status = status_data.get("status", "")
-
-				if status == "COMPLETED":
-					output = status_data.get("output", {})
-					video_url = None
-					if isinstance(output, dict):
-						video_url = output.get("video_url") or output.get("url") or output.get("output")
-					elif isinstance(output, str):
-						video_url = output
-
-					if video_url:
-						video_resp = await client.get(video_url)
-						video_resp.raise_for_status()
-						video_bytes = video_resp.content
-						if len(video_bytes) > 1000:
-							p = f"/tmp/generated_{hash(req.prompt)}.mp4"
-							with open(p, "wb") as f:
-								f.write(video_bytes)
-							return {
-								"success": True,
-								"prompt": req.prompt,
-								"source": "runpod-wan22",
-								"video_url": f"file://{p}",
-							}
-						raise HTTPException(status_code=502, detail="RunPod returned empty video")
-
-				elif status in ("FAILED", "CANCELLED"):
-					err = status_data.get("error", "unknown")
-					raise HTTPException(status_code=502, detail=f"RunPod job {status}: {err}")
-
-				if i % 6 == 0:
-					print(f"[GenerativeStudio] RunPod status: {status}")
-
-			raise HTTPException(status_code=504, detail="Video generation timed out after 5 minutes")
-
+		return await _hf_spaces_generate(req)
+	except ImportError:
+		raise HTTPException(status_code=503, detail="install gradio_client or set RUNPOD_API_KEY")
 	except HTTPException:
 		raise
 	except Exception as e:
-		raise HTTPException(status_code=502, detail=f"RunPod API error: {e}")
+		raise HTTPException(status_code=502, detail=f"Video generation failed: {e}")
+
+
+async def _runpod_generate(req, api_key, endpoint):
+	payload = {"input": {"prompt": req.prompt, "num_frames": req.num_frames if req.num_frames > 0 else 24, "width": req.width, "height": req.height}}
+	async with httpx.AsyncClient(timeout=120.0) as client:
+		resp = await client.post(f"{RUNPOD_API}/{endpoint}/run", headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}, json=payload)
+		resp.raise_for_status()
+		data = resp.json()
+		job_id = data.get("id")
+		if not job_id: raise HTTPException(status_code=502, detail="RunPod returned no job ID")
+		print(f"[GenerativeStudio] RunPod job {job_id} submitted. Polling...")
+		for i in range(72):
+			await asyncio.sleep(5)
+			sr = await client.get(f"{RUNPOD_API}/{endpoint}/status/{job_id}", headers={"Authorization": f"Bearer {api_key}"})
+			sr.raise_for_status()
+			sd = sr.json()
+			status = sd.get("status", "")
+			if status == "COMPLETED":
+				out = sd.get("output", {}); vu = out.get("video_url") if isinstance(out, dict) else (out if isinstance(out, str) else None)
+				if not vu: raise HTTPException(status_code=502, detail="RunPod returned no video URL")
+				vr = await client.get(vu); vr.raise_for_status(); vb = vr.content
+				if len(vb) < 1000: raise HTTPException(status_code=502, detail="Empty video")
+				p = f"/tmp/generated_{hash(req.prompt)}.mp4"
+				with open(p, "wb") as f: f.write(vb)
+				return {"success": True, "prompt": req.prompt, "source": "runpod-wan22", "video_url": f"file://{p}"}
+			elif status in ("FAILED", "CANCELLED"):
+				raise HTTPException(status_code=502, detail=f"RunPod job {status}: {sd.get('error','unknown')}")
+		raise HTTPException(status_code=504, detail="Video generation timed out (6 min)")
+
+
+async def _hf_spaces_generate(req):
+	from gradio_client import Client
+	client = Client("Wan-AI/Wan2.1")
+	client.predict(prompt=req.prompt, api_name="/t2v_generation_async")
+	for i in range(90):
+		await asyncio.sleep(10)
+		video, _c, _w, _p = client.predict(api_name="/status_refresh")
+		if video and isinstance(video, dict) and video.get("video"):
+			vp = video["video"]
+			if os.path.exists(vp):
+				out = f"/tmp/generated_{hash(req.prompt)}.mp4"
+				os.rename(vp, out)
+				return {"success": True, "prompt": req.prompt, "source": "hf-spaces-wan21", "video_url": f"file://{out}"}
+	raise HTTPException(status_code=504, detail="Video generation timed out (15 min)")
 
 
 async def upscale_video_service(req: UpscaleRequest):
-	"""Upscale video resolution using RealESRGAN (2x or 4x)."""
 	video_path = f"/tmp/{req.video_id}.mp4"
 	output_path = f"/tmp/{req.video_id}_{req.scale}x.mp4"
 	config = UpscaleConfig(scale=req.scale, model="RealESRGAN_x4plus" if req.scale == 4 else "RealESRGAN_x2plus")
 	pipeline = UpscalePipeline(config)
 	loop = asyncio.get_running_loop()
 	result = await loop.run_in_executor(None, pipeline.upscale, video_path, output_path)
-	if not result.success:
-		raise HTTPException(status_code=503, detail=f"Upscaling unavailable: {result.error}")
+	if not result.success: raise HTTPException(status_code=503, detail=f"Upscaling unavailable: {result.error}")
 	return {"success": True, "video_id": req.video_id, "scale": req.scale, "source": result.model, "output_url": f"file://{result.output_path}"}
 
 
 async def extract_nerf_service(req: NeRFRequest):
-	"""Deprecated NeRF endpoint — returns 410 Gone."""
 	return JSONResponse(status_code=410, content={"success": False, "error": "Use /nerf-extract on pre-processing service (port 8000).", "video_id": req.video_id}, headers={"Deprecation": "true", "Sunset": "Sat, 01 Aug 2026 00:00:00 GMT"})
 
 
 async def style_transfer_service(req: StyleTransferRequest):
-	"""Apply visual style transfer via OpenCV effects."""
-	video_path = f"/tmp/{req.video_id}.mp4"
-	output_path = f"/tmp/{req.video_id}_styled.mp4"
-	if not os.path.exists(video_path):
-		raise HTTPException(status_code=500, detail="Style transfer failed — video not found")
+	video_path = f"/tmp/{req.video_id}.mp4"; output_path = f"/tmp/{req.video_id}_styled.mp4"
+	if not os.path.exists(video_path): raise HTTPException(status_code=500, detail="Style transfer failed — video not found")
 	try:
 		import cv2, numpy as np, subprocess, tempfile
 		cap = cv2.VideoCapture(video_path)
 		if not cap.isOpened(): raise HTTPException(status_code=400, detail="Cannot open video")
-		fps = cap.get(cv2.CAP_PROP_FPS) or 24.0
-		total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-		step = max(1, total // 30)
-		td = tempfile.mkdtemp(prefix="style_")
-		oi = 0; fi = 0
+		fps = cap.get(cv2.CAP_PROP_FPS) or 24.0; total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)); step = max(1, total // 30)
+		td = tempfile.mkdtemp(prefix="style_"); oi = 0; fi = 0
 		while True:
 			ret, frame = cap.read()
 			if not ret: break
@@ -163,12 +125,10 @@ async def style_transfer_service(req: StyleTransferRequest):
 				if "anime" in sp:
 					g = cv2.medianBlur(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), 5)
 					e = cv2.adaptiveThreshold(g, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 9)
-					c = cv2.bilateralFilter(frame, 9, 300, 300)
-					styled = cv2.bitwise_and(c, c, mask=e)
+					c = cv2.bilateralFilter(frame, 9, 300, 300); styled = cv2.bitwise_and(c, c, mask=e)
 				elif "clay" in sp: styled = cv2.stylization(frame, sigma_s=60, sigma_r=0.6)
 				elif "pencil" in sp or "sketch" in sp:
-					g = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-					inv = 255 - g; blur = cv2.GaussianBlur(inv, (21, 21), 0)
+					g = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY); inv = 255 - g; blur = cv2.GaussianBlur(inv, (21, 21), 0)
 					styled = cv2.cvtColor(cv2.divide(g, 255 - blur, scale=256.0), cv2.COLOR_GRAY2BGR)
 				else: styled = cv2.detailEnhance(frame, sigma_s=10, sigma_r=0.15)
 				cv2.imwrite(f"{td}/frame_{oi:04d}.png", styled); oi += 1
@@ -178,32 +138,25 @@ async def style_transfer_service(req: StyleTransferRequest):
 		if oi > 0:
 			r = subprocess.run(["ffmpeg", "-y", "-framerate", str(fps/step), "-i", f"{td}/frame_%04d.png", "-c:v", "libx264", "-crf", "18", "-pix_fmt", "yuv420p", output_path], capture_output=True, timeout=300)
 			import shutil; shutil.rmtree(td, ignore_errors=True)
-			if r.returncode == 0:
-				return {"success": True, "video_id": req.video_id, "style_applied": req.style_prompt, "source": "opencv_stylization", "styled_video_url": f"file://{output_path}"}
+			if r.returncode == 0: return {"success": True, "video_id": req.video_id, "style_applied": req.style_prompt, "source": "opencv_stylization", "styled_video_url": f"file://{output_path}"}
 	except ImportError: raise HTTPException(status_code=503, detail="OpenCV not installed")
 	except Exception as e: raise HTTPException(status_code=500, detail=f"Style transfer error: {e}")
 	raise HTTPException(status_code=500, detail="Style transfer failed internally")
 
 
 async def generative_fill_service(req: GenerativeFillRequest):
-	"""Fill masked regions using OpenCV inpainting."""
-	video_path = f"/tmp/{req.video_id}.mp4"
-	mask_path = f"/tmp/{req.video_id}_mask.png"
-	output_path = f"/tmp/{req.video_id}_filled.mp4"
-	if not os.path.exists(video_path):
-		raise HTTPException(status_code=503, detail="Video not found")
+	video_path = f"/tmp/{req.video_id}.mp4"; mask_path = f"/tmp/{req.video_id}_mask.png"; output_path = f"/tmp/{req.video_id}_filled.mp4"
+	if not os.path.exists(video_path): raise HTTPException(status_code=503, detail="Video not found")
 	try:
 		import cv2, numpy as np, subprocess, tempfile
 		cap = cv2.VideoCapture(video_path)
 		if not cap.isOpened(): raise HTTPException(status_code=400, detail="Cannot open video")
-		fps = cap.get(cv2.CAP_PROP_FPS) or 24.0
-		w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)); h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+		fps = cap.get(cv2.CAP_PROP_FPS) or 24.0; w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)); h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 		mask = None
 		if os.path.exists(mask_path): mask = cv2.resize(cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE), (w, h)) if cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE) is not None else None
 		if mask is None:
 			mask = np.zeros((h, w), dtype=np.uint8)
-			if req.mask_coordinates:
-				x1, y1, x2, y2 = [int(c) for c in req.mask_coordinates[:4]]; mask[y1:y2, x1:x2] = 255
+			if req.mask_coordinates: x1, y1, x2, y2 = [int(c) for c in req.mask_coordinates[:4]]; mask[y1:y2, x1:x2] = 255
 			else: mask[h//4:3*h//4, w//4:3*w//4] = 255
 		td = tempfile.mkdtemp(prefix="fill_"); fi = 0
 		while True:
@@ -217,15 +170,13 @@ async def generative_fill_service(req: GenerativeFillRequest):
 		if fi > 0:
 			r = subprocess.run(["ffmpeg", "-y", "-framerate", str(fps), "-i", f"{td}/frame_%04d.png", "-c:v", "libx264", "-crf", "18", "-pix_fmt", "yuv420p", output_path], capture_output=True, timeout=300)
 			import shutil; shutil.rmtree(td, ignore_errors=True)
-			if r.returncode == 0:
-				return {"success": True, "video_id": req.video_id, "source": "opencv_inpaint", "filled_video_url": f"file://{output_path}"}
+			if r.returncode == 0: return {"success": True, "video_id": req.video_id, "source": "opencv_inpaint", "filled_video_url": f"file://{output_path}"}
 	except ImportError: print("[GenerativeStudio] OpenCV not available")
 	except Exception as e: print(f"[GenerativeStudio] OpenCV error: {e}")
 	raise HTTPException(status_code=503, detail="Generative fill unavailable — install opencv-python-headless")
 
 
 async def generate_avatar_service(req: AvatarRequest):
-	"""Generate AI avatar from text via Edge TTS."""
 	try:
 		from src.services.audio_gen import _edge_tts, _safe_slug
 		audio_bytes = await _edge_tts(req.script, "en-US")
