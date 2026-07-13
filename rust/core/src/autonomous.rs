@@ -109,8 +109,8 @@ impl AutonomousEditor {
     /// Asynchronously modifies the NLEState by making a real LLM API call.
     ///
     /// Provider selection via env vars:
-    ///   LLM_PROVIDER = openai | anthropic | gemini (default)
-    ///   OPENAI_API_KEY / ANTHROPIC_API_KEY / GEMINI_API_KEY
+    ///   LLM_PROVIDER = deepseek | openai | anthropic | gemini (default)
+    ///   DEEPSEEK_API_KEY / OPENAI_API_KEY / ANTHROPIC_API_KEY / GEMINI_API_KEY
     ///
     /// Falls back to a deterministic local plan if no API key is available
     /// or if the HTTP call fails (never blocks the user with an error).
@@ -127,6 +127,11 @@ impl AutonomousEditor {
             .clone()
             .unwrap_or_else(|| env::var("LLM_PROVIDER").unwrap_or_else(|_| "gemini".to_string()));
         let (api_url, api_key, model) = match provider.as_str() {
+            "deepseek" => (
+                "https://api.deepseek.com/v1/chat/completions".to_string(),
+                env::var("DEEPSEEK_API_KEY").unwrap_or_default(),
+                "deepseek-chat".to_string(),
+            ),
             "openai" => (
                 "https://api.openai.com/v1/chat/completions".to_string(),
                 env::var("OPENAI_API_KEY").unwrap_or_default(),

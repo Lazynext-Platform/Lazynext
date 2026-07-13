@@ -2,7 +2,7 @@
  * @module auth/server
  * @description Server-side Better Auth configuration with Drizzle
  *   adapter, email/password, email verification, and multi-transport
- *   email delivery (SMTP preferred, Resend fallback).
+ *   email delivery (Brevo primary, SMTP preferred, Resend fallback).
  */
 
 import { betterAuth } from "better-auth";
@@ -38,6 +38,25 @@ async function sendEmail({
 	if (transporter) {
 		await transporter.sendMail({ from, to, subject, html });
 		return;
+	}
+
+	// Brevo — 300 emails/day free, no credit card
+	if (process.env["BREVO_API_KEY"]) {
+		const resp = await fetch("https://api.brevo.com/v3/smtp/email", {
+			method: "POST",
+			headers: {
+				"api-key": process.env["BREVO_API_KEY"],
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				sender: { email: from.split("<")[1]?.replace(">", "") || from, name: "Lazynext" },
+				to: [{ email: to }],
+				subject,
+				htmlContent: html,
+			}),
+		});
+		if (resp.ok) return;
+		console.error("[Auth] Brevo API Error:", await resp.text());
 	}
 
 	if (process.env["RESEND_API_KEY"]) {
