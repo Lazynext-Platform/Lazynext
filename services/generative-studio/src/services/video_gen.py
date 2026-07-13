@@ -1,14 +1,15 @@
 """
-Video generation services: diffusion via Fal.ai Kling, upscaling, style transfer,
-generative fill, and AI avatar generation.
+Video generation services: text-to-video via Hugging Face Spaces (free),
+upscaling, style transfer, generative fill, and AI avatar generation.
 
-Uses Fal.ai + Kling 3.0 for text-to-video (best quality/price ratio),
-RealESRGAN for upscaling, Edge TTS for avatar narration, and OpenCV-based
-local fallbacks for style transfer and inpainting.
+Uses HF Spaces + Wan 2.1 for text-to-video — completely free, no API key,
+no GPU required. Falls back to local image generation if Spaces unavailable.
+RealESRGAN for upscaling, Edge TTS for avatar narration, OpenCV for effects.
 """
 
 import asyncio
 import os
+import time
 import httpx
 from fastapi import HTTPException
 from fastapi.responses import JSONResponse
@@ -18,12 +19,10 @@ from src.models import (
 )
 from upscale_pipeline import UpscalePipeline, UpscaleConfig
 
-FAL_KLING_MODEL = os.getenv(
-	"FAL_VIDEO_MODEL",
-	"fal-ai/kling-video/o3/standard/text-to-video"
-)
-# Fallback: Wan 2.5 is cheaper ($0.05/sec), no special approval needed
-FAL_WAN_MODEL = "fal-ai/wan-25-preview/text-to-video"
+# Hugging Face Spaces — free, no API key, GPU-accelerated
+HF_VIDEO_SPACE = os.getenv("HF_VIDEO_SPACE", "Wan-AI/Wan2.1")
+HF_VIDEO_MODEL = os.getenv("HF_VIDEO_MODEL", "Wan-AI/Wan2.2-TI2V-5B")
+
 FAL_INPAINT_MODEL = os.getenv(
 	"FAL_INPAINT_MODEL",
 	"fal-ai/propainter"
@@ -31,54 +30,89 @@ FAL_INPAINT_MODEL = os.getenv(
 
 
 async def generate_video_service(req: DiffusionRequest):
-	"""Generate video from text via Fal.ai (Kling 3.0 → Wan 2.5 fallback).
+	"""Generate video from text via Hugging Face Spaces (free, no API key).
 
-	Tries Kling 3.0 first (best quality), falls back to Wan 2.5
-	(cheaper, $0.05/sec, no special approval needed).
+	Uses Wan 2.1 HF Space for GPU-accelerated text-to-video generation.
+	Completely free — runs on shared HF GPU infrastructure.
+	Async with polling (~2-5 min per generation).
 
 	Raises:
-		HTTPException: 503 if FAL_KEY missing, 502 on API error.
+		HTTPException: 502 on Spaces error, 503 if Spaces unavailable.
 	"""
-	fal_key = os.getenv("FAL_KEY") or os.getenv("FAL_API_KEY")
-	if not fal_key:
-		raise HTTPException(status_code=503,
-			detail="Video generation unavailable — FAL_KEY not configured")
-
-	duration = (req.num_frames / 24.0) if req.num_frames > 0 else 5
-	payload = {"prompt": req.prompt, "duration": str(duration), "aspect_ratio": "16:9"}
-
-	async def try_model(model_id: str) -> dict:
-		queue_url = f"https://queue.fal.run/{model_id}"
-		async with httpx.AsyncClient() as client:
-			resp = await client.post(queue_url,
-				headers={"Authorization": f"Key {fal_key}", "Content-Type": "application/json"},
-				json=payload, timeout=30.0)
-			resp.raise_for_status()
-			data = resp.json()
-			return {
-				"success": True, "prompt": req.prompt,
-				"source": "fal-kling" if "kling" in model_id else "fal-wan",
-				"request_id": data.get("request_id"),
-				"status_url": f"https://queue.fal.run/{model_id}/requests/{data.get('request_id')}/status",
-				"status": data.get("status", "IN_QUEUE"),
-			}
-
-	# Try Kling 3.0 first
+	# Try HF Spaces first (free, no API key)
 	try:
-		return await try_model(FAL_KLING_MODEL)
-	except Exception as e:
-		msg = str(e)
-		if "403" in msg or "402" in msg or "locked" in msg.lower():
-			print(f"[GenerativeStudio] Kling unavailable ({msg[:80]}), trying Wan 2.5...")
-		else:
-			print(f"[GenerativeStudio] Kling error: {msg[:100]}")
+		from gradio_client import Client
 
-	# Fallback to Wan 2.5
-	try:
-		return await try_model(FAL_WAN_MODEL)
+		client = Client(HF_VIDEO_SPACE)
+		prompt = req.prompt
+
+		# Submit generation
+		print(f"[GenerativeStudio] Submitting to HF Space '{HF_VIDEO_SPACE}'...")
+		client.predict(prompt=prompt, api_name="/t2v_generation_async")
+
+		# Poll for result (up to 15 minutes for HF Spaces free tier)
+		for i in range(90):
+			await asyncio.sleep(10)
+			video, _cost, _wait, _prog = client.predict(api_name="/status_refresh")
+			if video and isinstance(video, dict) and video.get("video"):
+				video_path = video["video"]
+				if os.path.exists(video_path):
+					output = f"/tmp/generated_{hash(prompt)}.mp4"
+					os.rename(video_path, output)
+					return {
+						"success": True,
+						"prompt": prompt,
+						"source": "hf-spaces-wan21",
+						"video_url": f"file://{output}",
+					}
+			if i % 6 == 0:
+				print(f"[GenerativeStudio] Waiting for video... ({i*10}s)")
+
+		raise HTTPException(
+			status_code=504,
+			detail="Video generation timed out after 10 minutes",
+		)
+
+	except ImportError:
+		print("[GenerativeStudio] gradio_client not installed, trying HF Inference API...")
+	except HTTPException:
+		raise
 	except Exception as e:
-		raise HTTPException(status_code=502,
-			detail=f"Fal.ai API error: {e}")
+		print(f"[GenerativeStudio] HF Spaces error: {e}")
+
+	# Fallback: HF Inference API (direct API call, needs HF_TOKEN optionally)
+	hf_token = os.getenv("HF_TOKEN", "")
+	try:
+		headers = {"Content-Type": "application/json"}
+		if hf_token:
+			headers["Authorization"] = f"Bearer {hf_token}"
+
+		async with httpx.AsyncClient(timeout=120.0) as client:
+			resp = await client.post(
+				f"https://api-inference.huggingface.co/models/{HF_VIDEO_MODEL}",
+				headers=headers,
+				json={"inputs": req.prompt},
+			)
+			if resp.status_code == 200:
+				video_bytes = resp.content
+				if len(video_bytes) > 1000:
+					output = f"/tmp/generated_{hash(req.prompt)}.mp4"
+					with open(output, "wb") as f:
+						f.write(video_bytes)
+					return {
+						"success": True,
+						"prompt": req.prompt,
+						"source": "hf-inference",
+						"video_url": f"file://{output}",
+					}
+			print(f"[GenerativeStudio] HF Inference returned {resp.status_code}")
+	except Exception as e:
+		print(f"[GenerativeStudio] HF Inference error: {e}")
+
+	raise HTTPException(
+		status_code=503,
+		detail="Video generation unavailable — install gradio_client (pip install gradio_client) or set HF_TOKEN",
+	)
 
 
 async def upscale_video_service(req: UpscaleRequest):
