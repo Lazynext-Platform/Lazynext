@@ -85,9 +85,9 @@ function selectModel(prompt: string): string {
     lower.includes("review") ||
     lower.includes("reasoning")
   ) {
-    return "gemini-2.5-pro";
+    return "gemini-3.1-pro";
   }
-  return "gemini-2.5-flash";
+  return "gemini-3.5-flash";
 }
 
 /**
@@ -226,7 +226,7 @@ Respond ONLY with a JSON object:
 
     // Gemini via OpenAI-compatible endpoint
     const endpoint = `${process.env.GEMINI_API_BASE || "https://generativelanguage.googleapis.com/v1beta/openai"}/chat/completions`;
-    const modelName = provider || process.env.GEMINI_MODEL || "gemini-2.5-flash";
+    const modelName = provider || process.env.GEMINI_MODEL || "gemini-3.5-flash";
 
     const response = await fetch(endpoint, {
       method: "POST",

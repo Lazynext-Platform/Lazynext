@@ -1,5 +1,5 @@
 //! Autonomous AI editor that translates natural language intents into NLE timeline
-//! operations. Uses Gemini 2.5 Flash/Pro with intelligent switching.
+//! operations. Uses Gemini 3.5 Flash / Gemini 3.1 Pro with intelligent switching.
 //! with deterministic local fallback when no API key is available.
 
 use crate::NLEState;
@@ -129,9 +129,9 @@ impl AutonomousEditor {
             || prompt.contains("review");
 
         let model_name = if use_pro {
-            "gemini-2.5-pro"
+            "gemini-3.1-pro"
         } else {
-            "gemini-2.5-flash"
+            "gemini-3.5-flash"
         };
 
         let provider = env::var("GEMINI_API_KEY").ok().map(|_| "gemini").unwrap_or("local");
