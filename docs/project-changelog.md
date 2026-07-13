@@ -6,6 +6,33 @@
 
 ---
 
+## [Unreleased] — 2026-07-13 (Platform Optimization)
+
+### Changed — AI Provider Stack
+- **Replicate → Hugging Face Spaces** (Wan 2.1): Free text-to-video generation via Gradio Spaces API. Zero API cost.
+- **Gemini TTS → Edge TTS**: Free Microsoft Edge text-to-speech, 300+ voices, 100+ languages, unlimited.
+- **Coqui XTTS → F5-TTS**: Free MIT-licensed voice cloning, 300M params, CPU-capable (~2 min).
+- **ElevenLabs**: Removed entirely (dead code, never implemented).
+
+### Added — Analytics
+- 10 analytics providers wired: PostHog, Clarity, Plausible, GA4, Mixpanel, Amplitude, Umami, Matomo, OpenPanel, Countly
+- Umami (self-hosted, :8093) deployed and tracking on Linode production
+- Matomo (self-hosted, :8094) deployed and tracking on Linode production
+- Auto-reference audio generation for voice cloning via Edge TTS
+- Fal.ai Wan 2.5 fallback when Kling 3.0 unavailable
+
+### Infrastructure
+- Deployed full stack to Linode 8GB (192.46.209.127): 10 microservices + PostgreSQL + Redis + MySQL + Caddy
+- Docker Compose analytics services (Umami, Matomo)
+- GPU deployment script for CosyVoice 3 on Linode GPU instances
+- Linode GPU support ticket #27091699 created for RTX 4000 Ada
+
+### Removed
+- FAL_KEY from all env files, Docker, K8s, Terraform
+- ElevenLabs from entire codebase
+- Replicate API token from all configs
+- AWS/Azure/Replicate references from monitoring and runbooks
+
 ## [Unreleased] — 2026-07-05 (Feature #36)
 
 ### Added
