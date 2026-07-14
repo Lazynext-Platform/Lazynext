@@ -225,10 +225,6 @@ resource "azurerm_container_app" "ai_agents" {
         value = var.llm_provider
       }
       env {
-      }
-      env {
-      }
-      env {
         name        = "BETTER_AUTH_SECRET"
         secret_name = "better-auth-secret"
       }
@@ -390,8 +386,6 @@ resource "azurerm_container_app" "pre_processing" {
       env {
         name  = "MEDIA_BUCKET"
         value = azurerm_storage_container.media.name
-      }
-      env {
       }
     }
 
