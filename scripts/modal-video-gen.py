@@ -35,7 +35,7 @@ image = (
 )
 
 
-@app.function(gpu="A10G", image=image, timeout=600, scaledown_window=300)
+@app.function(gpu="A10G", image=image, timeout=600, scaledown_window=900, min_containers=1)
 @modal.concurrent(max_inputs=5)
 @modal.fastapi_endpoint(method="POST")
 def generate_video(prompt: str = "a beautiful sunset",
