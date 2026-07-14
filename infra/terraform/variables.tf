@@ -85,18 +85,6 @@ variable "better_auth_secret" {
 # API Keys
 # ─────────────────────────────────────────────────────────────────────────────
 
-  description = "API key for OpenAI (Whisper, GPT)"
-  type        = string
-  sensitive   = true
-  default     = "UNSET_SECRET"
-}
-
-  description = "API key for Anthropic (Claude — Lazynext AI Copilot)"
-  type        = string
-  sensitive   = true
-  default     = "UNSET_SECRET"
-}
-
 variable "gemini_api_key" {
   description = "API key for Google Gemini"
   type        = string
