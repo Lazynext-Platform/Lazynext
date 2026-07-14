@@ -247,10 +247,6 @@ resource "azurerm_container_app" "ai_agents" {
   }
 
   secret {
-  }
-  secret {
-  }
-  secret {
     name  = "better-auth-secret"
     value = var.better_auth_secret
   }
@@ -405,8 +401,6 @@ resource "azurerm_container_app" "pre_processing" {
     }
   }
 
-  secret {
-  }
 
   secret {
     name  = "acr-password"
