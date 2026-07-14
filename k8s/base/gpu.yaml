@@ -102,11 +102,9 @@ spec:
                 configMapKeyRef:
                   name: lazynext-config
                   key: MEDIA_BUCKET
-            - name: OPENAI_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: lazynext-secrets
-                  key: OPENAI_API_KEY
                   optional: true
           livenessProbe:
             httpGet:

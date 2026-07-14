@@ -291,17 +291,13 @@ spec:
                 configMapKeyRef:
                   name: lazynext-config
                   key: LLM_PROVIDER
-            - name: OPENAI_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: lazynext-secrets
-                  key: OPENAI_API_KEY
                   optional: true
-            - name: ANTHROPIC_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: lazynext-secrets
-                  key: ANTHROPIC_API_KEY
                   optional: true
             - name: GEMINI_API_KEY
               valueFrom:
@@ -524,11 +520,9 @@ spec:
                 configMapKeyRef:
                   name: lazynext-config
                   key: MEDIA_BUCKET
-            - name: OPENAI_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: lazynext-secrets
-                  key: OPENAI_API_KEY
                   optional: true
               valueFrom:
                 secretKeyRef:

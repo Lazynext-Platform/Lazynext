@@ -159,10 +159,8 @@ spec:
     - secretKey: BETTER_AUTH_SECRET
       remoteRef:
         key: better--auth--secret
-    - secretKey: OPENAI_API_KEY
       remoteRef:
         key: openai--api--key
-    - secretKey: ANTHROPIC_API_KEY
       remoteRef:
         key: anthropic--api--key
     - secretKey: GEMINI_API_KEY

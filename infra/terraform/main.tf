@@ -160,8 +160,6 @@ locals {
 
   secret_names = [
     "better-auth-secret",
-    "openai-api-key",
-    "anthropic-api-key",
     "gemini-api-key",
     "dodo-api-key",
     "dodo-webhook-secret",

@@ -225,12 +225,8 @@ resource "azurerm_container_app" "ai_agents" {
         value = var.llm_provider
       }
       env {
-        name        = "OPENAI_API_KEY"
-        secret_name = "openai-api-key"
       }
       env {
-        name        = "ANTHROPIC_API_KEY"
-        secret_name = "anthropic-api-key"
       }
       env {
         name        = "BETTER_AUTH_SECRET"
@@ -255,12 +251,8 @@ resource "azurerm_container_app" "ai_agents" {
   }
 
   secret {
-    name  = "openai-api-key"
-    value = var.openai_api_key
   }
   secret {
-    name  = "anthropic-api-key"
-    value = var.anthropic_api_key
   }
   secret {
     name  = "better-auth-secret"
@@ -400,8 +392,6 @@ resource "azurerm_container_app" "pre_processing" {
         value = azurerm_storage_container.media.name
       }
       env {
-        name        = "OPENAI_API_KEY"
-        secret_name = "openai-api-key"
       }
     }
 
@@ -422,8 +412,6 @@ resource "azurerm_container_app" "pre_processing" {
   }
 
   secret {
-    name  = "openai-api-key"
-    value = var.openai_api_key
   }
 
   secret {
