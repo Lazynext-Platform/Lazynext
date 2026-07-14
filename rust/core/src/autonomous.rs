@@ -134,19 +134,25 @@ impl AutonomousEditor {
             "gemini-3.5-flash"
         };
 
-        let provider = env::var("GEMINI_API_KEY").ok().map(|_| "gemini").unwrap_or("local");
+        let provider = env::var("GEMINI_API_KEY")
+            .ok()
+            .map(|_| "gemini")
+            .unwrap_or("local");
         let (api_url, api_key, model) = {
-                let key = env::var("GEMINI_API_KEY").unwrap_or_default();
-                let url = if key.is_empty() {
-                    format!("https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent", model_name)
-                } else {
-                    format!(
-                        "https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent?key={}",
-                        model_name, key
-                    )
-                };
-                (url, key, model_name.to_string())
+            let key = env::var("GEMINI_API_KEY").unwrap_or_default();
+            let url = if key.is_empty() {
+                format!(
+                    "https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent",
+                    model_name
+                )
+            } else {
+                format!(
+                    "https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent?key={}",
+                    model_name, key
+                )
             };
+            (url, key, model_name.to_string())
+        };
 
         println!(
             "🔗 [AI Engine] Routing to: {} (Model: {})",

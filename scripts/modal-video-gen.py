@@ -42,7 +42,9 @@ def generate_video(prompt: str = "a beautiful sunset",
                    width: int = 1024,
                    height: int = 576,
                    num_frames: int = 49):
-    import base64, time, torch
+    import base64
+    import time
+    import torch
     from diffusers import CogVideoXPipeline
     from diffusers.utils import export_to_video
 
