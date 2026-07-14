@@ -6,7 +6,7 @@ outputs, with tolerance-based comparison to handle encoder variance.
 
 import argparse
 import concurrent.futures
-import hashlib
+# import hashlib
 import itertools
 import json
 import os
@@ -676,7 +676,7 @@ class Runner:
         assert len(cn.audios) == 1
 
     def test_premiere_multi(self):
-        p_xml = self.main([f"resources/multi-track.mov"], ["-exp"], "multi.xml")
+        p_xml = self.main(["resources/multi-track.mov"], ["-exp"], "multi.xml")
 
         cn = fileinfo(self.main([p_xml], [], "multi_ALT.mp4"))
         assert len(cn.videos) == 1
@@ -923,7 +923,7 @@ class Runner:
 
     def test_audio_norm_ebu(self) -> None:
         """Test that EBU normalization preserves correct pitch/duration."""
-        import hashlib
+        # import hashlib
         import struct
         import wave
 
@@ -1173,7 +1173,7 @@ def main():
     args = test_options().parse_args()
     run = Runner()
     tests = []
-    test_methods = {
+    _test_methods = {
         name: getattr(run, name)
         for name in dir(Runner)
         if callable(getattr(Runner, name)) and name not in ["main", "raw", "check"]

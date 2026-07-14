@@ -10,7 +10,6 @@ import os
 import whisper
 from moviepy.editor import VideoFileClip, concatenate_videoclips
 import requests
-import json
 import ast
 
 def transcribe_video(video_path, model_name="base"):
