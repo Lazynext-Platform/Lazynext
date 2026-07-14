@@ -1,5 +1,5 @@
 """
-Lazynext Video Generation — Modal GPU Endpoint (CogVideoX-2B)
+Lazynext Video Generation — Modal GPU Endpoint (CogVideoX-5B)
 
 Deploy: modal deploy scripts/modal-video-gen.py
 

@@ -35,7 +35,7 @@ async def generate_video_service(req: DiffusionRequest):
 		)
 
 	try:
-		async with httpx.AsyncClient(timeout=600.0) as client:
+		async with httpx.AsyncClient(timeout=600.0, follow_redirects=True) as client:
 			resp = await client.post(
 				endpoint,
 				json={
