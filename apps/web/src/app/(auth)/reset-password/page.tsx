@@ -1,18 +1,21 @@
 /**
  * Reset password page — token-based password reset form.
+ * Includes Cloudflare Turnstile CAPTCHA verification.
  *
  * @page /reset-password
  */
 
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { toast } from "sonner";
 import Link from "next/link";
 import { resetPassword } from "@/auth/client";
 import { friendlyAuthError } from "@/components/auth/auth-errors";
+import { CaptchaWidget } from "@/components/auth/CaptchaWidget";
+import { verifyCaptchaToken } from "@/components/auth/captcha-verify";
 
 function ResetPasswordForm() {
 	const router = useRouter();
@@ -21,6 +24,21 @@ function ResetPasswordForm() {
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [loading, setLoading] = useState(false);
+	const captchaToken = useRef<string>("");
+
+	const verifyCaptcha = async (): Promise<boolean> => {
+		const t = captchaToken.current;
+		if (!t) {
+			toast.error("Please complete the CAPTCHA verification");
+			return false;
+		}
+		const valid = await verifyCaptchaToken(t);
+		if (!valid) {
+			toast.error("CAPTCHA verification failed. Please try again.");
+			captchaToken.current = "";
+		}
+		return valid;
+	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -34,6 +52,10 @@ function ResetPasswordForm() {
 		}
 		setLoading(true);
 		try {
+			if (!(await verifyCaptcha())) {
+				setLoading(false);
+				return;
+			}
 			const { error } = await resetPassword({
 				newPassword: password,
 				token: token || "",
@@ -111,6 +133,15 @@ function ResetPasswordForm() {
 						placeholder="Re-enter your password"
 					/>
 				</div>
+				<CaptchaWidget
+					onVerify={(t) => {
+						captchaToken.current = t;
+					}}
+					onError={() => {
+						captchaToken.current = "";
+					}}
+					disabled={loading}
+				/>
 				<button
 					type="submit"
 					disabled={loading}

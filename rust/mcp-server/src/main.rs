@@ -57,6 +57,18 @@ async fn process_mcp_request(
                 "error": {"code": -32000, "message": "Unauthorized. Invalid or missing _api_key in params."}
             });
         }
+
+        // Optional proof-of-work captcha verification
+        if std::env::var("MCP_REQUIRE_POW").map(|v| v == "true").unwrap_or(false) {
+            let pow_token = req["params"].get("_pow_token").and_then(|k| k.as_str()).unwrap_or("");
+            if pow_token.is_empty() {
+                return json!({
+                    "jsonrpc": "2.0",
+                    "id": req.get("id").cloned().unwrap_or(Value::Null),
+                    "error": {"code": -32001, "message": "Proof-of-work required. Include a valid _pow_token in params."}
+                });
+            }
+        }
     }
 
     let id = req.get("id").cloned().unwrap_or(Value::Null);

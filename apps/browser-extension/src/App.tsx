@@ -1,5 +1,6 @@
 /** @module App Root application component for browser extension */
 import { useState, useEffect } from "react";
+import { performCaptcha } from "./captcha";
 
 async function getApiGatewayUrl(): Promise<string> {
   const stored = (await chrome.storage.local.get("apiGatewayUrl")) as {
@@ -112,6 +113,11 @@ function App() {
         const headers: Record<string, string> = { "Content-Type": "application/json" };
         if (token) {
           headers["Authorization"] = `Bearer ${token}`;
+        }
+
+        const captchaToken = await performCaptcha();
+        if (captchaToken) {
+          headers["X-Captcha-Token"] = captchaToken;
         }
         
         try {

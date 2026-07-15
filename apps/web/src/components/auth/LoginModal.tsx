@@ -1,58 +1,120 @@
 /**
- * Login modal — dialog with sign-in form and social auth options.
+ * Login modal — dialog with sign-in form, magic link, and social
+ * auth options. MFA/two-factor is handled by the twoFactorClient plugin.
+ * Includes Cloudflare Turnstile CAPTCHA verification.
  *
  * @module components/auth/LoginModal
  */
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { X, Mail, Lock } from "lucide-react";
 import { signIn, signUp } from "@/auth/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import Link from "next/link";
 import { friendlyAuthError } from "./auth-errors";
+import { SocialAuthButtons } from "./SocialAuthButtons";
+import { CaptchaWidget } from "./CaptchaWidget";
+import { verifyCaptchaToken } from "./captcha-verify";
 
 export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
 	const [isLogin, setIsLogin] = useState(true);
+	const [loginMode, setLoginMode] = useState<"password" | "magicLink">("password");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [name, setName] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
+	const captchaToken = useRef<string>("");
+
+	const verifyCaptcha = async (): Promise<boolean> => {
+		const token = captchaToken.current;
+		if (!token) {
+			toast.error("Please complete the CAPTCHA verification");
+			return false;
+		}
+		const valid = await verifyCaptchaToken(token);
+		if (!valid) {
+			toast.error("CAPTCHA verification failed. Please try again.");
+			captchaToken.current = "";
+		}
+		return valid;
+	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!email || !password) return;
+		if (!email) return;
 
 		setIsLoading(true);
 		try {
-			if (isLogin) {
-				const { data, error } = await signIn.email({
-					email,
-					password,
-					rememberMe: true,
-				});
+			if (!(await verifyCaptcha())) {
+				setIsLoading(false);
+				return;
+			}
+
+			if (isLogin && loginMode === "password") {
+				if (!password) {
+					toast.error("Please enter your password");
+					setIsLoading(false);
+					return;
+				}
+				const { data, error } = await signIn.email(
+					{
+						email,
+						password,
+						rememberMe: true,
+					},
+					captchaToken.current
+						? { headers: { "X-Captcha-Token": captchaToken.current } }
+						: undefined,
+				);
 				if (error) {
 					toast.error(friendlyAuthError(error, "Invalid email or password"));
+					setIsLoading(false);
+					captchaToken.current = "";
 					return;
 				}
 				if (data) {
 					toast.success("Signed in successfully!");
 				}
+			} else if (isLogin && loginMode === "magicLink") {
+				const { error } = await signIn.magicLink(
+					{
+						email,
+						callbackURL: "/dashboard",
+					},
+					captchaToken.current
+						? { headers: { "X-Captcha-Token": captchaToken.current } }
+						: undefined,
+				);
+				if (error) {
+					toast.error(friendlyAuthError(error, "Could not send magic link"));
+					setIsLoading(false);
+					captchaToken.current = "";
+					return;
+				}
+				toast.success("Magic link sent! Check your email to sign in.");
 			} else {
-				if (password.length < 8) {
+				if (!password || password.length < 8) {
 					toast.error("Password must be at least 8 characters");
 					setIsLoading(false);
 					return;
 				}
-				const { data, error } = await signUp.email({
-					email,
-					password,
-					name: name || email.split("@")[0],
-				});
+				const { data, error } = await signUp.email(
+					{
+						email,
+						password,
+						name: name || email.split("@")[0],
+					},
+					captchaToken.current
+						? { headers: { "X-Captcha-Token": captchaToken.current } }
+						: undefined,
+				);
 				if (error) {
 					toast.error(friendlyAuthError(error, "Sign up failed"));
+					setIsLoading(false);
+					captchaToken.current = "";
 					return;
 				}
 				if (data) {
@@ -60,8 +122,12 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 				}
 			}
 			onClose();
+			setEmail("");
+			setPassword("");
+			setName("");
 		} catch (err) {
 			toast.error(friendlyAuthError(err, "Authentication failed"));
+			captchaToken.current = "";
 		} finally {
 			setIsLoading(false);
 		}
@@ -69,6 +135,7 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 
 	const toggleMode = () => {
 		setIsLogin(!isLogin);
+		setLoginMode("password");
 		setIsLoading(false);
 	};
 
@@ -140,24 +207,26 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 								</div>
 							</div>
 
-							<div className="space-y-2">
-								<label className="text-sm font-medium text-white/80">Password</label>
-								<div className="relative">
-									<Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
-									<input
-										type="password"
-										value={password}
-										onChange={(e) => setPassword(e.target.value)}
-										required
-										minLength={8}
-										autoComplete={isLogin ? "current-password" : "new-password"}
-										className="w-full pl-10 pr-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/50 transition-all text-sm"
-										placeholder="••••••••"
-									/>
+							{(!isLogin || loginMode === "password") && (
+								<div className="space-y-2">
+									<label className="text-sm font-medium text-white/80">Password</label>
+									<div className="relative">
+										<Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+										<input
+											type="password"
+											value={password}
+											onChange={(e) => setPassword(e.target.value)}
+											required
+											minLength={8}
+											autoComplete={isLogin ? "current-password" : "new-password"}
+											className="w-full pl-10 pr-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/50 transition-all text-sm"
+											placeholder="••••••••"
+										/>
+									</div>
 								</div>
-							</div>
+							)}
 
-							{isLogin && (
+							{isLogin && loginMode === "password" && (
 								<div className="text-right">
 									<Link
 										href="/forgot-password"
@@ -169,6 +238,16 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 								</div>
 							)}
 
+							<CaptchaWidget
+								onVerify={(token) => {
+									captchaToken.current = token;
+								}}
+								onError={() => {
+									captchaToken.current = "";
+								}}
+								disabled={isLoading}
+							/>
+
 							<button
 								type="submit"
 								disabled={isLoading}
@@ -176,13 +255,31 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 							>
 								{isLoading ? (
 									<div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-								) : isLogin ? (
-									"Sign In"
-								) : (
-									"Create Account"
-								)}
+								) : isLogin
+									? loginMode === "password"
+										? "Sign In"
+										: "Send Magic Link"
+									: "Create Account"}
 							</button>
 						</form>
+
+						{isLogin && (
+							<button
+								type="button"
+								onClick={() =>
+									setLoginMode(loginMode === "password" ? "magicLink" : "password")
+								}
+								className="w-full text-center text-sm text-cyan-400 hover:text-cyan-300 mt-3"
+							>
+								{loginMode === "password"
+									? "Sign in with magic link instead"
+									: "Sign in with password instead"}
+							</button>
+						)}
+
+						<div className="mt-2">
+							<SocialAuthButtons mode={isLogin ? "signIn" : "signUp"} />
+						</div>
 
 						<div className="mt-6 text-center text-sm text-muted">
 							{isLogin ? "Don't have an account?" : "Already have an account?"}{" "}

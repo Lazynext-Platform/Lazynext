@@ -798,6 +798,7 @@ impl Render for EditorShell {
                                                         .unwrap_or_else(|_| "http://127.0.0.1:8005".to_string());
                                                     tokio::spawn(async move {
                                                         let auth_header = load_auth_token();
+                                                        let captcha_token = crate::captcha::perform_captcha(&gateway).await.ok();
                                                         let client = reqwest::Client::new();
                                                         let mut req = client
                                                             .post(format!("{}/api/v1/autonomous_edit", gateway))
@@ -807,6 +808,9 @@ impl Render for EditorShell {
                                                             }));
                                                         if let Some(auth) = auth_header {
                                                             req = req.header("Authorization", auth);
+                                                        }
+                                                        if let Some(ref ct) = captcha_token {
+                                                            req = req.header("X-Captcha-Token", ct);
                                                         }
                                                         match req.send().await
                                                         {
