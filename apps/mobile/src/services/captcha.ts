@@ -196,7 +196,7 @@ export async function performCaptcha(): Promise<string | null> {
 		});
 
 		const verified = await verifySolution(challenge.challenge_id, nonce);
-		if (verified) return `${challenge.challenge_id}:${nonce}:${challenge.prefix}`;
+		if (verified) return `${challenge.challenge_id}:${nonce}`;
 		return null;
 	} catch (err) {
 		console.error("CAPTCHA verification failed:", err);

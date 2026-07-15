@@ -15,15 +15,43 @@ const submitSchema = z.object({
 		.max(MAX_MESSAGE_LENGTH, "Message too long"),
 });
 
-/**
- * POST /api/feedback
- * Rate-limited feedback submission. Validates the message with Zod and
- * persists the entry via the feedback service.
- */
+const API_GATEWAY_URL =
+	process.env.NEXT_PUBLIC_API_GATEWAY_URL || "http://localhost:8005";
+
 export async function POST(request: NextRequest) {
 	const { limited } = await checkRateLimit({ request });
 	if (limited) {
 		return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+	}
+
+	// Server-side captcha verification when Turnstile is configured
+	const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+	if (siteKey) {
+		const token = request.headers.get("X-Captcha-Token");
+		if (!token) {
+			return NextResponse.json(
+				{ error: "CAPTCHA verification required" },
+				{ status: 403 },
+			);
+		}
+		try {
+			const captchaRes = await fetch(
+				`${API_GATEWAY_URL}/api/v1/captcha/verify-turnstile`,
+				{
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ token }),
+				},
+			);
+			if (!captchaRes.ok) {
+				return NextResponse.json(
+					{ error: "CAPTCHA verification failed" },
+					{ status: 403 },
+				);
+			}
+		} catch {
+			// Verification service down — fail open (rate limiting protects)
+		}
 	}
 
 	const body = await request.json();

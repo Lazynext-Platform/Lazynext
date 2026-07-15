@@ -47,12 +47,16 @@ function getToken(): string | null {
 async function authFetch(
 	path: string,
 	body: Record<string, unknown>,
+	captchaToken?: string,
 ): Promise<{ data?: unknown; error?: string }> {
 	try {
 		const config = loadConfig();
 		const headers: Record<string, string> = { "Content-Type": "application/json" };
 		if (config.token) {
 			headers["Authorization"] = `Bearer ${config.token}`;
+		}
+		if (captchaToken) {
+			headers["X-Captcha-Token"] = captchaToken;
 		}
 		const res = await fetch(`${AUTH_BASE_URL}/${path}`, {
 			method: "POST",
@@ -128,7 +132,7 @@ async function verifyPowSolution(challengeId: string, nonce: number): Promise<bo
 	return data.success === true;
 }
 
-async function performCaptcha(): Promise<boolean> {
+async function performCaptcha(): Promise<string | null> {
 	try {
 		console.log("🤖 Verifying you are not a robot...");
 		const challenge = await getPowChallenge();
@@ -137,13 +141,13 @@ async function performCaptcha(): Promise<boolean> {
 		const verified = await verifyPowSolution(challenge.challenge_id, nonce);
 		if (verified) {
 			console.log("✅ Verification successful");
-			return true;
+			return `${challenge.challenge_id}:${nonce}`;
 		}
 		console.error("❌ CAPTCHA verification failed");
-		return false;
+		return null;
 	} catch (err) {
 		console.error(`❌ CAPTCHA error: ${err instanceof Error ? err.message : "Unknown error"}`);
-		return false;
+		return null;
 	}
 }
 
@@ -175,7 +179,8 @@ program
 	.requiredOption("-e, --email <string>", "Your email address")
 	.requiredOption("-p, --password <string>", "Your password")
 	.action(async (options) => {
-		if (!(await performCaptcha())) {
+		const captchaToken = await performCaptcha();
+		if (!captchaToken) {
 			process.exit(1);
 		}
 		console.log("🔐 Signing in...");
@@ -183,7 +188,7 @@ program
 			email: options.email,
 			password: options.password,
 			rememberMe: true,
-		});
+		}, captchaToken);
 
 		if (result.error) {
 			console.error(`❌ Login failed: ${result.error}`);
@@ -289,14 +294,15 @@ program
 	.description("Sign in with a magic link sent to your email")
 	.requiredOption("-e, --email <string>", "Your email address")
 	.action(async (options) => {
-		if (!(await performCaptcha())) {
+		const captchaToken = await performCaptcha();
+		if (!captchaToken) {
 			process.exit(1);
 		}
 		console.log(`📧 Sending magic link to ${options.email}...`);
 		const result = await authFetch("sign-in/magic-link", {
 			email: options.email,
 			callbackURL: "lazynext://cli-auth",
-		});
+		}, captchaToken);
 
 		if (result.error) {
 			console.error(`❌ Failed: ${result.error}`);
@@ -316,7 +322,8 @@ program
 	.requiredOption("-p, --password <string>", "Your password (min 8 chars)")
 	.option("-n, --name <string>", "Your name")
 	.action(async (options) => {
-		if (!(await performCaptcha())) {
+		const captchaToken = await performCaptcha();
+		if (!captchaToken) {
 			process.exit(1);
 		}
 		console.log("📝 Creating account...");
@@ -324,7 +331,7 @@ program
 			email: options.email,
 			password: options.password,
 			name: options.name || options.email.split("@")[0],
-		});
+		}, captchaToken);
 
 		if (result.error) {
 			console.error(`❌ Registration failed: ${result.error}`);
@@ -455,14 +462,15 @@ program
 	.description("Request a password reset email")
 	.requiredOption("-e, --email <string>", "Your email address")
 	.action(async (options) => {
-		if (!(await performCaptcha())) {
+		const captchaToken = await performCaptcha();
+		if (!captchaToken) {
 			process.exit(1);
 		}
 		console.log("📧 Sending password reset email...");
 		const result = await authFetch("request-password-reset", {
 			email: options.email,
 			redirectTo: "/reset-password",
-		});
+		}, captchaToken);
 
 		if (result.error) {
 			console.error(`❌ Failed: ${result.error}`);
