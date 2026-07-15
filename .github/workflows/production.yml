@@ -21,6 +21,9 @@ concurrency:
   group: production-deploy
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 env:
   ENVIRONMENT: production
   DOMAIN: lazynext.com
