@@ -2,7 +2,7 @@
 
 > **Project**: Lazynext
 > **Current Milestone**: v1.0 (First Production Release)
-> **Last Updated**: 2026-07-07
+> **Last Updated**: 2026-07-15
 
 ---
 
@@ -10,13 +10,13 @@
 
 | Metric | Count |
 |---|---|
-| Total Features | 36 |
-| 🟢 Complete | 36 |
+| Total Features | 37 |
+| 🟢 Complete | 37 |
 | ⏸️ On Hold | 0 |
 | 🔴 Not Started | 0 |
 | 🟡 In Progress | 0 |
 
-**Overall Progress**: ██████████ 100% — all 36 features complete. Production deployment + API keys remain.
+**Overall Progress**: ██████████ 100% — all 37 features complete. Production deployment + API keys remain.
 
 ---
 
@@ -29,7 +29,7 @@
 | 03 | API Gateway | 🟢 Complete | #01 | — | Axum REST server, 14 routes, JWT middleware. |
 | 04 | CLI Renderer | 🟢 Complete | #01 | — | Clap-based headless renderer, real ffmpeg pipeline. |
 | 05 | MCP Server | 🟢 Complete | #01 | — | MCP protocol server (14 tools, 4 resources, 4 prompts). |
-| 06 | Infrastructure & CI/CD | 🟢 Complete | — | — | Terraform, Docker, GitHub Actions, K8s, monitoring. |
+| 06 | Infrastructure & CI/CD | 🟢 Complete | — | — | Docker Compose, GitHub Actions, K8s, monitoring. |
 | 07 | Desktop App | 🟢 Complete | #01, #12, #20 | — | Real GPUI app: Dashboard + Editor, frame rendering, playback, AI Copilot, DeckLink. |
 | 08 | Mobile App | 🟢 Complete | #01, #13 | — | React Native shell + UniFFI native modules. Full editor, auth, AI Copilot, offline storage, Apple Pencil, Camera. Android + iOS native binding. |
 | 09 | Production Hardening — Web | 🟢 Complete | #01, #02, #03, #06 | `feature/09` | Kysely→Drizzle, mock removal, verified auth/compositor/CRDT. |
@@ -60,6 +60,7 @@
 | 34 | Real Video Playback Pipeline | 🟢 Complete | #01, #02, #07 | `feature/34` | CLI/Desktop/Web decode+render, 3 tests, 20/20 tasks. |
 | 35 | Platform Finalization — All 7 Formats | 🟢 Complete | #34 | `feature/35` | Desktop play/pause, Mobile NativeBridge, MCP verified, 16/22. |
 | 36 | E2E Launch Readiness | 🟢 Complete | #35 | `feature/36` | Phase 0-1 code fixes, test suite verified, docs finalized. |
+| 37 | CAPTCHA — All 7 Formats | 🟢 Complete | #36 | `feature/37` | Turnstile (web) + PoW (5 clients). API Gateway, 28 files, 23+11 tests. |
 
 ---
 
@@ -68,7 +69,7 @@
 All 36 features code-complete. Remaining items require external access:
 
 - **Linode deployment** (#35 Phase F, #36 Phase 2-3): `infra/linode/deploy.sh` → `bootstrap` → `deploy`. Set up DNS (lazynext.com → 192.46.209.127), populate `.env.linode`, verify all 9 systemd services and SSL via Caddy.
-- **API keys**: GEMINI_API_KEY, Anthropic API key, Resend, Dodo Payments, PostHog, Marble CMS, Freesound, Apple Developer cert, Google Play/Chrome Store accounts.
+- **API keys**: GEMINI_API_KEY, Resend, Dodo Payments, PostHog, Marble CMS, Freesound, Apple Developer cert, Google Play/Chrome Store accounts.
 - **Mobile app store publishing**: Apple Developer Program + Google Play Console accounts needed for App Store / Play Store submission. Pre-built native modules require signing certificates.
 
 ---
