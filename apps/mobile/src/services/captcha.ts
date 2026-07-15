@@ -17,8 +17,6 @@ interface PowChallenge {
 	expires_at: number;
 }
 
-// ── UTF-8 encoder (pure JS, no TextEncoder) ───────────────────────
-
 function stringToUtf8Bytes(str: string): number[] {
 	const bytes: number[] = [];
 	for (let i = 0; i < str.length; i++) {
@@ -203,3 +201,6 @@ export async function performCaptcha(): Promise<string | null> {
 		return null;
 	}
 }
+
+// Exported for testing
+export { stringToUtf8Bytes, sha256Bytes, checkDifficulty };
