@@ -6,8 +6,7 @@ metadata:
   name: lazynext-sa
   namespace: lazynext
   annotations:
-    # azure.workload.identity/client-id must be set to your Azure Managed Identity client ID
-    # azure.workload.identity/client-id: <AZURE_MI_CLIENT_ID>
+    # Labels for workload identity
 ---
 # ── Role: read K8s resources for health/status ──
 apiVersion: rbac.authorization.k8s.io/v1

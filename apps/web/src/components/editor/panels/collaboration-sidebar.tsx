@@ -5,8 +5,8 @@
  * @module components/editor/panels/collaboration-sidebar
  */
 
-import React, { useState } from "react";
-import { MessageSquare, CheckCircle, XCircle, Send } from "lucide-react";
+import { useState } from "react";
+import { MessageSquare, Send } from "lucide-react";
 
 export function CollaborationSidebar({
 	currentFrame,
@@ -89,15 +89,17 @@ export function CollaborationSidebar({
 				{comments
 					.sort((a, b) => a.frame - b.frame)
 					.map((c) => (
-						// eslint-disable-next-line jsx-a11y/no-static-element-interactions
-						// eslint-disable-next-line jsx-a11y/click-events-have-key-events
-						<div
-							key={c.id}
-							className="bg-background border border-border rounded-lg p-3 hover:border-zinc-600 transition-colors cursor-pointer group"
-							onClick={() => onNavigateToFrame(c.frame)}
-						>
+					<div
+						key={c.id}
+						className="bg-background border border-border rounded-lg p-3 hover:border-zinc-600 transition-colors cursor-pointer group"
+						onClick={() => onNavigateToFrame(c.frame)}
+						onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
+						role="button"
+						tabIndex={0}
+					>
 							<div className="flex justify-between items-start mb-2">
 								<div className="flex items-center gap-2">
+								{/* eslint-disable-next-line @next/next/no-img-element */}
 									<img
 										src={c.avatar}
 										alt="avatar"

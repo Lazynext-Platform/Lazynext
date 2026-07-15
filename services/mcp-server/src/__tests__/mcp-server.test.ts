@@ -8,6 +8,7 @@
 
 import { describe, test, expect, beforeAll, afterAll, beforeEach, mock } from "bun:test";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import type { JSONRPCMessage } from "@modelcontextprotocol/sdk/types.js";
 
 // ── Transport bridge state ──────────────────────────────────────────
 
@@ -25,7 +26,7 @@ function sendRequest(method: string, params?: Record<string, unknown>) {
 			method,
 			params: params ?? {},
 		};
-		clientTransport.send(message).catch(reject);
+		clientTransport.send(message as unknown as JSONRPCMessage).catch(reject);
 		setTimeout(() => {
 			if (pendingRequests.has(id)) {
 				pendingRequests.delete(id);
@@ -43,7 +44,7 @@ function sendNotification(
 		jsonrpc: "2.0",
 		method,
 		params: params ?? {},
-	});
+	} as unknown as JSONRPCMessage);
 }
 
 // ── Mock StdioServerTransport → InMemoryTransport ────────────────────
@@ -72,11 +73,13 @@ mock.module("@modelcontextprotocol/sdk/server/stdio.js", () => {
 			close() {
 				return this._transport.close();
 			}
-			send(message: unknown, options?: unknown) {
-				return this._transport.send(message, options);
+			send(message: unknown, _options?: unknown) {
+				return this._transport.send(message as unknown as JSONRPCMessage);
 			}
 			get onmessage() {
-				return this._transport.onmessage;
+				return this._transport.onmessage as
+					| ((...args: unknown[]) => void)
+					| undefined;
 			}
 			set onmessage(handler: ((...args: unknown[]) => void) | undefined) {
 				this._transport.onmessage = handler;
@@ -175,9 +178,9 @@ describe("tools/list", () => {
 
 		for (const tool of response.result.tools) {
 			expect(typeof tool.name).toBe("string");
-			expect(tool.name.length).toBeGreaterThan(0);
+			expect((tool.name as string).length).toBeGreaterThan(0);
 			expect(typeof tool.description).toBe("string");
-			expect(tool.description.length).toBeGreaterThan(0);
+			expect((tool.description as string).length).toBeGreaterThan(0);
 
 			const schema = tool.inputSchema as Record<string, unknown>;
 			expect(schema).toBeDefined();
@@ -425,7 +428,7 @@ describe("prompts/list", () => {
 
 		for (const prompt of response.result.prompts) {
 			expect(typeof prompt.name).toBe("string");
-			expect(prompt.name.length).toBeGreaterThan(0);
+			expect((prompt.name as string).length).toBeGreaterThan(0);
 			expect(typeof prompt.description).toBe("string");
 			expect(Array.isArray(prompt.arguments)).toBe(true);
 

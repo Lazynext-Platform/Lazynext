@@ -8,7 +8,6 @@
 "use client";
 
 import React from "react";
-import { useOptionalEditorState } from "./useEditorState";
 
 // ── Shared drag-to-move hook ──
 
@@ -260,6 +259,9 @@ function OmniOrbPanel({ onDismiss }: { onDismiss: () => void }) {
 			<div
 				className="relative w-16 h-16 flex items-center justify-center pointer-events-auto cursor-pointer"
 				onClick={onDismiss}
+				onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
+				role="button"
+				tabIndex={0}
 				title="Dismiss AI Assistant"
 			>
 				<div

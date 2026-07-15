@@ -30,7 +30,10 @@ interface ThemeToggleProps {
 export function ThemeToggle({ className, iconClassName }: ThemeToggleProps) {
 	const { setTheme, resolvedTheme } = useTheme();
 	const [mounted, setMounted] = useState(false);
-	useEffect(() => setMounted(true), []);
+	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
+		setMounted(true);
+	}, []);
 
 	if (!mounted) return <div className="size-8" />;
 

@@ -5,7 +5,7 @@
  * @module components/editor/EditorClient
  */
 
-/* eslint-disable jsx-a11y/media-has-caption, jsx-a11y/no-autofocus */
+/* eslint-disable jsx-a11y/media-has-caption, jsx-a11y/no-autofocus, react-hooks/exhaustive-deps */
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
@@ -13,7 +13,6 @@ import {
 	NLEState,
 	detectFaces,
 	processAudioBuffer,
-	initNeuralEngine,
 } from "lazynext-wasm";
 import { useEditorState } from "./useEditorState";
 import { wasmBridge } from "@/core/wasm-bridge";
@@ -22,38 +21,19 @@ import { RenderFarmModal } from "./RenderFarmModal";
 import { BezierEditorModal } from "./BezierEditorModal";
 import { NeuralCinemaOverlay } from "./NeuralCinemaOverlay";
 import { SentientColorOverlay } from "./SentientColorOverlay";
-import type { Project, Asset, TimelineMarker } from "@/types/editor";
+import type { Project } from "@/types/editor";
 import { toast } from "sonner";
 import {
 	Layers,
-	Volume2,
 	Video,
-	Type,
-	ZoomIn,
-	ZoomOut,
-	Play,
-	Pause,
-	SkipBack,
-	Scissors,
-	MousePointer2,
-	Spline,
-	ArrowLeft,
-	MoreHorizontal,
 	Settings2,
 	Download,
-	MonitorPlay,
-	Square,
-	Plus,
-	Settings,
 	Maximize2,
-	Trash2,
 	Undo,
-	Redo,
 	Bot,
 	Sparkles,
 	Terminal,
 	Send,
-	X,
 	Check,
 } from "lucide-react";
 import {
@@ -65,7 +45,6 @@ import { LumetriScopes } from "./panels/scopes";
 import { AudioMixer } from "./panels/audio-mixer";
 import { AIMagicTools } from "./panels/ai-magic-tools";
 import { VFXCompositor } from "./panels/vfx-compositor";
-import { TextPresets } from "./panels/text-presets";
 import { CollaborationSidebar } from "./panels/collaboration-sidebar";
 import { CollaborationSocket } from "@/collaboration/socket";
 import { MulticamGrid } from "./panels/multicam-grid";
@@ -77,7 +56,6 @@ import { VoiceChat } from "./VoiceChat";
 import WasmPlayer from "./wasm-player";
 import Timeline from "./timeline";
 import { CollaborationSync } from "@/lib/crdt";
-import { solveCubicBezier } from "@/utils/math";
 import { getKeyframedValue, hasKeyframe } from "./keyframe-utils";
 import { VideoScopes } from "./VideoScopes";
 import { FeatureToolbar } from "./FeatureToolbar";
@@ -89,12 +67,12 @@ import { INITIAL_ASSETS } from "./editor-defaults";
 export default function EditorClient({ project }: { project: Project }) {
 	const lastSavedProject = useRef<string>("");
 	const mediaRecorderRef = useRef<any>(null);
-	const audioChunksRef = useRef<any[]>([]);
+	const _audioChunksRef = useRef<any[]>([]);
 	const [frame, setFrame] = useState(0);
 
 	// Migrated to EditorStateProvider context (Phase 60)
 	const ctx = useEditorState();
-	const { projectData: ctxProject } = useEditorState();
+	const { projectData: _ctxProject } = useEditorState();
 	const { activeWorkspace, setActiveWorkspace } = ctx;
 
 	// We use a mock clientId for now unless the user context provides one
@@ -109,7 +87,7 @@ export default function EditorClient({ project }: { project: Project }) {
 		}
 	}, []);
 
-	const { broadcastDelta, socket, connected, peerCount } = useMultiplayer({
+	const { socket } = useMultiplayer({
 		projectId: project.id,
 		clientId,
 		onDeltaReceived: handleDeltaReceived,
@@ -145,7 +123,7 @@ export default function EditorClient({ project }: { project: Project }) {
 	const [projectData, setProjectData] = useState(project);
 	const [isAutoSaving, setIsAutoSaving] = useState(false);
 	const [isRestored, setIsRestored] = useState(false);
-	const [wasmState, setWasmState] = useState<"idle" | "ready" | "error">(
+	const [_wasmState, setWasmState] = useState<"idle" | "ready" | "error">(
 		"idle",
 	);
 
@@ -173,16 +151,16 @@ export default function EditorClient({ project }: { project: Project }) {
 		type?: string;
 	} | null>(null);
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const [collabSync, setCollabSync] = useState<CollaborationSync | null>(null);
+	const [_collabSync, setCollabSync] = useState<CollaborationSync | null>(null);
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const [nleEngine, setNleEngine] = useState<NLEState | null>(null);
 
 	const [isExporting, setIsExporting] = useState(false);
 	const [exportProgress, setExportProgress] = useState(0);
-	const [multiCamMode, setMultiCamMode] = useState(false);
-	const [isStereo3D, setIsStereo3D] = useState(false);
+	const [multiCamMode, _setMultiCamMode] = useState(false);
+	const [_isStereo3D, _setIsStereo3D] = useState(false);
 	const [showAudioMixer, setShowAudioMixer] = useState(false);
-	const [viewMode, setViewMode] = useState<"single" | "multicam">("single");
+	const [_viewMode, _setViewMode] = useState<"single" | "multicam">("single");
 	const [is3DWorkspace, setIs3DWorkspace] = useState(false);
 	const [isInfiniteCanvas, setIsInfiniteCanvas] = useState(false);
 	const [infinitePanZoom, setInfinitePanZoom] = useState({
@@ -400,7 +378,7 @@ export default function EditorClient({ project }: { project: Project }) {
 				try {
 					const errJson = JSON.parse(errBody);
 					errDetail = errJson.error || errJson.message || errDetail;
-				} catch {}
+				} catch { /* JSON parse failed, use default error */ }
 				throw new Error(errDetail);
 			}
 
@@ -611,6 +589,7 @@ export default function EditorClient({ project }: { project: Project }) {
 
 	// Phase 46: Multiplayer Cursor Simulation
 	useEffect(() => {
+		/* eslint-disable react-hooks/set-state-in-effect */
 		if (!isMultiplayer) {
 			setRemoteCursors([]);
 			return;
@@ -751,7 +730,7 @@ export default function EditorClient({ project }: { project: Project }) {
 
 	// Initialize Real-Time Collaboration and WASM
 	useEffect(() => {
-		const sync = new CollaborationSync("room_123", (remoteData) => {
+		const sync = new CollaborationSync("room_123", (_remoteData) => {
 			// In a real app, this merges CRDT states. For now, it just receives patches.
 			console.log("Received remote project data update");
 		});
@@ -894,7 +873,7 @@ export default function EditorClient({ project }: { project: Project }) {
 		commitState(project);
 	};
 
-	const handleSetTrackHeight = (height: "sm" | "md" | "lg") => {
+	const _handleSetTrackHeight = (height: "sm" | "md" | "lg") => {
 		setTrackHeightSize(height);
 	};
 
@@ -2936,7 +2915,7 @@ export default function EditorClient({ project }: { project: Project }) {
 									currentLocalFrame * (clip.playback_rate || 1.0);
 							}
 
-							const sourceOffset = initialMediaFrame / fps;
+							const _sourceOffset = initialMediaFrame / fps;
 
 							// Apply playbackRate
 							const initialPlaybackRate = getInterpolatedProperty(
@@ -3143,7 +3122,7 @@ export default function EditorClient({ project }: { project: Project }) {
 			activeSourcesRef.current.forEach((source: AudioBufferSourceNode) => {
 				try {
 					source.stop();
-				} catch (e) {}
+				} catch { /* JSON parse failed, use default error */ }
 			});
 			activeSourcesRef.current = [];
 		}
@@ -3295,7 +3274,7 @@ export default function EditorClient({ project }: { project: Project }) {
 		}
 	};
 
-	const handleAgentExecuteTool = (
+	const _handleAgentExecuteTool = (
 		toolName: string,
 		args: Record<string, any>,
 	) => {
@@ -3652,6 +3631,8 @@ export default function EditorClient({ project }: { project: Project }) {
 				{!mediaPoolPos.floating && (
 					<div
 						className="w-1 cursor-col-resize hover:bg-indigo-500/50 bg-background shrink-0 z-40 transition-colors"
+						role="button"
+						tabIndex={0}
 						onMouseDown={(e: React.MouseEvent) => {
 							e.preventDefault();
 							const startX = e.clientX;
@@ -3679,6 +3660,9 @@ export default function EditorClient({ project }: { project: Project }) {
 
 						<div
 							className="flex-1 flex flex-col items-center justify-center bg-background relative"
+							onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
+							role="button"
+							tabIndex={0}
 							onClick={(e) => {
 								if (activeTool === "pen" && selectedClipId) {
 									// Handle pen tool drawing on canvas
@@ -4110,6 +4094,9 @@ export default function EditorClient({ project }: { project: Project }) {
 						<div
 							className="text-foreground absolute top-4 left-4 z-10 text-sm font-mono bg-background/60 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-border cursor-pointer hover:border-indigo-500/50 transition-colors group"
 							title="Click to jump to a specific frame"
+							onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
+							role="button"
+							tabIndex={0}
 							onClick={() => {
 								const input = prompt("Jump to frame:", String(frame));
 								if (input !== null) {
@@ -4149,6 +4136,9 @@ export default function EditorClient({ project }: { project: Project }) {
 							<div
 								className="absolute top-4 right-4 z-50 w-8 h-8 rounded-full bg-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.8)] animate-pulse cursor-pointer flex items-center justify-center border-2 border-white/50 hover:scale-110 transition-transform"
 								onClick={() => handleAGICoEditor()}
+								onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
+								role="button"
+								tabIndex={0}
 								title="Sentient AGI Co-Editor"
 							>
 								<div className="w-2 h-2 bg-white rounded-full"></div>
@@ -4275,6 +4265,9 @@ export default function EditorClient({ project }: { project: Project }) {
 										<div
 											key={camIndex}
 											className="relative border border-border bg-background overflow-hidden cursor-pointer group hover:border-indigo-500 transition-colors"
+											onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
+											role="button"
+											tabIndex={0}
 											onClick={() => {
 												// Simulate cutting to a camera angle
 												console.log("Cut to camera", camIndex);
@@ -4597,6 +4590,8 @@ export default function EditorClient({ project }: { project: Project }) {
 					{!inspectorPos.floating && (
 						<div
 							className="w-1 cursor-col-resize hover:bg-indigo-500/50 bg-background shrink-0 z-40 transition-colors"
+							role="button"
+							tabIndex={0}
 							onMouseDown={(e: React.MouseEvent) => {
 								e.preventDefault();
 								const startX = e.clientX;
@@ -4634,9 +4629,11 @@ export default function EditorClient({ project }: { project: Project }) {
 					>
 						{/* Floating Header */}
 						{inspectorPos.floating && (
-							<div
-								className="h-8 bg-panel flex items-center justify-between px-3 cursor-move border-b border-border select-none"
-								onMouseDown={(e: React.MouseEvent) => {
+				<div
+					className="h-8 bg-panel flex items-center justify-between px-3 cursor-move border-b border-border select-none"
+					role="button"
+					tabIndex={0}
+					onMouseDown={(e: React.MouseEvent) => {
 									const startX = e.clientX - inspectorPos.x;
 									const startY = e.clientY - inspectorPos.y;
 									const onMove = (ev: MouseEvent) =>
@@ -4725,10 +4722,10 @@ export default function EditorClient({ project }: { project: Project }) {
 							{selectedClip ? (
 								<>
 									<div>
-										<label className="text-xs font-medium text-muted block mb-1">
+										<label htmlFor="inspector-name" className="text-xs font-medium text-muted block mb-1">
 											Name
 										</label>
-										<input
+										<input id="inspector-name"
 											type="text"
 											value={selectedClip.name}
 											onChange={(e) =>
@@ -4739,10 +4736,10 @@ export default function EditorClient({ project }: { project: Project }) {
 									</div>
 									<div className="flex gap-2">
 										<div className="flex-1">
-											<label className="text-xs font-medium text-muted block mb-1">
+											<label htmlFor="inspector-start-frame" className="text-xs font-medium text-muted block mb-1">
 												Start Frame
 											</label>
-											<input
+											<input id="inspector-start-frame"
 												type="number"
 												value={selectedClip.start_frame}
 												onChange={(e) =>
@@ -4755,10 +4752,10 @@ export default function EditorClient({ project }: { project: Project }) {
 										</div>
 
 										<div className="flex-1">
-											<label className="text-xs font-medium text-muted block mb-1">
+											<label htmlFor="inspector-duration" className="text-xs font-medium text-muted block mb-1">
 												Duration
 											</label>
-											<input
+											<input id="inspector-duration"
 												type="number"
 												value={selectedClip.duration_frames}
 												onChange={(e) =>
@@ -4774,9 +4771,9 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Text Settings */}
 									{selectedClip.type === "text" && (
 										<div className="pt-2 border-t border-border mt-2">
-											<label className="text-xs font-medium text-muted block mb-3">
+											<div className="text-xs font-medium text-muted block mb-3">
 												Text Settings
-											</label>
+											</div>
 											<div className="flex flex-col gap-3">
 												<div>
 													<span className="text-xs text-muted block mb-1">
@@ -5072,9 +5069,9 @@ export default function EditorClient({ project }: { project: Project }) {
 												</div>
 
 												<div className="pt-2 border-t border-border mt-2">
-													<label className="text-xs font-bold text-muted block mb-3 text-indigo-400">
+													<div className="text-xs font-bold text-muted block mb-3 text-indigo-400">
 														3D Fusion Controls
-													</label>
+													</div>
 
 													<div className="flex items-center justify-between mb-2">
 														<span className="text-xs text-muted w-24">
@@ -5197,9 +5194,9 @@ export default function EditorClient({ project }: { project: Project }) {
 									{(selectedClip.type === "video" ||
 										selectedClip.type === "audio") && (
 										<div className="pt-2 border-t border-border mt-2">
-											<label className="text-xs font-medium text-muted block mb-3">
+											<div className="text-xs font-medium text-muted block mb-3">
 												AI Services
-											</label>
+											</div>
 											<button
 												onClick={startAutoCaption}
 												disabled={isCaptioning}
@@ -5260,7 +5257,7 @@ export default function EditorClient({ project }: { project: Project }) {
 									{(selectedClip.type === "video" ||
 										selectedClip.type === "audio") && (
 										<div className="pt-2 border-t border-border mt-2">
-											<label className="text-xs font-medium text-muted block mb-3">
+											<label htmlFor="clip-playback-rate" className="text-xs font-medium text-muted block mb-3">
 												Playback Speed
 											</label>
 											<div className="flex items-center justify-between mb-2">
@@ -5272,7 +5269,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													{(selectedClip.playback_rate ?? 1.0).toFixed(2)}x
 												</span>
 											</div>
-											<input
+											<input id="clip-playback-rate"
 												type="range"
 												min="0.1"
 												max="4.0"
@@ -5297,9 +5294,9 @@ export default function EditorClient({ project }: { project: Project }) {
 											{/* Speed Ramp / Time Remap */}
 											<div className="mt-4 pt-3 border-t border-border/60">
 												<div className="flex items-center justify-between mb-3">
-													<label className="text-xs font-medium text-muted uppercase tracking-wider">
+													<span className="text-xs font-medium text-muted uppercase tracking-wider">
 														Speed Ramp
-													</label>
+													</span>
 													<button
 														onClick={() => {
 															const rampPoints =
@@ -5570,9 +5567,9 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Retiming Process (for video clips) */}
 									{selectedClip.type === "video" && (
 										<div className="pt-2 border-t border-border mt-2">
-											<label className="text-xs font-medium text-muted block mb-3">
+											<div className="text-xs font-medium text-muted block mb-3">
 												Retiming & Scaling Process
-											</label>
+											</div>
 
 											{/* Auto-Reframe (Phase 195) */}
 											<div className="flex items-center justify-between mb-3 bg-indigo-500/10 border border-indigo-500/20 p-2 rounded">
@@ -5645,9 +5642,9 @@ export default function EditorClient({ project }: { project: Project }) {
 									{(selectedClip.type === "audio" ||
 										selectedClip.type === "video") && (
 										<div className="pt-2 border-t border-border mt-2">
-											<label className="text-xs font-medium text-muted block mb-3">
+											<div className="text-xs font-medium text-muted block mb-3">
 												Audio Mix
-											</label>
+											</div>
 											<div className="flex items-center justify-between mb-4">
 												<div className="flex-1 flex flex-col items-center gap-1">
 													<div className="w-full h-1.5 bg-background rounded-full overflow-hidden flex shadow-inner">
@@ -5867,9 +5864,9 @@ export default function EditorClient({ project }: { project: Project }) {
 
 											{/* Phase 22: AI Voice Cloning & Dubbing */}
 											<div className="mt-4 pt-4 border-t border-border">
-												<label className="text-xs font-medium text-muted block mb-3">
+												<div className="text-xs font-medium text-muted block mb-3">
 													AI Voice / Dubbing (ElevenLabs Parity)
-												</label>
+												</div>
 												<button
 													onClick={() => {
 														toast.promise(
@@ -5913,7 +5910,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													🗣️ Generate ADR / TTS
 												</button>
 												<p className="text-[10px] text-muted mt-1.5 text-center leading-tight">
-													Clone the actor's voice and generate seamless
+													Clone the actor&apos;s voice and generate seamless
 													Automated Dialogue Replacement.
 												</p>
 											</div>
@@ -5968,9 +5965,9 @@ export default function EditorClient({ project }: { project: Project }) {
 
 											{/* Compositing (Mask & LUTs) */}
 											<div className="mt-4 pt-4 border-t border-border">
-												<label className="text-xs font-medium text-muted block mb-3">
+												<div className="text-xs font-medium text-muted block mb-3">
 													Compositing
-												</label>
+												</div>
 												<div className="flex items-center justify-between mb-3">
 													<span className="text-xs text-foreground">
 														Polygon Mask
@@ -6020,11 +6017,11 @@ export default function EditorClient({ project }: { project: Project }) {
 
 											<div className="mt-4 pt-3 border-t border-border/50">
 												<div className="flex items-center justify-between mb-2">
-													<label className="text-xs font-medium text-muted block">
+													<span className="text-xs font-medium text-muted block">
 														Voice Isolation (AI)
-													</label>
+													</span>
 
-													<label className="flex items-center gap-2 cursor-pointer">
+													<label aria-label="Voice Isolation (AI)" className="flex items-center gap-2 cursor-pointer">
 														<input
 															type="checkbox"
 															checked={selectedClip.voiceIsolation ?? false}
@@ -6168,7 +6165,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													✨ AI Voice Isolation
 												</span>
 
-												<label className="relative inline-flex items-center cursor-pointer">
+												<label aria-label="AI Voice Isolation" className="relative inline-flex items-center cursor-pointer">
 													<input
 														type="checkbox"
 														className="sr-only peer"
@@ -6183,9 +6180,9 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Audio Track Routing (Phase 186) */}
 									{selectedClip.type === "audio" && (
 										<div className="pt-2 border-t border-border mt-2 mb-4">
-											<label className="text-[10px] font-bold text-sky-400 block mb-2 uppercase tracking-wider">
+											<div className="text-[10px] font-bold text-sky-400 block mb-2 uppercase tracking-wider">
 												Output Routing
-											</label>
+											</div>
 											<div className="flex items-center justify-between">
 												<span className="text-[10px] text-muted w-16">
 													Bus Send
@@ -6203,9 +6200,9 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Audio EQ Graphic (Phase 162) */}
 									{selectedClip.type === "audio" && (
 										<div className="pt-2 border-t border-border mt-4 mb-4">
-											<label className="text-[10px] font-bold text-sky-400 block mb-2 uppercase tracking-wider">
+											<div className="text-[10px] font-bold text-sky-400 block mb-2 uppercase tracking-wider">
 												Parametric EQ
-											</label>
+											</div>
 											<div className="relative w-full h-24 bg-background border border-border rounded mb-3 overflow-hidden shadow-inner group">
 												<div className="absolute inset-0 pointer-events-none grid grid-cols-4 grid-rows-3 opacity-20">
 													{Array.from({ length: 12 }).map((_, i) => (
@@ -6257,9 +6254,9 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Spatial Audio / Ambisonics (Phase 183) */}
 									{selectedClip.type === "audio" && (
 										<div className="pt-2 border-t border-border mt-4 mb-4">
-											<label className="text-[10px] font-bold text-sky-400 block mb-2 uppercase tracking-wider">
+											<div className="text-[10px] font-bold text-sky-400 block mb-2 uppercase tracking-wider">
 												Spatial 360 Panner
-											</label>
+											</div>
 											<div className="w-full flex items-center justify-center p-4">
 												<div className="relative w-24 h-24 rounded-full border-2 border-border bg-background flex items-center justify-center cursor-move group hover:border-sky-500/50 transition-colors">
 													<div className="absolute inset-0 border border-border rounded-full scale-50"></div>
@@ -6278,9 +6275,9 @@ export default function EditorClient({ project }: { project: Project }) {
 									{(selectedClip.type === "audio" ||
 										selectedClip.type === "video") && (
 										<div className="pt-3 border-t border-border mt-3">
-											<label className="text-[10px] font-bold text-indigo-400 block mb-2 uppercase tracking-wider">
+											<div className="text-[10px] font-bold text-indigo-400 block mb-2 uppercase tracking-wider">
 												Voice FX & Pitch
-											</label>
+											</div>
 											<div className="flex items-center justify-between mb-2">
 												<span className="text-[10px] text-muted">Preset</span>
 												<select
@@ -6344,9 +6341,9 @@ export default function EditorClient({ project }: { project: Project }) {
 											{/* Audio Clean-up */}
 
 											<div className="flex flex-col gap-2 mt-3 pt-3 border-t border-border/50">
-												<label className="text-[10px] font-bold text-indigo-400 block uppercase tracking-wider mb-1">
+												<div className="text-[10px] font-bold text-indigo-400 block uppercase tracking-wider mb-1">
 													Audio Clean-up
-												</label>
+												</div>
 												<div className="flex items-center justify-between">
 													<span className="text-[10px] text-muted w-16 text-left leading-tight">
 														Noise
@@ -6418,11 +6415,11 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Visuals */}
 
 									<div className="pt-2 border-t border-border mt-2">
-										<label className="text-xs font-medium text-muted block mb-1">
+										<label htmlFor="clip-color-overlay" className="text-xs font-medium text-muted block mb-1">
 											Color Overlay (WASM)
 										</label>
 										<div className="flex items-center gap-2 mb-3">
-											<input
+											<input id="clip-color-overlay"
 												type="color"
 												value={rgbaToHex(selectedClip.layer?.color)}
 												onChange={(e) =>
@@ -6440,10 +6437,10 @@ export default function EditorClient({ project }: { project: Project }) {
 											</span>
 										</div>
 
-										<label className="text-xs font-medium text-muted block mb-1">
+										<label htmlFor="clip-blend-mode" className="text-xs font-medium text-muted block mb-1">
 											Blend Mode
 										</label>
-										<select
+										<select id="clip-blend-mode"
 											value={selectedClip.blend_mode || "normal"}
 											onChange={(e) =>
 												updateSelectedClip({ blend_mode: e.target.value })
@@ -6471,9 +6468,9 @@ export default function EditorClient({ project }: { project: Project }) {
 										{/* Blend If */}
 
 										<div className="mt-3 pt-3 border-t border-border/50">
-											<label className="text-[10px] font-bold text-muted block mb-2 uppercase tracking-wider">
+											<div className="text-[10px] font-bold text-muted block mb-2 uppercase tracking-wider">
 												Blend If (Luma)
-											</label>
+											</div>
 											<div className="flex flex-col gap-2">
 												<div className="flex items-center justify-between">
 													<span className="text-[10px] text-muted w-16 leading-tight text-left">
@@ -6545,9 +6542,9 @@ export default function EditorClient({ project }: { project: Project }) {
 										<div className="pt-4 border-t border-border mt-4 mb-4">
 											<div className="flex items-center justify-between mb-4">
 												<div className="flex items-center gap-2">
-													<label className="text-xs font-medium text-muted block">
+													<div className="text-xs font-medium text-muted block">
 														Color Wheels (Lift/Gamma/Gain)
-													</label>
+													</div>
 													{/* Custom LUT Creator (Phase 192) */}
 													<button
 														className="text-[10px] bg-panel text-muted hover:bg-glass hover:text-foreground px-2 py-0.5 rounded border border-border transition-colors flex items-center gap-1"
@@ -6618,8 +6615,10 @@ export default function EditorClient({ project }: { project: Project }) {
 																{wheel.label}
 															</span>
 
-															<div
-																className="w-16 h-16 rounded-full relative shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)] cursor-crosshair border border-border hover:border-zinc-500 transition-colors"
+				<div
+					className="w-16 h-16 rounded-full relative shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)] cursor-crosshair border border-border hover:border-zinc-500 transition-colors"
+					role="button"
+					tabIndex={0}
 																style={{
 																	background:
 																		"radial-gradient(circle at center, #71717a, transparent), conic-gradient(red, yellow, lime, aqua, blue, magenta, red)",
@@ -6712,9 +6711,9 @@ export default function EditorClient({ project }: { project: Project }) {
 											{/* Custom RGB Curves */}
 
 											<div className="mt-5 pt-4 border-t border-border">
-												<label className="text-[10px] font-bold text-amber-500 block mb-3 uppercase tracking-wider">
+												<div className="text-[10px] font-bold text-amber-500 block mb-3 uppercase tracking-wider">
 													Custom Curves
-												</label>
+												</div>
 												<div className="relative w-full aspect-square bg-background border border-border rounded mb-3 overflow-hidden cursor-crosshair group shadow-inner">
 													{/* Grid */}
 													<div className="absolute inset-0 pointer-events-none">
@@ -6817,11 +6816,11 @@ export default function EditorClient({ project }: { project: Project }) {
 											{/* 3D LUT Support */}
 
 											<div className="mt-5 pt-4 border-t border-border">
-												<label className="text-[10px] font-bold text-indigo-400 block mb-3 uppercase tracking-wider">
+												<label htmlFor="clip-3d-lut" className="text-[10px] font-bold text-indigo-400 block mb-3 uppercase tracking-wider">
 													3D LUT
 												</label>
 												<div className="flex items-center gap-2">
-													<select
+													<select id="clip-3d-lut"
 														className="bg-background border border-border text-foreground text-xs rounded px-2 py-1.5 flex-1 outline-none focus:border-indigo-500"
 														value={selectedClip.filters?.lut || "none"}
 														onChange={(e) => {
@@ -6881,11 +6880,11 @@ export default function EditorClient({ project }: { project: Project }) {
 												{/* Face Refinement AI (Phase 165) */}
 												<div className="mt-5 pt-4 border-t border-border">
 													<div className="flex items-center justify-between">
-														<label className="text-[10px] font-bold text-pink-400 uppercase tracking-wider flex items-center gap-1">
+														<span className="text-[10px] font-bold text-pink-400 uppercase tracking-wider flex items-center gap-1">
 															✨ Face Refinement (AI)
-														</label>
+														</span>
 
-														<label className="flex items-center gap-2 cursor-pointer">
+														<label aria-label="Face Refinement (AI)" className="flex items-center gap-2 cursor-pointer">
 															<input
 																type="checkbox"
 																className="sr-only"
@@ -7019,9 +7018,9 @@ export default function EditorClient({ project }: { project: Project }) {
 										selectedClip.type === "image") && (
 										<div className="pt-2 border-t border-border mt-2">
 											<div className="flex items-center justify-between mb-3">
-												<label className="text-xs font-medium text-muted block">
+												<div className="text-xs font-medium text-muted block">
 													Retiming & Speed
-												</label>
+												</div>
 												<button
 													className="text-[10px] bg-panel hover:bg-glass text-foreground px-2 py-1 rounded border border-border transition-colors"
 													onClick={() => handleSpeedRamp()}
@@ -7244,9 +7243,9 @@ export default function EditorClient({ project }: { project: Project }) {
 									{(selectedClip.type === "video" ||
 										selectedClip.type === "image") && (
 										<div className="pt-2 border-t border-border mt-2">
-											<label className="text-xs font-medium text-muted block mb-3">
+											<div className="text-xs font-medium text-muted block mb-3">
 												Image Effects
-											</label>
+											</div>
 											<div className="flex flex-col gap-3">
 												{/* Pixelate */}
 												<div className="flex items-center justify-between">
@@ -7358,9 +7357,9 @@ export default function EditorClient({ project }: { project: Project }) {
 												{/* Stabilization (Warp Stabilizer) */}
 
 												<div className="pt-3 mt-3 border-t border-border">
-													<label className="text-[10px] font-bold text-emerald-400 block mb-2 uppercase tracking-wider">
+													<div className="text-[10px] font-bold text-emerald-400 block mb-2 uppercase tracking-wider">
 														Warp Stabilizer
-													</label>
+													</div>
 													<div className="flex items-center justify-between mb-2">
 														<span className="text-[10px] text-muted">
 															Method
@@ -7428,9 +7427,9 @@ export default function EditorClient({ project }: { project: Project }) {
 												{/* Lens Correction / Optics */}
 
 												<div className="pt-3 mt-3 border-t border-border">
-													<label className="text-[10px] font-bold text-emerald-400 block mb-2 uppercase tracking-wider">
+													<div className="text-[10px] font-bold text-emerald-400 block mb-2 uppercase tracking-wider">
 														Lens / Optics
-													</label>
+													</div>
 													<div className="flex items-center justify-between mb-2">
 														<span className="text-[10px] text-muted w-16">
 															Distortion
@@ -7507,9 +7506,9 @@ export default function EditorClient({ project }: { project: Project }) {
 												{/* Glow / Bloom */}
 
 												<div className="pt-3 mt-3 border-t border-border">
-													<label className="text-[10px] font-bold text-emerald-400 block mb-2 uppercase tracking-wider">
+													<div className="text-[10px] font-bold text-emerald-400 block mb-2 uppercase tracking-wider">
 														Glow / Bloom
-													</label>
+													</div>
 													<div className="flex items-center justify-between mb-2">
 														<span className="text-[10px] text-muted w-16">
 															Intensity
@@ -7578,9 +7577,9 @@ export default function EditorClient({ project }: { project: Project }) {
 									{(selectedClip.type === "video" ||
 										selectedClip.type === "image") && (
 										<div className="pt-2 border-t border-border mt-2">
-											<label className="text-xs font-medium text-muted mb-2 block">
+											<div className="text-xs font-medium text-muted mb-2 block">
 												Crop
-											</label>
+											</div>
 											<div className="flex flex-col gap-2">
 												{["left", "right", "top", "bottom"].map((edge) => (
 													<div
@@ -7864,9 +7863,9 @@ export default function EditorClient({ project }: { project: Project }) {
 										selectedClip.magicEraseMask &&
 										selectedClip.magicEraseMask.length > 0 && (
 											<div className="pt-2 border-t border-border mt-2">
-												<label className="text-xs font-medium text-emerald-400 mb-2 block">
+												<div className="text-xs font-medium text-emerald-400 mb-2 block">
 													🪄 AI Magic Eraser
-												</label>
+												</div>
 												<p className="text-[10px] text-muted mb-2">
 													Mask contains {selectedClip.magicEraseMask.length}{" "}
 													brush strokes.
@@ -8027,9 +8026,9 @@ export default function EditorClient({ project }: { project: Project }) {
 									{(selectedClip.type === "video" ||
 										selectedClip.type === "image") && (
 										<div className="pt-2 border-t border-border mt-2">
-											<label className="text-xs font-medium text-muted mb-2 block">
+											<div className="text-xs font-medium text-muted mb-2 block">
 												Border Radius
-											</label>
+											</div>
 											<div className="flex flex-col gap-2">
 												<div className="flex items-center justify-between">
 													<button
@@ -8085,9 +8084,9 @@ export default function EditorClient({ project }: { project: Project }) {
 										selectedClip.type === "image" ||
 										selectedClip.type === "text") && (
 										<div className="pt-2 border-t border-border mt-2">
-											<label className="text-xs font-medium text-muted mb-2 block">
+											<div className="text-xs font-medium text-muted mb-2 block">
 												Drop Shadow
-											</label>
+											</div>
 											<div className="flex flex-col gap-2">
 												<div className="flex items-center justify-between mb-1">
 													<span className="text-[10px] text-muted w-12">
@@ -8298,9 +8297,9 @@ export default function EditorClient({ project }: { project: Project }) {
 										selectedClip.type === "image") && (
 										<div className="pt-2 border-t border-border mt-2">
 											<div className="flex items-center justify-between mb-3">
-												<label className="text-xs font-medium text-muted">
+												<span className="text-xs font-medium text-muted">
 													Effects (GPU Shaders)
-												</label>
+												</span>
 												<button
 													onClick={() => {
 														const hasChroma = selectedClip.effects?.some(
@@ -8475,9 +8474,9 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Transitions */}
 
 									<div className="pt-2 border-t border-border mt-2">
-										<label className="text-xs font-medium text-muted block mb-3">
+										<div className="text-xs font-medium text-muted block mb-3">
 											Transitions
-										</label>
+										</div>
 										<div className="flex flex-col gap-3">
 											{/* Fade In */}
 											<div className="flex items-center justify-between">
@@ -8555,7 +8554,7 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Clip Notes & Annotations */}
 									<div className="pt-2 border-t border-border mt-2">
 										<div className="flex items-center justify-between mb-3">
-											<label className="text-xs font-medium text-muted flex items-center gap-1.5">
+											<label htmlFor={`clip-note-input-${selectedClip.id}`} className="text-xs font-medium text-muted flex items-center gap-1.5">
 												<svg
 													className="w-3 h-3 text-amber-400"
 													fill="none"
@@ -8713,9 +8712,9 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Transform */}
 
 									<div className="pt-2 border-t border-border mt-2">
-										<label className="text-xs font-medium text-muted block mb-3">
+										<div className="text-xs font-medium text-muted block mb-3">
 											Transform
-										</label>
+										</div>
 										<div className="flex flex-col gap-3">
 											{/* Pos X */}
 											<div className="flex items-center justify-between">
@@ -9083,11 +9082,11 @@ export default function EditorClient({ project }: { project: Project }) {
 											{/* Dynamic Zoom (Phase 168) */}
 											<div className="pt-2 border-t border-border mt-2">
 												<div className="flex items-center justify-between mb-2">
-													<label className="text-[10px] font-bold text-emerald-400 block uppercase tracking-wider">
+													<span className="text-[10px] font-bold text-emerald-400 block uppercase tracking-wider">
 														Dynamic Zoom (Ken Burns)
-													</label>
+													</span>
 
-													<label className="flex items-center gap-2 cursor-pointer">
+													<label aria-label="Dynamic Zoom (Ken Burns)" className="flex items-center gap-2 cursor-pointer">
 														<input
 															type="checkbox"
 															className="sr-only"
@@ -9203,9 +9202,9 @@ export default function EditorClient({ project }: { project: Project }) {
 									{selectedClip.keyframes &&
 										selectedClip.keyframes.length > 0 && (
 											<div className="pt-4 border-t border-border mt-4 mb-4">
-												<label className="text-xs font-medium text-muted block mb-3">
+												<div className="text-xs font-medium text-muted block mb-3">
 													Animation Curves
-												</label>
+												</div>
 												<div className="flex flex-col gap-4">
 													{Object.entries(
 														selectedClip.keyframes.reduce(
@@ -9347,7 +9346,7 @@ export default function EditorClient({ project }: { project: Project }) {
 											</span>
 										</div>
 
-										<label className="relative inline-flex items-center cursor-pointer">
+										<label aria-label="VR 360 Workspace" className="relative inline-flex items-center cursor-pointer">
 											<input type="checkbox" className="sr-only peer" />
 											<div className="w-7 h-4 bg-glass peer-focus:outline-none focus-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-fuchsia-500"></div>
 										</label>
@@ -9376,14 +9375,14 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* WebGPU Hardware Engine (Phase 199) */}
 									<div className="mb-4 p-3 bg-background border border-border rounded flex flex-col gap-2">
 										<div className="flex items-center justify-between">
-											<label className="text-[10px] font-bold text-muted uppercase tracking-wider">
+											<label htmlFor="rendering-engine" className="text-[10px] font-bold text-muted uppercase tracking-wider">
 												Rendering Engine
 											</label>
 											<span className="text-[10px] px-1.5 py-0.5 bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 rounded">
 												Experimental
 											</span>
 										</div>
-										<select className="w-full bg-background border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none focus-ring focus:border-indigo-500">
+										<select id="rendering-engine" className="w-full bg-background border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none focus-ring focus:border-indigo-500">
 											<option>WebGL 2.0 (Stable)</option>
 											<option>WebGPU Hardware (Fast)</option>
 											<option>Software (CPU)</option>
@@ -9391,10 +9390,10 @@ export default function EditorClient({ project }: { project: Project }) {
 									</div>
 
 									<div>
-										<label className="text-xs font-medium text-muted block mb-1">
+										<label htmlFor="project-name" className="text-xs font-medium text-muted block mb-1">
 											Project Name
 										</label>
-										<input
+										<input id="project-name"
 											type="text"
 											value={projectData.name || "Untitled Project"}
 											onChange={(e) =>
@@ -9407,7 +9406,7 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Hardware Control Surface (Phase 184) */}
 									<div className="mt-2 p-3 bg-background border border-border rounded flex flex-col gap-2">
 										<div className="flex items-center justify-between">
-											<label className="text-[10px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
+											<label htmlFor="control-surface" className="text-[10px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
 												<svg
 													className="w-3 h-3"
 													fill="none"
@@ -9427,7 +9426,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												WebMIDI Active
 											</span>
 										</div>
-										<select className="w-full bg-background border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none focus-ring focus:border-indigo-500">
+										<select id="control-surface" className="w-full bg-background border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none focus-ring focus:border-indigo-500">
 											<option>Tangent Ripple (Connected)</option>
 											<option>Blackmagic Micro Panel</option>
 											<option>Generic MIDI CC</option>
@@ -9437,10 +9436,10 @@ export default function EditorClient({ project }: { project: Project }) {
 
 									<div className="flex gap-2">
 										<div className="flex-1">
-											<label className="text-xs font-medium text-muted block mb-1">
+											<label htmlFor="project-width" className="text-xs font-medium text-muted block mb-1">
 												Width
 											</label>
-											<input
+											<input id="project-width"
 												type="number"
 												value={projectData.width || 1920}
 												onChange={(e) =>
@@ -9454,10 +9453,10 @@ export default function EditorClient({ project }: { project: Project }) {
 										</div>
 
 										<div className="flex-1">
-											<label className="text-xs font-medium text-muted block mb-1">
+											<label htmlFor="project-height" className="text-xs font-medium text-muted block mb-1">
 												Height
 											</label>
-											<input
+											<input id="project-height"
 												type="number"
 												value={projectData.height || 1080}
 												onChange={(e) =>
@@ -9472,9 +9471,9 @@ export default function EditorClient({ project }: { project: Project }) {
 									</div>
 
 									<div>
-										<label className="text-xs font-medium text-muted block mb-1">
+										<div className="text-xs font-medium text-muted block mb-1">
 											Aspect Ratio Presets
-										</label>
+										</div>
 										<div className="flex gap-2">
 											<button
 												onClick={() =>
@@ -9516,11 +9515,11 @@ export default function EditorClient({ project }: { project: Project }) {
 									</div>
 
 									<div>
-										<label className="text-xs font-medium text-muted block mb-2">
+										<label htmlFor="project-bg-color" className="text-xs font-medium text-muted block mb-2">
 											Background Color
 										</label>
 										<div className="flex items-center gap-2">
-											<input
+											<input id="project-bg-color"
 												type="color"
 												value={(() => {
 													const bg = projectData.bg_color || [
@@ -9573,10 +9572,10 @@ export default function EditorClient({ project }: { project: Project }) {
 										{projectData.burnInEnabled && (
 											<div className="flex gap-2">
 												<div className="flex-1">
-													<label className="text-[10px] font-medium text-muted block mb-1">
+													<label htmlFor="burn-in-position" className="text-[10px] font-medium text-muted block mb-1">
 														Position
 													</label>
-													<select
+													<select id="burn-in-position"
 														value={projectData.burnInPosition || "bottom-right"}
 														onChange={(e) =>
 															commitState({
@@ -9595,10 +9594,10 @@ export default function EditorClient({ project }: { project: Project }) {
 												</div>
 
 												<div className="flex-1">
-													<label className="text-[10px] font-medium text-muted block mb-1">
+													<label htmlFor="burn-in-size" className="text-[10px] font-medium text-muted block mb-1">
 														Size
 													</label>
-													<select
+													<select id="burn-in-size"
 														value={projectData.burnInSize || "medium"}
 														onChange={(e) =>
 															commitState({
@@ -9662,10 +9661,10 @@ export default function EditorClient({ project }: { project: Project }) {
 										</label>
 
 										<div className="flex flex-col gap-2 mb-3">
-											<label className="text-[10px] font-medium text-muted">
+											<label htmlFor="project-fps" className="text-[10px] font-medium text-muted">
 												Project FPS
 											</label>
-											<select
+											<select id="project-fps"
 												value={projectData.fps || 60}
 												onChange={(e) =>
 													commitState({
@@ -9685,14 +9684,14 @@ export default function EditorClient({ project }: { project: Project }) {
 
 										<div>
 											<div className="flex justify-between items-center mb-1">
-												<label className="text-[10px] font-medium text-muted">
+												<label htmlFor="auto-save-frequency" className="text-[10px] font-medium text-muted">
 													Auto-Save Frequency
 												</label>
 												<span className="text-[10px] text-muted">
 													{projectData.autoSaveInterval || 5} mins
 												</span>
 											</div>
-											<input
+											<input id="auto-save-frequency"
 												type="range"
 												min="1"
 												max="30"
@@ -9717,6 +9716,8 @@ export default function EditorClient({ project }: { project: Project }) {
 				{/* Horizontal Splitter */}
 				<div
 					className="h-1 cursor-row-resize hover:bg-indigo-500/50 bg-background shrink-0 z-40 transition-colors"
+					role="button"
+					tabIndex={0}
 					onMouseDown={(e) => {
 						e.preventDefault();
 						const startY = e.clientY;
@@ -9955,9 +9956,11 @@ export default function EditorClient({ project }: { project: Project }) {
 						<>
 							{/* Timeline Minimap */}
 
-							<div
-								className="h-10 bg-background border-b border-border relative w-full overflow-hidden cursor-crosshair group flex-shrink-0"
-								onMouseDown={(e) => {
+				<div
+					className="h-10 bg-background border-b border-border relative w-full overflow-hidden cursor-crosshair group flex-shrink-0"
+					role="button"
+					tabIndex={0}
+					onMouseDown={(e) => {
 									const rect = e.currentTarget.getBoundingClientRect();
 									const x = e.clientX - rect.left;
 									const targetFrame = Math.max(
@@ -10489,6 +10492,9 @@ export default function EditorClient({ project }: { project: Project }) {
 					className="fixed z-[100] bg-panel border border-border shadow-2xl rounded py-1 flex flex-col w-48 text-sm"
 					style={{ top: contextMenu.y, left: contextMenu.x }}
 					onClick={(e) => e.stopPropagation()}
+					onKeyDown={(e) => { if (e.key === "Escape") { setContextMenu(null); } }}
+					role="menu"
+					tabIndex={0}
 				>
 					<button
 						className="text-left px-4 py-1.5 hover:bg-glass text-foreground w-full"
@@ -10770,6 +10776,10 @@ export default function EditorClient({ project }: { project: Project }) {
 				<>
 					<div
 						className="fixed inset-0 z-40"
+						onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
+						role="button"
+						tabIndex={0}
+						aria-label="Close menu"
 						onClick={() => setTrackContextMenu(null)}
 						onContextMenu={(e: any) => {
 							e.preventDefault();
@@ -10906,6 +10916,9 @@ export default function EditorClient({ project }: { project: Project }) {
 										<div
 											className="w-full h-4 bg-background border border-border rounded text-[8px] text-muted flex items-center justify-center cursor-pointer hover:bg-glass hover:text-foreground transition-colors"
 											title="Add VST Plugin"
+											onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
+											role="button"
+											tabIndex={0}
 											onClick={() =>
 												toast.success(
 													"VST Plugin browser opened. Support for VST3/AU coming in Phase 19.b",
@@ -11253,10 +11266,10 @@ export default function EditorClient({ project }: { project: Project }) {
 								</div>
 
 								<div className="flex flex-col gap-1">
-									<label className="text-[10px] text-muted uppercase tracking-wide font-medium">
+									<label htmlFor="export-file-name" className="text-[10px] text-muted uppercase tracking-wide font-medium">
 										File Name
 									</label>
-									<input
+									<input id="export-file-name"
 										type="text"
 										defaultValue="lazynext-export"
 										className="bg-background border border-border/50 rounded text-sm text-foreground px-3 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner"
@@ -11264,10 +11277,10 @@ export default function EditorClient({ project }: { project: Project }) {
 								</div>
 								<div className="grid grid-cols-2 gap-3">
 									<div className="flex flex-col gap-1">
-										<label className="text-[10px] text-muted uppercase tracking-wide font-medium">
+										<label htmlFor="export-format" className="text-[10px] text-muted uppercase tracking-wide font-medium">
 											Format
 										</label>
-										<select className="bg-background border border-border/50 rounded text-xs text-foreground px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
+										<select id="export-format" className="bg-background border border-border/50 rounded text-xs text-foreground px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
 											<option value="mp4">MP4 (H.264)</option>
 											<option value="webm">WebM (VP9)</option>
 											<option value="mov">QuickTime (ProRes)</option>
@@ -11276,10 +11289,10 @@ export default function EditorClient({ project }: { project: Project }) {
 									</div>
 
 									<div className="flex flex-col gap-1">
-										<label className="text-[10px] text-muted uppercase tracking-wide font-medium">
+										<label htmlFor="export-resolution" className="text-[10px] text-muted uppercase tracking-wide font-medium">
 											Resolution
 										</label>
-										<select className="bg-background border border-border/50 rounded text-xs text-foreground px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
+										<select id="export-resolution" className="bg-background border border-border/50 rounded text-xs text-foreground px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
 											<option value="3840x2160">3840×2160 (4K)</option>
 											<option value="1920x1080">1920×1080 (HD)</option>
 											<option value="1280x720">1280×720</option>
@@ -11290,10 +11303,10 @@ export default function EditorClient({ project }: { project: Project }) {
 								</div>
 								<div className="grid grid-cols-2 gap-3">
 									<div className="flex flex-col gap-1">
-										<label className="text-[10px] text-muted uppercase tracking-wide font-medium">
+										<label htmlFor="export-frame-rate" className="text-[10px] text-muted uppercase tracking-wide font-medium">
 											Frame Rate
 										</label>
-										<select className="bg-background border border-border/50 rounded text-xs text-foreground px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
+										<select id="export-frame-rate" className="bg-background border border-border/50 rounded text-xs text-foreground px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
 											<option value="24">23.976</option>
 											<option value="25">25</option>
 											<option value="30">29.97</option>
@@ -11303,10 +11316,10 @@ export default function EditorClient({ project }: { project: Project }) {
 									</div>
 
 									<div className="flex flex-col gap-1">
-										<label className="text-[10px] text-muted uppercase tracking-wide font-medium">
+										<label htmlFor="export-quality" className="text-[10px] text-muted uppercase tracking-wide font-medium">
 											Quality
 										</label>
-										<select className="bg-background border border-border/50 rounded text-xs text-foreground px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
+										<select id="export-quality" className="bg-background border border-border/50 rounded text-xs text-foreground px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
 											<option value="best">Best (Highest)</option>
 											<option value="high">High</option>
 											<option value="medium">Medium</option>
@@ -11316,10 +11329,10 @@ export default function EditorClient({ project }: { project: Project }) {
 								</div>
 								<div className="grid grid-cols-2 gap-3">
 									<div className="flex flex-col gap-1">
-										<label className="text-[10px] text-muted uppercase tracking-wide font-medium">
+										<label htmlFor="export-audio-codec" className="text-[10px] text-muted uppercase tracking-wide font-medium">
 											Audio Codec
 										</label>
-										<select className="bg-background border border-border/50 rounded text-xs text-foreground px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
+										<select id="export-audio-codec" className="bg-background border border-border/50 rounded text-xs text-foreground px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
 											<option value="aac">AAC (256kbps)</option>
 											<option value="pcm">PCM (Uncompressed)</option>
 											<option value="none">No Audio</option>
@@ -11327,10 +11340,10 @@ export default function EditorClient({ project }: { project: Project }) {
 									</div>
 
 									<div className="flex flex-col gap-1">
-										<label className="text-[10px] text-muted uppercase tracking-wide font-medium">
+										<label htmlFor="export-color-space" className="text-[10px] text-muted uppercase tracking-wide font-medium">
 											Color Space
 										</label>
-										<select className="bg-background border border-border/50 rounded text-xs text-foreground px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
+										<select id="export-color-space" className="bg-background border border-border/50 rounded text-xs text-foreground px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
 											<option value="rec709">Rec. 709</option>
 											<option value="rec2020">Rec. 2020 (HDR)</option>
 											<option value="srgb">sRGB</option>
@@ -11357,9 +11370,9 @@ export default function EditorClient({ project }: { project: Project }) {
 								{/* Direct Cloud Export (Phase 185) */}
 
 								<div className="mt-4 pt-4 border-t border-border">
-									<label className="text-xs font-medium text-muted block mb-2">
+									<div className="text-xs font-medium text-muted block mb-2">
 										Publish To
-									</label>
+									</div>
 									<div className="grid grid-cols-2 gap-2">
 										<button
 											className="flex items-center justify-center gap-2 p-2 bg-[#ff0000]/10 border border-[#ff0000]/20 hover:bg-[#ff0000]/20 rounded transition-colors"
@@ -11450,7 +11463,7 @@ export default function EditorClient({ project }: { project: Project }) {
 									Distributed Render Farm (P2P Cloud)
 								</span>
 
-								<label className="relative inline-flex items-center cursor-pointer">
+								<label aria-label="Distributed Render Farm" className="relative inline-flex items-center cursor-pointer">
 									<input type="checkbox" className="sr-only peer" />
 									<div className="w-7 h-4 bg-glass peer-focus:outline-none focus-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-emerald-500"></div>
 								</label>
@@ -11702,10 +11715,15 @@ export default function EditorClient({ project }: { project: Project }) {
 					</div>
 				</div>
 			)}
+			{/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
 			{/* Phase 38: Holographic Asset Forge Modal */}
 			{isAssetForgeOpen && (
 				<div
 					className="absolute inset-0 z-[100] flex items-center justify-center bg-background/60 backdrop-blur-sm p-8"
+					onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
+					role="button"
+					tabIndex={0}
+					aria-label="Close"
 					onClick={() => setIsAssetForgeOpen(false)}
 				>
 					<div
@@ -11742,10 +11760,10 @@ export default function EditorClient({ project }: { project: Project }) {
 
 							<div className="space-y-4 flex-1">
 								<div>
-									<label className="text-[10px] text-muted uppercase font-semibold mb-2 block">
+									<label htmlFor="asset-forge-material-type" className="text-[10px] text-muted uppercase font-semibold mb-2 block">
 										Material Type
 									</label>
-									<select
+									<select id="asset-forge-material-type"
 										className="w-full bg-background border border-border rounded p-1.5 text-xs text-foreground"
 										value={assetForgeMaterial}
 										onChange={(e) => setAssetForgeMaterial(e.target.value)}
@@ -11759,10 +11777,10 @@ export default function EditorClient({ project }: { project: Project }) {
 								</div>
 
 								<div>
-									<label className="text-[10px] text-muted uppercase font-semibold mb-2 block">
+									<label htmlFor="asset-forge-generation-prompt" className="text-[10px] text-muted uppercase font-semibold mb-2 block">
 										Generation Prompt
 									</label>
-									<textarea
+									<textarea id="asset-forge-generation-prompt"
 										className="w-full bg-background border border-border rounded p-2 text-xs text-foreground resize-none h-24 focus:border-fuchsia-500 focus:outline-none"
 										placeholder="Describe the 3D asset to forge... (e.g. 'A floating cyberpunk city element with glowing pink accents')"
 									/>
@@ -11810,10 +11828,16 @@ export default function EditorClient({ project }: { project: Project }) {
 				<div
 					className="absolute inset-0 z-[100] flex items-start justify-center pt-[15vh] bg-background/60 backdrop-blur-sm"
 					onClick={() => setShowCommandPalette(false)}
+					onKeyDown={(e) => { if (e.key === "Escape") { setShowCommandPalette(false); } }}
+					role="button"
+					tabIndex={0}
 				>
-					<div
-						className="w-full max-w-2xl bg-background border border-border/50 rounded-xl shadow-2xl overflow-hidden flex flex-col"
+				{/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+				<div
+					className="w-full max-w-2xl bg-background border border-border/50 rounded-xl shadow-2xl overflow-hidden flex flex-col"
 						onClick={(e) => e.stopPropagation()}
+						onKeyDown={(e) => { if (e.key === "Escape") { setShowCommandPalette(false); } }}
+						role="dialog"
 					>
 						<div className="flex items-center px-4 py-3 border-b border-border">
 							<svg
@@ -11877,11 +11901,14 @@ export default function EditorClient({ project }: { project: Project }) {
 										cmd.desc.toLowerCase().includes(commandQuery.toLowerCase()),
 								)
 								.map((cmd, idx) => (
-									<div
-										key={idx}
-										className="flex items-center px-4 py-3 hover:bg-indigo-600/20 cursor-pointer border-b border-border/50 group"
-										onClick={() => setShowCommandPalette(false)}
-									>
+								<div
+									key={idx}
+									className="flex items-center px-4 py-3 hover:bg-indigo-600/20 cursor-pointer border-b border-border/50 group"
+									onClick={() => setShowCommandPalette(false)}
+									onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
+									role="button"
+									tabIndex={0}
+								>
 										<svg
 											className="w-5 h-5 text-muted mr-4 group-hover:text-indigo-400"
 											fill="none"
@@ -11992,6 +12019,7 @@ export default function EditorClient({ project }: { project: Project }) {
 										{clip.name}
 									</span>
 									{clip.thumbnail && (
+									/* eslint-disable-next-line @next/next/no-img-element */
 										<img
 											src={clip.thumbnail}
 											className="absolute inset-0 w-full h-full object-cover opacity-30"

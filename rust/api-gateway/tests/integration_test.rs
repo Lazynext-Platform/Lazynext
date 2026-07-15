@@ -390,9 +390,9 @@ mod http_integration {
 
     // ── Captcha Endpoint Tests ──────────────────────────────────────────
 
-    use sha2::{Digest, Sha256};
     use axum::extract::Json as AxumJson;
     use serde::{Deserialize, Serialize};
+    use sha2::{Digest, Sha256};
 
     fn check_pow_difficulty(hash: &[u8; 32], difficulty: u32) -> bool {
         let full_bytes = (difficulty / 8) as usize;
@@ -415,6 +415,7 @@ mod http_integration {
     // We can't import from the binary crate, so we duplicate the minimal logic.
 
     #[derive(Serialize)]
+    #[allow(dead_code)]
     struct TestPowChallenge {
         challenge_id: String,
         prefix: String,
@@ -429,22 +430,20 @@ mod http_integration {
     }
 
     #[derive(Deserialize)]
+    #[allow(dead_code)]
     struct TestTurnstileRequest {
         token: String,
     }
 
     static TEST_CHALLENGE_STORE: std::sync::LazyLock<
         std::sync::Mutex<std::collections::HashMap<String, (String, u32)>>,
-    > = std::sync::LazyLock::new(|| {
-        std::sync::Mutex::new(std::collections::HashMap::new())
-    });
+    > = std::sync::LazyLock::new(|| std::sync::Mutex::new(std::collections::HashMap::new()));
 
     async fn handle_challenge() -> Json<serde_json::Value> {
         let challenge_id = uuid::Uuid::new_v4().to_string();
         let prefix = uuid::Uuid::new_v4().to_string().replace('-', "");
         let difficulty: u32 = 16;
-        let expires_at =
-            (chrono::Utc::now() + chrono::Duration::minutes(5)).timestamp() as u64;
+        let expires_at = (chrono::Utc::now() + chrono::Duration::minutes(5)).timestamp() as u64;
 
         let mut store = TEST_CHALLENGE_STORE.lock().unwrap();
         store.insert(challenge_id.clone(), (prefix.clone(), difficulty));
@@ -661,7 +660,10 @@ mod http_integration {
             .send()
             .await
             .unwrap();
-        assert_eq!(resp1.json::<serde_json::Value>().await.unwrap()["success"], true);
+        assert_eq!(
+            resp1.json::<serde_json::Value>().await.unwrap()["success"],
+            true
+        );
 
         // Second use with same challenge — should fail (single-use)
         let resp2 = client
@@ -673,6 +675,9 @@ mod http_integration {
             .send()
             .await
             .unwrap();
-        assert_eq!(resp2.json::<serde_json::Value>().await.unwrap()["success"], false);
+        assert_eq!(
+            resp2.json::<serde_json::Value>().await.unwrap()["success"],
+            false
+        );
     }
 }

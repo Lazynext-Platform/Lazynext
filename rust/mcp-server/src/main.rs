@@ -59,8 +59,14 @@ async fn process_mcp_request(
         }
 
         // Optional proof-of-work captcha verification
-        if std::env::var("MCP_REQUIRE_POW").map(|v| v == "true").unwrap_or(false) {
-            let pow_token = req["params"].get("_pow_token").and_then(|k| k.as_str()).unwrap_or("");
+        if std::env::var("MCP_REQUIRE_POW")
+            .map(|v| v == "true")
+            .unwrap_or(false)
+        {
+            let pow_token = req["params"]
+                .get("_pow_token")
+                .and_then(|k| k.as_str())
+                .unwrap_or("");
             if pow_token.is_empty() {
                 return json!({
                     "jsonrpc": "2.0",

@@ -155,7 +155,7 @@ class TranscriptionService {
 
 			this.worker.postMessage({
 				type: "init",
-				modelId: model.huggingFaceId,
+				modelId: model.modalId,
 			} satisfies WorkerMessage);
 		});
 	}

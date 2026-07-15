@@ -180,3 +180,60 @@ export const assets = pgTable("assets", {
 }, (table) => [
   index("assets_project_id_idx").on(table.projectId),
 ]);
+
+// ── Two-Factor Authentication (TOTP) ─────────────────────────────
+
+export const twoFactor = pgTable("two_factor", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  secret: text("secret").notNull(),
+  backupCodes: text("backup_codes").notNull(),
+  enabled: boolean("enabled").notNull().default(false),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
+}, (table) => [
+  uniqueIndex("two_factor_user_id_idx").on(table.userId),
+]);
+
+// ── Passkeys / WebAuthn Credentials ──────────────────────────────
+
+export const passkey = pgTable("passkey", {
+  id: text("id").primaryKey(),
+  name: text("name"),
+  publicKey: text("public_key").notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  credentialId: text("credential_id").notNull().unique(),
+  counter: integer("counter").notNull().default(0),
+  deviceType: text("device_type").notNull(),
+  backedUp: boolean("backed_up").notNull().default(false),
+  transports: text("transports"),
+  createdAt: timestamp("created_at").notNull(),
+}, (table) => [
+  index("passkey_user_id_idx").on(table.userId),
+  index("passkey_credential_id_idx").on(table.credentialId),
+]);
+
+// ── OIDC SSO Provider Connections ────────────────────────────────
+
+export const oidcConnection = pgTable("oidc_connection", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  providerId: text("provider_id").notNull(),
+  issuer: text("issuer").notNull(),
+  domain: text("domain"),
+  clientId: text("client_id").notNull(),
+  clientSecret: text("client_secret").notNull(),
+  metadata: jsonb("metadata"),
+  enabled: boolean("enabled").notNull().default(true),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
+}, (table) => [
+  index("oidc_connection_user_id_idx").on(table.userId),
+  index("oidc_connection_provider_id_idx").on(table.providerId),
+]);

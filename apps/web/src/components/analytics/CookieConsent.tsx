@@ -7,13 +7,14 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 export function CookieConsent() {
 	const [visible, setVisible] = useState(false);
 
 	useEffect(() => {
+		/* eslint-disable react-hooks/set-state-in-effect */
 		const consented = localStorage.getItem("lazynext-cookie-consent");
 		if (!consented) setVisible(true);
 	}, []);

@@ -31,7 +31,7 @@ const webEnvSchema = z.object({
 	RESEND_API_KEY: z.string().optional(),
 	LLM_PROVIDER: z.enum(["gemini"]).optional(),
 	RUST_API_GATEWAY_URL: z.string().optional(),
-	STORAGE_PROVIDER: z.enum(["local", "azure", "s3"]).optional(),
+	STORAGE_PROVIDER: z.enum(["local"]).optional(),
 });
 
 export type WebEnv = z.infer<typeof webEnvSchema>;

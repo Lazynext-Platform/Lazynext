@@ -1,32 +1,30 @@
 # Production Deployment Runbook
 
 > **Platform**: Lazynext v1.0
-> **Infrastructure**: Azure Container Apps + PostgreSQL + Redis
+> **Infrastructure**: Docker Compose + PostgreSQL + Redis
 > **Last Updated**: 2026-07-01
 
 ## Pre-Deployment Checklist
 
 - [ ] All CI checks pass on `main` (GitHub Actions)
-- [ ] Docker images built and pushed to ACR (`lazynextacrproduction.azurecr.io`)
+- [ ] Docker images built and pushed to GHCR (`ghcr.io/lazynext-platform`)
 - [ ] `DATABASE_URL` points to production PostgreSQL
 - [ ] `BETTER_AUTH_SECRET` is a 64-char random hex string (not dev fallback)
 - [ ] Stripe webhook secret configured for production Stripe account
-- [ ] SSL certificates valid (Azure Managed Certificates)
+- [ ] SSL certificates valid (Let's Encrypt via Traefik)
 - [ ] Redis cache flushed if schema changed
 - [ ] Database migrations tested against staging
 
 ## Quick Deploy
 
 ```bash
-# 1. Login to Azure
-az login
+# 1. SSH into production Linode
+ssh lke-user@lazynext-prod
 
-# 2. Set subscription
-az account set --subscription "Lazynext Production"
-
-# 3. Run deployment (build + push + deploy)
-export AZURE_REGION=eastus2
-./scripts/deploy.sh
+# 2. Pull latest and deploy via Docker Compose
+git pull origin main
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d
 
 # Or trigger via GitHub Actions:
 # Go to https://github.com/Lazynext-Platform/Lazynext/actions/workflows/production.yml
@@ -38,70 +36,47 @@ export AZURE_REGION=eastus2
 ### Build & Push Images
 
 ```bash
-ACR="lazynextacrproduction.azurecr.io"
-az acr login --name lazynextacrproduction
+GHCR="ghcr.io/lazynext-platform"
+docker login ghcr.io -u $GHCR_USERNAME -p $GHCR_TOKEN
 
 # Build all 9 service images
-docker build -t $ACR/lazynext-web:latest -f apps/web/Dockerfile apps/web
-docker build -t $ACR/lazynext-api-gateway:latest -f rust/api-gateway/Dockerfile rust
-docker build -t $ACR/lazynext-ai-agents:latest -f services/ai-agents/Dockerfile services/ai-agents
-docker build -t $ACR/lazynext-render-service:latest -f services/render-service/Dockerfile services/render-service
-docker build -t $ACR/lazynext-pre-processing:latest -f services/pre-processing/Dockerfile services/pre-processing
-docker build -t $ACR/lazynext-generative-studio:latest -f services/generative-studio/Dockerfile services/generative-studio
-docker build -t $ACR/lazynext-collab-server:latest -f services/collab-server/Dockerfile services/collab-server
-docker build -t $ACR/lazynext-analytics-service:latest -f services/analytics-service/Dockerfile services/analytics-service
-docker build -t $ACR/lazynext-mcp:latest -f rust/mcp-server/Dockerfile .
-docker build -t $ACR/lazynext-migrate:latest -f Dockerfile.migrate .
+docker build -t $GHCR/lazynext-web:latest -f apps/web/Dockerfile apps/web
+docker build -t $GHCR/lazynext-api-gateway:latest -f rust/api-gateway/Dockerfile rust
+docker build -t $GHCR/lazynext-ai-agents:latest -f services/ai-agents/Dockerfile services/ai-agents
+docker build -t $GHCR/lazynext-render-service:latest -f services/render-service/Dockerfile services/render-service
+docker build -t $GHCR/lazynext-pre-processing:latest -f services/pre-processing/Dockerfile services/pre-processing
+docker build -t $GHCR/lazynext-generative-studio:latest -f services/generative-studio/Dockerfile services/generative-studio
+docker build -t $GHCR/lazynext-collab-server:latest -f services/collab-server/Dockerfile services/collab-server
+docker build -t $GHCR/lazynext-analytics-service:latest -f services/analytics-service/Dockerfile services/analytics-service
+docker build -t $GHCR/lazynext-mcp:latest -f rust/mcp-server/Dockerfile .
+docker build -t $GHCR/lazynext-migrate:latest -f Dockerfile.migrate .
 
 # Push all
 for img in web api-gateway ai-agents render-service pre-processing generative-studio collab-server analytics-service mcp migrate; do
-  docker push $ACR/lazynext-$img:latest
+  docker push $GHCR/lazynext-$img:latest
 done
 ```
 
 ### Run Migrations
 
 ```bash
-az containerapp job start \
-  --name db-migrate \
-  --resource-group lazynext-rg-production
+docker compose -f docker-compose.prod.yml run --rm migrate
 ```
 
 ### Deploy Services
 
 ```bash
-RG="lazynext-rg-production"
-ENV="lazynext-capps-env-prod"
-ACR="lazynextacrproduction"
+GHCR="ghcr.io/lazynext-platform"
 
-# API Gateway (deploy first — other services depend on it)
-az containerapp update \
-  --name lazynext-api-gateway-prod \
-  --resource-group $RG \
-  --image $ACR.azurecr.io/lazynext-api-gateway:latest || \
-az containerapp create \
-  --name lazynext-api-gateway-prod \
-  --resource-group $RG \
-  --environment $ENV \
-  --image $ACR.azurecr.io/lazynext-api-gateway:latest \
-  --target-port 8005 --ingress external \
-  --min-replicas 1 --max-replicas 4 \
-  --cpu 1.0 --memory 2.0Gi \
-  --env-vars DATABASE_URL=secretref:database-url BETTER_AUTH_SECRET=secretref:better-auth-secret
+# Pull latest images
+docker compose -f docker-compose.prod.yml pull
 
-# Web App
-az containerapp update \
-  --name lazynext-web-prod \
-  --resource-group $RG \
-  --image $ACR.azurecr.io/lazynext-web:latest
+# Deploy all services
+docker compose -f docker-compose.prod.yml up -d
 
-# Deploy remaining services
-for svc in ai-agents render-service pre-processing generative-studio collab-server analytics-service; do
-  az containerapp update \
-    --name "lazynext-${svc}-prod" \
-    --resource-group $RG \
-    --image "$ACR.azurecr.io/lazynext-${svc}:latest"
-done
+# Scale individual services as needed
+docker compose -f docker-compose.prod.yml up -d --scale api-gateway=4
+docker compose -f docker-compose.prod.yml up -d --scale web=3
 ```
 
 ## Verify Deployment
@@ -127,23 +102,15 @@ done
 ## Rollback Procedure
 
 ```bash
-# Find the previous working revision
-az containerapp revision list \
-  --name lazynext-web-prod \
-  --resource-group lazynext-rg-production \
-  --query "[?properties.active].name" -o tsv
+# Find the previous working images
+docker compose -f docker-compose.prod.yml images
 
-# Activate a specific revision
-az containerapp revision activate \
-  --name lazynext-web-prod \
-  --resource-group lazynext-rg-production \
-  --revision web-prod--abc123def
+# Rollback to pinned tags
+docker compose -f docker-compose.prod.yml pull lazynext-web:previous-stable
+docker compose -f docker-compose.prod.yml up -d lazynext-web
 
-# Monitor rollback
-az containerapp revision list \
-  --name lazynext-web-prod \
-  --resource-group lazynext-rg-production \
-  -o table
+# Check status
+docker compose -f docker-compose.prod.yml ps
 ```
 
 ## Incident Response
@@ -155,22 +122,22 @@ az containerapp revision list \
 | CPU > 80% | 2 | Scale up `--max-replicas`, check for infinite loops |
 | Memory > 85% | 2 | Restart service, increase `--memory`, check for leaks |
 | 5xx Rate > 2% | 1 | Check logs, rollback to last known good revision |
-| Replica Count = 0 | 1 | Verify container image exists in ACR, check env vars |
+| Replica Count = 0 | 1 | Verify container image exists in GHCR, check env vars |
 | SLO Burn Rate Critical | Critical | Immediate investigation, see `slo-burn-rate.md` |
-| Database Down | Critical | Check Azure PostgreSQL status, verify connection string |
+| Database Down | Critical | Check PostgreSQL (Docker) status, verify connection string |
 
 ### Emergency Contacts
 
 | Role | Contact |
 |------|---------|
-| On-Call Engineer | PagerDuty rotation |
+| On-Call Engineer | Grafana OnCall rotation |
 | Database Admin | dba@lazynext.ai |
 | Security Incident | security@lazynext.ai |
 
 ## Scheduled Maintenance
 
 ### Daily
-- Review Azure Monitor Alert history
+- Review Grafana Alert history
 - Check Grafana dashboards for anomalies
 - Verify backup completion (`scripts/backup-db.sh` logs)
 

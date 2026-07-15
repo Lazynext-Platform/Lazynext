@@ -10,11 +10,8 @@ export function EmptyView() {
 				className="text-muted-foreground/75 size-10"
 				strokeWidth={1}
 			/>
-			// eslint-disable-next-line react/jsx-no-comment-textnodes
 			<div className="flex flex-col gap-2 text-center">
-				// eslint-disable-next-line react/no-unescaped-entities //
-				eslint-disable-next-line react/no-unescaped-entities
-				<p className="text-lg font-medium ">It's empty here</p>
+				<p className="text-lg font-medium ">It&apos;s empty here</p>
 				<p className="text-muted-foreground text-sm text-balance">
 					Click an element on the timeline to edit its properties
 				</p>

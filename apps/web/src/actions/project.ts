@@ -47,7 +47,7 @@ async function gatewayFetch(
       return null;
     }
     return resp.json();
-  } catch (err) {
+  } catch {
     console.warn(
       `[API Gateway] ${options.method || "GET"} ${path} unreachable — using local state.`,
     );

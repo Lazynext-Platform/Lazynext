@@ -1,11 +1,5 @@
-# Kubernetes — AKS Deployment (Deprecated)
+# Infrastructure / K8s
 
-> ⚠️ **This directory is intentionally empty.** Lazynext has migrated from Azure Kubernetes Service to Azure Container Apps for compute orchestration.
+> This directory is intentionally empty. Lazynext uses Docker Compose and systemd on Linode. See `/infra/linode/` for deployment configs.
 
-The K8s manifests for production deployment are in the **root-level** `/k8s/` directory (29 base + overlay manifests using Kustomize).
-
-The Terraform AKS module (`infra/terraform/aks.tf.disabled`) was disabled due to Azure for Students subscription limitations (no Premium tier access). If AKS becomes available in the future, reinstate `aks.tf.disabled` and deploy the Kustomize manifests from `/k8s/`.
-
-See:
-- `/k8s/README.md` — Kustomize deployment guide
-- `/infra/terraform/containerapps.tf` — Active Container Apps configuration
+Kubernetes manifests live at `/k8s/` in repo root for an optional self-managed K8s deployment path.

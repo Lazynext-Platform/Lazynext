@@ -6,12 +6,12 @@ set -euo pipefail
 #
 # Usage:
 #   ./scripts/docker-build.sh                              # build for local testing
-#   ./scripts/docker-build.sh --push                       # build + push to ACR
+#   ./scripts/docker-build.sh --push                       # build + push to GHCR
 #   ./scripts/docker-build.sh --push --registry myreg.com  # build + push to custom registry
 #   ./scripts/docker-build.sh --gpu                        # build GPU-enabled variants
 #
 # Environment:
-#   DOCKER_REGISTRY    — Registry host (default: azure ACR or localhost)
+#   DOCKER_REGISTRY    — Registry host (default: GHCR or localhost)
 #   DOCKER_TAG         — Image tag (default: latest)
 #   BUILD_PARALLEL     — Run builds in parallel (default: 1)
 #   SKIP_RUST_BUILD    — Skip Rust service builds (default: 0)
@@ -31,9 +31,9 @@ for arg in "$@"; do
   esac
 done
 
-# Auto-detect ACR registry if logged in
+# Auto-detect GHCR registry
 if [[ -z "$REGISTRY" ]] && $PUSH; then
-  REGISTRY=$(az acr show --name lazynextacrproduction --query loginServer -o tsv 2>/dev/null || echo "")
+  REGISTRY="ghcr.io/lazynext-platform"
 fi
 
 green() { printf '\033[32m%s\033[0m\n' "$*"; }

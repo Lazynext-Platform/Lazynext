@@ -21,7 +21,6 @@ import {
 	Download,
 	Wand2,
 	Clock,
-	Film,
 	Type,
 	Music,
 	Layers,
@@ -375,11 +374,13 @@ export function CommandPalette() {
 
 	// Reset selection when query changes
 	useEffect(() => {
+		/* eslint-disable react-hooks/set-state-in-effect */
 		setSelectedIdx(0);
 	}, [query]);
 
 	// Focus input on open
 	useEffect(() => {
+		/* eslint-disable react-hooks/set-state-in-effect */
 		if (showCommandPalette) {
 			setQuery("");
 			// Small delay to ensure the DOM is ready
@@ -451,6 +452,10 @@ export function CommandPalette() {
 			<div
 				className="fixed inset-0 z-200 bg-black/60 backdrop-blur-sm"
 				onClick={() => setShowCommandPalette(false)}
+				onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
+				role="button"
+				tabIndex={0}
+				aria-label="Close command palette"
 			/>
 
 			{/* Palette */}
@@ -509,7 +514,7 @@ export function CommandPalette() {
 								<div className="px-3 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
 									{category}
 								</div>
-								{cmds.map((cmd, idx) => {
+								{cmds.map((cmd) => {
 									const globalIdx =
 										filteredCommands.indexOf(cmd);
 									const isSelected =

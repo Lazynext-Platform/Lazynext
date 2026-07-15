@@ -212,7 +212,7 @@ Export Flow:
   → [render-service] creates BullMQ job
   → [render-service] constructs FFMPEG filtergraph from CRDT timeline
   → [render-service] encodes video
-  → [render-service] uploads to Azure Blob Storage
+   → [render-service] uploads to local filesystem
   → SSE progress events → [Export UI progress bar]
   → Download URL returned
 ```
@@ -253,12 +253,12 @@ Export Flow:
 | `RENDER_SERVICE_URL` | string | Render service URL (default: `http://127.0.0.1:8003`) |
 | `NEXT_PUBLIC_RENDER_SERVICE_URL` | string | Client-accessible render service URL |
 | `BETTER_AUTH_SECRET` | string | JWT signing secret (required, 64 chars) |
-| `STRIPE_WEBHOOK_SECRET` | string | Stripe webhook signing secret |
+| `DODO_WEBHOOK_SECRET` | string | Dodo Payments webhook signing secret |
 
 ## Security Considerations
 
 - **API Gateway JWT**: Replace hardcoded tokens with proper HS256 JWT validation using `BETTER_AUTH_SECRET`. Tokens must be verified on every request.
-- **Stripe Webhook**: Implement HMAC signature verification using `STRIPE_WEBHOOK_SECRET`. Reject unverified payloads.
+- **Dodo Payments Webhook**: Implement HMAC signature verification using `DODO_WEBHOOK_SECRET`. Reject unverified payloads.
 - **CSRF Protection**: Add CSRF tokens on all state-changing endpoints (POST/PUT/DELETE). Verify on server.
 - **Rate Limiting**: Add token-bucket rate limiting on API gateway routes. Configurable per-route limits.
 - **User ID**: Decode `sub` claim from JWT instead of hardcoded `"mock_user_id"`. Validate user exists in DB.

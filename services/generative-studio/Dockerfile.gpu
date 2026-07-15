@@ -30,20 +30,18 @@ RUN pip3 install --no-cache-dir \
     torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 \
     && pip3 install --no-cache-dir xformers --index-url https://download.pytorch.org/whl/cu124
 
-# Install application + diffusers with CUDA support
+# Install application deps
 COPY requirements.txt .
-RUN pip3 install --no-cache-dir -r requirements.txt \
-    && pip3 install --no-cache-dir accelerate xformers
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 WORKDIR /app
 
 COPY src/ ./src/
 COPY requirements.txt .
 
-# Hugging Face model cache (mount persistent volume in production)
-ENV HF_HOME=/models/huggingface
-ENV TRANSFORMERS_CACHE=/models/huggingface
-RUN mkdir -p /models/huggingface /tmp/generative \
+# Modal model cache (mount persistent volume in production)
+ENV MODEL_CACHE_DIR=/models/modal
+RUN mkdir -p /models/modal /tmp/generative \
     && chmod 755 /tmp/generative
 
 ENV PYTHONUNBUFFERED=1

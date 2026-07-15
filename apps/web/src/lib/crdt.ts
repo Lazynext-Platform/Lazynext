@@ -37,7 +37,7 @@ export class CollaborationSync {
 	 * Broadcasts a state change to other connected peers in the room.
 	 * @param newProjectData — the updated project state to synchronize.
 	 */
-	public broadcastUpdate(newProjectData: any) {
+	public broadcastUpdate(_newProjectData: any) {
 		// Scaffold: Generate a Yjs delta and broadcast over WebRTC DataChannel
 		// console.log(`[Collab] Broadcasting delta to peers...`);
 	}

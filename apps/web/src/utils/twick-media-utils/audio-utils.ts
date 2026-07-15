@@ -127,7 +127,7 @@ export const hasAudio = async (src: string): Promise<boolean> => {
 		}
 
 		return true;
-	} catch (error) {
+	} catch {
 		// If decoding fails, assume no audio
 		return false;
 	}
@@ -340,7 +340,7 @@ const audioBufferToMp3 = async (buffer: AudioBuffer): Promise<Blob> => {
 
 		// Encode PCM to MP3 using lamejs
 		return await encodePcmToMp3(pcmBuffer);
-	} catch (error) {
+	} catch {
 		// Fallback to WAV if MP3 encoding fails
 		return audioBufferToWavBlob(buffer);
 	}

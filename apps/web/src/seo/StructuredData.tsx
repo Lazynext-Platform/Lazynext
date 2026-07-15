@@ -10,7 +10,6 @@
  * @module seo/StructuredData
  */
 
-import React from "react";
 
 interface OrganizationSchemaProps {
 	/** Base URL of the site. */

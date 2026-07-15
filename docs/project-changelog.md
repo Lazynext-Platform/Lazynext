@@ -9,7 +9,9 @@
 ## [Unreleased] — 2026-07-13 (Platform Optimization)
 
 ### Changed — AI Provider Stack
-- **Replicate → HF Spaces → Modal** (CogVideoX-2B): Text-to-video via Modal GPU endpoint. $30/mo free credits, 35s gen, 5 concurrent.
+- **Replicate → Modal** (SD Pipeline): Text-to-video via Modal GPU endpoint. $30/mo free credits, 35s gen, 3 concurrent.
+
+  Line 29: - Modal GPU endpoint deployed (SD Pipeline on A10G, $30/mo free)
 - **OpenAI + Anthropic → Gemini 3.5 Flash / 3.1 Pro**: Single provider with intelligent Flash/Pro switching.
 - **Gemini TTS → Edge TTS**: Free Microsoft Edge text-to-speech, 300+ voices, 100+ languages, unlimited.
 - **Coqui XTTS → F5-TTS**: Free MIT-licensed voice cloning, 300M params, CPU-capable (~2 min).
@@ -26,20 +28,19 @@
 ### Infrastructure
 - Deployed full stack to Linode 8GB (192.46.209.127): 10 microservices + PostgreSQL + Redis + MySQL + Caddy
 - Docker Compose analytics services (Umami, Matomo, MySQL)
-- Modal GPU endpoint deployed (CogVideoX-2B on A10G, $30/mo free)
+- Modal GPU endpoint deployed (SD Pipeline on A10G, $30/mo free)
 - Linode GPU ticket #27091699 created (pending approval)
-- All Docker/K8s/Terraform configs updated for current stack
+- All Docker/K8s configs updated for current stack
 
 ### Removed
-- FAL_KEY from all env files, Docker, K8s, Terraform
 - ElevenLabs from entire codebase
-- Replicate, Fal.ai, Together AI, RunPod, CosyVoice 3 — all removed
-- HF Spaces Gradio dependency — replaced by Modal REST API
+- Replicate, Together AI, RunPod, CosyVoice 3 — all removed
+- Legacy GPU providers migrated to Modal platform
 
 ## [Unreleased] — 2026-07-05 (Feature #36)
 
 ### Added
-- **Feature #36 — E2E Launch Readiness (All 7 Formats)**: Phase 0 verification (230+ tests, 0 failures across all 7 formats). Phase 1 core hardening: fixed `check_job_status` render artifact resolution, wired `process_intent` real LLM delegation path, fixed CLI asset_loader render truncation, wired GEMINI_API_KEY NL→CRDT pipeline, added VoiceInput component with Whisper + WebSpeech fallback. E2E demo script: NL→AI→Timeline→Export in 40s, ffprobe-verified. Phase 2-3 owner-gated (Azure deployment, developer certs, store listings).
+- **Feature #36 — E2E Launch Readiness (All 7 Formats)**: Phase 0 verification (230+ tests, 0 failures across all 7 formats). Phase 1 core hardening: fixed `check_job_status` render artifact resolution, wired `process_intent` real LLM delegation path, fixed CLI asset_loader render truncation, wired GEMINI_API_KEY NL→CRDT pipeline, added VoiceInput component with Whisper + WebSpeech fallback. E2E demo script: NL→AI→Timeline→Export in 40s, ffprobe-verified. Phase 2-3 owner-gated (Linode deployment, developer certs, store listings).
 
 ### Fixed
 - CLI render truncation on synthetic clip (was 0 frames → now 48 frames / 2.000s @ 49.5fps via cleared asset_loader)
@@ -54,7 +55,7 @@
 ## [0.9.0] — 2026-07-01 (Features #33–#34)
 - **Feature #33 — Production Hardening All 7 Formats**: Desktop (playback, AI prompt, import, export), CLI (real media, ingest), MCP (SSE transport, 14 tools), API Gateway (graceful shutdown, render dispatch, E2E tests), Mobile (native stubs, preview), Browser Extension (timeline preview), Web (WASM automation)
 - **Feature #34 — Real Video Playback Pipeline**: Real video decode via CliFfmpegLoader → GPU compositor → valid H.264 MP4 export. Verified with red pixel analysis. Desktop auto-decodes video textures for real preview. Web video-decoder utility (WebCodecs API wrapper).
-- **Infrastructure**: Jenkinsfile, GitLab CI (.gitlab-ci.yml), 14 GitHub Actions workflows, Docker (15 Dockerfiles, 8 compose files), Kubernetes (34 manifests), Terraform (16 .tf files), Ansible (6 roles), Monitoring (Prometheus, Grafana, Loki, Tempo, Alloy, 5 dashboards, 5 runbooks)
+- **Infrastructure**: Jenkinsfile, GitLab CI (.gitlab-ci.yml), 14 GitHub Actions workflows, Docker (15 Dockerfiles, 8 compose files), Kubernetes (34 manifests), Ansible (6 roles), Monitoring (Prometheus, Grafana, Loki, Tempo, Alloy, 5 dashboards, 5 runbooks)
 - **TensorFlow**: models.conf for Whisper, SAM2, RIFE, ESRGAN
 - **Database**: README, migration scripts, PostgreSQL alerts
 
@@ -87,7 +88,7 @@
 - **Feature #29 — Mobile AI Copilot**: verified AI Copilot chat screen (`AIChatScreen`) and `NativeBridge.sendChatMessage` already implemented. Fixed quick-action race condition where `setPrompt(action); handleProcessIntent()` read stale prompt (silent no-op); added pencil timer unmount cleanup.
 - **Feature #30 — Backend Depth (verified complete)**: real `kafkajs` producer (KAFKA_BROKERS, SASL/SSL, in-mem fallback); real `sqlx` PostgreSQL `save_state`/`load_state` in collab-server; real UDP-broadcast+TCP CRDT mesh in p2p-sync (326 lines).
 - **Feature #31 — Observability + E2E (verified complete)**: OpenTelemetry in all 6 services (`telemetry.py` 196 lines, 4 Node services with `tracing.ts`, Python generative-studio). Full E2E pipeline driver: `scripts/full-e2e.sh` (ingest→transcribe→edit→render→ffprobe via curl). Playwright E2E suite (`platform-e2e.spec.ts`, 160 lines) covers all 7 formats. Roadmap reconciled: all 31 features 🟢 Complete.
-- **Feature #32 — Remaining Production Gaps**: Closed all 7 remaining code-verified gaps. Gap #2: wired rotoscope/nerf/stems AI actions to real Python microservices via tokio::spawn; Gap #5: unblocked Azure Blob Storage uploads with graceful local fallback; Gap #1: implemented real silence trimming with clip marking and pre-processing dispatch; Gap #3: replaced HTTP 501 generative fill with Fal.ai + OpenCV inpainting; Gap #6: wired MCP export to API Gateway GPU compositor; Gap #4: wired avatar-prompt.tsx to real Edge TTS API; Gap #7: hardened JWT secret (panics in production if missing). All changes compile, test, and lint clean.
+- **Feature #32 — Remaining Production Gaps**: Closed all 7 remaining code-verified gaps. Gap #2: wired rotoscope/nerf/stems AI actions to real Python microservices via tokio::spawn; Gap #5: unblocked local filesystem uploads with graceful fallback; Gap #1: implemented real silence trimming with clip marking and pre-processing dispatch; Gap #3: replaced HTTP 501 generative fill with Modal + OpenCV inpainting; Gap #6: wired MCP export to API Gateway GPU compositor; Gap #4: wired avatar-prompt.tsx to real Edge TTS API; Gap #7: hardened JWT secret (panics in production if missing). All changes compile, test, and lint clean.
 
 ### Changed
 - Roadmap statuses brought in sync with `main` — features 10-14 flipped from 🔴 Not Started → 🟢 Complete; 15-17 added; 22-31 verified and marked complete.

@@ -8,7 +8,7 @@
 - Fix real bugs, don't restructure working code
 - Graceful degradation: when API keys absent, return honest errors with guidance, never fake data
 - Every fix must have a corresponding test case or verification step
-- Owner-gated phases (Azure deploy, developer certs, store listings) should be clearly marked and not worked on without approval
+- Owner-gated phases (Linode deploy, developer certs, store listings) should be clearly marked and not worked on without approval
 
 ## DON'T ❌
 - Do NOT deploy to production or create store listings without owner approval (Phase 2-3 owner-gated)

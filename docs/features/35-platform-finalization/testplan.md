@@ -13,7 +13,7 @@
 - [ ] Mobile NativeBridge calls real native modules (no mock fallback)
 - [ ] MCP server advertises 50+ tools matching the orchestrator
 - [ ] SAM2 rotoscoping uses ONNX model when available (falls back to rembg)
-- [ ] Whisper transcription tries TF Serving before OpenAI API
+- [ ] Whisper transcription tries TF Serving before Gemini API
 - [ ] Analytics events survive service restart (SQLite persistence)
 - [ ] Full E2E test passes against production
 - [ ] All 7 formats verified against production URLs
@@ -78,7 +78,7 @@
 |---|---|
 | **Category** | Happy Path |
 | **Precondition** | TF Serving running with whisper-large-v3 |
-| **Steps** | 1. Send audio file for transcription → 2. Check logs → 3. Verify TF Serving was called first → 4. Verify OpenAI not called |
+| **Steps** | 1. Send audio file for transcription → 2. Check logs → 3. Verify TF Serving was called first → 4. Verify Gemini not called |
 | **Expected Result** | Transcription uses local TF Serving when available |
 | **Status** | ⬜ Not Run |
 
@@ -109,7 +109,7 @@
 | # | Scenario | Expected Behavior |
 |---|---|---|
 | 1 | SAM2 ONNX model file missing | Falls back to rembg gracefully |
-| 2 | TF Serving unavailable | Falls back to OpenAI API |
+| 2 | TF Serving unavailable | Falls back to Gemini API |
 | 3 | API Gateway unreachable from MCP server | Returns error to MCP client |
 | 4 | Desktop app launched without API Gateway | AI prompt shows "Gateway unavailable" |
 | 5 | Mobile app without native module installed | Shows "Native engine unavailable" message |

@@ -178,10 +178,11 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 						<form onSubmit={handleSubmit} className="space-y-4">
 							{!isLogin && (
 								<div className="space-y-2">
-									<label className="text-sm font-medium text-white/80">Name</label>
-									<input
-										type="text"
-										value={name}
+								<label htmlFor="login-name" className="text-sm font-medium text-white/80">Name</label>
+								<input
+									id="login-name"
+									type="text"
+									value={name}
 										onChange={(e) => setName(e.target.value)}
 										required
 										autoComplete="name"
@@ -192,10 +193,11 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 							)}
 
 							<div className="space-y-2">
-								<label className="text-sm font-medium text-white/80">Email</label>
+								<label htmlFor="login-email" className="text-sm font-medium text-white/80">Email</label>
 								<div className="relative">
 									<Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
 									<input
+										id="login-email"
 										type="email"
 										value={email}
 										onChange={(e) => setEmail(e.target.value)}
@@ -209,12 +211,13 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 
 							{(!isLogin || loginMode === "password") && (
 								<div className="space-y-2">
-									<label className="text-sm font-medium text-white/80">Password</label>
-									<div className="relative">
-										<Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
-										<input
-											type="password"
-											value={password}
+								<label htmlFor="login-password" className="text-sm font-medium text-white/80">Password</label>
+								<div className="relative">
+									<Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+									<input
+										id="login-password"
+										type="password"
+										value={password}
 											onChange={(e) => setPassword(e.target.value)}
 											required
 											minLength={8}

@@ -61,8 +61,8 @@ All notable changes to the Lazynext project are documented in this file.
 ### Networking & Infrastructure
 
 - **Docker Compose**: Full platform orchestration with `lazynext-network` Docker bridge.
-- **Kubernetes**: Optional K8s manifests for GPU-accelerated workloads on AKS.
-- **Azure Terraform**: Infrastructure-as-code for Azure Container Apps and PostgreSQL Flexible Server with private VNet.
+- **Kubernetes**: Optional K8s manifests for GPU-accelerated workloads on self-managed K8s.
+- **Docker Compose on Linode**: Infrastructure-as-code for Docker Compose on Linode and PostgreSQL 17 (Docker).
 - **P2P sync**: libp2p mesh networking for decentralized peer-to-peer collaboration via `rust/p2p-sync`.
 
 ### Observability

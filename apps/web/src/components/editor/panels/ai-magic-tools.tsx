@@ -5,7 +5,7 @@
  * @module components/editor/panels/ai-magic-tools
  */
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Sparkles, Wand2, Video, Mic, Music, RefreshCw } from "lucide-react";
 import { useEditorState } from "../useEditorState";
 import { toast } from "sonner";

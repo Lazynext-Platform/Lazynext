@@ -7,14 +7,12 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
 	Send,
 	Bot,
 	User,
 	Loader2,
-	Video,
-	Settings,
 	Play,
 	Rewind,
 	FastForward,
@@ -290,12 +288,14 @@ export default function ModernEditorClient({ project }: { project: any }) {
 									{asset.type === "video" || asset.type === "image" ? (
 										<div className="w-full aspect-video bg-background rounded overflow-hidden mb-2 border border-border/50 relative">
 											{asset.type === "image" ? (
+											/* eslint-disable-next-line @next/next/no-img-element */
 												<img
 													src={asset.url}
 													alt={asset.name}
 													className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
 												/>
 											) : (
+												// eslint-disable-next-line jsx-a11y/media-has-caption
 												<video
 													src={asset.url}
 													className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"

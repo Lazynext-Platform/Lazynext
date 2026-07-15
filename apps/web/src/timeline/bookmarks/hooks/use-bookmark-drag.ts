@@ -68,6 +68,7 @@ export function useBookmarkDrag({
 	const isShiftHeldRef = useShiftKey();
 	const tracks = editor.scenes.getActiveScene().tracks;
 	const activeScene = editor.scenes.getActiveScene();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const bookmarks = activeScene?.bookmarks ?? [];
 	const playheadTime = editor.playback.getCurrentTime();
 	const duration = editor.timeline.getTotalDuration();

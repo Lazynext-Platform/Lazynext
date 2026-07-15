@@ -1765,6 +1765,22 @@ server.setRequestHandler(types_js_1.CallToolRequestSchema, async (request) => {
     const { name } = request.params;
     const args = (request.params.arguments ?? {});
     const tool = TOOLS.find((t) => t.name === name);
+    // Optional PoW captcha verification for MCP tool calls
+    if (process.env.MCP_REQUIRE_POW === "true") {
+        const { verifyPowToken } = await import("./captcha.js");
+        const powToken = args._pow_token || "";
+        if (!(await verifyPowToken(powToken))) {
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: "Proof-of-work verification required. Include a valid _pow_token in your tool arguments.",
+                    },
+                ],
+                isError: true,
+            };
+        }
+    }
     if (!tool) {
         return {
             content: [{ type: "text", text: `Unknown tool: ${name}` }],

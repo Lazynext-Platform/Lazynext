@@ -35,6 +35,7 @@
 		"typescript-eslint": "^8.62.1"
 	},
 	"dependencies": {
+		"react-turnstile": "^1.1.5",
 		"turbo": "^2.10.3"
 	}
 }

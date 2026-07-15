@@ -166,6 +166,7 @@ export class VideoFrameExtractor {
 
 		// Create load promise
 		state.loadPromise = new Promise<void>((resolve, reject) => {
+		// eslint-disable-next-line prefer-const
 			let timeoutId: number | undefined;
 
 			const cleanup = () => {

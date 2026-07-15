@@ -7,7 +7,6 @@
  * @module seo/SocialMeta
  */
 
-import React from "react";
 
 interface SocialMetaProps {
 	/** Page title for social sharing. */

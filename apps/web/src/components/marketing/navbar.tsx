@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Film, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import { ThemeToggle } from "../theme-toggle";
 
@@ -74,10 +74,14 @@ export function MarketingNavbar() {
 			{/* Mobile menu overlay */}
 			{mobileOpen && (
 				<div className="fixed inset-0 z-50 md:hidden">
-					<div
-						className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-						onClick={() => setMobileOpen(false)}
-					/>
+				<div
+					className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+					onClick={() => setMobileOpen(false)}
+					onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
+					role="button"
+					tabIndex={0}
+					aria-label="Close menu"
+				/>
 					<div className="absolute top-0 right-0 w-72 h-full bg-background border-l border-border shadow-2xl p-6 flex flex-col gap-6 animate-in slide-in-from-right duration-200">
 						<div className="flex items-center justify-between">
 							<span className="font-bold text-foreground text-lg">Menu</span>

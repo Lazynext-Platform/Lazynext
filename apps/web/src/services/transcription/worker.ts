@@ -1,14 +1,5 @@
-/** @module Transcription web worker running Whisper pipeline for speech recognition */
-import {
-	pipeline,
-	type AutomaticSpeechRecognitionPipeline,
-	type AutomaticSpeechRecognitionOutput,
-} from "@huggingface/transformers";
+/** @module Transcription web worker routing to Modal Whisper API */
 import type { TranscriptionSegment } from "@/transcription/types";
-import {
-	DEFAULT_CHUNK_LENGTH_SECONDS,
-	DEFAULT_STRIDE_SECONDS,
-} from "@/transcription/audio";
 
 export type WorkerMessage =
 	| { type: "init"; modelId: string }
@@ -28,10 +19,12 @@ export type WorkerResponse =
 	| { type: "transcribe-error"; error: string }
 	| { type: "cancelled" };
 
-let transcriber: AutomaticSpeechRecognitionPipeline | null = null;
+const MODAL_WHISPER_ENDPOINT =
+	process.env.NEXT_PUBLIC_MODAL_WHISPER_ENDPOINT ||
+	"https://lazynext--whisper.modal.run/transcribe";
+
 let cancelled = false;
-let lastReportedProgress = -1;
-const fileBytes = new Map<string, { loaded: number; total: number }>();
+let isInitialized = false;
 
 self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
 	const message = event.data;
@@ -53,67 +46,16 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
 	}
 };
 
-async function handleInit({ modelId }: { modelId: string }) {
-	lastReportedProgress = -1;
-	fileBytes.clear();
-
+async function handleInit({ modelId: _modelId }: { modelId: string }) {
 	try {
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-		transcriber = (await pipeline("automatic-speech-recognition", modelId, {
-			dtype: "q4",
-			device: "auto",
-			progress_callback: (progressInfo: {
-				status?: string;
-				file?: string;
-				loaded?: number;
-				total?: number;
-			}) => {
-				const file = progressInfo.file;
-				if (!file) return;
-
-				const loaded = progressInfo.loaded ?? 0;
-				const total = progressInfo.total ?? 0;
-
-				if (progressInfo.status === "progress" && total > 0) {
-					fileBytes.set(file, { loaded, total });
-				} else if (progressInfo.status === "done") {
-					const existing = fileBytes.get(file);
-					if (existing) {
-						fileBytes.set(file, {
-							loaded: existing.total,
-							total: existing.total,
-						});
-					}
-				}
-
-				// sum all bytes
-				let totalLoaded = 0;
-				let totalSize = 0;
-				for (const { loaded, total } of fileBytes.values()) {
-					totalLoaded += loaded;
-					totalSize += total;
-				}
-
-				if (totalSize === 0) return;
-
-				const overallProgress = (totalLoaded / totalSize) * 100;
-				const roundedProgress = Math.floor(overallProgress);
-
-				if (roundedProgress !== lastReportedProgress) {
-					lastReportedProgress = roundedProgress;
-					self.postMessage({
-						type: "init-progress",
-						progress: roundedProgress,
-					} satisfies WorkerResponse);
-				}
-			},
-		})) as unknown as AutomaticSpeechRecognitionPipeline;
-
+		// Whisper runs on Modal GPU — web worker just confirms readiness
+		self.postMessage({ type: "init-progress", progress: 100 } satisfies WorkerResponse);
 		self.postMessage({ type: "init-complete" } satisfies WorkerResponse);
+		isInitialized = true;
 	} catch (error) {
 		self.postMessage({
 			type: "init-error",
-			error: error instanceof Error ? error.message : "Failed to load model",
+			error: error instanceof Error ? error.message : "Failed to connect to Modal Whisper",
 		} satisfies WorkerResponse);
 	}
 }
@@ -125,10 +67,10 @@ async function handleTranscribe({
 	audio: Float32Array;
 	language: string;
 }) {
-	if (!transcriber) {
+	if (!isInitialized) {
 		self.postMessage({
 			type: "transcribe-error",
-			error: "Model not initialized",
+			error: "Worker not initialized",
 		} satisfies WorkerResponse);
 		return;
 	}
@@ -136,36 +78,45 @@ async function handleTranscribe({
 	cancelled = false;
 
 	try {
-		const rawResult = await transcriber(audio, {
-			chunk_length_s: DEFAULT_CHUNK_LENGTH_SECONDS,
-			stride_length_s: DEFAULT_STRIDE_SECONDS,
-			language: language === "auto" ? undefined : language,
-			return_timestamps: true,
+		// Convert Float32Array to base64 WAV for Modal API
+		const wavBuffer = float32ToWav(audio, 16000);
+		const base64Audio = arrayBufferToBase64(wavBuffer);
+
+		self.postMessage({ type: "transcribe-progress", progress: 30 } satisfies WorkerResponse);
+
+		const response = await fetch(MODAL_WHISPER_ENDPOINT, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				audio_base64: base64Audio,
+				language: language === "auto" ? undefined : language,
+			}),
 		});
 
 		if (cancelled) return;
 
-		const result: AutomaticSpeechRecognitionOutput = Array.isArray(rawResult)
-			? rawResult[0]
-			: rawResult;
-
-		const segments: TranscriptionSegment[] = [];
-
-		if (result.chunks) {
-			for (const chunk of result.chunks) {
-				if (chunk.timestamp && chunk.timestamp.length >= 2) {
-					segments.push({
-						text: chunk.text,
-						start: chunk.timestamp[0] ?? 0,
-						end: chunk.timestamp[1] ?? chunk.timestamp[0] ?? 0,
-					});
-				}
-			}
+		if (!response.ok) {
+			throw new Error(`Modal Whisper returned ${response.status}`);
 		}
+
+		self.postMessage({ type: "transcribe-progress", progress: 70 } satisfies WorkerResponse);
+
+		const data: {
+			text: string;
+			segments?: Array<{ text: string; start: number; end: number }>;
+		} = await response.json();
+
+		const segments: TranscriptionSegment[] = (data.segments || []).map(
+			(seg) => ({
+				text: seg.text,
+				start: seg.start,
+				end: seg.end,
+			}),
+		);
 
 		self.postMessage({
 			type: "transcribe-complete",
-			text: result.text,
+			text: data.text || "",
 			segments,
 		} satisfies WorkerResponse);
 	} catch (error) {
@@ -175,4 +126,55 @@ async function handleTranscribe({
 			error: error instanceof Error ? error.message : "Transcription failed",
 		} satisfies WorkerResponse);
 	}
+}
+
+function float32ToWav(samples: Float32Array, sampleRate: number): ArrayBuffer {
+	const numChannels = 1;
+	const bitsPerSample = 16;
+	const byteRate = (sampleRate * numChannels * bitsPerSample) / 8;
+	const blockAlign = (numChannels * bitsPerSample) / 8;
+	const dataSize = samples.length * (bitsPerSample / 8);
+	const bufferSize = 44 + dataSize;
+
+	const buffer = new ArrayBuffer(bufferSize);
+	const view = new DataView(buffer);
+
+	const writeString = (offset: number, str: string) => {
+		for (let i = 0; i < str.length; i++) {
+			view.setUint8(offset + i, str.charCodeAt(i));
+		}
+	};
+
+	writeString(0, "RIFF");
+	view.setUint32(4, bufferSize - 8, true);
+	writeString(8, "WAVE");
+	writeString(12, "fmt ");
+	view.setUint32(16, 16, true);
+	view.setUint16(20, 1, true);
+	view.setUint16(22, numChannels, true);
+	view.setUint32(24, sampleRate, true);
+	view.setUint32(28, byteRate, true);
+	view.setUint16(32, blockAlign, true);
+	view.setUint16(34, bitsPerSample, true);
+	writeString(36, "data");
+	view.setUint32(40, dataSize, true);
+
+	let offset = 44;
+	for (let i = 0; i < samples.length; i++) {
+		const sample = Math.max(-1, Math.min(1, samples[i]));
+		const intSample = sample < 0 ? sample * 32768 : sample * 32767;
+		view.setInt16(offset, intSample, true);
+		offset += 2;
+	}
+
+	return buffer;
+}
+
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+	const bytes = new Uint8Array(buffer);
+	let binary = "";
+	for (let i = 0; i < bytes.byteLength; i++) {
+		binary += String.fromCharCode(bytes[i]);
+	}
+	return btoa(binary);
 }

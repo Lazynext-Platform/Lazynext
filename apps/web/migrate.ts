@@ -11,7 +11,7 @@ async function main() {
   
   const isUnixSocket = connectionString?.includes("%2Fcloudsql");
   // Use SSL in production.
-  // Never disable certificate validation — use sslmode=require for Azure PostgreSQL.
+  // Never disable certificate validation — use sslmode=require for PostgreSQL (Docker).
   const pool = new Pool({
     connectionString,
     ssl: process.env.NODE_ENV === "production" && !isUnixSocket ? { rejectUnauthorized: true } : undefined,

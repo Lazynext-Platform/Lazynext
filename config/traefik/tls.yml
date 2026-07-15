@@ -11,9 +11,9 @@
 #     -out /etc/traefik/certs/lazynext.com.crt \
 #     -subj "/CN=*.lazynext.local"
 #
-# Azure Application Gateway:
-#   Upload PFX to Key Vault, reference in waf.tf ssl_certificate block.
-#   See infra/terraform/waf.tf for the commented HTTPS listener config.
+# Linode NodeBalancer:
+#   Upload PFX via Docker secrets, reference in docker-compose.yml cert block.
+#   See docker-compose.prod.yml for the HTTPS listener config.
 
 tls:
   stores:

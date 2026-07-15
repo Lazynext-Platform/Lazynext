@@ -151,10 +151,8 @@ kubectl exec -it -n lazynext <worker-pod-name> -- sh -c \
 
 ### Step 6 — Verify storage throughput
 ```bash
-# Check IOPS and throughput on the Azure Files share used for render scratch
-az monitor metrics list \
-  --resource /subscriptions/<sub>/resourceGroups/lazynext-prod/providers/Microsoft.Storage/storageAccounts/lazynextrender \
-  --metric Transactions --interval PT5M --start-time <incident-start> --end-time now
+# Check IOPS and throughput on the local NVMe/SSD storage used for render scratch
+ssh linode-instance "iostat -x 1 10"
 ```
 
 ### Step 7 — Check for noisy neighbor effects
@@ -224,15 +222,15 @@ kubectl describe node <node-name> | grep -A 10 "Conditions:"
    ```
 
 ### Tactic E — Storage bottleneck
-1. If Azure Files IOPS is saturated, reduce the number of concurrent render jobs per worker (increase `RENDER_JOB_CONCURRENCY` env var to lower parallelism on disk-heavy jobs).
-2. Switch high-throughput jobs to use the local ephemeral SSD for scratch, with final output written to Azure Files only at completion.
+1. If local storage IOPS is saturated, reduce the number of concurrent render jobs per worker (increase `RENDER_JOB_CONCURRENCY` env var to lower parallelism on disk-heavy jobs).
+2. Switch high-throughput jobs to use the local ephemeral SSD for scratch, with final output written to persistent storage only at completion.
 
 ## Escalation Policy
 
 | Level | Role | When to Escalate | Contact |
 |-------|------|-------------------|---------|
-| **L1** | On-call engineer (24/7 rotation) | First responder for all render alerts | PagerDuty → `render-oncall` |
-| **L2** | Media pipeline engineer | L1 cannot resolve within 30 minutes; FFMPEG codec issues, GPU shader regressions, or asset pipeline failures | PagerDuty → `media-oncall` |
+| **L1** | On-call engineer (24/7 rotation) | First responder for all render alerts | Grafana OnCall → `render-oncall` |
+| **L2** | Media pipeline engineer | L1 cannot resolve within 30 minutes; FFMPEG codec issues, GPU shader regressions, or asset pipeline failures | Grafana OnCall → `media-oncall` |
 | **L3** | Infrastructure lead + Render Service owner | L2 cannot resolve within 60 minutes; persistent OOM kills, storage bottleneck, or cluster capacity exhausted | Slack `#ops-leads` + `#render` → call |
 | **L4** | VP Engineering | L3 not reached within 15 minutes; user-facing impact (users cannot export) exceeds 1 hour | Phone tree |
 

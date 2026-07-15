@@ -14,7 +14,7 @@
 - **Duration**: Active
 - **Worked On**: Phases A–E. Desktop play/pause + AI prompt wiring, Mobile NativeBridge real UniFFI, MCP server 50+ tool expansion, SAM2 ONNX + local Whisper wiring, Analytics SQLite persistence.
 - **Stopped At**: Phase H (Docs & Cleanup) — roadmap updated, changelog created. Ready for commit.
-- **Blockers**: None. Phase F (Azure deployment) requires production credentials.
+- **Blockers**: None. Phase F (Linode deployment) requires production credentials.
 - **Next Steps**: Commit, push, merge to main, run full E2E test.
 
 ---
@@ -38,7 +38,7 @@
 
 ### Phase D — SAM2 ONNX + Local Whisper
 - **[Changed]**: `services/pre-processing/sam2_pipeline.py` — Added real SAM2 ONNX runtime path; `Sam2Pipeline` now tries ONNX model first (`/models/sam2_hiera_large.onnx`), then falls back to rembg u2net; separated into `_rotoscope_onnx()` and `_rotoscope_rembg()` methods; method tracking in results (`sam2_onnx` vs `rembg`)
-- **[Changed]**: `services/pre-processing/src/services/audio_analysis.py` — Added local TF Serving Whisper path; `transcribe_audio_service()` now tries `TF_SERVING_URL/v1/models/whisper:predict` first, then falls back to OpenAI Whisper API; returns `source` field in response (`tf_serving_whisper` vs `openai_whisper`)
+- **[Changed]**: `services/pre-processing/src/services/audio_analysis.py` — Added local TF Serving Whisper path; `transcribe_audio_service()` now tries `TF_SERVING_URL/v1/models/whisper:predict` first, then falls back to Gemini Whisper API; returns `source` field in response (`tf_serving_whisper` vs `gemini_whisper`)
 
 ### Phase E — Analytics Persistence
 - **[Changed]**: `services/analytics-service/src/index.ts` — Added `bun:sqlite` persistence layer; events written to `analytics.db` with WAL journal mode; `events` table with user_id, event_type, metadata (JSON), session_id, timestamp; indexed on user_id, event_type, timestamp; `persistEvent()` wrapper with graceful failure

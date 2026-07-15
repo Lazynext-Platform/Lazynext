@@ -1,5 +1,6 @@
 /**
- * Sign-in screen for mobile app.
+ * Sign-in screen for mobile app with email/password,
+ * magic link, and social OAuth (Google/Apple/Microsoft).
  *
  * @module screens/SignInScreen
  */
@@ -15,16 +16,18 @@ import {
 	KeyboardAvoidingView,
 	Platform,
 	ScrollView,
+	Linking,
 } from "react-native";
 import { useAuth } from "../contexts/AuthContext";
 
-/** Sign-in screen with email/password form and navigation to sign-up. */
 export function SignInScreen({ navigation }: { navigation: any }) {
-	const { signIn } = useAuth();
+	const { signIn, signInWithMagicLink, signInWithOAuth } = useAuth();
+	const [mode, setMode] = useState<"password" | "magicLink">("password");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
+	const [oauthLoading, setOauthLoading] = useState<string | null>(null);
 
 	const handleSignIn = async () => {
 		if (!email || !password) {
@@ -38,6 +41,38 @@ export function SignInScreen({ navigation }: { navigation: any }) {
 			setError(result.error.message || "Invalid email or password");
 		}
 		setLoading(false);
+	};
+
+	const handleMagicLink = async () => {
+		if (!email) {
+			setError("Please enter your email address");
+			return;
+		}
+		setLoading(true);
+		setError("");
+		const result = await signInWithMagicLink(email);
+		if (result.error) {
+			setError(result.error.message || "Could not send magic link");
+		} else {
+			setError("");
+			setPassword("");
+		}
+		setLoading(false);
+	};
+
+	const handleOAuth = async (provider: "google" | "apple" | "microsoft") => {
+		setOauthLoading(provider);
+		setError("");
+		try {
+			const result = await signInWithOAuth(provider);
+			if (result.error) {
+				setError(result.error.message || `Could not sign in with ${provider}`);
+			}
+		} catch {
+			setError(`Could not sign in with ${provider}`);
+		} finally {
+			setOauthLoading(null);
+		}
 	};
 
 	return (
@@ -68,34 +103,95 @@ export function SignInScreen({ navigation }: { navigation: any }) {
 						autoComplete="email"
 					/>
 
-					<Text style={styles.label}>Password</Text>
-					<TextInput
-						style={styles.input}
-						value={password}
-						onChangeText={setPassword}
-						placeholder="••••••••"
-						placeholderTextColor="#52525b"
-						secureTextEntry
-						autoComplete="password"
-					/>
-
-					<TouchableOpacity
-						onPress={() => navigation.navigate("ForgotPassword")}
-					>
-						<Text style={styles.link}>Forgot password?</Text>
-					</TouchableOpacity>
+					{mode === "password" && (
+						<>
+							<Text style={styles.label}>Password</Text>
+							<TextInput
+								style={styles.input}
+								value={password}
+								onChangeText={setPassword}
+								placeholder="••••••••"
+								placeholderTextColor="#52525b"
+								secureTextEntry
+								autoComplete="password"
+							/>
+							<TouchableOpacity
+								onPress={() => navigation.navigate("ForgotPassword")}
+							>
+								<Text style={styles.link}>Forgot password?</Text>
+							</TouchableOpacity>
+						</>
+					)}
 
 					<TouchableOpacity
 						style={[styles.button, loading && styles.buttonDisabled]}
-						onPress={handleSignIn}
+						onPress={mode === "password" ? handleSignIn : handleMagicLink}
 						disabled={loading}
 					>
 						{loading ? (
 							<ActivityIndicator color="#050505" />
 						) : (
-							<Text style={styles.buttonText}>Sign In</Text>
+							<Text style={styles.buttonText}>
+								{mode === "password" ? "Sign In" : "Send Magic Link"}
+							</Text>
 						)}
 					</TouchableOpacity>
+
+					<TouchableOpacity
+						onPress={() => {
+							setMode(mode === "password" ? "magicLink" : "password");
+							setError("");
+						}}
+					>
+						<Text style={styles.switchModeText}>
+							{mode === "password"
+								? "Sign in with magic link instead"
+								: "Sign in with password instead"}
+						</Text>
+					</TouchableOpacity>
+
+					{/* ── Social Auth Buttons ──────────────────── */}
+					<View style={styles.dividerRow}>
+						<View style={styles.divider} />
+						<Text style={styles.dividerText}>or continue with</Text>
+						<View style={styles.divider} />
+					</View>
+
+					<View style={styles.socialRow}>
+						<TouchableOpacity
+							style={styles.socialButton}
+							onPress={() => handleOAuth("google")}
+							disabled={oauthLoading !== null}
+						>
+							{oauthLoading === "google" ? (
+								<ActivityIndicator color="#fff" size="small" />
+							) : (
+								<Text style={styles.socialButtonText}>G</Text>
+							)}
+						</TouchableOpacity>
+						<TouchableOpacity
+							style={styles.socialButton}
+							onPress={() => handleOAuth("apple")}
+							disabled={oauthLoading !== null}
+						>
+							{oauthLoading === "apple" ? (
+								<ActivityIndicator color="#fff" size="small" />
+							) : (
+								<Text style={styles.socialButtonText}>A</Text>
+							)}
+						</TouchableOpacity>
+						<TouchableOpacity
+							style={styles.socialButton}
+							onPress={() => handleOAuth("microsoft")}
+							disabled={oauthLoading !== null}
+						>
+							{oauthLoading === "microsoft" ? (
+								<ActivityIndicator color="#fff" size="small" />
+							) : (
+								<Text style={styles.socialButtonText}>M</Text>
+							)}
+						</TouchableOpacity>
+					</View>
 
 					<TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
 						<Text style={styles.switchText}>
@@ -161,10 +257,53 @@ const styles = StyleSheet.create({
 	},
 	buttonDisabled: { opacity: 0.4 },
 	buttonText: { color: "#050505", fontWeight: "bold", fontSize: 16 },
+	switchModeText: {
+		color: "#00e5ff",
+		fontSize: 13,
+		textAlign: "center",
+		marginTop: 12,
+	},
 	switchText: {
 		color: "rgba(255,255,255,0.5)",
 		fontSize: 13,
 		textAlign: "center",
 		marginTop: 16,
+	},
+	dividerRow: {
+		flexDirection: "row",
+		alignItems: "center",
+		marginTop: 20,
+		marginBottom: 12,
+	},
+	divider: {
+		flex: 1,
+		height: 1,
+		backgroundColor: "rgba(255,255,255,0.1)",
+	},
+	dividerText: {
+		color: "rgba(255,255,255,0.3)",
+		fontSize: 11,
+		marginHorizontal: 12,
+		textTransform: "uppercase",
+	},
+	socialRow: {
+		flexDirection: "row",
+		justifyContent: "center",
+		gap: 12,
+	},
+	socialButton: {
+		backgroundColor: "rgba(255,255,255,0.08)",
+		width: 56,
+		height: 44,
+		borderRadius: 12,
+		alignItems: "center",
+		justifyContent: "center",
+		borderWidth: 1,
+		borderColor: "rgba(255,255,255,0.1)",
+	},
+	socialButtonText: {
+		color: "#fff",
+		fontSize: 16,
+		fontWeight: "700",
 	},
 });

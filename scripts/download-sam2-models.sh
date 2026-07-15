@@ -14,7 +14,7 @@
 set -e
 
 MODEL_DIR="${1:-models/sam2}"
-BASE_URL="https://huggingface.co/facebook/sam2-hiera-large/resolve/main"
+BASE_URL="https://modal.com/facebook/sam2-hiera-large/resolve/main"
 
 echo "🔽 Downloading SAM2 ONNX models..."
 echo "   Target directory: $MODEL_DIR"

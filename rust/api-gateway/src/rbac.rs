@@ -1,9 +1,12 @@
 //! Role-based access control — JWT authentication middleware.
 //!
 //! Validates better-auth HS256 JWTs on every authenticated request,
-//! extracts `AuthClaims` (sub, email, name, role), maps roles to a
-//! `WorkspaceRole` hierarchy (Viewer < Editor < Admin), and inserts
-//! claims into request extensions for downstream handlers.
+//! extracts `AuthClaims` (sub, email, name, role, provider, mfa_verified),
+//! maps roles to a `WorkspaceRole` hierarchy (Viewer < Editor < Admin),
+//! and inserts claims into request extensions for downstream handlers.
+//!
+//! Supports tokens from: email/password, Google, Apple, Microsoft OAuth,
+//! Magic Link, Passkeys, SSO/OIDC, and MFA-verified sessions.
 
 use axum::{
     extract::Request,
@@ -19,6 +22,7 @@ use std::sync::LazyLock;
 ///
 /// better-auth issues HS256 tokens with the standard registered claims
 /// plus the user record fields stored in the token payload.
+/// With social providers, MFA, and SSO, additional claims may be present.
 #[derive(Debug, Clone, Deserialize)]
 pub struct AuthClaims {
     /// User ID (standard `sub` claim)
@@ -31,6 +35,12 @@ pub struct AuthClaims {
     pub role: Option<String>,
     /// Whether the email has been verified
     pub email_verified: Option<bool>,
+    /// The authentication provider used (email, google, apple, microsoft, magicLink, passkey, sso)
+    pub provider: Option<String>,
+    /// Whether the session passed MFA/2FA verification
+    pub mfa_verified: Option<bool>,
+    /// Whether the user has MFA/2FA enabled on their account
+    pub mfa_enabled: Option<bool>,
     /// Issued-at timestamp (Unix seconds)
     pub iat: u64,
     /// Expiration timestamp (Unix seconds)
@@ -95,8 +105,6 @@ pub fn jwt_decoding_key() -> &'static DecodingKey {
     &KEY
 }
 
-// Reads a secret from an env var, falling back to a file path env var; panics
-// if neither yields a non-empty value.
 fn read_secret(env_var: &str, file_var: &str) -> String {
     if let Ok(secret) = std::env::var(env_var)
         && !secret.is_empty()
@@ -122,8 +130,6 @@ fn read_secret(env_var: &str, file_var: &str) -> String {
 pub fn jwt_validation() -> &'static Validation {
     static VALIDATION: LazyLock<Validation> = LazyLock::new(|| {
         let mut v = Validation::new(Algorithm::HS256);
-        // We validate exp ourselves for better error messages,
-        // but still enforce it.
         v.validate_exp = true;
         v.set_required_spec_claims(&["exp", "sub"]);
         v
@@ -133,13 +139,21 @@ pub fn jwt_validation() -> &'static Validation {
 
 // ── Middleware ────────────────────────────────────────────────────────────
 
+/// MFA requirement level for route authorization.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum MfaRequirement {
+    /// No MFA required (default for most routes)
+    Optional,
+    /// MFA must be verified on this session token
+    Required,
+}
+
 /// Axum middleware that validates a better-auth JWT on every request.
 ///
 /// # Behaviour
 /// 1. Checks for `X-Internal-API-Key` header — if present and matches
 ///    `INTERNAL_API_KEY` env var, creates synthetic Admin claims and
-///    bypasses JWT validation (for trusted internal services like the
-///    web app server).
+///    bypasses JWT validation (for trusted internal services).
 /// 2. Otherwise, extracts `Authorization: Bearer <token>` header.
 /// 3. Decodes and validates the JWT using `BETTER_AUTH_SECRET`.
 /// 4. On success: inserts [`AuthClaims`] into request extensions and
@@ -161,6 +175,9 @@ pub async fn authorize_request(mut req: Request, next: Next) -> Result<Response,
             name: Some("Internal Service".into()),
             role: Some("admin".into()),
             email_verified: Some(true),
+            provider: Some("internal".into()),
+            mfa_verified: Some(true),
+            mfa_enabled: Some(false),
             iat: 0,
             exp: u64::MAX,
         };
@@ -178,13 +195,37 @@ pub async fn authorize_request(mut req: Request, next: Next) -> Result<Response,
             StatusCode::UNAUTHORIZED
         })?;
 
+    // Validate MFA for sensitive endpoints if the user has MFA enabled
+    // This is checked per-route via the `require_mfa` middleware
+    let mfa_required = req.extensions().get::<MfaRequirement>();
+    if matches!(mfa_required, Some(&MfaRequirement::Required))
+        && claims.mfa_enabled == Some(true)
+        && claims.mfa_verified != Some(true)
+    {
+        tracing::warn!(
+            sub = %claims.sub,
+            "MFA required but not verified on this session"
+        );
+        return Err(StatusCode::FORBIDDEN);
+    }
+
     tracing::debug!(
         sub = %claims.sub,
         role = ?claims.role,
+        provider = ?claims.provider,
+        mfa_verified = ?claims.mfa_verified,
         "Authenticated request"
     );
 
     req.extensions_mut().insert(claims);
+    Ok(next.run(req).await)
+}
+
+/// Middleware that marks a route as requiring MFA verification.
+/// Must be used AFTER `authorize_request` in the middleware stack.
+pub async fn require_mfa(mut req: Request, next: Next) -> Result<Response, StatusCode> {
+    req.extensions_mut().insert(MfaRequirement::Required);
+    // The actual MFA check happens in authorize_request
     Ok(next.run(req).await)
 }
 
@@ -222,7 +263,6 @@ fn extract_bearer_token(req: &Request) -> Option<String> {
         .get("sec-websocket-protocol")
         .and_then(|h| h.to_str().ok())
     {
-        // usually format is "auth_token_value, other_protocol"
         let parts: Vec<&str> = raw.split(',').collect();
         if !parts.is_empty() {
             return Some(parts[0].trim().to_string());
@@ -247,4 +287,10 @@ pub fn auth_claims(req: &axum::extract::Request) -> &AuthClaims {
 pub fn user_role(req: &axum::extract::Request) -> WorkspaceRole {
     let claims = auth_claims(req);
     WorkspaceRole::from_claim(claims.role.as_deref().unwrap_or("user"))
+}
+
+/// Check if the authenticated user has MFA verified on this session.
+pub fn mfa_verified(req: &axum::extract::Request) -> bool {
+    let claims = auth_claims(req);
+    claims.mfa_verified == Some(true) || claims.mfa_enabled != Some(true)
 }

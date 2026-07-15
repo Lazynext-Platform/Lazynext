@@ -66,10 +66,15 @@ export interface SearchResult {
     score: number;
     /** The matched timeline item. */
     item: {
+        /** Unique item identifier. */
         id: string;
+        /** Item type discriminator. */
         type: string;
+        /** Display name of the item. */
         name: string;
+        /** Start time of the item. */
         start: number;
+        /** End time of the item. */
         end: number;
     };
     /** Surrounding context showing why the item matched. */

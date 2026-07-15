@@ -8,7 +8,7 @@
  * @module editor/avatar-prompt
  */
 
-import React, { useState } from "react";
+import { useState } from "react";
 
 const GEN_STUDIO_URL = process.env.NEXT_PUBLIC_GENERATIVE_STUDIO_URL || "http://127.0.0.1:8001";
 

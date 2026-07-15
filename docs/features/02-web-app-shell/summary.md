@@ -6,7 +6,7 @@
 
 ## What Was Built
 
-The Next.js 16 web application is the primary delivery surface for Lazynext. It provides: a full glassmorphism-styled editor UI with 45+ shadcn/ui components, a canvas-based timeline engine with track system, element placement, snapping, and zoom; Fabric.js preview canvas with 12 element types, overlays, transforms, and zoom guides; a command-pattern undo/redo system with 40+ commands supporting batch and preview; IndexedDB/OPFS storage with 31 sequential migrations; a render tree with 11 render node types; WASM compositor integration; authentication via better-auth with Upstash Redis rate limiting; Stripe payments and Resend email; 37 pages covering editor, dashboard, settings, and billing. The app runs at port 3000 and imports the Rust WASM bundle (`lazynext-wasm`).
+The Next.js 16 web application is the primary delivery surface for Lazynext. It provides: a full glassmorphism-styled editor UI with 45+ shadcn/ui components, a canvas-based timeline engine with track system, element placement, snapping, and zoom; Fabric.js preview canvas with 12 element types, overlays, transforms, and zoom guides; a command-pattern undo/redo system with 40+ commands supporting batch and preview; IndexedDB/OPFS storage with 31 sequential migrations; a render tree with 11 render node types; WASM compositor integration; authentication via better-auth with Upstash Redis rate limiting; Dodo Payments payments and Resend email; 37 pages covering editor, dashboard, settings, and billing. The app runs at port 3000 and imports the Rust WASM bundle (`lazynext-wasm`).
 
 ## Key Decisions
 

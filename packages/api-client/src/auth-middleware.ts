@@ -6,9 +6,13 @@
  * Falls back to a dev key ONLY when NODE_ENV is not "production".
  * In production, refuses to start if no secret is configured.
  *
+ * Supports tokens from: email/password, Google, Apple, Microsoft OAuth,
+ * Magic Link, Passkeys, SSO/OIDC, and MFA-verified sessions.
+ *
  * Exports:
  *   authMiddleware — Express middleware (applies to all routes)
  *   requireAuth — Express middleware (applies to specific routes)
+ *   requireMfa — Express middleware (requires MFA-verified session)
  *   optionalAuth — attaches user if token present, never rejects
  */
 
@@ -26,6 +30,14 @@ export interface AuthClaims {
 	name: string;
 	/** User role. */
 	role: string;
+	/** Whether the email has been verified. */
+	emailVerified?: boolean;
+	/** Auth provider used for this session. */
+	provider?: string;
+	/** Whether this session passed MFA/2FA verification. */
+	mfaVerified?: boolean;
+	/** Whether the user has MFA enabled on their account. */
+	mfaEnabled?: boolean;
 	/** Issued-at timestamp. */
 	iat: number;
 	/** Expiration timestamp. */
@@ -101,12 +113,6 @@ function verifyToken(token: string): AuthClaims | null {
  * Express middleware that requires a valid JWT bearer token.
  * Responds 401 if the token is missing, invalid, or expired.
  * On success, attaches `req.user` with decoded AuthClaims.
- *
- * @example
- * ```ts
- * app.use(authMiddleware); // protect all routes
- * app.get("/secure", authMiddleware, handler); // protect single route
- * ```
  */
 export function authMiddleware(
 	req: Request,
@@ -131,14 +137,6 @@ export function authMiddleware(
  * Express middleware that attaches user claims if a valid token is present,
  * but never rejects the request. Use for endpoints that support both
  * authenticated and anonymous access.
- *
- * @example
- * ```ts
- * app.get("/public-feed", optionalAuth, (req, res) => {
- *   if (req.user) res.json({ personalized: true });
- *   else res.json({ personalized: false });
- * });
- * ```
  */
 export function optionalAuth(
 	req: Request,
@@ -151,6 +149,31 @@ export function optionalAuth(
 		if (claims) {
 			req.user = claims;
 		}
+	}
+	next();
+}
+
+/**
+ * Express middleware that requires the user's session to be MFA-verified.
+ * Must be used AFTER authMiddleware in the middleware chain.
+ * Responds 403 if the user has MFA enabled but the session is not verified.
+ */
+export function requireMfa(
+	req: Request,
+	res: Response,
+	next: NextFunction,
+): void {
+	const user = req.user;
+	if (!user) {
+		res.status(401).json({ error: "Missing authorization token" });
+		return;
+	}
+	if (user.mfaEnabled && !user.mfaVerified) {
+		res.status(403).json({
+			error: "MFA verification required for this endpoint",
+			code: "MFA_REQUIRED",
+		});
+		return;
 	}
 	next();
 }

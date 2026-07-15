@@ -294,7 +294,7 @@ export class PoolManager {
 			max_lifetime: config.maxLifetimeSeconds || undefined,
 			prepare: false, // Better for connection pooling
 			onnotice: () => {}, // Suppress notice messages
-			debug: (connection, query, params) => {
+			debug: (_connection, _query, _params) => {
 				// Optional: integrate with OpenTelemetry here
 			},
 		};
@@ -528,7 +528,7 @@ export function getPoolManager(): PoolManager {
 		throw new Error("DATABASE_URL environment variable is required for pool manager");
 	}
 
-	// Skip real DB connection when using placeholder/skip URLs (dev/staging/Azure cold start)
+	// Skip real DB connection when using placeholder/skip URLs (dev/staging/Docker cold start)
 	const isSkipUrl = databaseUrl.includes("skip:skip@") || databaseUrl.includes("placeholder");
 	if (isSkipUrl) {
 		console.log("[PoolManager] DATABASE_URL is a placeholder — operating in degraded mode (no DB)");

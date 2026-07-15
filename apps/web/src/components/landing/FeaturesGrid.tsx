@@ -67,7 +67,7 @@ export function FeaturesGrid() {
 							<p className="text-[var(--text-muted)] dark:text-muted leading-relaxed mb-8">
 								Describe your edits via natural language. Our Python FastAPI
 								microservices route tasks across 18 specialized AI providers
-								(OpenAI, Anthropic, Gemini, DeepSeek) based on task complexity.
+								(Google Gemini, Ollama) based on task complexity.
 							</p>
 
 							{/* Example prompt */}
@@ -93,7 +93,7 @@ export function FeaturesGrid() {
 									(&#123;
 								</p>
 								<p className="pl-4 mt-1 text-[var(--text-primary)] dark:text-foreground">
-									prompt: "Rotoscope the subject"
+									prompt: &quot;Rotoscope the subject&quot;
 								</p>
 								<p>&#125;);</p>
 							</div>

@@ -63,7 +63,7 @@ Before writing anything in an app, ask: **"Does this belong in `rust/`?"**
 | `services/collab-server` | Rust Axum (port 8004): CRDT sync + WebRTC signaling |
 | `services/analytics-service` | Node.js Bun (port 8006): Event ingestion, Kafka |
 | `services/social-publish` | Node.js Bun (port 8007): Multi-platform publishing |
-| `infra/terraform/` | Azure infrastructure as code |
+| `infra/linode/` | Linode deployment (Docker Compose, systemd) |
 | `k8s/` | Kubernetes manifests (optional AKS) |
 | `monitoring/` | Prometheus, Grafana, Loki, Tempo, Alertmanager |
 | `scripts/` | Build, deploy, and automation scripts |
@@ -203,7 +203,7 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 **Format**: `<type>: <short description>`
 
-Include `Co-Authored-By: Claude <noreply@anthropic.com>` for AI-assisted commits. Include any lint exceptions in the commit body with reasoning.
+Include `Co-Authored-By: AI Assistant <noreply@lazynext.ai>` for AI-assisted commits. Include any lint exceptions in the commit body with reasoning.
 
 ---
 
@@ -331,7 +331,7 @@ cd services/render-service && bun test
 1. Create `services/<name>/` with a Dockerfile and health check endpoint (`GET /health`)
 2. Add to `docker-compose.yml` and `docker-compose.dev.yml`
 3. Register in `start-platform.sh`
-4. Add Terraform configuration in `infra/terraform/` for Azure deployment
+4. Update Docker Compose configuration in `infra/linode/` for deployment
 5. Add any new environment variables to `.env.example`
 6. Document in `docs/api-reference.md`
 

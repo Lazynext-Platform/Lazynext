@@ -15,10 +15,17 @@ lazynext/
 │   ├── crates/effects/      # 11 GPU effect shaders
 │   ├── crates/export/       # FFMPEG encoding pipeline
 │   ├── wasm/                # WASM bridge (all crates → JS)
-│   └── api-gateway/         # Axum REST gateway
+│   ├── api-gateway/         # Axum REST gateway
+│   ├── cli/                 # Headless CLI renderer
+│   ├── mcp-server/          # MCP protocol server
+│   ├── p2p-sync/            # libp2p mesh networking
+│   ├── plugin-api/          # Video effect plugin API
+│   ├── provenance/          # C2PA content authenticity
+│   ├── temporal-versioning/ # Branching & merging CRDT timelines
+│   └── tests/               # Integration tests
 ├── services/                # Microservices (Python FastAPI, Node.js Bun)
 ├── packages/                # Shared packages
-├── infra/                   # Infrastructure as code: Terraform, K8s manifests
+├── infra/                   # Infrastructure as code: Docker Compose, K8s manifests
 └── docs/                    # Mastery documentation framework
 ```
 

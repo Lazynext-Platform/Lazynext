@@ -4,7 +4,7 @@
 #
 # ALL 8 application services + infrastructure + monitoring in one file.
 # Designed for single-host production deployments.
-# For multi-host / Kubernetes, see k8s/ and terraform/ directories.
+# For multi-host / Kubernetes, see k8s/ directory.
 #
 # ⚠️  Before deploying:
 #   1. Copy .env.production.example → .env.production and fill in values
@@ -311,11 +311,10 @@ services:
       - OMP_NUM_THREADS=2
       - MKL_NUM_THREADS=2
       - NUMBA_CACHE_DIR=/tmp
-      - HF_HOME=/tmp/huggingface
-      - TRANSFORMERS_CACHE=/tmp/huggingface
+      - MODEL_CACHE_DIR=/tmp/modal
+      - MODEL_CACHE=/tmp/modal
       - MEDIA_BUCKET=${MEDIA_BUCKET:-lazynext-media-prod}
-      - STORAGE_PROVIDER=${STORAGE_PROVIDER:-azure}
-      - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING:-}
+      - STORAGE_PROVIDER=${STORAGE_PROVIDER:-local}
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318/v1/traces
       - OTEL_SERVICE_NAME=pre-processing
       - OTEL_ENABLED=true
@@ -365,10 +364,10 @@ services:
         window: 300s
     environment:
       - PYTHONUNBUFFERED=1
-      - HF_HOME=/tmp/huggingface
-      - TRANSFORMERS_CACHE=/tmp/huggingface
+      - MODEL_CACHE_DIR=/tmp/modal
+      - MODEL_CACHE=/tmp/modal
       - MEDIA_BUCKET=${MEDIA_BUCKET:-lazynext-media-prod}
-      - STORAGE_PROVIDER=${STORAGE_PROVIDER:-azure}
+      - STORAGE_PROVIDER=${STORAGE_PROVIDER:-local}
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318/v1/traces
       - OTEL_SERVICE_NAME=generative-studio
       - OTEL_ENABLED=true
@@ -476,8 +475,7 @@ services:
       - FFMPEG_PATH=/usr/bin/ffmpeg
       - FFPROBE_PATH=/usr/bin/ffprobe
       - MEDIA_BUCKET=${MEDIA_BUCKET:-lazynext-media-prod}
-      - STORAGE_PROVIDER=${STORAGE_PROVIDER:-azure}
-      - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING:-}
+      - STORAGE_PROVIDER=${STORAGE_PROVIDER:-local}
       - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/1
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318/v1/traces
       - OTEL_SERVICE_NAME=render-service
@@ -737,8 +735,7 @@ services:
       - NODE_ENV=production
       - NODE_OPTIONS=--max-old-space-size=1792
       - NEXT_TELEMETRY_DISABLED=1
-      - STORAGE_PROVIDER=${STORAGE_PROVIDER:-azure}
-      - AZURE_STORAGE_ACCOUNT=${AZURE_STORAGE_ACCOUNT:-lazynextmediaprod}
+      - STORAGE_PROVIDER=${STORAGE_PROVIDER:-local}
       - DATABASE_URL=${DATABASE_URL:-postgresql://lazynext:${DB_PASSWORD}@postgres:5432/lazynext}
       - BETTER_AUTH_SECRET_FILE=/run/secrets/better_auth_secret
       - BETTER_AUTH_URL=https://${DOMAIN:-lazynext.com}

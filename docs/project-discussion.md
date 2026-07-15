@@ -41,13 +41,13 @@ Professional video editing is bottlenecked by complex UI and manual workflows. E
 | **Web Framework** | Next.js, SvelteKit, Remix | Next.js 16 (App Router) | Industry standard, React 19 ecosystem, server components |
 | **Desktop Framework** | Electron, Tauri, GPUI | GPUI (Zed framework) | Native performance, wgpu rendering, Rust-native — no JS bridge needed |
 | **Mobile** | Flutter, Swift/Kotlin native | React Native + UniFFI | Code sharing with web, UniFFI for direct Rust bindings |
-| **Database** | PostgreSQL, SQLite, MongoDB | PostgreSQL 16 | Relational integrity, Drizzle ORM support, Azure managed service |
+| **Database** | PostgreSQL, SQLite, MongoDB | PostgreSQL 17 | Relational integrity, Drizzle ORM support, self-managed on Linode |
 | **State Management** | Redux, Zustand, CRDTs | CRDTs (LWW-Register + CmRDT) | Real-time collaboration requires conflict-free merging; CRDTs are the only correct choice |
 | **GPU** | Metal/DirectX directly, Vulkan, wgpu | wgpu | Cross-platform (WebGPU, Vulkan, Metal, DX12) from single codebase |
-| **AI Inference** | Self-hosted only, Cloud only | Pluggable (OpenAI, Anthropic, Gemini, Ollama) | Graceful degradation to local when API keys absent |
+| **AI Inference** | Self-hosted only, Cloud only | Google Gemini | Graceful degradation to local when API keys absent |
 | **Testing** | Jest, Vitest, Bun test | Bun test + Playwright | Bun is the package manager; native test runner avoids tool duplication |
 | **Build/Tooling** | npm, yarn, pnpm | Bun + Turbo | Speed, workspace support, WASM build integration |
-| **Deployment** | AWS, GCP, Azure, Vercel | Azure Container Apps + Terraform | Enterprise contracts, GPU node pools, private VNet |
+| **Deployment** | Cloud providers, Vercel, self-managed | Linode Docker Compose | Self-managed, cost-effective, full control |
 
 ## Architecture Discussion
 
@@ -83,7 +83,7 @@ lazynext/
 ├── services/                # Backend microservices (Python, Node.js, Rust)
 ├── packages/                # Shared packages (api-client)
 ├── plugins/                 # Plugin SDK and examples
-├── terraform/               # Infrastructure as Code
+├── infra/                   # Infrastructure deployment scripts
 ├── k8s/                     # Kubernetes manifests
 ├── monitoring/              # Prometheus, Grafana, Loki, Tempo
 ├── scripts/                 # Build and automation scripts
@@ -104,7 +104,7 @@ lazynext/
 - REST API Gateway with JWT auth
 - Headless CLI renderer
 - MCP server for AI agent integration
-- Terraform-managed Azure infrastructure with CI/CD
+- Linode Docker Compose deployment with CI/CD
 
 ### Out of Scope (v1.0 / MVP)
 
@@ -188,7 +188,7 @@ lazynext/
 - Rust chosen as core language specifically for WASM compilation target and CRDT implementation safety
 - GPUI chosen over Electron specifically to avoid JS bridge overhead for GPU compositing
 - CRDTs chosen over OT after reviewing academic literature on convergence guarantees
-- Azure chosen over AWS/GCP due to existing enterprise contracts and GPU node pool availability
+- Linode chosen for deployment due to cost-effectiveness, full server control, and simplicity.
 
 ## Open Questions
 
@@ -197,7 +197,7 @@ lazynext/
 - [x] CRDTs or OT for collaboration? → Decided: CRDTs for correct convergence
 - [x] Monorepo or multi-repo? → Decided: Monorepo with strict layer separation
 - [x] What database? → Decided: PostgreSQL via Drizzle ORM
-- [x] What deployment platform? → Decided: Azure Container Apps via Terraform
+- [x] What deployment platform? → Decided: Linode Docker Compose
 
 ## Decisions Log
 
@@ -211,7 +211,7 @@ lazynext/
 | 2025-Q3 | GPUI for desktop shell | Native performance, no JS bridge overhead |
 | 2025-Q3 | Pluggable LLM providers | Graceful degradation to local when API keys absent |
 | 2025-Q4 | C2PA for content provenance | Industry standard for content authenticity |
-| 2026-Q1 | Azure Container Apps for deployment | Enterprise contracts, GPU node pools |
+| 2026-Q1 | Linode Docker Compose for deployment | Cost-effective, full server control |
 
 ## Discussion Complete ✅
 

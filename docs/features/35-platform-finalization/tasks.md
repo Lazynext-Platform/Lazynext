@@ -52,10 +52,10 @@
 
 ## Phase F — Production Deployment (Gap F8)
 
-> Requires Azure subscription and credentials.
+> Requires Linode account and credentials.
 
-- [ ] **F.1** — Run `terraform plan` and `terraform apply`
-- [ ] **F.2** — Deploy all 7 microservices to Azure
+- [ ] **F.1** — Run `./infra/linode/deploy.sh` to deploy
+- [ ] **F.2** — Deploy all 7 microservices to Linode
 - [ ] **F.3** — Run `scripts/full-e2e.sh` against production URLs
 - [ ] **F.4** — Verify all 7 formats against production
 - [ ] 📍 **Checkpoint F** — Full E2E test passes
@@ -86,7 +86,7 @@
 
 ## Ship 🚀
 
-- [x] All phases complete (code-wise; Phase F needs Azure)
+- [x] All phases complete (code-wise; Phase F needs Linode)
 - [ ] Final commit with descriptive message
 - [ ] Push to feature branch
 - [ ] Human approval received

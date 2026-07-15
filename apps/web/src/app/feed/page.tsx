@@ -6,7 +6,7 @@
 
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { VideoPlayer } from "@/components/feed/VideoPlayer";
 import Link from "next/link";
 import { ArrowLeft, Compass, Video as VideoIcon, Sparkles } from "lucide-react";
@@ -139,6 +139,7 @@ export default function FeedPage() {
 				))}
 			</div>
 
+		{/* eslint-disable-next-line react/no-unknown-property */}
 			<style jsx global>{`
 				.hide-scrollbar::-webkit-scrollbar {
 					display: none;

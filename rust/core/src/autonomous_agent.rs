@@ -4,7 +4,7 @@
 //! This agent runs as a persistent background task that watches the NLE timeline
 //! for changes, periodically analyzes the composition, and either suggests or
 //! automatically executes improvements. It uses the same LLM providers as the
-//! Lazynext AI Agent Copilot (OpenAI, Anthropic, Gemini) with local fallback.
+//! Lazynext AI Agent Copilot (Google Gemini) with local fallback.
 //!
 //! # Modes
 //!
@@ -99,7 +99,7 @@ pub enum SuggestionCategory {
 /// Configuration for the background autonomous agent.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentConfig {
-    /// AI provider to use (e.g., "openai", "anthropic", "local").
+    /// AI provider to use (e.g., "gemini", "local").
     pub provider: String,
     /// Operating mode for the autonomous agent.
     pub mode: AgentMode,

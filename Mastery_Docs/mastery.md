@@ -1093,7 +1093,7 @@ project-root/
 | **ORM/Data** | [e.g., SQLAlchemy, Prisma, None] | [version] | [reason] |
 | **Testing** | [e.g., pytest, Jest, cargo test] | [version] | [reason] |
 | **Build** | [e.g., webpack, cargo, make] | [version] | [reason] |
-| **Deployment** | [e.g., Docker, Vercel, AWS, None yet] | — | [reason] |
+| **Deployment** | [e.g., Docker, Linode, Vercel, None yet] | — | [reason] |
 
 <!-- Add or remove rows as needed for your stack -->
 

@@ -15,7 +15,7 @@ Welcome to the Lazynext documentation. Lazynext is an enterprise-grade, multi-pl
 | Document | Description |
 |----------|-------------|
 | [**User Guide**](user-guide.md) | Quick start, AI Copilot commands, timeline basics, export formats, collaboration, keyboard shortcuts, FAQ |
-| [**Project Roadmap**](project-roadmap.md) | Current feature status and progress (36/36 complete) |
+| [**Project Roadmap**](project-roadmap.md) | Current feature status and progress (37/37 complete) |
 
 ---
 
@@ -73,7 +73,7 @@ Active & completed features are documented under `docs/features/`:
 | [#34 — Real Video Playback](features/34-real-video-playback-pipeline/architecture.md) | Video decode → GPU compositor → H.264 export |
 | [#36 — E2E Launch Readiness](features/36-e2e-launch-readiness/architecture.md) | Final audit, 8 bug fixes, all 7 formats verified |
 
-See `docs/features/` for the full list of 36 features.
+See `docs/features/` for the full list of 37 features.
 
 ---
 

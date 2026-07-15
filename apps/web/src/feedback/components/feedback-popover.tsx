@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/immutability, react-hooks/refs, react-hooks/incompatible-library, react-hooks/exhaustive-deps */
 /** @module Feedback popover with compose and history views */
 
 import { useState, useRef } from "react";
@@ -217,6 +218,7 @@ function FeedbackPopoverContent({ onClose }: { onClose: () => void }) {
 						)}
 						<div className="flex gap-2">
 							{!form.watch("message").trim() && (
+								/* eslint-disable-next-line react-hooks/incompatible-library */
 								<Button
 									type="button"
 									variant="outline"

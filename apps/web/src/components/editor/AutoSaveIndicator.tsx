@@ -21,7 +21,7 @@ interface AutoSaveIndicatorProps {
 export function AutoSaveIndicator({ className }: AutoSaveIndicatorProps) {
 	const [status, setStatus] = useState<SaveStatus>("saved");
 
-	const checkOnline = useCallback(() => {
+	const _checkOnline = useCallback(() => {
 		if (typeof navigator === "undefined") return true;
 		return navigator.onLine;
 	}, []);

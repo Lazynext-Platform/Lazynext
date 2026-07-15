@@ -181,7 +181,8 @@ export const Canvas: React.FC<CanvasProps> = ({
 			>
 				{/* The WASM engine renders into lazynext-canvas (managed by wasm-player) */}
 				{/* This div reserves the correct aspect ratio space */}
-				<div
+		{/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+		<div
 					style={{
 						width: `${Math.min(960, width)}px`,
 						aspectRatio: `${width} / ${height}`,

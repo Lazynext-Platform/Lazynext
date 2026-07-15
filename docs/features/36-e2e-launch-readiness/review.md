@@ -62,7 +62,7 @@ cargo check -p neural_engine → 0 errors
 ## Remaining (Owner-Gated)
 1. Add `GEMINI_API_KEY` for real AI editing demo
 2. Apple Developer cert for signed desktop build
-3. Azure login for production deploy (Feature #35 Phase F)
+3. Linode SSH for production deploy (Feature #35 Phase F)
 4. Chrome Web Store developer account
 5. TestFlight / Google Play developer accounts
 6. Merge `feature/36-e2e-launch-readiness` → `main`

@@ -4,8 +4,6 @@
  * @module components/editor/TopToolbar
  */
 
-import React from "react";
-
 // Phase 52: Extracting Top Navigation
 export function TopToolbar() {
 	return (

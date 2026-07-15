@@ -7,8 +7,6 @@
 
 "use client";
 
-import React from "react";
-
 interface FarmNode {
 	/** Node identifier. */
 	node: string;

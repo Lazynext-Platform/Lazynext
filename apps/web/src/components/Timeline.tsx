@@ -1,5 +1,5 @@
 /** @module Timeline component with scrubber playhead and clip tracks */
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 
 // Types mapped from Rust's lazynext_core::engine
 interface Clip {
@@ -14,7 +14,7 @@ interface Clip {
 }
 
 export const Timeline: React.FC = () => {
-  const [clips, setClips] = useState<Clip[]>([
+  const [clips, _setClips] = useState<Clip[]>([
     { id: 'clip_1', name: 'Intro Sequence', start: 0, end: 120 },
     { id: 'clip_2', name: 'Main Action', start: 120, end: 360 },
   ]);
@@ -53,6 +53,21 @@ export const Timeline: React.FC = () => {
         ref={timelineRef}
         onMouseDown={handleScrub}
         onMouseMove={handleMouseMove}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            setCurrentFrame((f) => Math.max(0, f - 1));
+          } else if (e.key === "ArrowRight") {
+            e.preventDefault();
+            setCurrentFrame((f) => Math.min(500, f + 1));
+          }
+        }}
+        role="slider"
+        tabIndex={0}
+        aria-label="Timeline scrubber"
+        aria-valuenow={currentFrame}
+        aria-valuemin={0}
+        aria-valuemax={500}
         style={{ 
           position: 'relative', 
           flex: 1, 

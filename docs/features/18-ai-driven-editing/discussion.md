@@ -24,7 +24,7 @@ Make the Lazynext AI Agent Copilot's natural-language commands reliably produce 
 
 ### What already works
 
-- **NL decomposition**: `services/ai-agents/src/orchestrator.ts` (1593 lines) decomposes natural-language prompts into structured orchestration plans with tool calls. Routes to OpenAI/Anthropic/Ollama automatically. Falls back to rule-based decomposition when LLMs are unavailable.
+- **NL decomposition**: `services/ai-agents/src/orchestrator.ts` (1593 lines) decomposes natural-language prompts into structured orchestration plans with tool calls. Routes to Gemini/Ollama automatically. Falls back to rule-based decomposition when LLMs are unavailable.
 - **Tool catalog**: 50+ named editing operations are listed in the orchestrator's system prompt (transcribe, generate_broll, apply_color_grade, clean_audio, add_viral_captions, edit_via_transcript, remove_filler_words, diarize_speakers, auto_reframe, apply_color_match, 3D LUT, generate_proxies, apply_speed_ramp, perform_trim_edit, etc.).
 - **MCP integration**: `services/ai-agents/src/mcp.ts` wraps Playwright, Firecrawl, and Context7 MCP clients — the AI agent can invoke external tools during decomposition.
 - **Web editor AI chat surface**: wired to the real API endpoint (Feature #15).
@@ -62,7 +62,7 @@ Make the Lazynext AI Agent Copilot's natural-language commands reliably produce 
 
 - Desktop/mobile AI chat surfaces (defer to #07 / #08 depth work)
 - New AI capabilities (voice cloning, NeRF, particle systems) — this feature is about making the *existing* advertised features actually work
-- LLM provider changes (OpenAI/Anthropic/Gemini/Ollama switching is already wired)
+- LLM provider changes (Gemini/Ollama switching is already wired)
 
 ## Discussion Complete ✅
 

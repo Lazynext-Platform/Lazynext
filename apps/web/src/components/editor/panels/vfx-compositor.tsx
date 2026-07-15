@@ -5,11 +5,10 @@
  * @module components/editor/panels/vfx-compositor
  */
 
-import React from "react";
-import { Layers, Crosshair, Sparkles, Film } from "lucide-react";
+import { Crosshair, Sparkles, Film } from "lucide-react";
 
 export function VFXCompositor({
-	updateSelectedClip,
+	updateSelectedClip: _updateSelectedClip,
 	selectedClip,
 }: {
 	updateSelectedClip: any;

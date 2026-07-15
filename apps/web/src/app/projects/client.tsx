@@ -16,7 +16,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { KeyboardEvent, MouseEvent } from "react";
+import type { KeyboardEvent } from "react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { EditorCore } from "@/core";

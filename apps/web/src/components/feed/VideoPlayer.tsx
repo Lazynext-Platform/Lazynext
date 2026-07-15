@@ -1,7 +1,7 @@
 "use client";
 /** @module Video player component for the discover feed with remix action */
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
 	Heart,
 	MessageCircle,
@@ -46,6 +46,7 @@ export function VideoPlayer({
 	const [isLiked, setIsLiked] = useState(false);
 
 	useEffect(() => {
+		/* eslint-disable react-hooks/set-state-in-effect */
 		if (isActive) {
 			videoRef.current
 				?.play()

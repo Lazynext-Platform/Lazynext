@@ -68,12 +68,12 @@ export default function ProfilePage() {
 
 						<div className="space-y-6">
 							<div>
-								<label className="text-sm text-[var(--text-muted)] mb-2 flex items-center gap-2"><User className="w-4 h-4"/> Full Name</label>
-								<input type="text" defaultValue={profile.name} className="w-full bg-[var(--bg-main)] border border-[var(--border-glass)] rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-primary)]/50 transition-colors" />
+								<label htmlFor="profile-full-name" className="text-sm text-[var(--text-muted)] mb-2 flex items-center gap-2"><User className="w-4 h-4"/> Full Name</label>
+								<input id="profile-full-name" type="text" defaultValue={profile.name} className="w-full bg-[var(--bg-main)] border border-[var(--border-glass)] rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-primary)]/50 transition-colors" />
 							</div>
 							<div>
-								<label className="text-sm text-[var(--text-muted)] mb-2 flex items-center gap-2"><Mail className="w-4 h-4"/> Email Address</label>
-								<input type="email" defaultValue={profile.email} disabled className="w-full bg-[var(--bg-main)] border border-[var(--border-glass)] rounded-xl px-4 py-3 text-[var(--text-muted)] opacity-50 cursor-not-allowed" />
+								<label htmlFor="profile-email" className="text-sm text-[var(--text-muted)] mb-2 flex items-center gap-2"><Mail className="w-4 h-4"/> Email Address</label>
+								<input id="profile-email" type="email" defaultValue={profile.email} disabled className="w-full bg-[var(--bg-main)] border border-[var(--border-glass)] rounded-xl px-4 py-3 text-[var(--text-muted)] opacity-50 cursor-not-allowed" />
 							</div>
 						</div>
 					</motion.div>

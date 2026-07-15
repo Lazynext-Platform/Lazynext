@@ -6,8 +6,6 @@
  * @module collaboration/presence
  */
 
-import React from "react";
-
 interface CursorPosition {
 	/** X position on the canvas. */
 	x: number;

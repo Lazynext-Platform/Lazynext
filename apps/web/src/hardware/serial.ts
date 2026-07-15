@@ -18,7 +18,7 @@ export class RS422DeckController {
 		}
 
 		try {
-			// @ts-ignore
+			// @ts-expect-error — navigator.serial requires type augmentation
 			this.port = await navigator.serial.requestPort();
 			await this.port.open({
 				baudRate: 38400,

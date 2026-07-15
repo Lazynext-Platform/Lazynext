@@ -81,7 +81,7 @@ proc main*(cArgs: seq[string]) =
   if inputPath == "":
     error "A media file is needed"
   if model == "":
-    error "A model is needed, you came find them here: https://huggingface.co/ggerganov/whisper.cpp"
+    error "A model is needed, you came find them here: https://modal.com/ggerganov/whisper.cpp"
   if queue < 1 or queue > 86400:
     error &"Invalid queue value: {queue}"
   if output != "-" and not formatExplicit:

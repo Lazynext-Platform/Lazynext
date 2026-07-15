@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
-# restore.sh — Restore PostgreSQL database from local backup or Azure Blob
+# restore.sh — Restore PostgreSQL database from local backup
 #
 # Usage:
 #   ./scripts/db/restore.sh ./backups/lazynext_20260628_030000.sql.gz       # Local file
-#   ./scripts/db/restore.sh https://mystorage.blob.core.windows.net/media/backups/file.sql.gz  # Azure URL
 #   ./scripts/db/restore.sh --point-in-time "2026-06-27 14:30:00"           # PITR (delegates to point-in-time-restore.sh)
-#   ./scripts/db/restore.sh --latest                                        # Restore latest backup from Azure
 #
 # Features:
 #   - Checksum validation (SHA-256)
@@ -29,8 +27,6 @@ DB_NAME="${DB_NAME:-lazynext}"
 DB_PASSWORD="${DB_PASSWORD:?Set DB_PASSWORD env var}"
 PGPASSWORD="${DB_PASSWORD}"
 
-AZURE_STORAGE_ACCOUNT="${AZURE_STORAGE_ACCOUNT:-}"
-AZURE_STORAGE_CONTAINER="${AZURE_STORAGE_CONTAINER:-media}"
 BACKUP_DIR="${BACKUP_DIR:-$REPO_ROOT/.backups}"
 TEMP_DIR="${TEMP_DIR:-/tmp/lazynext-restore}"
 
@@ -88,12 +84,10 @@ Options:
   --skip-migrations    Skip running pending migrations after restore
   --skip-verify        Skip post-restore data integrity verification
   --point-in-time TS   Point-in-time restore (e.g. "2026-06-27 14:30:00")
-  --latest             Restore latest backup from Azure Blob Storage
   --help, -h           Show this help
 
 Environment:
   DB_HOST, DB_PORT, DB_USER, DB_NAME, DB_PASSWORD
-  AZURE_STORAGE_ACCOUNT, AZURE_STORAGE_CONTAINER
 EOF
 			exit 0
 			;;
@@ -145,28 +139,7 @@ acquire_backup() {
 
 	if [[ "$source" =~ ^https?:// ]]; then
 		log_info "Downloading backup from URL: $source"
-		if command -v az &>/dev/null; then
-			# Extract blob path from URL for az CLI download
-			local account="${AZURE_STORAGE_ACCOUNT}"
-			local container="${AZURE_STORAGE_CONTAINER}"
-			local blob_name
-			blob_name=$(echo "$source" | sed -n 's|.*/media/\(.*\)|\1|p')
-
-			if [ -n "$account" ] && [ -n "$blob_name" ]; then
-				az storage blob download \
-					--account-name "$account" \
-					--container-name "$container" \
-					--name "$blob_name" \
-					--file "$output" \
-					--auth-mode login \
-					--no-progress 2>/dev/null
-			else
-				# Fall back to curl
-				curl -fSL --progress-bar -o "$output" "$source"
-			fi
-		else
-			curl -fSL --progress-bar -o "$output" "$source"
-		fi
+		curl -fSL --progress-bar -o "$output" "$source"
 		log_ok "Downloaded backup to $output"
 	elif [[ "$source" =~ ^/ ]] || [[ "$source" =~ ^\. ]]; then
 		# Local file path
@@ -180,30 +153,6 @@ acquire_backup() {
 		log_error "Invalid source: $source (must be local path or https:// URL)"
 		exit 1
 	fi
-}
-
-find_latest_azure_backup() {
-	if [ -z "$AZURE_STORAGE_ACCOUNT" ]; then
-		log_error "AZURE_STORAGE_ACCOUNT must be set to use --latest"
-		exit 1
-	fi
-
-	log_info "Finding latest backup in Azure Blob Storage..."
-	local latest
-	latest=$(az storage blob list \
-		--account-name "$AZURE_STORAGE_ACCOUNT" \
-		--container-name "$AZURE_STORAGE_CONTAINER" \
-		--prefix "backups/lazynext_" \
-		--query "sort_by([], &properties.lastModified)[-1].name" \
-		--output tsv \
-		--auth-mode login 2>/dev/null)
-
-	if [ -z "$latest" ] || [ "$latest" = "None" ]; then
-		log_error "No backups found in Azure Blob Storage"
-		exit 1
-	fi
-
-	echo "https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${AZURE_STORAGE_CONTAINER}/${latest}"
 }
 
 # ── Backup Validation ───────────────────────────────────────────────────────
@@ -424,8 +373,9 @@ main() {
 
 	# Handle --latest
 	if [ "$USE_LATEST" = true ]; then
-		RESTORE_SOURCE=$(find_latest_azure_backup)
-		log_info "Latest backup: $RESTORE_SOURCE"
+		log_error "--latest is not supported (no cloud backup configured)"
+		exit 1
+	fi
 	fi
 
 	if [ -z "$RESTORE_SOURCE" ]; then

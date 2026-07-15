@@ -4,7 +4,7 @@ import type { SceneTracks } from "@/timeline";
 import { EditorCore } from "@/core";
 import type { TimelineTrack } from "@/timeline";
 
-function removeTrackElements<TTrack extends TimelineTrack>({
+function _removeTrackElements<TTrack extends TimelineTrack>({
 	track,
 	elements,
 }: {

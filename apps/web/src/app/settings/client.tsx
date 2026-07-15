@@ -99,28 +99,30 @@ export function SettingsPageClient() {
 						</p>
 						<form onSubmit={handleSave} className="mt-4 space-y-4">
 							<div>
-								<label className="mb-1 block text-xs font-medium text-muted">
-									Name
-								</label>
-								<input
-									type="text"
-									value={name}
-									maxLength={200}
-									onChange={(e) => setName(e.target.value)}
-									className="w-full rounded-lg border border-[var(--border-glass)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent-primary)] transition-colors"
-									placeholder="Your display name"
-								/>
+							<label htmlFor="settings-name" className="mb-1 block text-xs font-medium text-muted">
+								Name
+							</label>
+							<input
+								id="settings-name"
+								type="text"
+								value={name}
+								maxLength={200}
+								onChange={(e) => setName(e.target.value)}
+								className="w-full rounded-lg border border-[var(--border-glass)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent-primary)] transition-colors"
+								placeholder="Your display name"
+							/>
 							</div>
 							<div>
-								<label className="mb-1 block text-xs font-medium text-muted">
-									Email
-								</label>
-								<input
-									type="email"
-									value={session.user?.email ?? ""}
-									disabled
-									className="w-full rounded-lg border border-[var(--border-glass)] bg-[var(--bg-main)]/50 px-3 py-2 text-sm text-muted outline-none"
-								/>
+							<label htmlFor="settings-email" className="mb-1 block text-xs font-medium text-muted">
+								Email
+							</label>
+							<input
+								id="settings-email"
+								type="email"
+								value={session.user?.email ?? ""}
+								disabled
+								className="w-full rounded-lg border border-[var(--border-glass)] bg-[var(--bg-main)]/50 px-3 py-2 text-sm text-muted outline-none"
+							/>
 								<p className="mt-1 text-xs text-muted">
 									Email cannot be changed
 								</p>
@@ -144,7 +146,7 @@ export function SettingsPageClient() {
 							Customize your editing experience.
 						</p>
 						<div className="mt-4 space-y-3">
-							<label className="flex items-center justify-between rounded-lg border border-[var(--border-glass)] bg-[var(--bg-main)]/50 px-4 py-3">
+							<label aria-label="Autosave" className="flex items-center justify-between rounded-lg border border-[var(--border-glass)] bg-[var(--bg-main)]/50 px-4 py-3">
 								<div>
 									<span className="text-sm font-bold text-[var(--text-primary)]">
 										Autosave
@@ -154,12 +156,13 @@ export function SettingsPageClient() {
 									</p>
 								</div>
 								<input
+									id="settings-autosave"
 									type="checkbox"
 									defaultChecked
 									className="h-4 w-4 rounded accent-[var(--accent-primary)]"
 								/>
 							</label>
-							<label className="flex items-center justify-between rounded-lg border border-[var(--border-glass)] bg-[var(--bg-main)]/50 px-4 py-3">
+							<label aria-label="Snap to Grid" className="flex items-center justify-between rounded-lg border border-[var(--border-glass)] bg-[var(--bg-main)]/50 px-4 py-3">
 								<div>
 									<span className="text-sm font-bold text-[var(--text-primary)]">
 										Snap to Grid
@@ -169,6 +172,7 @@ export function SettingsPageClient() {
 									</p>
 								</div>
 								<input
+									id="settings-snap-to-grid"
 									type="checkbox"
 									defaultChecked
 									className="h-4 w-4 rounded accent-[var(--accent-primary)]"

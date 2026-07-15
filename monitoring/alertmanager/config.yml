@@ -1,10 +1,10 @@
 # ── AlertManager Configuration (Enhanced) ─────────────────────────
-# Routes alerts to Slack, PagerDuty, and email based on severity.
+# Routes alerts to Slack, Grafana OnCall, and email based on severity.
 #
 # Secrets expected in environment or via Vault/K8s ExternalSecret:
 #   SLACK_WEBHOOK_URL          — Webhook for #lazynext-alerts-critical
 #   SLACK_WEBHOOK_URL_WARNING  — Webhook for #lazynext-alerts
-#   PAGERDUTY_INTEGRATION_KEY  — PagerDuty routing/integration key
+#   GRAFANA_ONCALL_INTEGRATION_URL  — Grafana OnCall webhook integration URL
 #   RESEND_API_KEY             — Email API key for alert notifications
 #   RESEND_ALERT_EMAIL_KEY     — Alternative email delivery key
 #
@@ -12,7 +12,6 @@
 
 global:
   resolve_timeout: 5m
-  pagerduty_url: "https://events.pagerduty.com/v2/enqueue"
   # slack_api_url removed — set per-receiver in route configs
   # slack_api_url: "http://localhost:9999/webhook"
 
@@ -25,11 +24,11 @@ route:
   repeat_interval: 3h
 
   routes:
-    # ── CRITICAL: API Gateway Down > 1min → PagerDuty + Slack ──
+    # ── CRITICAL: API Gateway Down > 1min → Grafana OnCall + Slack ──
     - match:
         severity: critical
         alertname: APIGatewayDown
-      receiver: "pagerduty-critical"
+      receiver: "grafana-oncall-critical"
       continue: true
     - match:
         severity: critical
@@ -41,7 +40,7 @@ route:
     - match:
         severity: critical
         alertname: RenderQueueCriticalBacklog
-      receiver: "pagerduty-critical"
+      receiver: "grafana-oncall-critical"
       continue: true
     - match:
         severity: critical
@@ -54,12 +53,12 @@ route:
       receiver: "slack-warnings"
       continue: false
 
-    # ── CRITICAL: Database Connection Failures > 5/min → PagerDuty
+    # ── CRITICAL: Database Connection Failures > 5/min → Grafana OnCall
     - match:
         severity: critical
       match_re:
         alertname: "Database.*|PostgreSQL.*"
-      receiver: "pagerduty-critical"
+      receiver: "grafana-oncall-critical"
       continue: true
     - match:
         severity: critical
@@ -74,10 +73,10 @@ route:
       receiver: "slack-critical"
       continue: false
 
-    # ── CRITICAL (general): PagerDuty + Slack ───────────────────
+    # ── CRITICAL (general): Grafana OnCall + Slack ──────────────
     - match:
         severity: critical
-      receiver: "pagerduty-critical"
+      receiver: "grafana-oncall-critical"
       continue: true
     - match:
         severity: critical
@@ -209,28 +208,12 @@ receivers:
         color: "good"
         send_resolved: false
 
-  # ── PagerDuty: Critical Only ─────────────────────────────────
-  - name: "pagerduty-critical"
-    pagerduty_configs:
-      - routing_key: "${PAGERDUTY_INTEGRATION_KEY}"
-        severity: "critical"
-        description: |
-          {{ .CommonAnnotations.description }}
-        source: '{{ .CommonLabels.service | default "unknown" }}'
-        component: "{{ .CommonLabels.instance }}"
-        group: "{{ .GroupLabels.alertname }}"
-        class: "{{ .CommonLabels.severity }}"
-        client: "Lazynext Monitoring"
-        client_url: "https://monitoring.lazynext.ai"
-        details:
-          service: "{{ .CommonLabels.service }}"
-          severity: "{{ .CommonLabels.severity }}"
-          alertname: "{{ .CommonLabels.alertname }}"
-          runbook: "{{ .CommonAnnotations.runbook_url }}"
-          grafana_url: "https://monitoring.lazynext.ai/grafana/d/lazynext-overview"
-        links:
-          - href: "https://monitoring.lazynext.ai/grafana/d/lazynext-overview"
-            text: "Grafana Dashboard"
+  # ── Grafana OnCall: Critical Only ────────────────────────────
+  - name: "grafana-oncall-critical"
+    webhook_configs:
+      - url: "${GRAFANA_ONCALL_INTEGRATION_URL:-https://oncall.example.com/disabled}"
+        send_resolved: true
+        max_alerts: 0
 
   # ── Email: DBA Notifications ─────────────────────────────────
   - name: "email-dba"

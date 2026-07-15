@@ -8,7 +8,7 @@
  * @module editor/script-editor
  */
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useWasm } from "@/hooks/use-wasm";
 
 /**
@@ -19,7 +19,7 @@ import { useWasm } from "@/hooks/use-wasm";
  */
 export function ScriptEditor() {
 	const { time } = useWasm();
-	const [selectedText, setSelectedText] = useState("");
+	const [_selectedText, _setSelectedText] = useState("");
 
 	// Script data from project transcript (pre-processing service, port 8000).
 	// Populated when a Whisper transcript is available for the active project.
@@ -51,13 +51,16 @@ export function ScriptEditor() {
 					</p>
 				) : (
 					script.map((line) => (
-					<p
+					<div
 						key={line.id}
 						className="cursor-pointer hover:bg-yellow-200 transition-colors p-1 rounded"
 						onMouseUp={() => handleTextSelection(line.id)}
+						onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleTextSelection(line.id); } }}
+						role="button"
+						tabIndex={0}
 					>
 						{line.text}
-					</p>
+					</div>
 				)))}
 			</div>
 

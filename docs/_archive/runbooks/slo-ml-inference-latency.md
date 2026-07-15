@@ -169,7 +169,7 @@ kubectl exec -it -n lazynext <ml-worker-pod> -- nvidia-smi
 1. Pick a recent slow request from the logs or Prometheus exemplars.
 2. Check the OpenTelemetry trace for that request in Grafana Tempo / Jaeger to find the bottleneck span.
 3. Common bottlenecks:
-   - **I/O phase**: Large asset download from Azure Blob Storage. Check network throughput on the pod.
+    - **I/O phase**: Large asset download from local filesystem. Check network throughput on the pod.
    - **Preprocessing phase**: Video decode, audio resampling, image resize. Check CPU utilization.
    - **Model inference phase**: GPU kernel launch overhead, VRAM swaps. Check GPU metrics.
    - **Postprocessing phase**: Format conversion, output encoding.
@@ -195,8 +195,8 @@ kubectl logs -n lazynext deployment/generative-studio --since=15m | grep -E "ERR
 
 ### Step 6 — Check for external dependency failures
 1. **ElevenLabs API**: Check ElevenLabs status page and API key validity.
-2. **HuggingFace model hub**: If models are fetched from HF at runtime, check HF status.
-3. **Azure Blob Storage**: Verify the storage account is reachable and not throttling.
+2. **Modal model hub**: If models are fetched from Modal at runtime, check Modal status.
+3. **Local filesystem**: Verify the storage is reachable and not throttling.
 
 ### Step 7 — Determine if this is a workload shift or infrastructure issue
 ```bash
@@ -256,7 +256,7 @@ curl -s http://localhost:8001/admin/metrics | jq '.requests_by_type'
    kubectl cordon <gpu-node>
    kubectl drain <gpu-node> --ignore-daemonsets --delete-emptydir-data
    ```
-   Then file an Azure hardware replacement ticket.
+    Then file a Linode hardware replacement ticket.
 
 ### Tactic D — GPU VRAM saturation
 1. **Identify the VRAM-heavy model**:
@@ -267,17 +267,17 @@ curl -s http://localhost:8001/admin/metrics | jq '.requests_by_type'
 3. **Enable model offloading**: Set `STABLE_DIFFUSION_ENABLE_MODEL_CPU_OFFLOAD=true` to move unused model components to CPU RAM between inference calls.
 4. **Add a VRAM guard**: If VRAM usage exceeds 90%, reject new inference requests with HTTP 429 (too many requests) until VRAM frees up, rather than letting requests OOM.
 
-### Tactic E — External API degradation (Gemini TTS, HuggingFace)
+### Tactic E — External API degradation (Gemini TTS, Modal)
 1. **Enable local fallback**: Use locally cached Coqui XTTS v2 model when the API is slow or unavailable.
-2. **Cache model weights**: Ensure all models are pre-cached in the Docker image or on a persistent volume, so HuggingFace outages don't block inference.
+2. **Cache model weights**: Ensure all models are pre-cached in the Docker image or on a persistent volume, so Modal outages don't block inference.
 3. **Circuit breaker**: The service should already trip a circuit breaker after 5 consecutive failures to an external API, serving stale results or returning a degraded-mode response.
 
 ## Escalation Policy
 
 | Level | Role | When to Escalate | Contact |
 |-------|------|-------------------|---------|
-| **L1** | On-call engineer (24/7 rotation) | First responder for all ML inference alerts | PagerDuty → `ml-oncall` |
-| **L2** | ML platform engineer | L1 cannot resolve within 30 minutes; GPU hardware issues, model loading failures, or queue sustained > 50 | PagerDuty → `ml-platform-oncall` |
+| **L1** | On-call engineer (24/7 rotation) | First responder for all ML inference alerts | Grafana OnCall → `ml-oncall` |
+| **L2** | ML platform engineer | L1 cannot resolve within 30 minutes; GPU hardware issues, model loading failures, or queue sustained > 50 | Grafana OnCall → `ml-platform-oncall` |
 | **L3** | ML research engineer (model-specific issues) + Infrastructure lead | L2 cannot resolve within 60 minutes; model quality degradation, ECC errors requiring HW replacement, or regional GPU capacity shortage | Slack `#ml-platform` + `#ops-leads` → call |
 | **L4** | VP Engineering | L3 not reached within 15 minutes; user-facing impact exceeds 1 hour; cost of idle GPU capacity exceeding $500/hr | Phone tree |
 
@@ -320,7 +320,7 @@ GPU cost burn rate: <N> × Standard_NC24ads_A100_v4 @ $X/hr = $Y/hr wasted
    - Sample slow/failed request trace IDs for postmortem analysis.
 7. [ ] **Root cause analysis** — Draft within 24 hours. Common failure modes:
    - GPU hardware fault (ECC errors, thermal throttling, driver crash).
-   - Model loading failure (cache corruption, HF outage, disk full).
+   - Model loading failure (cache corruption, Modal outage, disk full).
    - Input data anomaly triggering pathological model behavior.
    - Resource contention from a concurrent high-priority workload.
    - Inference library or CUDA version regression from a recent dependency update.
@@ -347,5 +347,5 @@ GPU cost burn rate: <N> × Standard_NC24ads_A100_v4 @ $X/hr = $Y/hr wasted
 - Generative Studio service: `/Users/avaspatel/Lazynext/services/generative-studio/`
 - Python ML dependencies: `services/pre-processing/requirements.txt`, `services/generative-studio/requirements.txt`
 - NVIDIA DCGM exporter: `https://github.com/NVIDIA/dcgm-exporter`
-- GPU instance types (Azure): `https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/gpu-accelerated/`
+- GPU instance types (Linode): `https://www.linode.com/products/gpu/`
 - Multi-burn-rate alerts: `https://sre.google/workbook/alerting-on-slos/`

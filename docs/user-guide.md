@@ -331,7 +331,7 @@ A: Yes. The desktop app works fully offline. AI features gracefully degrade to l
 A: MP4, MOV, MKV, WebM, AVI, WAV, MP3, FLAC, PNG, JPEG, WebP, GIF, TIFF, and more. Almost anything FFmpeg can read.
 
 **Q: Can I use my own AI models?**
-A: Yes. Set `LLM_PROVIDER=gemini` to use Google Gemini (add your GEMINI_API_KEY). The platform also supports OpenAI and Anthropic with your own API keys.
+A: Yes. Set `LLM_PROVIDER=gemini` to use Google Gemini (add your GEMINI_API_KEY). The platform uses Gemini as the sole AI provider.
 
 ### Editing
 
@@ -350,7 +350,7 @@ A: Yes. The platform supports ProRes 4444, DCP cinema packages, AAF interchange,
 A: Web: any modern browser. Desktop: macOS 14+, Windows 11, Linux. GPU recommended but not required — CPU fallback is available. At least 8 GB RAM recommended.
 
 **Q: Where is my data stored?**
-A: Projects are stored in PostgreSQL. Media files go to Azure Blob Storage (cloud) or your local disk (desktop). You own your data — we provide export tools for everything.
+A: Projects are stored in PostgreSQL. Media files go to local filesystem storage (Linode) or your local disk (desktop). You own your data — we provide export tools for everything.
 
 **Q: How does collaboration handle conflicts?**
 A: Lazynext uses CRDTs, not OT (Operational Transforms) or locking. Two people can edit the same clip simultaneously, and the CRDT converges to the same state regardless of operation order. It's the same tech that powers Figma and Linear.

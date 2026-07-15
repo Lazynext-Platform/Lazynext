@@ -573,8 +573,8 @@
             "refId": "B"
           },
           {
-            "expr": "histogram_quantile(0.95, sum(rate(openai_api_duration_seconds_bucket[5m])) by (le))",
-            "legendFormat": "OpenAI p95",
+            "expr": "histogram_quantile(0.95, sum(rate(gemini_api_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "Gemini p95",
             "refId": "C"
           }
         ],

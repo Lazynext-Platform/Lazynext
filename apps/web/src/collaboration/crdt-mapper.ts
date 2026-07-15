@@ -8,7 +8,7 @@
  * @module collaboration/crdt-mapper
  */
 
-import type { TScene, TimelineTrack, TimelineElement, SceneTracks, Bookmark } from "@/timeline";
+import type { TScene, TimelineElement, SceneTracks, Bookmark } from "@/timeline";
 
 /**
  * Maps the flat WASM EntityGraph back into the nested React TScene[] tree.
@@ -42,7 +42,7 @@ export function hydrateScenesFromEntityGraph(entityGraph: any): TScene[] {
 	for (const [id, jsonStr] of Object.entries(entities)) {
 		try {
 			parsedEntities.set(id, JSON.parse(jsonStr as string));
-		} catch (e) {
+		} catch {
 			console.warn(`Failed to parse entity ${id}`);
 		}
 	}

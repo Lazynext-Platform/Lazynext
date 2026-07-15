@@ -55,8 +55,8 @@ Before writing anything in an app, ask: "Does this belong in `rust/`?"
 | `services/render-service` | Node.js (Bun) on port 8003: FFMPEG render farm with SSE progress streaming |
 | `services/collab-server` | Rust (Axum) on port 8004: CRDT WebSocket sync + WebRTC signaling relay |
 | `services/analytics-service` | Node.js (Bun) on port 8006: High-velocity data ingestion and LTV calculation engine |
-| `terraform/` | Azure infrastructure as code |
-| `k8s/` | Kubernetes manifests (optional, for AKS GPU workloads) |
+| `infra/linode/` | Docker Compose infrastructure as code |
+| `k8s/` | Kubernetes manifests (optional, for self-managed K8s GPU workloads) |
 | `monitoring/` | Prometheus, Grafana, Loki, Tempo configurations |
 | `plugins/` | Example third-party plugins and SDK |
 
@@ -206,7 +206,7 @@ feat: add gaussian blur GPU effect with configurable sigma
 Implements a separable gaussian blur in two passes for O(w) performance
 per dimension. Supports sigma from 0.5 to 50.0.
 
-Co-Authored-By: Claude <noreply@anthropic.com>
+Co-Authored-By: Claude <noreply@google.com>
 ```
 
 ```
@@ -217,14 +217,14 @@ the second tombstone incorrectly overwrote the first. Now we
 merge tombstone intervals.
 
 Closes #1427
-Co-Authored-By: Claude <noreply@anthropic.com>
+Co-Authored-By: Claude <noreply@google.com>
 ```
 
 ### AI-Assisted Commits
 
 When Claude Code or other AI tools assist with a commit, include:
 ```
-Co-Authored-By: Claude <noreply@anthropic.com>
+Co-Authored-By: Claude <noreply@google.com>
 ```
 
 ---
@@ -337,7 +337,7 @@ cd services/generative-studio && pytest -v
 
 - Tests in `tests/` directory within each service
 - Use `pytest` fixtures for shared setup
-- Mock external API calls (OpenAI, Replicate, ElevenLabs) in unit tests
+- Mock external API calls (Gemini, Replicate, ElevenLabs) in unit tests
 
 ### Node.js Service Testing
 
@@ -409,7 +409,7 @@ Third-party dependency additions require license compatibility review. All depen
 2. Add it to `docker-compose.yml`, `docker-compose.dev.yml`, and `docker-compose.gpu.yml` as appropriate
 3. Add health check endpoint (`GET /health` returning JSON with `status: "ok"`)
 4. Register in `start-platform.sh`
-5. Add Terraform configuration in `terraform/` for Azure Container Apps deployment
+5. Add Docker Compose configuration in `infra/linode/` for Linode deployment
 6. Update `.env.example` with any new environment variables
 7. Document in `CLAUDE.md` services table and `docs/api-reference.md`
 
@@ -465,7 +465,7 @@ Lazynext uses continuous deployment from `main`:
 1. PRs are merged into `main` after review and green CI
 2. The `production.yml` workflow triggers on push to `main`
 3. Docker images are built and pushed to `ghcr.io/lazynext/*`
-4. Azure Container Apps are updated via `az containerapp update`
+4. Docker Compose services are updated via SSH / systemctl
 5. Database migrations run as part of the deployment
 
 ### Hotfixes

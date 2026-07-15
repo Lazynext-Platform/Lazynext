@@ -3,10 +3,10 @@
  *
  * Provides a comprehensive health check suitable for:
  *   - Kubernetes liveness/readiness probes
- *   - Azure App Service health checks
+ *   - Docker Compose health checks
  *   - Load balancer health probes
  *   - Monitoring dashboards (Grafana, Datadog)
- *   - Alerting systems (PagerDuty, Opsgenie)
+ *   - Alerting systems (Grafana OnCall, Opsgenie)
  *
  * Endpoint: GET /api/db-health
  *
@@ -429,8 +429,8 @@ async function checkDiskSpace(
 		const tablesWithBloat = Number(r?.tables_with_bloat ?? 0);
 
 		// Estimate disk usage (this is approximate without OS-level checks)
-		// In production, you'd query Azure metrics API or use df
-		const diskUsedPercent = 0; // Placeholder — query Azure Metrics in Azure env
+		// In production, you'd query Docker metrics or use df
+		const diskUsedPercent = 0; // Placeholder — query Docker metrics in production
 		const diskFreeBytes = 0;
 
 		let status: HealthStatus = "healthy";
@@ -445,7 +445,7 @@ async function checkDiskSpace(
 		}
 
 		if (tablesWithBloat > 10) {
-			const degradedMsg = status === "healthy" ? undefined : message;
+			const _degradedMsg = status === "healthy" ? undefined : message;
 			status = status === "healthy" ? "degraded" : status;
 			message = `${tablesWithBloat} tables have significant bloat (>30%)`;
 		}

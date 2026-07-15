@@ -8,9 +8,9 @@
  * @module editor/PromptMode
  */
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useEditor } from "./use-editor";
-import { Bot, Sparkles, Command } from "lucide-react";
+import { Bot, Command } from "lucide-react";
 
 /**
  * Premium command interface for conversing with the Lazynext AI Agent Copilot.
@@ -25,6 +25,7 @@ export const PromptMode: React.FC = () => {
 	const [isMounted, setIsMounted] = useState(false);
 
 	useEffect(() => {
+		/* eslint-disable react-hooks/set-state-in-effect */
 		setIsMounted(true);
 	}, []);
 

@@ -21,7 +21,7 @@ User types/speaks NL command
 ┌──────────────────────────────────┐
 │  ai-agents :8002                 │  services/ai-agents/src/orchestrator.ts
 │  decomposeIntent(prompt)         │
-│  ├─ LLM route (OpenAI/Anth/      │
+│  ├─ LLM route (Gemini/            │
 │  │  Ollama) → JSON plan          │
 │  └─ Rule-based fallback          │
 │  executePlan(steps)              │

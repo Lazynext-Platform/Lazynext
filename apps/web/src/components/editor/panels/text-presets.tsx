@@ -5,8 +5,7 @@
  * @module components/editor/panels/text-presets
  */
 
-import React from "react";
-import { Type, Play } from "lucide-react";
+import { Play } from "lucide-react";
 
 export function TextPresets({
 	onAddPreset,
@@ -36,20 +35,21 @@ export function TextPresets({
 		<div className="flex flex-col h-full bg-background overflow-y-auto custom-scrollbar p-2">
 			<div className="grid grid-cols-2 gap-2">
 				{presets.map((preset) => (
-					// eslint-disable-next-line jsx-a11y/no-static-element-interactions
-					// eslint-disable-next-line jsx-a11y/click-events-have-key-events
-					<div
-						key={preset.id}
-						onClick={() =>
-							onAddPreset({
-								type: "text",
-								name: preset.name,
-								duration_frames: 120,
-								presetId: preset.id,
-							})
-						}
-						className="flex flex-col items-center justify-center p-4 border border-border rounded-lg bg-background hover:border-zinc-500 cursor-pointer transition-all hover:scale-[1.02] group"
-					>
+				<div
+					key={preset.id}
+					onClick={() =>
+						onAddPreset({
+							type: "text",
+							name: preset.name,
+							duration_frames: 120,
+							presetId: preset.id,
+						})
+					}
+					onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
+					role="button"
+					tabIndex={0}
+					className="flex flex-col items-center justify-center p-4 border border-border rounded-lg bg-background hover:border-zinc-500 cursor-pointer transition-all hover:scale-[1.02] group"
+				>
 						<div
 							className={`w-12 h-12 rounded-full ${preset.bg} flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition-transform relative`}
 						>

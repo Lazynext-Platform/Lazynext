@@ -10,7 +10,7 @@ Python FastAPI service providing media ingestion, transcription, rotoscoping, an
 
 ### POST /transcribe
 
-Transcribe audio from a video or audio file using OpenAI Whisper.
+Transcribe audio from a video or audio file using Gemini Whisper (TF Serving).
 
 **URL**: `POST /transcribe`
 

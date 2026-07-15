@@ -71,7 +71,7 @@ interface LegacyVectorValue {
 	y: number;
 }
 
-interface LegacyVectorKeyframe {
+interface _LegacyVectorKeyframe {
 	/** Unique keyframe identifier. */
 	id: string;
 	/** Keyframe time in ticks. */

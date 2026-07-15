@@ -69,7 +69,7 @@ See [architecture-crdt.md](architecture-crdt.md) for convergence guarantees.
 
 ```
 User prompt
-  → ai-agents:8002 orchestrator (LLM: OpenAI/Anthropic/Gemini/Ollama)
+  → ai-agents:8002 orchestrator (LLM: Gemini/Ollama)
   → structured tool calls → CrdtOperations
   → applied through the same state crate path as human edits
   → timeline updates + optional preview

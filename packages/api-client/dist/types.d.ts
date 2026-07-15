@@ -208,7 +208,7 @@ export interface AutonomousEditRequest {
     /** Optional list of source file URLs to scope the edit. */
     source_files?: string[];
     /** LLM provider to use for intent parsing. */
-    llm_provider?: "openai" | "anthropic" | "gemini";
+    llm_provider?: "gemini";
 }
 /**
  * Response from `POST /api/v1/ai/generate`.

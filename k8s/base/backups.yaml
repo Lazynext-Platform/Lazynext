@@ -38,17 +38,6 @@ spec:
 
                   echo "[Backup] File: $BACKUP_FILE ($(du -h "$BACKUP_FILE" | cut -f1))"
 
-                  # Upload to Azure Blob Storage if configured
-                  if [ -n "$AZURE_STORAGE_ACCOUNT" ] && [ -n "$AZURE_STORAGE_CONTAINER" ]; then
-                    echo "[Backup] Uploading to Azure Blob: $AZURE_STORAGE_ACCOUNT/$AZURE_STORAGE_CONTAINER/backups/"
-                    az storage blob upload \
-                      --account-name "$AZURE_STORAGE_ACCOUNT" \
-                      --container-name "$AZURE_STORAGE_CONTAINER" \
-                      --name "backups/$(basename $BACKUP_FILE)" \
-                      --file "$BACKUP_FILE" \
-                      --auth-mode login || true
-                  fi
-
                   # Cleanup local backups older than 7 days
                   find /backups -name "lazynext_*.sql.gz" -mtime +7 -delete
                   echo "[Backup] Complete."
@@ -58,12 +47,6 @@ spec:
                     secretKeyRef:
                       name: lazynext-secrets
                       key: POSTGRES_PASSWORD
-                - name: AZURE_STORAGE_ACCOUNT
-                  valueFrom:
-                    configMapKeyRef:
-                      name: lazynext-config
-                      key: MEDIA_BUCKET
-                      
               resources:
                 requests:
                   cpu: "100m"

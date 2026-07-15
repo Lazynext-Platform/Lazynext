@@ -186,7 +186,7 @@ class WebRTCClient {
    * Broadcast a CRDT delta to all connected P2P peers.
    */
   broadcast(delta: ArrayBuffer): void {
-    for (const [peerId, peer] of this.peers) {
+    for (const [_peerId, peer] of this.peers) {
       if (peer.dataChannel?.readyState === "open") {
         peer.dataChannel.send(delta);
       }

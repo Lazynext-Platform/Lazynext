@@ -29,7 +29,7 @@ metadata:
   annotations:
     quota.lazynext.ai/description: "Production resource quota — 3x base limits"
     quota.lazynext.ai/review-date: "2026-09-28"  # Quarterly review
-    quota.lazynext.ai/estimated-monthly-cost: "See Azure Cost Management"
+    quota.lazynext.ai/estimated-monthly-cost: "See Linode billing"
 spec:
   hard:
     # ── Compute ─────────────────────────────────────────────────────
@@ -145,22 +145,22 @@ spec:
 # ═══════════════════════════════════════════════════════════════════
 
 ---
-# Allow ingress from Azure Front Door / CDN IP ranges to ingress controller
-# This ensures media.lazynext.ai traffic is allowed ONLY from our CDN.
+# Allow ingress from Linode NodeBalancer IP ranges to ingress controller
+# This ensures media.lazynext.ai traffic is allowed ONLY from our load balancer.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-azure-frontdoor
+  name: allow-linode-loadbalancer
   namespace: lazynext
   labels:
     app.kubernetes.io/part-of: lazynext
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/component: networking
     environment: production
-    policy-type: cdn-ingress
+    policy-type: lb-ingress
   annotations:
-    networkpolicy.lazynext.ai/description: "Allow Azure Front Door health probes and traffic"
-    networkpolicy.lazynext.ai/source: "Azure Front Door backend IP ranges"
+    networkpolicy.lazynext.ai/description: "Allow Linode NodeBalancer health probes and traffic"
+    networkpolicy.lazynext.ai/source: "Linode NodeBalancer IP ranges"
 spec:
   podSelector:
     matchLabels:
@@ -170,20 +170,20 @@ spec:
   ingress:
     - from:
         - ipBlock:
-            # Azure Front Door IP ranges (global).
+            # Linode NodeBalancer IP ranges.
             # Update periodically from:
-            # https://www.microsoft.com/en-us/download/details.aspx?id=56519
+            # https://www.linode.com/docs/products/networking/nodebalancer/
             # Current as of: June 2026
-            cidr: 147.243.0.0/16
+            cidr: 192.81.128.0/17
       ports:
         - port: 80
           protocol: TCP
         - port: 443
           protocol: TCP
-    # Allow Azure Front Door health probe agent
+    # Allow Linode health probe agent
     - from:
         - ipBlock:
-            cidr: 191.233.0.0/17
+            cidr: 66.228.32.0/20
       ports:
         - port: 80
           protocol: TCP
@@ -203,13 +203,13 @@ metadata:
     environment: production
     security-tier: critical
   annotations:
-    networkpolicy.lazynext.ai/description: "Block access to Azure Instance Metadata Service to prevent IMDS-based SSRF"
+    networkpolicy.lazynext.ai/description: "Block access to cloud instance metadata service to prevent IMDS-based SSRF"
 spec:
   podSelector: {}
   policyTypes:
     - Egress
   egress:
-    # Deny 169.254.169.254 (Azure IMDS endpoint)
+    # Deny 169.254.169.254 (cloud IMDS endpoint)
     - to:
         - ipBlock:
             cidr: 0.0.0.0/0

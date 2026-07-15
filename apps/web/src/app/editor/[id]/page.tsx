@@ -6,7 +6,6 @@
  * @page /editor/[id]
  */
 
-import ModernEditorClient from "@/components/editor/ModernEditorClient";
 import { EditorErrorBoundary } from "@/components/editor/EditorErrorBoundary";
 import { EditorStateProvider } from "@/components/editor/useEditorState";
 import { EditorUIClient } from "./editor-ui-client";

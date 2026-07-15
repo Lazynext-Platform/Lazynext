@@ -8,7 +8,6 @@
 import type {
 	SceneTracks,
 	TimelineElement,
-	TimelineTrack,
 } from "@/timeline/types";
 import type { RippleAdjustment } from "./apply";
 

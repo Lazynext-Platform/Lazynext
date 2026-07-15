@@ -86,10 +86,10 @@
       - any-glob-to-any-file:
         - "k8s/**/*"
 
-"area:terraform":
+"area:infra":
   - changed-files:
       - any-glob-to-any-file:
-        - "terraform/**/*"
+        - "infra/**/*"
 
 "area:database":
   - changed-files:

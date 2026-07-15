@@ -2,7 +2,6 @@
 import {
 	applyEffectPasses,
 	applyMaskFeather as applyMaskFeatherWasm,
-	initializeGpu,
 } from "lazynext-wasm";
 import type { EffectPass, EffectUniformValue } from "@/effects/types";
 

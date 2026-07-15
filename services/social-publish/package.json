@@ -1,6 +1,8 @@
 {
 	"name": "social-publish",
 	"version": "1.0.0",
+	"private": true,
+	"packageManager": "bun@1.3.14",
 	"description": "Social media publishing pipeline — reframe, upload, schedule",
 	"scripts": {
 		"start": "bun run src/index.ts",

@@ -105,6 +105,7 @@ export function useAgentSuggestions(): UseAgentSuggestionsReturn {
 	// Keep a ref so the interval always sees the latest status without
 	// re-creating the timer every time status changes.
 	const statusRef = useRef<AgentState | null>(null);
+	// eslint-disable-next-line react-hooks/refs
 	statusRef.current = status;
 
 	// ── Initial fetch + status ────────────────────────────────────

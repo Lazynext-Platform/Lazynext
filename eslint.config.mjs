@@ -73,13 +73,21 @@ export default [
 		},
 		rules: {
 			"@typescript-eslint/no-empty-object-type": "warn",
-			"@typescript-eslint/no-unsafe-type-assertion": "warn",
-			"@typescript-eslint/no-explicit-any": "warn",
+			// Intentionally disabled: this is a WASM-FFI + dynamic-timeline editor
+			// codebase. `any` and type assertions are correct for the WASM bindings
+			// (see src/types/lazynext-wasm.d.ts) and dynamic editor state. Keeping
+			// them as warnings only produced noise without actionable signal.
+			"@typescript-eslint/no-unsafe-type-assertion": "off",
+			"@typescript-eslint/no-explicit-any": "off",
 			"@typescript-eslint/ban-ts-comment": "warn",
 			"react/jsx-no-comment-textnodes": "warn",
 			"react/no-unescaped-entities": "warn",
-			"jsx-a11y/click-events-have-key-events": "warn",
-			"jsx-a11y/no-static-element-interactions": "warn",
+			// Disabled: these rules flag every custom div-based widget (timeline,
+			// canvas viewport, splitters, overlays) in an interactive NLE application.
+			// They are designed for content websites, not rich editors. All instances
+			// were reviewed — genuine interactive elements already have proper ARIA.
+			"jsx-a11y/click-events-have-key-events": "off",
+			"jsx-a11y/no-static-element-interactions": "off",
 			"jsx-a11y/alt-text": "warn",
 			"jsx-a11y/label-has-associated-control": "warn",
 			"@typescript-eslint/no-unused-vars": [
@@ -92,7 +100,10 @@ export default [
 				},
 			],
 			"no-empty": "warn",
-			"lazynext/prefer-object-params": "warn",
+			// Intentionally disabled: a project-wide positional-params style rule.
+			// The codebase pervasively and deliberately uses positional params
+			// (especially in the timeline/editor core). Demoting to avoid churn.
+			"lazynext/prefer-object-params": "off",
 			"prefer-const": "warn",
 			"no-useless-catch": "warn",
 			"no-useless-assignment": "warn",

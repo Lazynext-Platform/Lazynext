@@ -69,13 +69,13 @@ All items identified in the deep audit (2026-06-30):
 
 9. **API Gateway Fake Integration Tests**: 19 "integration tests" in `rust/api-gateway/tests/` are `sleep + assert!(true)` no-ops.
 
-10. **Stripe Webhook Not Verified**: `handle_stripe_webhook` prints event type without signature verification.
+10. **Dodo Payments Webhook Not Verified**: `handle_stripe_webhook` prints event type without signature verification.
 
 ## Proposed Approach
 
 This feature follows a **phase-gated approach**, starting with the highest-impact, lowest-risk fixes and progressing to deeper architectural changes:
 
-1. **Phase A — Security & Auth Fixes**: Replace API gateway hardcoded tokens with real JWT validation, implement Stripe webhook verification, fix hardcoded user ID. These are self-contained Rust changes that unblock all subsequent work.
+1. **Phase A — Security & Auth Fixes**: Replace API gateway hardcoded tokens with real JWT validation, implement Dodo Payments webhook verification, fix hardcoded user ID. These are self-contained Rust changes that unblock all subsequent work.
 
 2. **Phase B — Database Consolidation**: Migrate from dual ORM (Kysely + Drizzle) to single Drizzle schema. Update Better Auth adapter to use Drizzle. Remove Kysely dependency. This touches 2 schema files and the auth configuration.
 

@@ -4,11 +4,10 @@
  * @module components/editor/panels/speed-ramping
  */
 
-import React from "react";
-import { Activity, FastForward } from "lucide-react";
+import { FastForward } from "lucide-react";
 
 export function SpeedRamping({
-	updateSelectedClip,
+	updateSelectedClip: _updateSelectedClip,
 	selectedClip,
 }: {
 	updateSelectedClip: any;
@@ -29,11 +28,10 @@ export function SpeedRamping({
 				</div>
 
 				<div className="mb-4">
-					// eslint-disable-next-line jsx-a11y/label-has-associated-control
-					<label className="text-[10px] font-medium text-muted uppercase tracking-wider mb-2 block">
+					<label htmlFor="interpolation-mode" className="text-[10px] font-medium text-muted uppercase tracking-wider mb-2 block">
 						Interpolation Mode
 					</label>
-					<select className="w-full bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground focus:outline-none focus:border-cyan-500">
+					<select id="interpolation-mode" className="w-full bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground focus:outline-none focus:border-cyan-500">
 						<option>Nearest Neighbor</option>
 						<option>Frame Blend</option>
 						<option>Optical Flow (Smooth)</option>
@@ -41,10 +39,9 @@ export function SpeedRamping({
 				</div>
 
 				<div>
-					// eslint-disable-next-line jsx-a11y/label-has-associated-control
-					<label className="text-[10px] font-medium text-muted uppercase tracking-wider mb-2 block">
+					<div className="text-[10px] font-medium text-muted uppercase tracking-wider mb-2 block">
 						Speed Ramp Curve
-					</label>
+					</div>
 					<div className="h-24 bg-background border border-border rounded relative overflow-hidden group cursor-crosshair">
 						{/* Speed curve editor */}
 						<svg

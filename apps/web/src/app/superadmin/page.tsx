@@ -11,7 +11,6 @@ import {
 	Activity,
 	Server,
 	Cpu,
-	AlertTriangle,
 	TerminalSquare,
 	ShieldAlert,
 } from "lucide-react";
@@ -20,7 +19,7 @@ import { adminData } from "@/lib/admin-data";
 
 export default async function SuperAdminDashboard() {
 	const metrics = await adminData.getAdminMetrics();
-	const systemStatus = await adminData.getSystemStatus();
+	const _systemStatus = await adminData.getSystemStatus();
 	const aiMetrics = await adminData.getAIProviderMetrics();
 
 	return (
@@ -38,27 +37,27 @@ export default async function SuperAdminDashboard() {
 							<Activity className="w-5 h-5" />
 							Global Telemetry
 						</Link>
-						<a
-							href="#"
-							className="flex items-center gap-3 px-4 py-3 text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] rounded-lg transition-colors"
-						>
-							<Server className="w-5 h-5" />
-							Render Farm Nodes
-						</a>
-						<a
-							href="#"
-							className="flex items-center gap-3 px-4 py-3 text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] rounded-lg transition-colors"
-						>
-							<Cpu className="w-5 h-5" />
-							AI Model Routing
-						</a>
-						<a
-							href="#"
-							className="flex items-center gap-3 px-4 py-3 text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] rounded-lg transition-colors"
-						>
-							<ShieldAlert className="w-5 h-5" />
-							User Moderation
-						</a>
+					<button
+						type="button"
+						className="flex items-center gap-3 px-4 py-3 text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] rounded-lg transition-colors"
+					>
+						<Server className="w-5 h-5" />
+						Render Farm Nodes
+					</button>
+					<button
+						type="button"
+						className="flex items-center gap-3 px-4 py-3 text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] rounded-lg transition-colors"
+					>
+						<Cpu className="w-5 h-5" />
+						AI Model Routing
+					</button>
+					<button
+						type="button"
+						className="flex items-center gap-3 px-4 py-3 text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] rounded-lg transition-colors"
+					>
+						<ShieldAlert className="w-5 h-5" />
+						User Moderation
+					</button>
 					</nav>
 				</aside>
 

@@ -32,7 +32,7 @@ monitoring/
 
 | File | Purpose |
 |---|---|
-| `datasources.yml` | Auto-provisioned datasources: Prometheus (default), Loki, Tempo, Azure PostgreSQL |
+| `datasources.yml` | Auto-provisioned datasources: Prometheus (default), Loki, Tempo, PostgreSQL |
 | `dashboards.yml` | Dashboard provisioning config |
 | `dashboards/` | JSON dashboard definitions |
 
@@ -57,14 +57,14 @@ Datasources connect to Docker Compose service names by default (`prometheus:9090
 
 | File | Purpose |
 |---|---|
-| `config.yml` | Alert routing tree, receivers (Slack, PagerDuty, email), inhibition rules |
+| `config.yml` | Alert routing tree, receivers (Slack, Grafana OnCall, email), inhibition rules |
 
 ### Alloy (`alloy/`)
 
 | File | Purpose |
 |---|---|
 | `config.alloy` | Grafana Alloy configuration for local development (OTel receiver, processors, exporters) |
-| `config-prod.alloy` | Production Alloy configuration with Azure-specific exporters |
+| `config-prod.alloy` | Production Alloy configuration with Docker-specific exporters |
 
 Alloy acts as the OpenTelemetry collector — receiving, processing, and exporting telemetry to Prometheus, Loki, and Tempo.
 
@@ -91,11 +91,11 @@ Apps (OTel SDK) ──→ Alloy ──→ Tempo (traces)
                    ├───────→ Loki  (logs)
                    └───────→ Prometheus (metrics)
 
-Prometheus ──→ Alertmanager ──→ Slack / PagerDuty / Email
+Prometheus ──→ Alertmanager ──→ Slack / Grafana OnCall / Email
 Prometheus ──→ Grafana    (dashboards)
 Loki        ──→ Grafana   (log exploration)
 Tempo       ──→ Grafana   (trace exploration)
 Blackbox    ──→ Prometheus (endpoint health)
 ```
 
-In production on Azure, Application Insights provides an additional telemetry path alongside this stack.
+In production on Linode, this observability stack provides the primary telemetry path for all services.

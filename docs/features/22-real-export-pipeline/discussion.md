@@ -37,7 +37,7 @@ This is the highest-leverage remaining work: a video editor's core value is prod
 ### Node path (render-service) — REAL but divergent
 | Component | File:line | Status |
 |---|---|---|
-| Queue + worker | `services/render-service/src/index.ts:113-297` | Real — BullMQ, Redis (degrades gracefully), SSE progress, Azure Blob upload |
+| Queue + worker | `services/render-service/src/index.ts:113-297` | Real — BullMQ, Redis (degrades gracefully), SSE progress, local filesystem upload |
 | ffmpeg filtergraph | `index.ts:308-421` | Real — builds `filter_complex` with `overlay` + `amix` **only for clips with `http` URLs**, at `0:0`, no transforms/effects/opacity/animation |
 | Synthetic fallback | `index.ts:390-406` | Test pattern when no real clip URLs — this is the "solid-color canvas" M7 referred to |
 | C2PA signing | `index.ts:440-522` | Real but **sidecar `.c2pa.json` + self-signed HMAC** (dev); not embedded in container |

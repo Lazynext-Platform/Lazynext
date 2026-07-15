@@ -11,7 +11,6 @@
 
 "use client";
 
-import React from "react";
 import ModernEditorClient from "@/components/editor/ModernEditorClient";
 import { MobileGate } from "@/components/editor/mobile-gate";
 import { CommandPalette } from "@/components/editor/CommandPalette";

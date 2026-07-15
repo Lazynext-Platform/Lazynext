@@ -6,27 +6,27 @@
 
 ## What Was Built
 
-Complete Azure-based infrastructure managed as code with a full CI/CD pipeline:
+Complete Linode-based infrastructure managed with Docker Compose and a full CI/CD pipeline:
 
-- **Terraform**: Azure infrastructure (VNet, delegated subnets, Blob Storage backend, Key Vault, Container Apps, PostgreSQL Flexible Server, GPU node pools for AKS)
+- **Docker Compose**: Linode infrastructure (PostgreSQL Docker, Caddy reverse proxy, self-managed K8s optional)
 - **Docker**: 7 docker-compose files covering dev, prod, GPU, CI, monitoring, TensorFlow, and ingress scenarios. Multi-stage Dockerfiles for Rust builder, migration runner, and all 8 services
-- **Kubernetes**: Production-grade manifests (NetworkPolicies, HPAs, PDBs, ExternalSecrets, CronJobs, GPU node pool support) for optional AKS deployment
-- **CI/CD**: 13 GitHub Actions workflows covering Rust (fmt, clippy, test), Web (typecheck, lint, test, E2E), Python (ruff, pytest), WASM build, Docker build/push, and Azure deploy
+- **Kubernetes**: Production-grade manifests (NetworkPolicies, HPAs, PDBs, ExternalSecrets, CronJobs, GPU node pool support) for optional self-managed K8s deployment
+- **CI/CD**: 13 GitHub Actions workflows covering Rust (fmt, clippy, test), Web (typecheck, lint, test, E2E), Python (ruff, pytest), WASM build, Docker build/push, and Linode deploy
 - **Monitoring**: Full Grafana/Prometheus/Loki/Tempo/Alloy stack with pre-built dashboards, SLO definitions, and Alertmanager configuration
 - **Ansible**: Bare-metal provisioning playbooks from fresh OS to K8s with GPU drivers
 - **Config**: Traefik ingress, environment variable templates, startup scripts
 
 ## Key Decisions
 
-- **Azure**: Chosen for enterprise contracts and GPU node pool availability
-- **Terraform**: IaC standard — avoids cloud vendor lock-in for infrastructure definitions
+- **Linode**: Chosen for cost-effectiveness, full server control, and simplicity
+- **Docker Compose**: Standard for self-managed deployment — avoids cloud vendor lock-in
 - **GitHub Actions**: Consolidated CI (originally also had GitLab CI and Jenkins)
-- **Container Apps over AKS**: Simpler for the 8-service deployment; AKS kept as optional for GPU workloads
+- **Docker Compose over self-managed K8s**: Simpler for the 8-service deployment; K8s kept as optional for GPU workloads
 - **Docker Compose for local dev**: Enables full platform simulation on a single machine
 
 ## Files & Components Affected
 
-- `terraform/` — Azure IaC: VNet, subnets, storage, key vault, container apps, PostgreSQL
+- `infra/` — Linode deployment: Docker Compose, systemd services, Caddy config, PostgreSQL
 - `k8s/` — K8s manifests: deployments, services, ingress, HPAs, PDBs, secrets, cronjobs
 - `.github/workflows/` — 13 CI/CD workflows (ci.yml, production.yml, etc.)
 - `docker-compose*.yml` — 7 Compose files for various environments
@@ -44,6 +44,6 @@ Complete Azure-based infrastructure managed as code with a full CI/CD pipeline:
 
 ## Notes
 
-- ~80% completion. Gaps: remove sensitive files from repo (env.yaml, web.json, db.json), fix docker-compose env var gaps (Stripe, Resend, Freesound, Marble vars missing), consolidate CI/CD (4 overlapping systems → keep GitHub Actions only), consolidate docker-compose files (7 → 2), standardize env var naming, add OpenTelemetry instrumentation, configure Alertmanager receivers, add end-to-end integration test
+- ~80% completion. Gaps: remove sensitive files from repo (env.yaml, web.json, db.json), fix docker-compose env var gaps (Dodo Payments, Resend, Freesound, Marble vars missing), consolidate CI/CD (4 overlapping systems → keep GitHub Actions only), consolidate docker-compose files (7 → 2), standardize env var naming, add OpenTelemetry instrumentation, configure Alertmanager receivers, add end-to-end integration test
 - Infrastructure quality is production-grade — K8s manifests especially thorough with NetworkPolicies, HPAs, PDBs, ExternalSecrets
 - Monitoring stack is comprehensive — pre-built Grafana dashboards and SLO definitions

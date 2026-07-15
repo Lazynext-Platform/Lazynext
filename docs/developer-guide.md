@@ -111,7 +111,7 @@ open http://localhost:8005/swagger-ui
 │  └───────────────────────────────────────────────────┘  │
 │                                                          │
 │  ┌─────────────┐  ┌──────────┐  ┌──────────────────┐   │
-│  │ PostgreSQL  │  │  Redis   │  │ Azure Blob       │   │
+│  │ PostgreSQL  │  │  Redis   │  │ Local Storage    │   │
 │  │ (CRDT+ORM)  │  │ (Cache)  │  │ (Media Storage)  │   │
 │  └─────────────┘  └──────────┘  └──────────────────┘   │
 └─────────────────────────────────────────────────────────┘
@@ -120,7 +120,7 @@ open http://localhost:8005/swagger-ui
 ### Data Flow
 
 ```
-User (type/speak) → Lazynext AI Agent Copilot → LLM (Anthropic/OpenAI/Gemini/Ollama)
+User (type/speak) → Lazynext AI Agent Copilot → LLM (Gemini/Ollama)
     → VideoIntent → AutonomousEditor → CRDT mutations
     → NLEState → GPU Compositor (wgpu) → Frame buffer
     → ExportPipeline (FFmpeg) → Final video file
@@ -532,7 +532,7 @@ SELECT * FROM crdt_operations WHERE project_id = 'proj_abc123' ORDER BY timestam
 | Auth 401 | Missing secret | Set `BETTER_AUTH_SECRET` in `.env.local` |
 | DB connection refused | PostgreSQL not running | `docker compose up -d db` |
 | Render 503 | GPU queue full | Check `docker compose logs render-service` |
-| AI features return mock | Missing API keys | Set `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` |
+| AI features return mock | Missing API keys | Set `GEMINI_API_KEY` |
 | Port conflicts | Previous instance running | `docker compose down; lsof -ti:3000,8000-8007 \| xargs kill -9` |
 
 ---

@@ -7,8 +7,8 @@
  *
  * @module editor/multicam-grid
  */
-
-import React, { useEffect, useState, useRef } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useState, useRef } from "react";
 import { useWasm } from "@/hooks/use-wasm";
 import { wasmBridge } from "@/core/wasm-bridge";
 

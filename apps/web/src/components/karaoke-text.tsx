@@ -5,7 +5,6 @@
  * @module components/karaoke-text
  */
 
-import React from "react";
 import { useWasm } from "@/hooks/use-wasm";
 
 export type Word = {

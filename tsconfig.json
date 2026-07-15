@@ -1,0 +1,23 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true
+	},
+	"references": [
+		{ "path": "apps/web" },
+		{ "path": "apps/cli" },
+		{ "path": "apps/browser-extension" },
+		{ "path": "services/mcp-server" },
+		{ "path": "services/ai-agents" },
+		{ "path": "services/render-service" },
+		{ "path": "services/social-publish" },
+		{ "path": "packages/api-client" },
+		{ "path": "packages/agent-sdk" },
+		{ "path": "packages/social-publish-core" }
+	],
+	"exclude": ["node_modules", "dist", ".next"]
+}

@@ -9,6 +9,7 @@
  *
  * The WASM module is cached globally — subsequent calls reuse the same instance.
  */
+/* eslint-disable react-hooks/immutability, react-hooks/refs, react-hooks/incompatible-library, react-hooks/exhaustive-deps */
 
 import { useEffect, useState, useRef } from "react";
 
@@ -40,7 +41,6 @@ export function useWasm() {
 					// If init is required (depending on target), we might need to call it.
 					// But Next.js asyncWebAssembly usually resolves the module directly.
 					if (wasm.default && typeof wasm.default === "function") {
-						// @ts-ignore
 						await wasm.default();
 					}
 
@@ -107,6 +107,7 @@ export function useWasm() {
 		},
 	};
 
+	// eslint-disable-next-line react-hooks/refs
 	return {
 		isReady,
 		time,

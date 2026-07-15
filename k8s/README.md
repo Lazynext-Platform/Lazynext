@@ -1,54 +1,51 @@
 # Kubernetes
 
-Kubernetes manifests for deploying Lazynext on **AKS** (Azure Kubernetes Service) or any standard K8s cluster. This is the optional self-managed deployment path — the primary deployment uses Azure Container Apps provisioned via Terraform.
+Kubernetes manifests for deploying Lazynext on any standard K8s cluster. This is the optional self-managed deployment path — the primary deployment uses Docker Compose + systemd on Linode (see `infra/linode/`).
 
 ## Why K8s Exists
 
-Azure Container Apps is the default deployment target (see `infra/terraform/containerapps.tf`). These K8s manifests provide an alternative for:
+Docker Compose is the default deployment target. These K8s manifests provide an alternative for:
 - On-premises or hybrid deployments
-- AKS clusters (requires Pay-As-You-Go subscription — disabled in Terraform via `aks.tf.disabled`)
+- Self-managed K8s clusters with GPU node pools
 - Teams that need full K8s primitives (network policies, custom scheduling, GPU node pools)
 
 ## Directory Layout
 
 ```
 k8s/
-├── base/                          # Kustomize base (29 manifests)
+├── base/                          # Kustomize base
 │   ├── kustomization.yaml         # Kustomize entry point — lists all resources
 │   ├── namespace.yaml             # lazynext namespace (pod-security: restricted)
-│   ├── secrets.yaml               # Sealed Secrets references
+│   ├── secrets.yaml               # Secrets references
 │   ├── configmap.yaml             # Application configuration
 │   ├── databases.yaml             # PostgreSQL + Redis StatefulSets
 │   ├── services.yaml              # ClusterIP Services for microservices
 │   ├── networking.yaml            # Network policies (zero-trust default-deny)
 │   ├── autoscaling.yaml           # KEDA + HPAs (per-service scaling rules)
 │   ├── budgets.yaml               # Pod Disruption Budgets
-│   ├── backups.yaml               # Velero backup schedules
+│   ├── backups.yaml               # Backup schedules
 │   ├── monitoring.yaml            # ServiceMonitors for Prometheus Operator
 │   ├── redis-configmap.yaml       # Redis configuration
-│   ├── security-policies.yaml     # Pod Security Standards + OPA constraints
+│   ├── security-policies.yaml     # Pod Security Standards
 │   ├── rbac.yaml                  # RBAC roles and bindings
 │   ├── pgbouncer.yaml             # PgBouncer connection pooling
 │   ├── model-warmup.yaml          # ML model warmup init containers
 │   ├── gpu.yaml                   # GPU node selectors, tolerations, NVIDIA runtime
-│   ├── ingress.yaml               # Ingress resources (collab-server, web)
+│   ├── ingress.yaml               # Ingress resources
 │   ├── cert-manager.yaml          # Let's Encrypt ClusterIssuer
 │   ├── keda.yaml                  # KEDA ScaledObjects
 │   ├── fluentbit.yaml             # Fluent Bit log forwarder (DaemonSet)
 │   ├── sealed-secrets.yaml        # Sealed Secrets controller
-│   ├── velero.yaml                # Velero backup CRDs
-│   ├── service-mesh.yaml          # Linkerd / Istio annotations
+│   ├── service-mesh.yaml          # Service mesh annotations
 │   ├── init-containers.yaml       # Init container patches (strategic merge)
-│   ├── collab-server-deployment.yaml   # CRDT collaboration server deployment
+│   ├── collab-server-deployment.yaml
 │   ├── collab-server-networkpolicy.yaml
-│   ├── collab-server-ingress.yaml
-│   └── analytics-service-networkpolicy.yaml
+│   └── collab-server-ingress.yaml
 ├── overlays/                      # Environment-specific overlays
 │   ├── dev/
 │   ├── staging/
 │   └── production/
 └── ha/                            # High availability configurations
-    └── patroni-values.yaml        # Patroni PostgreSQL HA operator values
 ```
 
 ## Kustomize Overlays
@@ -64,21 +61,17 @@ k8s/overlays/
 
 ## Image Sources
 
-Container images are pulled from Azure Container Registry (`lazynextacrdevlmblwn.azurecr.io/`). The `base/kustomization.yaml` transforms image references from `ghcr.io/lazynext-platform/*` to ACR:
+Container images are pulled from GitHub Container Registry (`ghcr.io/lazynext-platform/`):
 
-| Service | ACR Image |
+| Service | Image |
 |---|---|
-| `lazynext-web` | `lazynext-web` |
-| `lazynext-ai-agents` | `lazynext-ai-agents` |
-| `lazynext-render-service` | `lazynext-render-service` |
-| `lazynext-pre-processing` | `lazynext-pre-processing` |
-| `lazynext-generative-studio` | `lazynext-generative-studio` |
-| `lazynext-mcp` | `lazynext-mcp` |
-| `lazynext-analytics-service` | `lazynext-analytics-service` |
-
-## High Availability (`ha/`)
-
-`patroni-values.yaml` configures the Patroni operator for PostgreSQL HA with automatic failover. Used when running PostgreSQL inside the cluster instead of Azure Flexible Server.
+| `lazynext-web` | `ghcr.io/lazynext-platform/lazynext-web` |
+| `lazynext-ai-agents` | `ghcr.io/lazynext-platform/lazynext-ai-agents` |
+| `lazynext-render-service` | `ghcr.io/lazynext-platform/lazynext-render-service` |
+| `lazynext-pre-processing` | `ghcr.io/lazynext-platform/lazynext-pre-processing` |
+| `lazynext-generative-studio` | `ghcr.io/lazynext-platform/lazynext-generative-studio` |
+| `lazynext-mcp` | `ghcr.io/lazynext-platform/lazynext-mcp` |
+| `lazynext-analytics-service` | `ghcr.io/lazynext-platform/lazynext-analytics-service` |
 
 ## Usage
 
@@ -99,8 +92,7 @@ kubectl delete -k k8s/overlays/production
 - **Network policies**: Default-deny with explicit allow rules per service
 - **Sealed Secrets**: Encrypted secrets stored in Git via Bitnami Sealed Secrets
 - **RBAC**: Least-privilege roles for service accounts
-- **Image policy**: ACR with vulnerability scanning
 
-## Relationship to Terraform
+## Relationship to Linode
 
-Terraform (`infra/terraform/`) provisions the Azure infrastructure (VNet, PostgreSQL, Redis, ACR, Key Vault). These K8s manifests deploy the application workloads onto either an AKS cluster (if enabled) or any conformant K8s cluster. The two are complementary — Terraform for infra, K8s for workloads.
+Docker Compose (`infra/linode/`) provisions the infrastructure (PostgreSQL, Redis, Caddy). These K8s manifests deploy the application workloads onto any conformant K8s cluster. The two are complementary — Docker Compose for infra, K8s for workloads.

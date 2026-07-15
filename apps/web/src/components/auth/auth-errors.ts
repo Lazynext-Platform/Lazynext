@@ -3,6 +3,9 @@
  * @description Maps Better Auth / network errors into friendly,
  *   actionable user-facing messages so sign-up/sign-in/reset failures
  *   are never a dead-end "Sign up failed".
+ *
+ *   Covers email/password, OAuth (Google/Apple/Microsoft),
+ *   Magic Link, MFA/TOTP, Passkeys, and SSO error codes.
  */
 
 export interface AuthErrorLike {
@@ -13,6 +16,7 @@ export interface AuthErrorLike {
 }
 
 const FRIENDLY: Record<string, string> = {
+	// ── Email/Password ──────────────────────────────────────────
 	USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL:
 		"An account with this email already exists. Try signing in instead.",
 	INVALID_EMAIL_OR_PASSWORD: "Incorrect email or password. Please try again.",
@@ -25,6 +29,56 @@ const FRIENDLY: Record<string, string> = {
 	RATE_LIMITED:
 		"Too many attempts. Please wait a minute and try again.",
 	INVALID_TOKEN: "This link is invalid or has expired. Request a new one.",
+
+	// ── OAuth / Social Login ────────────────────────────────────
+	OAUTH_CALLBACK_ERROR:
+		"Sign in with this provider failed. Please try again.",
+	ACCOUNT_NOT_LINKED:
+		"This account is not linked to that sign-in method. Use your original sign-in method or link the account in settings.",
+	PROVIDER_NOT_FOUND:
+		"This sign-in provider is not configured. Please use another method.",
+	OAUTH_EMAIL_NOT_VERIFIED:
+		"Your email with this provider isn't verified. Verify it first, then try again.",
+
+	// ── Magic Link ───────────────────────────────────────────────
+	MAGIC_LINK_EXPIRED:
+		"This magic link has expired. Request a new one.",
+	MAGIC_LINK_INVALID:
+		"This magic link is invalid or already used. Request a new one.",
+	MAGIC_LINK_RATE_LIMITED:
+		"Too many magic link requests. Please wait a minute and try again.",
+
+	// ── MFA / Two-Factor (TOTP) ─────────────────────────────────
+	TWO_FACTOR_INVALID:
+		"Invalid verification code. Check your authenticator app and try again.",
+	TWO_FACTOR_BACKUP_CODE_INVALID:
+		"Invalid backup code. Each code can only be used once.",
+	TWO_FACTOR_ALREADY_ENABLED:
+		"Two-factor authentication is already enabled on this account.",
+	TWO_FACTOR_NOT_ENABLED:
+		"Two-factor authentication is not set up on this account.",
+	TWO_FACTOR_REQUIRED:
+		"Enter the verification code from your authenticator app to continue.",
+
+	// ── Passkeys / WebAuthn ──────────────────────────────────────
+	PASSKEY_NOT_SUPPORTED:
+		"Your device doesn't support passkeys. Use a different sign-in method or update your browser.",
+	PASSKEY_REGISTRATION_FAILED:
+		"Failed to register this passkey. Try again or use a different device.",
+	PASSKEY_AUTHENTICATION_FAILED:
+		"Could not authenticate with this passkey. Try another method.",
+	PASSKEY_DUPLICATE:
+		"This passkey is already registered on your account.",
+	PASSKEY_NO_CREDENTIALS:
+		"No passkeys found on this account. Set one up in account settings.",
+
+	// ── SSO / SAML / OIDC ────────────────────────────────────────
+	SSO_DOMAIN_NOT_ALLOWED:
+		"Single sign-on is not available for your email domain. Sign in with email instead.",
+	SSO_PROVIDER_ERROR:
+		"Your company's single sign-on provider returned an error. Contact your IT administrator.",
+	SSO_CONNECTION_EXISTS:
+		"This SSO connection is already configured. Remove the existing one first.",
 };
 
 function looksLikeNetwork(message: string): boolean {

@@ -1,8 +1,8 @@
 # Lazynext Production Runbook
 
 > **Document version:** 1.0 | **Last updated:** 2026-07-02
-> **Target environment:** Production (Azure + Docker Compose)
-> **On-call rotation:** See PagerDuty schedule
+> **Target environment:** Production (Linode Docker Compose)
+> **On-call rotation:** See Grafana OnCall schedule
 
 ---
 
@@ -41,10 +41,10 @@
          │            │           │           │            │
          └────────────┼───────────┼───────────┼────────────┘
                       │           │           │
-                 ┌────┴────┐ ┌───┴─────┐ ┌───┴──────┐
-                 │ Postgres│ │  Redis  │ │  Azure   │
-                 │ 16      │ │  7      │ │  Blob    │
-                 └─────────┘ └─────────┘ └──────────┘
+                  ┌────┴────┐ ┌───┴─────┐ ┌───┴──────┐
+                  │ Postgres│ │  Redis  │ │  Local   │
+                  │ 16      │ │  7      │ │  Storage │
+                  └─────────┘ └─────────┘ └──────────┘
                             │
          ┌──────────────────┼──────────────────┐
     ┌────┴────┐ ┌──────┴──────┐ ┌───────┴──────┐
@@ -166,19 +166,11 @@ docker compose -f docker-compose.prod-full.yml up -d --no-deps \
 # Then update the image tag to the previous version:
 # Edit the compose file or set the environment variable with the old tag
 
+# Docker Compose rollback (deploy previous image tag):
+# docker compose -f docker-compose.prod-full.yml up -d --no-deps \
+#   render-service:<previous-tag>
 # Or use the deploy script with a specific tag:
 TAG=v1.2.3 ./scripts/deploy-prod.sh
-
-# Azure Container Apps (if deployed to Azure):
-az containerapp revision list \
-  --name lazynext-web-prod \
-  --resource-group lazynext-rg-production \
-  -o table
-
-az containerapp revision activate \
-  --name lazynext-web-prod \
-  --resource-group lazynext-rg-production \
-  --revision [previous-revision-name]
 ```
 
 ### Clear Render Queue (Emergency)
@@ -370,13 +362,13 @@ curl -f http://localhost:3000/api/health
 
 ## 5. Monitoring Alerts Reference
 
-### Critical Alerts (PagerDuty + Slack #lazynext-alerts-critical)
+### Critical Alerts (Grafana OnCall + Slack #lazynext-alerts-critical)
 
 | Alert | Trigger | Duration | Action |
 |-------|---------|----------|--------|
 | APIGatewayDown | `up{job="lazynext-api-gateway"} == 0` | 1m | Check API Gateway pod, restore |
 | RenderQueueCriticalBacklog | `render_queue_size > 100` | 10m | Scale render workers |
-| PaymentProcessingFailure | Payment webhook errors | 5m | Check Stripe dashboard, webhook secret |
+| PaymentProcessingFailure | Payment webhook errors | 5m | Check Dodo Payments dashboard, webhook secret |
 | HighRenderFailureRate | Failure rate > 5% | 10m | Check FFmpeg logs, storage access |
 | DatabaseConnectionFailures | Connection refused > 5/min | 1m | Check DB pod, connection pool |
 | WebAppDown | `up{job="lazynext-web"} == 0` | 5m | Restore web app |
@@ -419,11 +411,9 @@ curl -f http://localhost:3000/api/health
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `REDIS_PASSWORD` | Redis auth password | (empty) |
-| `LLM_PROVIDER` | Default LLM provider | `anthropic` |
-| `STORAGE_PROVIDER` | Media storage backend | `azure` |
-| `MEDIA_BUCKET` | Storage bucket/container name | `lazynext-media-prod` |
-| `AZURE_STORAGE_ACCOUNT` | Azure storage account | `lazynextmediaprod` |
-| `AZURE_STORAGE_CONNECTION_STRING` | Azure storage connection string | (empty) |
+| `LLM_PROVIDER` | Default LLM provider | `gemini` |
+| `STORAGE_PROVIDER` | Media storage backend | `local` |
+| `MEDIA_DIR` | Media filesystem path | `/opt/lazynext/media` |
 | `RENDER_PARALLELISM` | Parallel FFmpeg jobs per worker | `4` |
 | `CF_API_EMAIL` | Cloudflare API email | `ops@lazynext.ai` |
 | `CF_DNS_API_TOKEN` | Cloudflare DNS API token | (empty) |
@@ -434,9 +424,9 @@ curl -f http://localhost:3000/api/health
 | `COLLAB_LOG_LEVEL` | Collab server log level | `info` |
 | `API_GATEWAY_LOG_LEVEL` | API Gateway log level | `info` |
 | `POSTHOG_KEY` | PostHog analytics key | (empty) |
-| `STRIPE_PUBLISHABLE_KEY` | Stripe publishable key | (empty) |
-| `STRIPE_PRO_PRICE_ID` | Stripe Pro plan price ID | (empty) |
-| `STRIPE_STUDIO_PRICE_ID` | Stripe Studio plan price ID | (empty) |
+| `DODO_PUBLISHABLE_KEY` | Dodo Payments publishable key | (empty) |
+| `DODO_PRO_PRICE_ID` | Dodo Payments Pro plan price ID | (empty) |
+| `DODO_STUDIO_PRICE_ID` | Dodo Payments Studio plan price ID | (empty) |
 | `LAZYNEXT_WEBHOOK_URL` | External webhook URL | (empty) |
 
 ### Docker Secrets (managed via `docker secret`)
@@ -445,13 +435,11 @@ curl -f http://localhost:3000/api/health
 |-------------|---------|-------------|
 | `lazynext_postgres_password` | postgres | PostgreSQL password |
 | `lazynext_better_auth_secret` | api-gateway, web, collab-server | Auth signing key |
-| `lazynext_stripe_secret_key` | web | Stripe secret key |
-| `lazynext_stripe_webhook_secret` | api-gateway, web | Stripe webhook key |
+| `lazynext_dodo_secret_key` | web | Dodo Payments secret key |
+| `lazynext_stripe_webhook_secret` | api-gateway, web | Dodo Payments webhook key |
 | `lazynext_resend_api_key` | web | Email API key |
-| `lazynext_openai_api_key` | ai-agents, pre-processing | OpenAI API key |
-| `lazynext_anthropic_api_key` | ai-agents | Anthropic API key |
-| `lazynext_gemini_api_key` | ai-agents | Gemini API key |
-| `lazynext_fal_key` | pre-processing, generative-studio | Fal.ai API key |
+| `lazynext_gemini_api_key` | ai-agents, pre-processing | Gemini API key |
+| `lazynext_modal_key` | pre-processing, generative-studio | Modal API key |
 | `lazynext_freesound_client_id` | web | Freesound client ID |
 | `lazynext_freesound_api_key` | web | Freesound API key |
 | `lazynext_marble_workspace_key` | web | Marble CMS workspace key |
@@ -470,13 +458,11 @@ curl -f http://localhost:3000/api/health
 # Create all production secrets:
 echo "${DB_PASSWORD}" | docker secret create lazynext_postgres_password -
 echo "${BETTER_AUTH_SECRET}" | docker secret create lazynext_better_auth_secret -
-echo "${STRIPE_SECRET_KEY}" | docker secret create lazynext_stripe_secret_key -
-echo "${STRIPE_WEBHOOK_SECRET}" | docker secret create lazynext_stripe_webhook_secret -
+echo "${DODO_SECRET_KEY}" | docker secret create lazynext_dodo_secret_key -
+echo "${DODO_WEBHOOK_SECRET}" | docker secret create lazynext_stripe_webhook_secret -
 echo "${RESEND_API_KEY}" | docker secret create lazynext_resend_api_key -
-echo "${OPENAI_API_KEY}" | docker secret create lazynext_openai_api_key -
-echo "${ANTHROPIC_API_KEY}" | docker secret create lazynext_anthropic_api_key -
 echo "${GEMINI_API_KEY}" | docker secret create lazynext_gemini_api_key -
-echo "${FAL_KEY}" | docker secret create lazynext_fal_key -
+echo "${MODAL_API_KEY}" | docker secret create lazynext_modal_key -
 echo "${CF_DNS_API_TOKEN}" | docker secret create cloudflare_api_token -
 
 # Verify secrets exist

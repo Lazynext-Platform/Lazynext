@@ -35,7 +35,7 @@ rotoscoping, video generation, dubbing, etc.) exceeds 5 minutes over a 1-hour wi
   ```
   Scale up if needed: `az aks nodepool scale --cluster-name lazynext-aks-prod --name gpunp --node-count 2 --resource-group lazynext-rg-prod`
 
-### 2. External API rate limiting (Fal.ai, Edge TTS)
+### 2. External API rate limiting (Modal, Edge TTS)
 - **Symptom:** 429 HTTP status codes in logs, latency spikes
 - **Fix:** Check API dashboard on provider's website. Consider enabling
   fallback to local models if API is consistently rate-limited.
@@ -60,7 +60,7 @@ rotoscoping, video generation, dubbing, etc.) exceeds 5 minutes over a 1-hour wi
 
 - **15 minutes:** ML platform team lead
 - **30 minutes:** CTO (AI features are core product differentiator)
-- **If all ML services are down:** Trigger PagerDuty for on-call ML engineer
+- **If all ML services are down:** Trigger Grafana OnCall for on-call ML engineer
 
 ## Post-Incident
 

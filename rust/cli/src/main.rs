@@ -49,7 +49,7 @@ struct Args {
     #[arg(short, long)]
     file: Option<String>,
 
-    /// Provider for LLM (openai, anthropic, gemini)
+    /// Provider for LLM (gemini)
     #[arg(long, default_value = "gemini")]
     llm_provider: String,
 
@@ -70,7 +70,7 @@ enum Commands {
         #[arg(short, long)]
         file: Option<String>,
 
-        /// Provider for LLM (openai, anthropic, gemini)
+        /// Provider for LLM (gemini)
         #[arg(long, default_value = "gemini")]
         llm_provider: String,
     },

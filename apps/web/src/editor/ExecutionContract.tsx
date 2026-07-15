@@ -7,7 +7,6 @@
  * @module editor/ExecutionContract
  */
 
-import React, { useEffect, useState } from "react";
 import { useEditor } from "./use-editor";
 
 interface CrdtOperation {

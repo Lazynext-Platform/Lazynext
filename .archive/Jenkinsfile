@@ -9,7 +9,7 @@ pipeline {
     }
 
     environment {
-        DOCKER_REGISTRY = 'lazynext.azurecr.io'
+        DOCKER_REGISTRY = 'ghcr.io/lazynext-platform'
         RUST_VERSION    = '1.96'
         BUN_VERSION     = '1.3.14'
         CARGO_TERM_COLOR = 'always'
