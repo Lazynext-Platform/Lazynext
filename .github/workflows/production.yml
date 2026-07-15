@@ -127,17 +127,10 @@ jobs:
 
       - name: Build and push all images
         run: |
-          docker buildx bake --push \
-            --set "*.platform=linux/amd64" \
-            --set "*.tags=${REGISTRY}/lazynext-web:latest,${REGISTRY}/lazynext-web:${GITHUB_SHA}" \
-            --set "*.tags=${REGISTRY}/lazynext-ai-agents:latest,${REGISTRY}/lazynext-ai-agents:${GITHUB_SHA}" \
-            --set "*.tags=${REGISTRY}/lazynext-render-service:latest,${REGISTRY}/lazynext-render-service:${GITHUB_SHA}" \
-            --set "*.tags=${REGISTRY}/lazynext-pre-processing:latest,${REGISTRY}/lazynext-pre-processing:${GITHUB_SHA}" \
-            --set "*.tags=${REGISTRY}/lazynext-generative-studio:latest,${REGISTRY}/lazynext-generative-studio:${GITHUB_SHA}" \
-            --set "*.tags=${REGISTRY}/lazynext-db-migrate:latest,${REGISTRY}/lazynext-db-migrate:${GITHUB_SHA}" \
-            --set "*.tags=${REGISTRY}/lazynext-collab-server:latest,${REGISTRY}/lazynext-collab-server:${GITHUB_SHA}" \
-            --set "*.tags=${REGISTRY}/lazynext-analytics-service:latest,${REGISTRY}/lazynext-analytics-service:${GITHUB_SHA}" \
-            --set "*.tags=${REGISTRY}/lazynext-api-gateway:latest,${REGISTRY}/lazynext-api-gateway:${GITHUB_SHA}"
+          TAG=latest GIT_SHA="${GITHUB_SHA}" docker buildx bake --push \
+            --set "*.platform=linux/amd64"
+          TAG="${GITHUB_SHA}" GIT_SHA="${GITHUB_SHA}" docker buildx bake --push \
+            --set "*.platform=linux/amd64"
 
   # ── Deploy to Linode ─────────────────────────────────────────────────
   deploy:
