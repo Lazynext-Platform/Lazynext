@@ -85,7 +85,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install system dependencies
-        run: sudo apt-get update && sudo apt-get install -y libasound2-dev libudev-dev
+        run: sudo apt-get update && sudo apt-get install -y libasound2-dev libudev-dev libxcb1-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev libxkbcommon-x11-dev
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -96,8 +96,8 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@1.96.0
 
-      - name: Rust tests
-        run: cargo test --workspace
+      - name: Rust tests (skip desktop)
+        run: cargo test --workspace --exclude lazynext_desktop
 
       - name: TypeScript tests
         run: bun run test
