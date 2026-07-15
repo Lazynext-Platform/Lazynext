@@ -26,6 +26,7 @@ use tokio::sync::Mutex;
 use tokio::sync::mpsc;
 use tracing::{error, info, warn};
 
+pub mod captcha;
 pub mod csrf;
 pub mod db;
 pub mod ratelimit;
@@ -221,32 +222,51 @@ async fn main() {
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .route("/health", get(health_handler))
         .route("/api/v1/dodo/webhook", post(handle_dodo_webhook))
+        .route(
+            "/api/v1/captcha/verify-turnstile",
+            post(captcha::handle_verify_turnstile),
+        )
+        .route(
+            "/api/v1/captcha/challenge",
+            get(captcha::handle_get_challenge),
+        )
+        .route(
+            "/api/v1/captcha/verify-pow",
+            post(captcha::handle_verify_pow),
+        )
         .layer(middleware::from_fn_with_state(
             state.clone(),
             ratelimit::rate_limit,
         ));
 
     let authenticated_routes = Router::new()
-        .route("/api/v1/autonomous_edit", post(handle_autonomous_edit))
-        .route(
-            "/api/v1/timeline",
-            get(handle_get_timeline).post(handle_add_clip),
-        )
+        .route("/api/v1/timeline", get(handle_get_timeline))
         .route("/api/v1/user/profile", get(handle_get_profile))
+        .route("/api/v1/user/credits", get(handle_get_user_credits))
+        .route("/api/v1/projects", get(handle_get_projects))
+        .route("/api/v1/ws", get(ws::ws_handler))
+        .route("/api/v1/social/schedule", get(handle_social_schedule))
+        .route("/api/v1/routines", get(handle_list_routines))
+        .route("/api/v1/channels", get(handle_list_channels))
+        .route("/api/v1/tasks", get(handle_list_tasks))
+        .route("/api/v1/tasks/{id}", get(handle_get_task))
+        .route("/api/v1/media/presigned-url", get(handle_get_presigned_url))
+        // Admin (already role-gated)
+        .route("/api/v1/admin/dashboard", get(handle_admin_dashboard));
+
+    // ── Routes requiring CAPTCHA verification ──────────────────────
+    let captcha_protected_routes = Router::new()
+        .route("/api/v1/autonomous_edit", post(handle_autonomous_edit))
+        .route("/api/v1/timeline", post(handle_add_clip))
         .route(
             "/api/v1/user/integrations/connect",
             post(handle_integration_connect),
         )
         .route("/api/v1/ai/ingest", post(handle_ai_ingest))
         .route("/api/v1/render", post(handle_trigger_render))
-        .route("/api/v1/projects", get(handle_get_projects))
-        .route("/api/v1/user/credits", get(handle_get_user_credits))
         .route("/api/v1/ai/generate", post(handle_generate))
         .route("/api/v1/ai/tts", post(handle_tts))
-        .route("/api/v1/admin/dashboard", get(handle_admin_dashboard))
-        .route("/api/v1/ws", get(ws::ws_handler))
         .route("/api/v1/media/upload", post(handle_media_upload))
-        .route("/api/v1/media/presigned-url", get(handle_get_presigned_url))
         .route("/api/v1/ingest/stream", post(handle_stream_ingest))
         .route(
             "/api/v1/ingest/stream/complete",
@@ -259,33 +279,30 @@ async fn main() {
         .route("/api/v1/social/reframe", post(handle_social_reframe))
         .route("/api/v1/social/publish", post(handle_social_publish))
         .route("/api/v1/social/metadata", post(handle_social_metadata))
-        .route("/api/v1/social/schedule", get(handle_social_schedule))
-        // ── Scheduled Routines ──────────────────────────────────────
         .route("/api/v1/routines", post(handle_create_routine))
-        .route("/api/v1/routines", get(handle_list_routines))
         .route("/api/v1/routines/{id}", delete(handle_cancel_routine))
         .route(
             "/api/v1/routines/{id}/execute",
             post(handle_execute_routine),
         )
-        // ── Channels ────────────────────────────────────────────────
         .route("/api/v1/channels/webhook", post(handle_register_webhook))
         .route("/api/v1/channels/event", post(handle_channel_event))
-        .route("/api/v1/channels", get(handle_list_channels))
-        // ── Background Tasks ─────────────────────────────────────────
         .route("/api/v1/tasks", post(handle_enqueue_task))
-        .route("/api/v1/tasks", get(handle_list_tasks))
-        .route("/api/v1/tasks/{id}", get(handle_get_task))
         .layer(middleware::from_fn(rbac::authorize_request))
         .layer(middleware::from_fn(csrf::csrf_protection))
+        .layer(middleware::from_fn(captcha::captcha_middleware))
         .layer(middleware::from_fn_with_state(
             state.clone(),
             ratelimit::rate_limit,
         ));
 
+    // Merge all authenticated route groups — inner routers already
+    // carry their own middleware; no extra layers at this level.
+    let all_authenticated = authenticated_routes.merge(captcha_protected_routes);
+
     // Merge public and authenticated routes.
     let app = public_routes
-        .merge(authenticated_routes)
+        .merge(all_authenticated)
         .with_state(state)
         .layer(TraceLayer::new_for_http());
 
@@ -1689,8 +1706,7 @@ struct PresignedUrlQuery {
 
 /// GET /api/v1/media/presigned-url
 ///
-/// Generates an Azure Blob Storage SAS URL for direct client-to-cloud upload.
-/// Falls back to a dev/stub URL when Azure credentials are not configured.
+/// Generates a direct upload URL for client-to-server media upload.
 ///
 /// **Auth**: Requires Editor role or higher.
 /// **Query**: `filename` — the target blob name.
@@ -1705,25 +1721,10 @@ async fn handle_get_presigned_url(
         return Json(json!({ "success": false, "error": "Insufficient permissions" }));
     }
 
-    let account =
-        std::env::var("AZURE_STORAGE_ACCOUNT").unwrap_or_else(|_| "lazynext-dev".to_string());
-    let container =
-        std::env::var("AZURE_STORAGE_CONTAINER").unwrap_or_else(|_| "media".to_string());
+    let api_url =
+        std::env::var("API_GATEWAY_URL").unwrap_or_else(|_| "https://api.lazynext.com".to_string());
 
-    // Generate real SAS URL via azure_storage_blobs SDK when credentials configured
-    let signed_url = match db::generate_blob_sas_url(&account, &container, &query.filename).await {
-        Ok(url) => url,
-        Err(e) => {
-            tracing::error!("Failed to generate SAS URL: {e}");
-            let expiry = (chrono::Utc::now() + chrono::Duration::hours(1))
-                .format("%Y-%m-%dT%H:%M:%SZ")
-                .to_string();
-            format!(
-                "https://{}.blob.core.windows.net/{}/{}?sp=cw&se={}&spr=https&sv=2022-11-02&sr=b&sig=error_fallback",
-                account, container, query.filename, expiry
-            )
-        }
-    };
+    let signed_url = format!("{}/api/v1/upload/{}", api_url, query.filename);
 
     Json(json!({
         "success": true,
@@ -1807,12 +1808,11 @@ struct StreamCompletePayload {
 
 /// POST /api/v1/ingest/stream/complete
 ///
-/// Finalizes a chunked MediaRecorder stream session. Uploads the assembled
-/// file to Azure Blob Storage (if configured) and adds the clip to the
-/// timeline.
+/// Finalizes a chunked MediaRecorder stream session. Keeps the assembled
+/// file in local storage and adds the clip to the timeline.
 ///
 /// **Body**: `StreamCompletePayload` (session_id)
-/// **Returns**: `{ success, message, url, azure_uploaded }`
+/// **Returns**: `{ success, message, url }`
 async fn handle_stream_complete(
     State(state): State<AppState>,
     Json(payload): Json<StreamCompletePayload>,
@@ -1827,56 +1827,6 @@ async fn handle_stream_complete(
         return Json(json!({ "success": false, "error": "Session file not found" }));
     }
 
-    let azure_uploaded = {
-        let account = std::env::var("AZURE_STORAGE_ACCOUNT").unwrap_or_default();
-        let key = std::env::var("AZURE_STORAGE_ACCESS_KEY").unwrap_or_default();
-        let container =
-            std::env::var("AZURE_STORAGE_CONTAINER").unwrap_or_else(|_| "media".to_string());
-
-        if !account.is_empty() && !key.is_empty() {
-            match std::fs::read(&file_path) {
-                Ok(data) => {
-                    let blob_name = format!("{}.webm", session_id);
-                    match azure_storage_blobs::prelude::ClientBuilder::new(
-                        account.clone(),
-                        azure_storage::StorageCredentials::access_key(account, key),
-                    )
-                    .blob_client(&container, &blob_name)
-                    .put_block_blob(data)
-                    .await
-                    {
-                        Ok(_) => {
-                            info!(
-                                "Uploaded stream {} to Azure Blob Storage ({}/{})",
-                                session_id, container, blob_name
-                            );
-                            true
-                        }
-                        Err(e) => {
-                            error!(
-                                "Azure Blob Storage upload failed: {}. Falling back to local file.",
-                                e
-                            );
-                            false
-                        }
-                    }
-                }
-                Err(e) => {
-                    error!(
-                        "Failed to read local file {} for Azure upload: {}",
-                        file_path, e
-                    );
-                    false
-                }
-            }
-        } else {
-            info!(
-                "Azure Storage credentials not configured — keeping local file for session {}",
-                session_id
-            );
-            false
-        }
-    };
     let mut nle = state.nle.lock().await;
     let track_count = nle.get_project_data().tracks.len();
     if track_count == 0 {
@@ -1891,13 +1841,8 @@ async fn handle_stream_complete(
         300,
     );
 
-    let msg = if azure_uploaded {
-        "Stream finalized, uploaded to Azure Blob Storage, and added to timeline"
-    } else {
-        "Stream finalized (local storage) and added to timeline"
-    };
     Json(
-        json!({ "success": true, "message": msg, "url": file_path, "azure_uploaded": azure_uploaded }),
+        json!({ "success": true, "message": "Stream finalized (local storage) and added to timeline", "url": file_path }),
     )
 }
 

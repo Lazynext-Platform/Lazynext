@@ -1,7 +1,7 @@
 "use client";
 /** @module Feedback popover with compose and history views */
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { ClockIcon } from "lucide-react";
@@ -21,6 +21,8 @@ import {
 	clearFormDraft,
 } from "@/components/ui/form";
 import type { FeedbackEntry } from "../types";
+import { CaptchaWidget } from "@/components/auth/CaptchaWidget";
+import { verifyCaptchaToken } from "@/components/auth/captcha-verify";
 
 const PERSIST_KEY = "feedback-draft";
 const HISTORY_KEY = "feedback-history";
@@ -56,9 +58,11 @@ function useFeedback() {
 	async function submit({
 		values,
 		onSuccess,
+		captchaToken,
 	}: {
 		values: FeedbackFormValues;
 		onSuccess: () => void;
+		captchaToken?: string;
 	}) {
 		if (isSubmitting) return;
 		setIsSubmitting(true);
@@ -66,7 +70,10 @@ function useFeedback() {
 		try {
 			const res = await fetch("/api/feedback", {
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
+				headers: {
+					"Content-Type": "application/json",
+					...(captchaToken ? { "X-Captcha-Token": captchaToken } : {}),
+				},
 				body: JSON.stringify(values),
 			});
 
@@ -115,14 +122,21 @@ type View = "compose" | "history";
 function FeedbackPopoverContent({ onClose }: { onClose: () => void }) {
 	const { entries, isSubmitting, submit } = useFeedback();
 	const [view, setView] = useState<View>("compose");
+	const captchaTokenRef = useRef<string>("");
 
 	const form = useForm<FeedbackFormValues>({
 		defaultValues: { message: "" },
 	});
 
 	async function handleSubmit(values: FeedbackFormValues) {
+		const token = captchaTokenRef.current;
+		if (!(await verifyCaptchaToken(token))) {
+			toast.error("CAPTCHA verification required");
+			return;
+		}
 		await submit({
 			values,
+			captchaToken: token,
 			onSuccess: () => {
 				form.reset({ message: "" });
 				clearFormDraft({ key: PERSIST_KEY });
@@ -179,6 +193,14 @@ function FeedbackPopoverContent({ onClose }: { onClose: () => void }) {
 								</FormControl>
 							</FormItem>
 						)}
+					/>
+					<CaptchaWidget
+						onVerify={(token) => {
+							captchaTokenRef.current = token;
+						}}
+						onError={() => {
+							captchaTokenRef.current = "";
+						}}
 					/>
 					<div className="flex items-center justify-between border-t px-3 py-2">
 						{entries.length > 0 ? (

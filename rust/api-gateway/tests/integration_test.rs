@@ -387,4 +387,292 @@ mod http_integration {
         assert_eq!(body["success"], true);
         assert!(body["projects"].is_array());
     }
+
+    // ── Captcha Endpoint Tests ──────────────────────────────────────────
+
+    use sha2::{Digest, Sha256};
+    use axum::extract::Json as AxumJson;
+    use serde::{Deserialize, Serialize};
+
+    fn check_pow_difficulty(hash: &[u8; 32], difficulty: u32) -> bool {
+        let full_bytes = (difficulty / 8) as usize;
+        let remaining_bits = difficulty % 8;
+        for b in hash.iter().take(full_bytes) {
+            if *b != 0 {
+                return false;
+            }
+        }
+        if remaining_bits > 0 && full_bytes < 32 {
+            let mask = 0xFFu8 << (8 - remaining_bits);
+            if hash[full_bytes] & mask != 0 {
+                return false;
+            }
+        }
+        true
+    }
+
+    // Re-implement minimal captcha handlers for integration testing.
+    // We can't import from the binary crate, so we duplicate the minimal logic.
+
+    #[derive(Serialize)]
+    struct TestPowChallenge {
+        challenge_id: String,
+        prefix: String,
+        difficulty: u32,
+        expires_at: u64,
+    }
+
+    #[derive(Deserialize)]
+    struct TestPowSolution {
+        challenge_id: String,
+        nonce: u64,
+    }
+
+    #[derive(Deserialize)]
+    struct TestTurnstileRequest {
+        token: String,
+    }
+
+    static TEST_CHALLENGE_STORE: std::sync::LazyLock<
+        std::sync::Mutex<std::collections::HashMap<String, (String, u32)>>,
+    > = std::sync::LazyLock::new(|| {
+        std::sync::Mutex::new(std::collections::HashMap::new())
+    });
+
+    async fn handle_challenge() -> Json<serde_json::Value> {
+        let challenge_id = uuid::Uuid::new_v4().to_string();
+        let prefix = uuid::Uuid::new_v4().to_string().replace('-', "");
+        let difficulty: u32 = 16;
+        let expires_at =
+            (chrono::Utc::now() + chrono::Duration::minutes(5)).timestamp() as u64;
+
+        let mut store = TEST_CHALLENGE_STORE.lock().unwrap();
+        store.insert(challenge_id.clone(), (prefix.clone(), difficulty));
+
+        Json(serde_json::json!({
+            "challenge_id": challenge_id,
+            "prefix": prefix,
+            "difficulty": difficulty,
+            "expires_at": expires_at,
+        }))
+    }
+
+    async fn handle_verify_pow(
+        AxumJson(solution): AxumJson<TestPowSolution>,
+    ) -> Json<serde_json::Value> {
+        let mut store = TEST_CHALLENGE_STORE.lock().unwrap();
+        let challenge_data = store.remove(&solution.challenge_id);
+
+        match challenge_data {
+            None => Json(serde_json::json!({
+                "success": false,
+                "message": "Invalid or expired challenge",
+            })),
+            Some((prefix, difficulty)) => {
+                let mut hasher = Sha256::new();
+                hasher.update(format!("{}{}", prefix, solution.nonce).as_bytes());
+                let hash: [u8; 32] = hasher.finalize().into();
+                let valid = check_pow_difficulty(&hash, difficulty);
+                Json(serde_json::json!({
+                    "success": valid,
+                    "message": if valid { "Proof-of-work verified" } else { "Invalid solution" },
+                }))
+            }
+        }
+    }
+
+    async fn handle_verify_turnstile(
+        AxumJson(_payload): AxumJson<TestTurnstileRequest>,
+    ) -> Json<serde_json::Value> {
+        Json(serde_json::json!({
+            "success": true,
+            "message": "CAPTCHA disabled (dev mode)",
+        }))
+    }
+
+    fn build_captcha_test_router() -> Router {
+        Router::new()
+            .route("/api/v1/captcha/challenge", get(handle_challenge))
+            .route(
+                "/api/v1/captcha/verify-pow",
+                axum::routing::post(handle_verify_pow),
+            )
+            .route(
+                "/api/v1/captcha/verify-turnstile",
+                axum::routing::post(handle_verify_turnstile),
+            )
+    }
+
+    #[tokio::test]
+    async fn test_captcha_challenge_returns_valid_fields() {
+        let app = build_captcha_test_router();
+        let addr = start_test_server(app).await;
+        let client = Client::new();
+
+        let resp = client
+            .get(format!("http://{}/api/v1/captcha/challenge", addr))
+            .send()
+            .await
+            .unwrap();
+
+        assert_eq!(resp.status(), 200);
+        let body: serde_json::Value = resp.json().await.unwrap();
+        assert!(body["challenge_id"].is_string());
+        assert!(!body["challenge_id"].as_str().unwrap().is_empty());
+        assert!(body["prefix"].is_string());
+        assert_eq!(body["prefix"].as_str().unwrap().len(), 32);
+        assert!(body["difficulty"].is_number());
+        assert!(body["expires_at"].is_number());
+    }
+
+    #[tokio::test]
+    async fn test_captcha_challenge_is_unique() {
+        let app = build_captcha_test_router();
+        let addr = start_test_server(app).await;
+        let client = Client::new();
+
+        let resp1 = client
+            .get(format!("http://{}/api/v1/captcha/challenge", addr))
+            .send()
+            .await
+            .unwrap();
+        let resp2 = client
+            .get(format!("http://{}/api/v1/captcha/challenge", addr))
+            .send()
+            .await
+            .unwrap();
+
+        let body1: serde_json::Value = resp1.json().await.unwrap();
+        let body2: serde_json::Value = resp2.json().await.unwrap();
+
+        assert_ne!(body1["challenge_id"], body2["challenge_id"]);
+    }
+
+    #[tokio::test]
+    async fn test_captcha_pow_full_flow_solve_and_verify() {
+        let app = build_captcha_test_router();
+        let addr = start_test_server(app).await;
+        let client = Client::new();
+
+        let challenge_resp = client
+            .get(format!("http://{}/api/v1/captcha/challenge", addr))
+            .send()
+            .await
+            .unwrap();
+        let challenge: serde_json::Value = challenge_resp.json().await.unwrap();
+        let prefix = challenge["prefix"].as_str().unwrap();
+        let difficulty = challenge["difficulty"].as_u64().unwrap() as u32;
+        let challenge_id = challenge["challenge_id"].as_str().unwrap();
+
+        let mut nonce = 0u64;
+        let solution_nonce = loop {
+            let mut hasher = Sha256::new();
+            hasher.update(format!("{}{}", prefix, nonce).as_bytes());
+            let hash: [u8; 32] = hasher.finalize().into();
+            if check_pow_difficulty(&hash, difficulty) {
+                break nonce;
+            }
+            nonce += 1;
+            if nonce > 5_000_000 {
+                panic!("Could not solve PoW in 5M iterations");
+            }
+        };
+
+        let verify_resp = client
+            .post(format!("http://{}/api/v1/captcha/verify-pow", addr))
+            .json(&serde_json::json!({
+                "challenge_id": challenge_id,
+                "nonce": solution_nonce,
+            }))
+            .send()
+            .await
+            .unwrap();
+
+        assert_eq!(verify_resp.status(), 200);
+        let verify_body: serde_json::Value = verify_resp.json().await.unwrap();
+        assert_eq!(verify_body["success"], true);
+    }
+
+    #[tokio::test]
+    async fn test_captcha_pow_invalid_nonce_rejected() {
+        let app = build_captcha_test_router();
+        let addr = start_test_server(app).await;
+        let client = Client::new();
+
+        let challenge_resp = client
+            .get(format!("http://{}/api/v1/captcha/challenge", addr))
+            .send()
+            .await
+            .unwrap();
+        let challenge: serde_json::Value = challenge_resp.json().await.unwrap();
+        let challenge_id = challenge["challenge_id"].as_str().unwrap();
+
+        let verify_resp = client
+            .post(format!("http://{}/api/v1/captcha/verify-pow", addr))
+            .json(&serde_json::json!({
+                "challenge_id": challenge_id,
+                "nonce": 0,
+            }))
+            .send()
+            .await
+            .unwrap();
+
+        let verify_body: serde_json::Value = verify_resp.json().await.unwrap();
+        assert_eq!(verify_body["success"], false);
+    }
+
+    #[tokio::test]
+    async fn test_captcha_challenge_single_use() {
+        let app = build_captcha_test_router();
+        let addr = start_test_server(app).await;
+        let client = Client::new();
+
+        let challenge_resp = client
+            .get(format!("http://{}/api/v1/captcha/challenge", addr))
+            .send()
+            .await
+            .unwrap();
+        let challenge: serde_json::Value = challenge_resp.json().await.unwrap();
+        let prefix = challenge["prefix"].as_str().unwrap();
+        let difficulty = challenge["difficulty"].as_u64().unwrap() as u32;
+        let challenge_id = challenge["challenge_id"].as_str().unwrap();
+
+        let mut nonce = 0u64;
+        let solution_nonce = loop {
+            let mut hasher = Sha256::new();
+            hasher.update(format!("{}{}", prefix, nonce).as_bytes());
+            let hash: [u8; 32] = hasher.finalize().into();
+            if check_pow_difficulty(&hash, difficulty) {
+                break nonce;
+            }
+            nonce += 1;
+            if nonce > 5_000_000 {
+                panic!("Could not solve PoW");
+            }
+        };
+
+        // First use — should succeed
+        let resp1 = client
+            .post(format!("http://{}/api/v1/captcha/verify-pow", addr))
+            .json(&serde_json::json!({
+                "challenge_id": challenge_id,
+                "nonce": solution_nonce,
+            }))
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(resp1.json::<serde_json::Value>().await.unwrap()["success"], true);
+
+        // Second use with same challenge — should fail (single-use)
+        let resp2 = client
+            .post(format!("http://{}/api/v1/captcha/verify-pow", addr))
+            .json(&serde_json::json!({
+                "challenge_id": challenge_id,
+                "nonce": solution_nonce,
+            }))
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(resp2.json::<serde_json::Value>().await.unwrap()["success"], false);
+    }
 }

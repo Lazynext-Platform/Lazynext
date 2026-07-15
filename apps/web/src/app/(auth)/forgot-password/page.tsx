@@ -1,31 +1,58 @@
 /**
  * Forgot password page — email-based password reset flow.
+ * Includes Cloudflare Turnstile CAPTCHA verification.
  *
  * @page /forgot-password
  */
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { toast } from "sonner";
 import Link from "next/link";
 import { requestPasswordReset } from "@/auth/client";
 import { friendlyAuthError } from "@/components/auth/auth-errors";
+import { CaptchaWidget } from "@/components/auth/CaptchaWidget";
+import { verifyCaptchaToken } from "@/components/auth/captcha-verify";
 
 export default function ForgotPasswordPage() {
 	const [email, setEmail] = useState("");
 	const [sent, setSent] = useState(false);
 	const [loading, setLoading] = useState(false);
+	const captchaToken = useRef<string>("");
+
+	const verifyCaptcha = async (): Promise<boolean> => {
+		const token = captchaToken.current;
+		if (!token) {
+			toast.error("Please complete the CAPTCHA verification");
+			return false;
+		}
+		const valid = await verifyCaptchaToken(token);
+		if (!valid) {
+			toast.error("CAPTCHA verification failed. Please try again.");
+			captchaToken.current = "";
+		}
+		return valid;
+	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setLoading(true);
 		try {
-			const { error } = await requestPasswordReset({
-				email,
-				redirectTo: "/reset-password",
-			});
+			if (!(await verifyCaptcha())) {
+				setLoading(false);
+				return;
+			}
+			const { error } = await requestPasswordReset(
+				{
+					email,
+					redirectTo: "/reset-password",
+				},
+				captchaToken.current
+					? { headers: { "X-Captcha-Token": captchaToken.current } }
+					: undefined,
+			);
 			if (!error) {
 				setSent(true);
 				toast.success("Reset link sent! Check your email.");
@@ -70,6 +97,15 @@ export default function ForgotPasswordPage() {
 					required
 					className="w-full rounded-lg border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder-[var(--text-muted)] outline-none focus:border-[var(--accent-secondary)] focus:ring-1 focus:ring-[var(--accent-secondary)]"
 					placeholder="you@example.com"
+				/>
+				<CaptchaWidget
+					onVerify={(token) => {
+						captchaToken.current = token;
+					}}
+					onError={() => {
+						captchaToken.current = "";
+					}}
+					disabled={loading}
 				/>
 				<button
 					type="submit"

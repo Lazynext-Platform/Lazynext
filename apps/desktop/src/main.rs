@@ -14,6 +14,7 @@ mod dashboard;
 use dashboard::Dashboard;
 
 mod auth;
+mod captcha;
 mod editor;
 mod theme;
 

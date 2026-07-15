@@ -1,6 +1,7 @@
 /** @module overlay Overlay component for browser extension */
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { performCaptcha } from "./captcha";
 
 interface Project {
   /** Unique project identifier. */
@@ -314,11 +315,19 @@ function OverlayEditor() {
                 const prompt = (document.getElementById("ai-prompt") as HTMLInputElement).value;
                 if (!prompt) return;
                 
+                setStatus("Verifying...");
+                const captchaToken = await performCaptcha();
+                if (!captchaToken) {
+                  setStatus("Error: CAPTCHA verification failed");
+                  return;
+                }
+
                 setStatus("Processing AI command...");
                 try {
                   const gatewayUrl = await chrome.storage.local.get("apiGatewayUrl")
                     .then(r => r.apiGatewayUrl || "http://localhost:8005");
                   const headers = await authHeaders();
+                  headers["X-Captcha-Token"] = captchaToken;
                   const resp = await fetch(`${gatewayUrl}/api/v1/autonomous_edit`, {
                     method: "POST",
                     headers,
