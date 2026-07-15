@@ -96,7 +96,7 @@ services:
         
         echo "Downloading Whisper large-v3..."
         curl -L -o $MODELS_DIR/whisper-large-v3.pt \
-          https://huggingface.co/openai/whisper-large-v3/resolve/main/pytorch_model.bin
+          https://modal.com/openai/whisper-large-v3/resolve/main/pytorch_model.bin
         
         echo "All models downloaded."
     volumes:

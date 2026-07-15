@@ -1,5 +1,5 @@
 # ── Weekly Security Scan ─────────────────────────────────────────────────
-# Runs Trivy vulnerability/config scans, Terraform scanning, Kubernetes
+# Runs Trivy vulnerability/config scans, Kubernetes
 # manifest checks, and secret detection (TruffleHog + Gitleaks). CodeQL is
 # handled separately by GitHub's default code-scanning setup.
 name: Weekly Security Scan
@@ -58,33 +58,6 @@ jobs:
   # ("advanced") CodeQL job cannot coexist with default setup — GitHub rejects
   # the upload with "analyses from advanced configurations cannot be processed
   # when the default setup is enabled". It is intentionally omitted here.
-
-  tfsec:
-    name: Terraform Security Scan
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-
-      # tfsec is deprecated and merged into Trivy; scan Terraform configs
-      # with Trivy's misconfiguration scanner instead.
-      - name: Run Trivy Terraform config scan
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: "config"
-          scan-ref: "infra/terraform"
-          format: "sarif"
-          output: "tfsec.sarif"
-          severity: "HIGH,CRITICAL"
-          exit-code: "0"
-          timeout: "10m"
-
-      - name: Upload Terraform SARIF
-        uses: github/codeql-action/upload-sarif@v4
-        if: always()
-        with:
-          sarif_file: "tfsec.sarif"
-          category: "terraform"
 
   kubesec:
     name: Kubernetes Manifest Security

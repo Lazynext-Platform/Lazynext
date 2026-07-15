@@ -5,7 +5,7 @@ import type { SceneTracks, VideoElement } from "@/timeline";
 import { applyElementUpdate } from "@/timeline/update-pipeline";
 import { mediaTime, ZERO_MEDIA_TIME } from "@/wasm";
 
-function buildTransform(): Transform {
+function _buildTransform(): Transform {
 	return {
 		scaleX: 1,
 		scaleY: 1,

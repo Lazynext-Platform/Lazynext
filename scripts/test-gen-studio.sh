@@ -68,10 +68,10 @@ test_endpoint "Edge TTS /avatar" POST "/generate-avatar" \
 	'{"script":"Hello from Lazynext.","avatar_model":"test_avatar"}' \
 	'"success":true'
 
-# Fal.ai video gen — should return prediction ID or graceful error
-test_endpoint "Fal.ai /generate-video" POST "/generate-video" \
+# Modal video gen — should return prediction ID or graceful error
+test_endpoint "Modal /generate-video" POST "/generate-video" \
 	'{"prompt":"a test video","width":1024,"height":576,"num_frames":24}' \
-	'"success"\|"Fal.ai\|"not configured"'
+	'"success"\|"Modal\|"not configured"'
 
 # Inpainting
 test_endpoint "Inpaint /inpaint" POST "/inpaint" \

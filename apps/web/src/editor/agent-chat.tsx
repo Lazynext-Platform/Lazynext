@@ -145,7 +145,7 @@ export function AgentChat({
 	const [showSlashMenu, setShowSlashMenu] = useState(false);
 	const [slashFilter, setSlashFilter] = useState("");
 	const [selectedSlashIdx, setSelectedSlashIdx] = useState(0);
-	const [failedMessageId, setFailedMessageId] = useState<number | null>(null);
+	const [_failedMessageId, setFailedMessageId] = useState<number | null>(null);
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
 
@@ -167,6 +167,7 @@ export function AgentChat({
 
 	// Slash command filtering
 	useEffect(() => {
+		/* eslint-disable react-hooks/set-state-in-effect */
 		if (input.startsWith("/")) {
 			const filter = input.slice(1).toLowerCase();
 			setSlashFilter(filter);

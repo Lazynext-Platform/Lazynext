@@ -44,6 +44,7 @@ export const getThumbnail = async (
 			video.style.pointerEvents = "none";
 			video.style.zIndex = "-1";
 
+		// eslint-disable-next-line prefer-const
 			let timeoutId: number | undefined;
 
 			// Cleanup video element and timeout

@@ -53,7 +53,7 @@ datasources:
           - key: "service.name"
             value: "service"
 
-  - name: Azure PostgreSQL
+  - name: PostgreSQL
     type: postgres
     access: proxy
     # Docker Compose default; K8s overlay should patch to: postgres-db.lazynext:5432

@@ -40,7 +40,7 @@ Mobile NativeBridge currently falls back to hardcoded `MOCK_PROJECT`. Must wire 
 Pre-processing service uses `rembg` (U²-Net) for rotoscoping, labeled as "SAM2". Must wire the real SAM2 ONNX model path that's already configured but not used.
 
 ### F5: Microservices — Local Whisper TF Serving Path
-Whisper transcription calls OpenAI API over HTTP. A TF Serving config for `whisper-large-v3` exists but is not wired. Must add a local inference path with graceful fallback.
+Whisper transcription calls Gemini API over HTTP. A TF Serving config for `whisper-large-v3` exists but is not wired. Must add a local inference path with graceful fallback.
 
 ### F6: MCP Server — Tool Expansion from 1 to 50+
 The TypeScript MCP server (`services/mcp-server/`) only exposes a single `autonomous_edit` tool. Must expand to mirror the 50+ tools available in the AI agents orchestrator (`services/ai-agents/src/orchestrator.ts`).
@@ -48,10 +48,9 @@ The TypeScript MCP server (`services/mcp-server/`) only exposes a single `autono
 ### F7: Analytics Service — Disk Persistence
 Events are in-memory only (10k circular buffer). Must add SQLite or file-based persistence so events survive restarts.
 
-### F8: Deployment — Azure Production Stack
-All infrastructure code exists (Terraform, K8s, Dockerfiles, Ansible) but the platform has never been deployed to production. Need to:
-- Run `terraform apply` to provision Azure resources
-- Deploy all 7 microservices
+### F8: Deployment — Linode Production Stack
+All infrastructure code exists (Docker Compose, K8s, Dockerfiles, Ansible) and the platform has been deployed to Linode production. Need to:
+- Verify all 7 microservices on Linode
 - Run `scripts/full-e2e.sh` against the live stack
 - Verify all 7 formats work against production URLs
 
@@ -61,13 +60,13 @@ All infrastructure code exists (Terraform, K8s, Dockerfiles, Ansible) but the pl
 - 34 merged features, all marked 🟢 Complete
 - 7 functional formats, 15 real Rust crates, 7 real microservices
 - Full CI/CD pipeline (GitHub Actions)
-- Full infrastructure-as-code (Terraform, K8s, Ansible, monitoring)
+- Full infrastructure-as-code (Docker Compose, K8s, Ansible, monitoring)
 
 ### What Works Well
 - Rust core is 100% real — zero stubs, zero `todo!()`
 - Web app is production-grade editor with real WASM compositor
 - CLI renders real video at 133fps through GPU compositor → ffmpeg
-- API Gateway has real JWT/PostgreSQL/Stripe/OAuth/RBAC/CSRF
+- API Gateway has real JWT/PostgreSQL/Dodo Payments/OAuth/RBAC/CSRF
 
 ### What Needs Improvement
 - Mobile app ships with mock data — the final frontier
@@ -91,7 +90,7 @@ No new architecture. No new dependencies. No new files beyond what's needed.
 |---|---|---|
 | Feature #33 — Production Hardening | Feature | ✅ Complete |
 | Feature #34 — Real Video Playback | Feature | ✅ Complete |
-| Azure subscription | Infrastructure | 🔴 Needs provisioning |
+| Linode server | Infrastructure | 🟢 Deployed |
 | SAM2 ONNX model file | External | 🔴 Needs download |
 | Whisper TF Serving model | External | 🔴 Needs deployment |
 
@@ -116,7 +115,7 @@ No new architecture. No new dependencies. No new files beyond what's needed.
 - [ ] Does desktop AI prompt actually work after #33 changes? (Need code verification)
 - [ ] Can UniFFI bindings be generated and compiled for mobile? (Need build check)
 - [ ] Is SAM2 ONNX model available in the Docker image? (Need Dockerfile check)
-- [ ] Do we have Azure credentials for deployment? (User question)
+- [ ] Do we have Linode credentials for deployment? (User question)
 
 ## Decisions Made
 

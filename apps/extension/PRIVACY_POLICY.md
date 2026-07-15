@@ -16,7 +16,7 @@ Recorded chunks of media are buffered temporarily in memory before being securel
 The media captured is used strictly for the purpose of importing footage into your personal Lazynext timeline. It is not sold, shared with third-party advertisers, or used to train public AI models.
 
 ## Data Transmission & Security
-All captured media is transmitted securely using TLS/SSL encryption to our cloud infrastructure and is stored in private AWS S3 buckets.
+All captured media is transmitted securely using TLS/SSL encryption to our cloud infrastructure and is stored in private encrypted storage.
 
 ## User Control
 You can stop recording at any time by clicking "Stop Recording." The extension does not record in the background or monitor your browsing history (`tabs` permission is strictly used to identify the active tab for capture).

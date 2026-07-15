@@ -45,7 +45,7 @@ python src/main.py
 |---|---|---|
 | `PORT` | `8001` | HTTP listen port |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | — | OpenTelemetry OTLP collector endpoint |
-| `HF_HOME` | — | Hugging Face cache directory |
+| `MODEL_CACHE_DIR` | — | Modal model cache directory |
 | `TORCH_DEVICE` | `cpu` | PyTorch device (`cpu`, `cuda`) |
 
 ## Dependencies

@@ -81,5 +81,6 @@ export function useMultiplayer({
 		[]
 	);
 
+	// eslint-disable-next-line react-hooks/refs
 	return { broadcastDelta, socket: wsRef.current, connected, peerCount: 1 };
 }

@@ -512,7 +512,7 @@ Python FastAPI. Base URL: `http://localhost:8000`
 
 ### `POST /transcribe`
 
-Transcribe audio using OpenAI Whisper.
+Transcribe audio using Gemini Whisper (TF Serving).
 
 **Request** (multipart/form-data):
 ```

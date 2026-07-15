@@ -1,0 +1,136 @@
+/**
+ * Two-Factor Verification Screen — shown after sign-in when
+ * the account has 2FA/MFA enabled. Prompts for TOTP code.
+ *
+ * @module screens/TwoFactorScreen
+ */
+
+import React, { useState } from "react";
+import {
+	View,
+	Text,
+	TextInput,
+	TouchableOpacity,
+	StyleSheet,
+	ActivityIndicator,
+	KeyboardAvoidingView,
+	Platform,
+} from "react-native";
+import { useAuth } from "../contexts/AuthContext";
+
+export function TwoFactorScreen({ navigation, route }: { navigation: any; route: any }) {
+	const { verifyTwoFactor } = useAuth();
+	const { email, password } = route.params || {};
+	const [code, setCode] = useState("");
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState("");
+
+	const handleVerify = async () => {
+		if (code.length !== 6) {
+			setError("Enter the 6-digit verification code");
+			return;
+		}
+		setLoading(true);
+		setError("");
+		const result = await verifyTwoFactor(code);
+		if (result.error) {
+			setError(result.error.message || "Invalid verification code");
+		}
+		setLoading(false);
+	};
+
+	return (
+		<KeyboardAvoidingView
+			style={styles.container}
+			behavior={Platform.OS === "ios" ? "padding" : undefined}
+		>
+			<View style={styles.inner}>
+				<View style={styles.card}>
+					<Text style={styles.title}>Two-Factor Authentication</Text>
+					<Text style={styles.subtitle}>
+						Enter the 6-digit verification code from your authenticator app.
+					</Text>
+
+					{error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+					<TextInput
+						style={styles.codeInput}
+						value={code}
+						onChangeText={(t) => setCode(t.replace(/\D/g, "").slice(0, 6))}
+						placeholder="000000"
+						placeholderTextColor="#52525b"
+						keyboardType="number-pad"
+						maxLength={6}
+						autoFocus
+						textAlign="center"
+					/>
+
+					<TouchableOpacity
+						style={[styles.button, loading && styles.buttonDisabled]}
+						onPress={handleVerify}
+						disabled={loading || code.length !== 6}
+					>
+						{loading ? (
+							<ActivityIndicator color="#050505" />
+						) : (
+							<Text style={styles.buttonText}>Verify & Sign In</Text>
+						)}
+					</TouchableOpacity>
+
+					<TouchableOpacity onPress={() => navigation.goBack()}>
+						<Text style={styles.backLink}>Back to Sign In</Text>
+					</TouchableOpacity>
+				</View>
+			</View>
+		</KeyboardAvoidingView>
+	);
+}
+
+const styles = StyleSheet.create({
+	container: { flex: 1, backgroundColor: "#050505" },
+	inner: { flex: 1, justifyContent: "center", padding: 24 },
+	card: {
+		backgroundColor: "rgba(24,24,27,0.5)",
+		borderRadius: 24,
+		padding: 24,
+		borderWidth: 1,
+		borderColor: "rgba(255,255,255,0.08)",
+		alignItems: "center",
+	},
+	title: { fontSize: 20, fontWeight: "700", color: "#fff", marginBottom: 8 },
+	subtitle: {
+		color: "rgba(255,255,255,0.5)",
+		fontSize: 14,
+		textAlign: "center",
+		marginBottom: 20,
+	},
+	errorText: { color: "#ef4444", fontSize: 13, marginBottom: 12 },
+	codeInput: {
+		backgroundColor: "rgba(255,255,255,0.05)",
+		color: "#fff",
+		fontSize: 28,
+		fontWeight: "700",
+		letterSpacing: 10,
+		paddingHorizontal: 20,
+		paddingVertical: 16,
+		borderRadius: 12,
+		borderWidth: 1,
+		borderColor: "rgba(255,255,255,0.08)",
+		width: "100%",
+		marginBottom: 20,
+	},
+	button: {
+		backgroundColor: "#00e5ff",
+		paddingVertical: 14,
+		borderRadius: 12,
+		alignItems: "center",
+		width: "100%",
+	},
+	buttonDisabled: { opacity: 0.4 },
+	buttonText: { color: "#050505", fontWeight: "bold", fontSize: 16 },
+	backLink: {
+		color: "#00e5ff",
+		fontSize: 14,
+		marginTop: 16,
+	},
+});

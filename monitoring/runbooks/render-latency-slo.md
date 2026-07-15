@@ -36,11 +36,11 @@ budget will be exhausted.
   kubectl rollout restart deploy/lazynext-render -n lazynext
   ```
 
-### 3. Storage backend slow (Azure Blob)
+### 3. Storage backend slow (local filesystem)
 - **Symptom:** Render completes but upload to storage is slow
-- **Fix:** Check cloud provider status. If Azure Blob, run:
+- **Fix:** Check disk I/O. If using local filesystem, run:
   ```bash
-  az storage blob list --container-name media --account-name $(AZURE_STORAGE_ACCOUNT) --auth-mode login
+   ls /opt/lazynext/media/
   ```
 
 ### 4. CPU throttling / resource exhaustion

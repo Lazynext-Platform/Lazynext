@@ -229,10 +229,8 @@ export class AudioManager {
 		this.activeClipIds.clear();
 
 		for (const source of this.queuedSources) {
-			try {
-				source.stop();
-			} catch {}
-			source.disconnect();
+			source.stop();
+		source.disconnect();
 		}
 		this.queuedSources.clear();
 	}

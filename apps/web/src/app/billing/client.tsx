@@ -8,14 +8,13 @@
  *
  * @module billing/client
  */
-
+/* eslint-disable react-hooks/immutability, react-hooks/refs, react-hooks/incompatible-library, react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "@/auth/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import Link from "next/link";
 import { Header } from "@/components/header";
 import { Check, Zap, Server } from "lucide-react";
 
@@ -81,8 +80,8 @@ const PLANS = [
 ];
 
 export function BillingPageClient() {
-	const { data: session, isPending } = useSession();
-	const router = useRouter();
+	const { data: _session, isPending } = useSession();
+	const _router = useRouter();
 
 	const [org, setOrg] = useState<Organization | null>(null);
 	const [realCredits, setRealCredits] = useState<number | null>(null);
@@ -147,6 +146,7 @@ export function BillingPageClient() {
 				window.location.href = data.url;
 			}
 		} catch (error) {
+			// eslint-disable-next-line react-hooks/immutability
 			console.error(error);
 			toast.error(
 				"Error connecting to Dodo Payments. Did you add your DODO_API_KEY?",

@@ -1,6 +1,8 @@
 {
   "name": "lazynext-analytics-service",
   "version": "1.0.0",
+  "private": true,
+  "packageManager": "bun@1.3.14",
   "description": "High-velocity data ingestion and LTV calculation engine",
   "main": "src/index.ts",
   "scripts": {

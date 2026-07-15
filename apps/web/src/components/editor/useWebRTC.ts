@@ -8,7 +8,7 @@ interface UseWebRTCOptions {
 	projectId: string;
 }
 
-export function useWebRTC({ socket, projectId }: UseWebRTCOptions) {
+export function useWebRTC({ socket, projectId: _projectId }: UseWebRTCOptions) {
 	const [localStream, setLocalStream] = useState<MediaStream | null>(null);
 	const [peers, setPeers] = useState<{ [id: string]: MediaStream }>({});
 	const peerConnections = useRef<{ [id: string]: RTCPeerConnection }>({});
@@ -133,7 +133,7 @@ export function useWebRTC({ socket, projectId }: UseWebRTCOptions) {
 						return newPeers;
 					});
 				}
-			} catch (err) {
+			} catch {
 				// not a JSON message or parse error
 			}
 		};

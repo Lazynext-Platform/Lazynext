@@ -115,16 +115,12 @@ spec:
             nodeSelector:
               kubernetes.io/os: linux
       # DNS-01 solver as backup (for wildcard certificates or when HTTP is blocked)
-      # Uncomment and configure if you want to use Azure DNS for challenges:
+      # Uncomment and configure for Cloudflare DNS:
       # - dns01:
-      #     azureDNS:
-      #       clientID: <managed-identity-client-id>
-      #       subscriptionID: <azure-subscription-id>
-      #       resourceGroupName: <dns-zone-resource-group>
-      #       hostedZoneName: lazynext.ai
-      #       environment: AzurePublicCloud
-      #       managedIdentity:
-      #         clientID: <user-assigned-managed-identity-client-id>
+      #     cloudflare:
+      #       apiTokenSecretRef:
+      #         name: cloudflare-api-token
+      #         key: api-token
 
 # ═══════════════════════════════════════════════════════════════════
 # 3. Certificate — lazynext.ai and wildcard (*.lazynext.ai)
@@ -268,10 +264,6 @@ spec:
   commonName: media.lazynext.ai
   dnsNames:
     - media.lazynext.ai
-  # ADDITIONAL SANs for Azure CDN / Front Door origin verification
-  # When using Azure Front Door with custom domain, also include:
-  # - media-prod.lazynext.ai   (Azure CDN origin)
-  # - media.azureedge.net      (if using Azure CDN managed TLS)
   privateKey:
     algorithm: RSA
     size: 4096

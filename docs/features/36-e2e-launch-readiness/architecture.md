@@ -42,7 +42,7 @@ User (type/speak) ─▶ Lazynext AI Agent orchestrator ─▶ LLM (Gemini) ─�
 ## Config / Env Deltas
 - Add real `GEMINI_API_KEY` to `.env.local` (owner-provided; until then graceful-degrade).
 - Confirm `DATABASE_URL` (PostgreSQL) for gateway/collab live runs.
-- Azure deploy uses existing Terraform; no infra changes this feature.
+- Linode deploy uses existing Docker Compose; no infra changes this feature.
 
 ## Test Strategy
 - Re-run 490 Rust tests; must stay green.

@@ -51,7 +51,7 @@ EditorClient.startExport({format, bitrate})
    render-service worker:
        spawns ffmpeg (ExportEncoder args, format from job)
        writes received RGBA chunks → ffmpeg.stdin in order
-       on end → close stdin → upload (Azure Blob) → C2PA embed → SSE 'completed'
+       on end → close stdin → upload (local filesystem) → C2PA embed → SSE 'completed'
 ```
 Fallback if render-service offline: browser encodes locally via `WebCodecs` + `mp4-muxer` (graceful degradation, no mock).
 
@@ -87,7 +87,7 @@ where F: FnMut(u32) -> Fut, Fut: Future<Output = Vec<u8>>;
 ```
 
 ## Config / Env
-- Existing: `RENDER_SERVICE_URL`, `OUTPUT_DIR`, `AZURE_STORAGE_ACCOUNT`, `MEDIA_BUCKET`.
+- Existing: `RENDER_SERVICE_URL`, `OUTPUT_DIR`, `MEDIA_BUCKET`.
 - New: `C2PA_SIGNING_CERT_ISSUER`, `C2PA_SIGNING_CERT_KEY` (prod embed); absent → dev sidecar.
 - `EXPORT_FRAME_STREAM_MAX_BYTES` (backpressure cap, default 64 MiB).
 
@@ -99,7 +99,7 @@ where F: FnMut(u32) -> Fut, Fut: Future<Output = Vec<u8>>;
 ## Security
 - Frame endpoint must verify the jobId exists and is in `awaiting_frames` (no spoofing of other users' jobs).
 - Size validation per frame (`width*height*4`); reject oversized bodies (DoS).
-- C2PA signing key is a secret — read from env/Key Vault, never logged.
+- C2PA signing key is a secret — read from env/Docker secrets, never logged.
 
 ## Non-Goals (restated)
 - New export formats / effects / blend modes.

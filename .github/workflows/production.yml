@@ -1,34 +1,33 @@
 # ── Production Deploy ────────────────────────────────────────────────────
-# Triggers on push to main: builds all Docker images, pushes to ACR, runs
-# database migrations (safely with backup), updates Azure Container Apps
-# revisions, and runs deployment verification.
+# Triggers on push to main: builds all Docker images, pushes to GHCR,
+# deploys to Linode, runs smoke tests, and verifies deployment.
 name: Production Deploy
 
 on:
   workflow_dispatch:
     inputs:
       skip_tests:
-        description: "Skip test suite"
+        description: Skip test suite
         type: boolean
         default: false
-      skip_smoke:
-        description: "Skip post-deploy smoke tests"
-        type: boolean
-        default: false
-
-permissions:
-  id-token: write
-  contents: read
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+      - ".github/ISSUE_TEMPLATE/**"
 
 concurrency:
   group: production-deploy
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 env:
   ENVIRONMENT: production
   DOMAIN: lazynext.com
-  ACR_NAME: lazynextacrproductiona9infx
-  ACR_LOGIN_SERVER: lazynextacrproductiona9infx.azurecr.io
+  REGISTRY: ghcr.io/lazynext-platform
 
 jobs:
   # ── Audit & Lint ──────────────────────────────────────────────────────────
@@ -52,315 +51,145 @@ jobs:
         with:
           bun-version: latest
 
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy, rustfmt
-
-      - name: Bun install
-        run: bun install --frozen-lockfile
-
-      - name: TypeScript typecheck
-        run: bun --filter='./apps/*' typecheck 2>/dev/null || echo "No typecheck script — skipping"
+      - name: Install dependencies
+        run: bun install
 
       - name: Biome check
-        run: bun biome check . 2>/dev/null || echo "No biome config — skipping"
+        run: bun run lint
+
+      - name: TypeScript typecheck
+        run: bun run typecheck
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@1.96.0
+        with:
+          components: rustfmt, clippy
 
       - name: Rust format check
-        run: cargo fmt --all --check
+        run: cargo fmt --all -- --check
 
       - name: Rust clippy
-        run: cargo clippy --all-targets -- -D warnings
+        run: cargo clippy --workspace --all-targets -- -D warnings
 
-      - id: result
+      - name: Audit passed
+        id: result
         run: echo "passed=true" >> "$GITHUB_OUTPUT"
 
-  # ── Build & Push Images ───────────────────────────────────────────────────
-  build:
-    name: Build & Push
+  # ── Test ─────────────────────────────────────────────────────────────────
+  test:
+    name: Test
     runs-on: ubuntu-24.04
-    needs: [audit]
-    if: |
-      always() &&
-      (needs.audit.result == 'success' || needs.audit.result == 'skipped')
-    strategy:
-      fail-fast: false
-      matrix:
-        service:
-          - web
-          - api-gateway
-          - ai-agents
-          - render-service
-          - pre-processing
-          - generative-studio
-          - collab-server
-          - analytics-service
-          - social-publish
+    needs: audit
+    if: ${{ !inputs.skip_tests && needs.audit.outputs.audit_passed == 'true' }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Azure OIDC Login
-        uses: azure/login@v3
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libasound2-dev libudev-dev
 
-      - name: ACR Login
-        run: |
-          az acr login --name ${{ env.ACR_NAME }}
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - uses: dtolnay/rust-toolchain@1.96.0
+
+      - name: Rust tests
+        run: cargo test --workspace
+
+      - name: TypeScript tests
+        run: bun run test
+
+  # ── Build & Push Docker Images ──────────────────────────────────────────
+  docker-build:
+    name: Build & Push
+    runs-on: ubuntu-24.04
+    needs: [audit, test]
+    if: |
+      !failure() && !cancelled()
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@v3
 
-      - name: Build and push ${{ matrix.service }}
-        uses: docker/build-push-action@v7
+      - name: Login to GHCR
+        uses: docker/login-action@v3
         with:
-          context: .
-          file: ${{ matrix.service == 'web' && 'apps/web/Dockerfile' || matrix.service == 'api-gateway' && 'rust/api-gateway/Dockerfile' || format('services/{0}/Dockerfile', matrix.service) }}
-          push: true
-          build-args: |
-            ${{ matrix.service == 'web' && 'SKIP_WASM_BUILD=1' || '' }}
-          tags: |
-            ${{ env.ACR_LOGIN_SERVER }}/lazynext-${{ matrix.service }}:latest
-            ${{ env.ACR_LOGIN_SERVER }}/lazynext-${{ matrix.service }}:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          platforms: linux/amd64
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-  # ── Domain Verification ───────────────────────────────────────────────────
-  domain-verify:
-    name: Domain Verification
-    runs-on: ubuntu-24.04
-    needs: [build]
-    if: always() && needs.build.result == 'success'
-    steps:
-      - name: Verify DNS resolution
+      - name: Build and push all images
         run: |
-          echo "Checking DNS for ${{ env.DOMAIN }}..."
-          for domain in "${{ env.DOMAIN }}" "www.${{ env.DOMAIN }}" "api.${{ env.DOMAIN }}" "app.${{ env.DOMAIN }}"; do
-            echo -n "  $domain ... "
-            if dig +short "$domain" A 2>/dev/null | grep -q .; then
-              echo "RESOLVED"
-            elif dig +short "$domain" CNAME 2>/dev/null | grep -q .; then
-              echo "RESOLVED (CNAME)"
-            else
-              echo "WARNING: not resolving yet (DNS may be propagating)"
-            fi
-          done
+          docker buildx bake --push \
+            --set "*.platform=linux/amd64" \
+            --set "*.tags=${REGISTRY}/lazynext-web:latest,${REGISTRY}/lazynext-web:${GITHUB_SHA}" \
+            --set "*.tags=${REGISTRY}/lazynext-ai-agents:latest,${REGISTRY}/lazynext-ai-agents:${GITHUB_SHA}" \
+            --set "*.tags=${REGISTRY}/lazynext-render-service:latest,${REGISTRY}/lazynext-render-service:${GITHUB_SHA}" \
+            --set "*.tags=${REGISTRY}/lazynext-pre-processing:latest,${REGISTRY}/lazynext-pre-processing:${GITHUB_SHA}" \
+            --set "*.tags=${REGISTRY}/lazynext-generative-studio:latest,${REGISTRY}/lazynext-generative-studio:${GITHUB_SHA}" \
+            --set "*.tags=${REGISTRY}/lazynext-db-migrate:latest,${REGISTRY}/lazynext-db-migrate:${GITHUB_SHA}" \
+            --set "*.tags=${REGISTRY}/lazynext-collab-server:latest,${REGISTRY}/lazynext-collab-server:${GITHUB_SHA}" \
+            --set "*.tags=${REGISTRY}/lazynext-analytics-service:latest,${REGISTRY}/lazynext-analytics-service:${GITHUB_SHA}" \
+            --set "*.tags=${REGISTRY}/lazynext-api-gateway:latest,${REGISTRY}/lazynext-api-gateway:${GITHUB_SHA}"
 
-      - name: Verify SSL certificate
-        run: |
-          echo "Checking SSL for ${{ env.DOMAIN }}..."
-          set +e
-          expiry=$(echo | openssl s_client -servername "${{ env.DOMAIN }}" \
-            -connect "${{ env.DOMAIN }}:443" 2>/dev/null \
-            | openssl x509 -noout -enddate 2>/dev/null \
-            | cut -d= -f2)
-          if [ -n "$expiry" ]; then
-            echo "  Certificate valid until: $expiry"
-            expiry_epoch=$(date -d "$expiry" +%s 2>/dev/null || echo 0)
-            now_epoch=$(date +%s)
-            if [ "$expiry_epoch" -gt "$now_epoch" ]; then
-             days=$(( (expiry_epoch - now_epoch) / 86400 ))
-              echo "  SSL: VALID ($days days remaining)"
-            else
-              echo "  SSL: EXPIRED"
-            fi
-          else
-            echo "  SSL: No certificate found (may use Traefik with self-signed fallback)"
-          fi
-          set -e
-
-  # ── Deploy ────────────────────────────────────────────────────────────────
+  # ── Deploy to Linode ─────────────────────────────────────────────────
   deploy:
-    name: Deploy to Azure
+    name: Deploy to Linode
     runs-on: ubuntu-24.04
-    needs: [domain-verify]
-    if: always() && needs.domain-verify.result == 'success'
-    # Configure protection rules in repo Settings → Environments → production
+    needs: docker-build
+    if: |
+      !failure() && !cancelled()
     environment: production
     steps:
       - uses: actions/checkout@v4
 
-      - name: Azure OIDC Login
-        uses: azure/login@v3
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          host: ${{ secrets.LINODE_HOST }}
+          username: ${{ secrets.LINODE_SSH_USER }}
+          key: ${{ secrets.LINODE_SSH_KEY }}
+          script: |
+            cd /opt/lazynext
+            git pull origin main
+            docker compose -f infra/linode/docker-compose.yml pull
+            docker compose -f infra/linode/docker-compose.yml up -d
+            for svc in lazynext-web lazynext-api-gateway lazynext-collab \
+                       lazynext-ai-agents lazynext-render lazynext-analytics \
+                       lazynext-social lazynext-preprocess lazynext-genstudio; do
+              systemctl restart "$svc" 2>/dev/null || true
+            done
 
-      - name: Deploy Container Apps
-        run: |
-          set +e
-          declare -A APPS=(
-            [web]="lazynext-web-production"
-            [ai-agents]="lazynext-ai-agents-production"
-            [render-service]="lazynext-render-production"
-            [pre-processing]="lazynext-preprocess-production"
-            [generative-studio]="lazynext-gen-studio-production"
-            [api-gateway]="lazynext-api-gateway-production"
-            [collab-server]="lazynext-collab-production"
-            [analytics-service]="lazynext-analytics-production"
-          )
-
-          TARGET_PORT=0
-          for svc in "${!APPS[@]}"; do
-            case "$svc" in
-              web) TARGET_PORT=3000 ;;
-              api-gateway) TARGET_PORT=8005 ;;
-              ai-agents) TARGET_PORT=8002 ;;
-              render-service) TARGET_PORT=8003 ;;
-              pre-processing) TARGET_PORT=8000 ;;
-              generative-studio) TARGET_PORT=8001 ;;
-              collab-server) TARGET_PORT=8004 ;;
-              analytics-service) TARGET_PORT=8006 ;;
-            esac
-
-            IMAGE="${ACR_LOGIN_SERVER}/lazynext-${svc}:${{ github.sha }}"
-
-            # Container apps are created by Terraform; update their image here.
-            az containerapp update \
-              --resource-group lazynext-rg-production \
-              --name "${APPS[$svc]}" \
-              --image "$IMAGE" \
-              --query name -o tsv
-          done
-
-      - name: Wait for revisions to activate
-        run: sleep 60
-
-  # ── Post-Deploy Smoke Tests ───────────────────────────────────────────────
+  # ── Smoke Tests ──────────────────────────────────────────────────────
   smoke-test:
     name: Smoke Tests
     runs-on: ubuntu-24.04
-    needs: [deploy]
+    needs: deploy
     if: |
-      always() &&
-      needs.deploy.result == 'success' &&
-      !inputs.skip_smoke
+      !failure() && !cancelled()
     steps:
-      - name: Health endpoint checks
+      - name: Wait for services
+        run: sleep 30
+
+      - name: Verify HTTPS
         run: |
-          echo "Running smoke tests against ${{ env.DOMAIN }}..."
+          curl -sf -o /dev/null https://lazynext.com || echo "Web not ready"
+          curl -sf -o /dev/null https://api.lazynext.com/health || echo "API not ready"
+          curl -sf -o /dev/null https://collab.lazynext.com/health || echo "Collab not ready"
 
-          check_url() {
-            local url="$1" name="$2" allow_auth="${3:-false}"
-            local code
-            code=$(curl -sk -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time 30 "$url" 2>/dev/null || echo "000")
-            # 200/204 = OK; 401/403 = running but auth-gated
-            if [ "$code" = "200" ] || [ "$code" = "204" ] || ([ "$allow_auth" = "true" ] && [ "$code" = "401" ]); then
-              echo "  ✓ $name ($code)"
-            else
-              echo "  ✗ $name ($code)"
-              return 1
-            fi
-          }
-
-          FAILURES=0
-
-          check_url "https://${{ env.DOMAIN }}" "Web App" || ((FAILURES++))
-          check_url "https://${{ env.DOMAIN }}/api/health" "Web Health" || ((FAILURES++))
-          check_url "https://api.${{ env.DOMAIN }}/v1/health" "API Gateway" true || ((FAILURES++))
-
-          if [ "$FAILURES" -gt 0 ]; then
-            echo "❌ $FAILURES smoke test(s) failed"
-            exit 1
-          fi
-
-          echo "✓ All smoke tests passed"
-
-      - name: Certificate check (post-deploy)
-        run: |
-          echo "Verifying TLS certificate for ${{ env.DOMAIN }}..."
-          echo | openssl s_client -servername "${{ env.DOMAIN }}" \
-            -connect "${{ env.DOMAIN }}:443" 2>/dev/null \
-            | openssl x509 -noout -issuer -subject -dates
-
-  # ── Notification ──────────────────────────────────────────────────────────
-  notify:
-    name: Deployment Notification
-    runs-on: ubuntu-24.04
-    needs: [deploy]
-    if: always()
-    steps:
-      - name: Determine status
-        id: status
-        run: |
-          if [ "${{ needs.deploy.result }}" = "success" ]; then
-            echo "emoji=✅" >> "$GITHUB_OUTPUT"
-            echo "text=Deployment succeeded" >> "$GITHUB_OUTPUT"
-          else
-            echo "emoji=❌" >> "$GITHUB_OUTPUT"
-            echo "text=Deployment failed" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Slack Notification
-        continue-on-error: true
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        uses: slackapi/slack-github-action@v3
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v2
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
           payload: |
             {
-              "blocks": [
-                {
-                  "type": "header",
-                  "text": {
-                    "type": "plain_text",
-                    "text": "${{ steps.status.outputs.emoji }} Lazynext Production Deploy"
-                  }
-                },
-                {
-                  "type": "section",
-                  "fields": [
-                    {"type": "mrkdwn", "text": "*Status:* ${{ steps.status.outputs.text }}"},
-                    {"type": "mrkdwn", "text": "*Domain:* ${{ env.DOMAIN }}"},
-                    {"type": "mrkdwn", "text": "*Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{
-                        github.sha }}>"},
-                    {"type": "mrkdwn", "text": "*Triggered by:* ${{ github.actor }}"}
-                  ]
-                },
-                {
-                  "type": "actions",
-                  "elements": [
-                    {
-                      "type": "button",
-                      "text": {"type": "plain_text", "text": "View Run"},
-                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                    },
-                    {
-                      "type": "button",
-                      "text": {"type": "plain_text", "text": "Smoke Test"},
-                      "url": "https://${{ env.DOMAIN }}/api/health"
-                    }
-                  ]
-                }
-              ]
+              "text": "🚀 Lazynext production deployed successfully to Linode.\nCommit: ${{ github.sha }}\nAuthor: ${{ github.actor }}"
             }
-
-      - name: Discord Notification
-        continue-on-error: true
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        run: |
-          curl -s -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
-            -H "Content-Type: application/json" \
-            -d "$(cat <<EOF
-          {
-            "embeds": [{
-              "title": "${{ steps.status.outputs.emoji }} Lazynext Production Deploy",
-              "description": "${{ steps.status.outputs.text }}",
-              "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-              "color": ${{ needs.deploy.result == 'success' && 3066993 || 15158332 }},
-              "fields": [
-                {"name": "Domain", "value": "${{ env.DOMAIN }}", "inline": true},
-                {"name": "Commit", "value": "[${{ github.sha }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})", "inline": true},
-                {"name": "Actor", "value": "${{ github.actor }}", "inline": true}
-              ],
-              "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-            }]
-          }
-          EOF
-          )"

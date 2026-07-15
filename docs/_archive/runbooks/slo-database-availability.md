@@ -1,7 +1,7 @@
 # SLO Runbook: Database Availability
 
 ## Service
-PostgreSQL Flexible Server (Azure) — primary datastore for all Lazynext microservices and the web application.
+PostgreSQL 17 (Docker) — primary datastore for all Lazynext microservices and the web application.
 
 ## SLO Target
 - **Objective**: 99.95% availability (measured over a 30-day rolling window).
@@ -17,7 +17,7 @@ PostgreSQL Flexible Server (Azure) — primary datastore for all Lazynext micros
 | `DatabaseHighErrorRate` | Warning | `rate(pg_stat_database_xact_rollback[5m]) / rate(pg_stat_database_xact_commit[5m]) > 0.05` | 10m |
 | `DatabaseReplicationLag` | Warning | `pg_stat_replication_flush_lag_bytes > 1_000_000_000` (1 GB) | 10m |
 | `DatabaseSlowQueries` | Warning | `histogram_quantile(0.95, rate(pg_stat_statements_query_duration_seconds_bucket[5m])) > 2` | 10m |
-| `DatabaseDiskNearFull` | Critical | `pg_stat_database_size_bytes / azure_postgresql_storage_limit_bytes > 0.85` | 5m |
+| `DatabaseDiskNearFull` | Critical | `pg_stat_database_size_bytes / linode_postgresql_storage_limit_bytes > 0.85` | 5m |
 | `DatabaseSLOBurnRate` | Critical | Multi-burn-rate alert on `pg_up == 0`: 14.4x for 1h window OR 6x for 6h window | — |
 
 ## Prometheus Queries
@@ -25,7 +25,7 @@ PostgreSQL Flexible Server (Azure) — primary datastore for all Lazynext micros
 ### Check current availability
 ```promql
 # Is the database accepting connections right now?
-pg_up{job="azure-postgresql",server=~"lazynext-.*"}
+pg_up{job="linode-postgresql",server=~"lazynext-.*"}
 ```
 
 ### Connection pool saturation
@@ -69,26 +69,26 @@ pg_stat_replication_flush_lag_bytes{datname="lazynext"}
 # Percentage of provisioned storage consumed
 pg_stat_database_size_bytes{datname="lazynext"}
   / on(job) group_left
-azure_postgresql_storage_limit_bytes
+linode_postgresql_storage_limit_bytes
 ```
 
 ### SLO burn rate (error budget consumption)
 ```promql
 # 1-hour burn rate window
-sum(rate(pg_up{job="azure-postgresql"} == 0)[1h]))
+sum(rate(pg_up{job="linode-postgresql"} == 0)[1h]))
   / (1 - 0.9995)   # 14.4x burn rate threshold
 
 # 6-hour burn rate window
-sum(rate(pg_up{job="azure-postgresql"} == 0)[6h]))
+sum(rate(pg_up{job="linode-postgresql"} == 0)[6h]))
   / (1 - 0.9995)   # 6x burn rate threshold
 ```
 
 ## Diagnostic Steps
 
 ### Step 1 — Triage the alert
-1. Open the Azure Portal → Azure Database for PostgreSQL flexible server → the `lazynext-prod` instance.
-2. Check the **Metrics** blade: CPU percent, memory percent, storage percent, IO percent, active connections.
-3. Check the **Diagnose and solve problems** blade for auto-detected issues.
+1. Open the Linode Dashboard → the `lazynext-prod` instance.
+2. Check the **Metrics** panel: CPU percent, memory percent, storage percent, IO percent, active connections.
+3. Check system logs for auto-detected issues (`journalctl` / Docker logs).
 4. Note the time the alert fired and correlate with recent deployments (check `#deployments` Slack or GitHub Actions history).
 
 ### Step 2 — Verify database reachability
@@ -141,7 +141,7 @@ FROM pg_stat_replication;
 ```
 
 ### Step 5 — Review recent logs
-1. Azure Portal → the PostgreSQL server → **Logs**.
+1. SSH into the Linode instance → check **Docker logs** for the PostgreSQL container.
 2. Filter for `ERROR`, `FATAL`, `PANIC` around the incident window.
 3. Common patterns to look for: `too many clients`, `out of shared memory`, `disk full`, `could not fork new process`, `terminating connection due to administrator command`.
 
@@ -157,7 +157,7 @@ FROM pg_stat_replication;
    ```bash
    kubectl rollout restart deployment/<service-name> -n lazynext
    ```
-3. If the application connection pool is misconfigured, scale up `max_connections` on the server (Azure Portal → Server parameters), then restart the service with corrected pool size.
+3. If the application connection pool is misconfigured, scale up `max_connections` on the server (edit `postgresql.conf` via SSH), then restart the service with corrected pool size.
 4. As a last resort, terminate idle connections:
    ```sql
    SELECT pg_terminate_backend(pid)
@@ -177,7 +177,7 @@ FROM pg_stat_replication;
    LIMIT 20;
    ```
 2. If audit/temp tables are bloated, manually archive and truncate the oldest partitions.
-3. Scale storage up in Azure Portal (auto-grow should be enabled; if not, enable it and increase the limit).
+3. Scale storage up via Linode Dashboard (or expand the Docker volume; auto-grow should be enabled; if not, enable it and increase the limit).
 4. Run `VACUUM FULL` on bloated tables (requires table lock — schedule a brief maintenance window).
 
 ### Tactic C — High query latency
@@ -195,14 +195,15 @@ FROM pg_stat_replication;
 4. If the query originates from a recent deploy, consider rolling that deploy back.
 
 ### Tactic D — Database unreachable / down
-1. Check Azure Service Health for platform-level incidents in the region.
-2. If the server status is `Stopped`, start it from the Azure Portal.
-3. If the server is `Starting` and stuck, open an Azure support ticket (Severity A).
+1. Check Linode status page for platform-level incidents in the region.
+2. If the server status is `Stopped`, start it via SSH (`docker compose up -d db`).
+3. If the server is `Starting` and stuck, open a Linode support ticket (Severity A).
 4. If the entire region is degraded, initiate cross-region failover to the read replica:
    ```bash
-   az postgres flexible-server replica promote --resource-group lazynext-prod --name lazynext-prod-replica
+   # SSH to the Linode replica instance and promote it
+   ssh user@linode-replica 'sudo -u postgres pg_ctl promote -D /var/lib/postgresql/data'
    ```
-   Then update `DATABASE_URL` across all services (update the `.env` in Key Vault, then trigger a rollout restart of all container apps).
+   Then update `DATABASE_URL` across all services (update via Docker secrets, then trigger a restart of all Docker Compose services).
 
 ### Tactic E — Replication lag (warning threshold)
 1. Check if the primary is under heavy write load — throttle non-critical batch jobs.
@@ -213,13 +214,13 @@ FROM pg_stat_replication;
 
 | Level | Role | When to Escalate | Contact |
 |-------|------|-------------------|---------|
-| **L1** | On-call engineer (24/7 rotation) | First responder for all database alerts | PagerDuty → `db-oncall` |
-| **L2** | Database reliability engineer (DRE) | L1 cannot resolve within 30 minutes; connection exhaustion, replication lag, or storage full scenarios | PagerDuty → `dba-oncall` |
-| **L3** | Infrastructure lead | L2 cannot resolve within 60 minutes; region-level Azure outage; data corruption suspected | Slack `#ops-leads` → call |
+| **L1** | On-call engineer (24/7 rotation) | First responder for all database alerts | Grafana OnCall → `db-oncall` |
+| **L2** | Database reliability engineer (DRE) | L1 cannot resolve within 30 minutes; connection exhaustion, replication lag, or storage full scenarios | Grafana OnCall → `dba-oncall` |
+| **L3** | Infrastructure lead | L2 cannot resolve within 60 minutes; region-level Linode outage; data corruption suspected | Slack `#ops-leads` → call |
 | **L4** | VP Engineering | L3 not reached within 15 minutes; user-facing impact exceeds 2 hours; decision to trigger public status page update | Phone tree |
 
 ### Escalation triggers by incident duration
-- **15 minutes** — L1 acknowledges the alert in PagerDuty and posts a brief situation report to `#ops-incidents`.
+- **15 minutes** — L1 acknowledges the alert in Grafana OnCall and posts a brief situation report to `#ops-incidents`.
 - **30 minutes** — If unresolved, escalate to L2 (DRE).
 - **45 minutes** — If L2 has not acknowledged, page L3 directly.
 - **60 minutes** — If no path to resolution exists, declare a major incident and engage the Incident Commander (IC) per the company IRP (Incident Response Plan).
@@ -239,7 +240,7 @@ FROM pg_stat_replication;
    bun run test:e2e
    ```
 3. [ ] **Capture evidence** — Collect the following and attach to the incident ticket:
-   - Azure Metrics screenshots for the incident window (CPU, memory, IOPS, connections, storage).
+    - Linode Dashboard metrics screenshots for the incident window (CPU, memory, IOPS, connections, storage).
    - PostgreSQL logs for the incident window.
    - Relevant application logs from each microservice.
    - Prometheus alert timeline (from Alertmanager or Grafana).
@@ -252,7 +253,7 @@ FROM pg_stat_replication;
 10. [ ] **Verify error budget door** — If error budget was exhausted, ensure the automated deploy gate in CI/CD is blocking non-emergency deployments until budget recovers.
 
 ## References
-- Azure PostgreSQL Flexible Server documentation: `https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/`
+- PostgreSQL 17 documentation: `https://www.postgresql.org/docs/17/`
 - Prometheus PostgreSQL exporter: `https://github.com/prometheus-community/postgres_exporter`
-- Lazynext Infrastructure Terraform: `terraform/`
+- Lazynext Infrastructure Docker Compose: `infra/linode/`
 - Multi-burn-rate alert methodology: `https://sre.google/workbook/alerting-on-slos/`

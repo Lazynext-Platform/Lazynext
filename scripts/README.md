@@ -6,13 +6,9 @@ Utility and operational scripts for the Lazynext platform.
 
 | Script | Description |
 |---|---|
-| `apply-infra.sh` | Apply Azure Terraform infrastructure (idempotent plan + apply). |
-| `bootstrap-terraform-state-azure.sh` | One-time setup of Azure Terraform remote state (RG, Storage Account, Blob Container). |
-| `finish-provision.sh` | Finalize Azure provisioning — fix storage keys, apply remaining resources, set GitHub CI/CD secrets. |
-| `create-apps.sh` | Create 4 Azure Container Apps (ai-agents, render, pre-processing, generative-studio) with AMD64 ACR images. |
-| `deploy.sh` | Master deployment orchestrator — Terraform, WASM build, Fastlane mobile builds, desktop codesigning, extension packaging. |
-| `docker-build.sh` | Build and push all 9 Docker service images (local or ACR). Supports `--push`, `--gpu`, parallel builds. |
-| `setup-gpu-operator.sh` | Install NVIDIA GPU Operator on AKS for GPU scheduling, DCGM monitoring, and MIG support. |
+| `deploy-prod.sh` | Production deploy — builds, pushes to GHCR, deploys to Linode. |
+| `docker-build.sh` | Build and push all 9 Docker service images (local or GHCR). Supports `--push`, `--gpu`, parallel builds. |
+| `setup-gpu-operator.sh` | Install NVIDIA GPU Operator on LKE for GPU scheduling, DCGM monitoring, and MIG support. |
 | `farm_deploy.sh` | Compile and distribute the Rust CLI daemon across a 5-node headless render farm. |
 
 ## Database
@@ -21,20 +17,20 @@ Utility and operational scripts for the Lazynext platform.
 |---|---|
 | `db-setup.sql` | PostgreSQL initial setup — extensions, application roles, schema grants, performance tuning. |
 | `migrate-db.sh` | Run Drizzle ORM migrations (`--generate`, `--push`, `--production`). |
-| `backup-db.sh` | Local or Azure Blob PostgreSQL backup (`--azure`, `--restore`). |
+| `backup-db.sh` | Local or remote PostgreSQL backup (`--remote`, `--restore`). |
 | `redis-prod.conf` | Redis 7.x production configuration (persistence, memory, replication, security). |
 | `pgbouncer.ini` | PgBouncer connection pooler configuration for PostgreSQL. |
 | `pgbouncer-userlist.txt` | PgBouncer auth credentials mapping. |
 | `db/connection-test.sh` | Comprehensive PostgreSQL connection diagnostics (direct, PgBouncer, SSL, replication lag). |
-| `db/restore.sh` | Restore PostgreSQL from local backup, Azure Blob URL, or `--latest` backup. |
-| `db/point-in-time-restore.sh` | Azure PostgreSQL Point-In-Time Restore (PITR) from backup to primary. |
+| `db/restore.sh` | Restore PostgreSQL from local backup, remote URL, or `--latest` backup. |
+| `db/point-in-time-restore.sh` | PostgreSQL Point-In-Time Restore (PITR) from backup to primary. |
 | `db/seed-analytics.sh` | Generate test data for analytics tables (users, sessions, events, A/B experiments, audit logs). |
 
 ## Security & Secrets
 
 | Script | Description |
 |---|---|
-| `rotate-secrets.sh` | Rotate database passwords and API keys in Azure Key Vault (`--db`, `--api-keys`, `--all`). |
+| `rotate-secrets.sh` | Rotate database passwords and API keys (`--db`, `--api-keys`, `--all`). |
 | `scan-images.sh` | Vulnerability scan Docker images with Trivy (CRITICAL/HIGH severity). |
 | `sign-images.sh` | Sign Docker images with Cosign (keyless via GitHub OIDC) and attach SBOMs. |
 
@@ -43,8 +39,8 @@ Utility and operational scripts for the Lazynext platform.
 | Script | Description |
 |---|---|
 | `download-sam2-models.sh` | Download SAM2 ONNX model files (~480 MB) for real AI segmentation. |
-| `export-model.sh` | Export HuggingFace models (Whisper, SAM2, Real-ESRGAN, MobileNet, EfficientNet) to TensorFlow SavedModel. |
-| `tf-model-download.sh` | Download TensorFlow Serving models with checksum verification, retries, and HuggingFace fallback. |
+| `export-model.sh` | Export Modal-managed models (Whisper, SAM2, Real-ESRGAN, MobileNet, EfficientNet) to TensorFlow SavedModel. |
+| `tf-model-download.sh` | Download TensorFlow Serving models with checksum verification, retries, and Modal fallback. |
 | `generate-kotlin-bindings.sh` | Generate UniFFI Kotlin bindings for Android from Rust UDL definitions. |
 | `batch-render.yaml` | CLI batch render manifest — define multiple export projects with format, resolution, framerate overrides. |
 

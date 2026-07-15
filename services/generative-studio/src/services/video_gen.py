@@ -1,8 +1,8 @@
 """
-Video generation services: text-to-video via Modal (CogVideoX-5B),
+Video generation services: text-to-video via Modal (pure PyTorch SD pipeline),
 upscaling, style transfer, generative fill, and AI avatar generation.
 
-Modal + CogVideoX-5B: $30/mo free credits, ~2 min gen, 5 concurrent, A10G GPU.
+Modal SD Pipeline: $30/mo free credits, ~2 min gen, 3 concurrent, A10G GPU.
 RealESRGAN for upscaling, Edge TTS for avatars, OpenCV for effects.
 """
 
@@ -20,10 +20,10 @@ from upscale_pipeline import UpscalePipeline, UpscaleConfig
 
 
 async def generate_video_service(req: DiffusionRequest):
-	"""Generate video via Modal + CogVideoX-5B.
+	"""Generate video via Modal SD pipeline.
 
 	Requires MODAL_VIDEO_ENDPOINT env var.
-	Modal: $30/mo free credits, ~35s per video, 5 concurrent.
+	Modal: $30/mo free credits, ~35s per video, 3 concurrent.
 	"""
 	endpoint = os.getenv("MODAL_VIDEO_ENDPOINT", "")
 
@@ -66,7 +66,7 @@ async def generate_video_service(req: DiffusionRequest):
 			return {
 				"success": True,
 				"prompt": req.prompt,
-				"source": "modal-cogvideox",
+				"source": "modal-sd-pipeline",
 				"video_url": f"file://{output_path}",
 				"stats": {
 					"load_time": data.get("load_time"),

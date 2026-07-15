@@ -13,7 +13,7 @@
 
 import { db } from "@/db";
 import { user, subscriptions, projects } from "@/db/schema";
-import { sql, count, sum } from "drizzle-orm";
+import { sql, count } from "drizzle-orm";
 
 export type AdminMetrics = {
   /** Total number of registered users. */
@@ -96,32 +96,8 @@ async function getAIProviderMetrics(): Promise<AIProviderMetric[]> {
   // a real monitoring endpoint.
   return [
     {
-      name: "Claude 3.5 Sonnet",
-      provider: "Anthropic",
-      colorHex: "#a855f7",
-      requestsPerMin: null,
-      avgLatencyMs: null,
-      status: "Unknown",
-    },
-    {
-      name: "GPT-4o",
-      provider: "OpenAI",
-      colorHex: "#22c55e",
-      requestsPerMin: null,
-      avgLatencyMs: null,
-      status: "Unknown",
-    },
-    {
-      name: "Gemini 1.5 Pro",
-      provider: "Google",
-      colorHex: "#3b82f6",
-      requestsPerMin: null,
-      avgLatencyMs: null,
-      status: "Unknown",
-    },
-    {
-      name: "Google Gemini",
-      provider: "Gemini",
+      name: "Gemini 3.5 Flash / 3.1 Pro",
+      provider: "Google Gemini",
       colorHex: "#4285F4",
       requestsPerMin: null,
       avgLatencyMs: null,

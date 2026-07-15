@@ -7,8 +7,6 @@
  * @module collaboration/cursors
  */
 
-import React from "react";
-
 export interface RemoteCursor {
 	/** Unique peer identifier. */
 	peerId: string;

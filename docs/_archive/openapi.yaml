@@ -44,7 +44,7 @@ paths:
                 prompt: { type: string, description: "Natural language editing intent" }
                 require_plan_approval: { type: boolean, default: true }
                 source_files: { type: array, items: { type: string } }
-                llm_provider: { type: string, enum: [openai, anthropic, gemini, gemini] }
+                llm_provider: { type: string, enum: [gemini, ollama] }
       responses:
         '200':
           description: Edit applied successfully

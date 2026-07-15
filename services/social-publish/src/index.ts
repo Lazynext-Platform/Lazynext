@@ -542,7 +542,7 @@ interface MetadataInput {
  * and suggested posting times based on platform best practices.
  *
  * Uses deterministic templates with user-provided inputs woven in.
- * When OPENAI_API_KEY is configured, could be replaced with LLM generation.
+ * When GEMINI_API_KEY is configured, could be replaced with LLM generation.
  */
 /**
  * Generate AI-optimized platform metadata (title, description, hashtags).

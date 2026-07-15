@@ -8,8 +8,8 @@ metadata:
 data:
   # Environment
   NODE_ENV: "production"
-  STORAGE_PROVIDER: "azure"
-  LLM_PROVIDER: "anthropic"
+  STORAGE_PROVIDER: "local"
+  LLM_PROVIDER: "gemini"
 
   # Service URLs (internal K8s DNS)
   AI_AGENTS_URL: "http://lazynext-sync:8002"

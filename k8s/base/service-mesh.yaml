@@ -816,19 +816,18 @@ spec:
   resolution: DNS
 
 ---
-# Allow mesh workloads to reach Fal.ai API for Kling video generation
+# Allow mesh workloads to reach Modal API for GPU video generation
 apiVersion: networking.istio.io/v1beta1
 kind: ServiceEntry
 metadata:
-  name: fal-api
+  name: modal-api
   namespace: lazynext
   labels:
     app.kubernetes.io/part-of: lazynext
     app.kubernetes.io/managed-by: kustomize
 spec:
   hosts:
-    - api.fal.run
-    - queue.fal.run
+    - api.modal.com
   ports:
     - number: 443
       name: https
@@ -837,7 +836,7 @@ spec:
   resolution: DNS
 
 ---
-# Allow mesh workloads to reach OpenAI / Anthropic / Gemini LLM APIs
+# Allow mesh workloads to reach Google Gemini LLM API
 apiVersion: networking.istio.io/v1beta1
 kind: ServiceEntry
 metadata:
@@ -848,8 +847,6 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
 spec:
   hosts:
-    - api.openai.com
-    - api.anthropic.com
     - generativelanguage.googleapis.com
   ports:
     - number: 443
@@ -859,20 +856,19 @@ spec:
   resolution: DNS
 ---
 #
-# Allow outbound to Azure services (Blob Storage, Key Vault, ACR)
+# Internal service communication only
 apiVersion: networking.istio.io/v1beta1
 kind: ServiceEntry
 metadata:
-  name: azure-services
+  name: internal-services
   namespace: lazynext
   labels:
     app.kubernetes.io/part-of: lazynext
     app.kubernetes.io/managed-by: kustomize
 spec:
   hosts:
-    - "*.blob.core.windows.net"
-    - "*.vault.azure.net"
-    - "*.azurecr.io"
+    - "*.lazynext.com"
+    - "lazynext.com"
   ports:
     - number: 443
       name: https

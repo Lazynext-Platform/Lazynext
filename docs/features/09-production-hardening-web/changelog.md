@@ -23,7 +23,7 @@
 
 ### 2026-06-30
 
-- **[Verified] Phase A — Security & Auth**: API gateway already has real JWT auth (`rbac.rs`), Stripe HMAC verification, CSRF protection, and rate limiting. 19 real tests pass. No hardcoded tokens found.
+- **[Verified] Phase A — Security & Auth**: API gateway already has real JWT auth (`rbac.rs`), Dodo Payments HMAC verification, CSRF protection, and rate limiting. 19 real tests pass. No hardcoded tokens found.
 - **[Completed] Phase B — Database Consolidation**: Merged Kysely `timelineData`, `renderStatus`, `renderJobId` columns into Drizzle `projects` table. Added `assets` table. Generated migration `0002_tiresome_trauma.sql`. Removed Kysely from `package.json`, `next.config.ts`, and deleted `src/lib/db/schema.ts`. Zero Kysely imports remain.
 - **[Completed] Phase C — Mock Data Removal**: Created real `src/lib/admin-data.ts` with Drizzle queries. Replaced `mockDb` in superadmin page with `adminData`. Removed fake system logs — replaced with Grafana dashboard link. Deleted `api/mock-db/route.ts`. Un-stubbed `getRecentUsers()` to fetch from API gateway.
 - **[Verified] Phase D — GPU Compositor**: WASM compositor bridge at `rust/wasm/src/compositor.rs` is already 1004 lines of real implementation with `initCompositor`, `renderFrame`, `renderProjectFrame`, texture management, keyframe interpolation, 17 blend modes, transitions, effects.
@@ -36,7 +36,7 @@
 
 | What Changed | Original Plan | What Actually Happened | Why |
 |---|---|---|---|
-| Phase A (Auth fixes) | Replace hardcoded tokens | Found API gateway already had real JWT, CSRF, rate limiting, Stripe HMAC | Code was updated since the audit |
+| Phase A (Auth fixes) | Replace hardcoded tokens | Found API gateway already had real JWT, CSRF, rate limiting, Dodo Payments HMAC | Code was updated since the audit |
 | Phase D (GPU renderer) | Create gpu-renderer.ts | Found 1004-line WASM compositor bridge already implemented | Audit was outdated |
 | Phase E (CRDT sync) | Complete sync loop | Found bidirectional sync already working in crdt-sync.ts | Audit was outdated |
 | Phase F (Export) | Build from scratch | Found export routes already delegate to render-service | Audit was outdated |

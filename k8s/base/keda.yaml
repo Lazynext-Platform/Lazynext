@@ -27,28 +27,6 @@
 # ═══════════════════════════════════════════════════════════════════
 
 ---
-# Azure Queue Storage authentication (Pod Identity / Workload Identity)
-apiVersion: keda.sh/v1alpha1
-kind: TriggerAuthentication
-metadata:
-  name: azure-queue-auth
-  namespace: lazynext
-  labels:
-    app.kubernetes.io/part-of: lazynext
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/component: autoscaling
-spec:
-  # Uses Azure Workload Identity (no secrets needed).
-  # The service account must be federated with Azure AD:
-  #   az identity federated-credential create \
-  #     --identity-name lazynext-keda-identity \
-  #     --name keda-fic \
-  #     --issuer "${AKS_OIDC_ISSUER}" \
-  #     --subject "system:serviceaccount:lazynext:keda-sa"
-  podIdentity:
-    provider: azure-workload
-
----
 # Kafka authentication — SASL/SSL credentials for consumer lag monitoring
 apiVersion: keda.sh/v1alpha1
 kind: TriggerAuthentication
@@ -90,73 +68,6 @@ spec:
       key: UPSTASH_REDIS_REST_TOKEN
 
 # ═══════════════════════════════════════════════════════════════════
-# ScaledObject: render-service — Scale on Azure Queue length
-# ═══════════════════════════════════════════════════════════════════
-
----
-apiVersion: keda.sh/v1alpha1
-kind: ScaledObject
-metadata:
-  name: render-service-queue-scaler
-  namespace: lazynext
-  labels:
-    app: lazynext-render
-    app.kubernetes.io/part-of: lazynext
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/component: autoscaling
-    keda.sh/trigger: azure-queue
-spec:
-  # Target the render-service Deployment
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: lazynext-render
-
-  # Scale range: 1 pod at idle, up to 20 during peak render backlogs.
-  # This overrides the HPA (autoscaling.yaml) which sets 2-15.
-  # KEDA's max takes precedence when active.
-  minReplicaCount: 1
-  maxReplicaCount: 20
-
-  # Polling interval: check queue depth every 15 seconds
-  pollingInterval: 15
-  # Cooldown: after queue is empty, wait 5 minutes before scaling down
-  # This prevents thrashing when jobs arrive in bursts.
-  cooldownPeriod: 300
-
-  # Fallback: if Azure Queue is unreachable for 60s, fall back to HPA
-  fallback:
-    failureThreshold: 4
-    replicas: 3
-
-  triggers:
-    # Azure Storage Queue trigger — each render job is a queue message.
-    # Target: 5 messages per pod. If 50 messages are queued → scale to 10 pods.
-    - type: azure-queue
-      metadata:
-        # Azure Storage Account where render jobs are queued
-        accountName: lazynextmediasa
-        # Queue name holding pending render jobs
-        queueName: render-jobs
-        # Target queue length per pod
-        # Formula: desiredReplicas = ceil(queueLength / queueLengthTarget)
-        queueLength: "5"
-        # Connection string is NOT needed — we use Workload Identity above
-      authenticationRef:
-        name: azure-queue-auth
-
-    # Secondary trigger: CPU (backstop). If CPU spikes before queue builds up,
-    # scale anyway. This handles CPU-bound decryption/decompression phases.
-    - type: cpu
-      metricType: Utilization
-      metadata:
-        value: "70"
-        containerName: lazynext-render
-
-  # Advanced: scale to zero during idle periods to save cost
-  # idleReplicaCount: 0
-
-# ═══════════════════════════════════════════════════════════════════
 # ScaledObject: ai-agents — Scale on Kafka consumer lag
 # ═══════════════════════════════════════════════════════════════════
 
@@ -194,7 +105,7 @@ spec:
     # When consumer lag exceeds 10 messages per partition, scale up.
     - type: kafka
       metadata:
-        # Bootstrap servers (Azure Event Hubs Kafka endpoint or Confluent Cloud)
+        # Bootstrap servers (Kafka endpoint)
         bootstrapServers: "lazynext-eventhub.servicebus.windows.net:9093"
         # Consumer group managing CRDT event consumption
         consumerGroup: lazynext-sync-group
@@ -206,7 +117,7 @@ spec:
         offsetResetPolicy: latest
         # Allow scaling from/to zero if no messages
         scaleToZeroOnLagThreshold: "false"
-        # TLS required for Azure Event Hubs
+        # TLS required for Kafka SASL/SSL
         tls: enable
         sasl: plaintext
       authenticationRef:

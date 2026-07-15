@@ -1,6 +1,7 @@
 /**
  * Auth context — provides session state, signIn, signUp, signOut,
- * requestPasswordReset, and resetPassword to all screens.
+ * social OAuth, magic link, MFA/2FA, passkey, and password reset
+ * to all screens.
  *
  * @module contexts/AuthContext
  */
@@ -16,6 +17,9 @@ import type { ReactNode } from "react";
 import {
 	signIn as apiSignIn,
 	signUp as apiSignUp,
+	signInWithMagicLink as apiSignInWithMagicLink,
+	signInWithOAuth as apiSignInWithOAuth,
+	verifyTwoFactor as apiVerifyTwoFactor,
 	signOut as apiSignOut,
 	requestPasswordReset as apiRequestPasswordReset,
 	resetPassword as apiResetPassword,
@@ -26,32 +30,16 @@ import {
 } from "../services/auth";
 
 interface AuthContextValue {
-	/** Current session data or null. */
 	session: Session | null;
-	/** Whether auth is initializing. */
 	isLoading: boolean;
-	/** Signs in with email and password. */
 	signIn: (email: string, password: string) => Promise<AuthResponse>;
-	/** Signs up a new account. */
-	signUp: (
-		/** Display name for the new account. */
-		name: string,
-		/** Account email address. */
-		email: string,
-		/** Account password. */
-		password: string,
-	) => Promise<AuthResponse>;
-	/** Signs out the current session. */
+	signUp: (name: string, email: string, password: string) => Promise<AuthResponse>;
+	signInWithMagicLink: (email: string) => Promise<AuthResponse>;
+	signInWithOAuth: (provider: "google" | "apple" | "microsoft") => Promise<AuthResponse>;
+	verifyTwoFactor: (code: string) => Promise<AuthResponse>;
 	signOut: () => Promise<void>;
-	/** Requests a password reset email. */
 	requestPasswordReset: (email: string) => Promise<AuthResponse>;
-	/** Resets the password with a token. */
-	resetPassword: (
-		/** The new password to set. */
-		newPassword: string,
-		/** Password-reset token from the reset email. */
-		token: string,
-	) => Promise<AuthResponse>;
+	resetPassword: (newPassword: string, token: string) => Promise<AuthResponse>;
 }
 
 const AuthContext = createContext<AuthContextValue>({
@@ -59,6 +47,9 @@ const AuthContext = createContext<AuthContextValue>({
 	isLoading: true,
 	signIn: async () => ({ error: { message: "Auth not initialized" } }),
 	signUp: async () => ({ error: { message: "Auth not initialized" } }),
+	signInWithMagicLink: async () => ({ error: { message: "Auth not initialized" } }),
+	signInWithOAuth: async () => ({ error: { message: "Auth not initialized" } }),
+	verifyTwoFactor: async () => ({ error: { message: "Auth not initialized" } }),
 	signOut: async () => {},
 	requestPasswordReset: async () => ({
 		error: { message: "Auth not initialized" },
@@ -66,7 +57,6 @@ const AuthContext = createContext<AuthContextValue>({
 	resetPassword: async () => ({ error: { message: "Auth not initialized" } }),
 });
 
-/** Provides auth state (user, session, token) to the component tree via React context. */
 export function AuthProvider({ children }: { children: ReactNode }) {
 	const [session, setSession] = useState<Session | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
@@ -77,9 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				const stored = getStoredSession();
 				if (stored?.token) {
 					const sess = await getSession();
-					if (sess) {
-						setSession(sess);
-					}
+					if (sess) setSession(sess);
 				}
 			} catch {
 				// Ignore init errors
@@ -114,6 +102,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		[],
 	);
 
+	const handleMagicLink = useCallback(
+		async (email: string) => {
+			return apiSignInWithMagicLink(email);
+		},
+		[],
+	);
+
+	const handleOAuth = useCallback(
+		async (provider: "google" | "apple" | "microsoft") => {
+			return apiSignInWithOAuth(provider);
+		},
+		[],
+	);
+
+	const handleTwoFactor = useCallback(
+		async (code: string) => {
+			const result = await apiVerifyTwoFactor(code);
+			if (!result.error) {
+				const stored = getStoredSession();
+				if (stored) setSession(stored);
+			}
+			return result;
+		},
+		[],
+	);
+
 	const handleSignOut = useCallback(async () => {
 		await apiSignOut();
 		setSession(null);
@@ -126,6 +140,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				isLoading,
 				signIn: handleSignIn,
 				signUp: handleSignUp,
+				signInWithMagicLink: handleMagicLink,
+				signInWithOAuth: handleOAuth,
+				verifyTwoFactor: handleTwoFactor,
 				signOut: handleSignOut,
 				requestPasswordReset: apiRequestPasswordReset,
 				resetPassword: apiResetPassword,
@@ -136,7 +153,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	);
 }
 
-/** Hook to access the current auth context (user, session, loading, signIn, signOut, signUp). */
 export function useAuth(): AuthContextValue {
 	return useContext(AuthContext);
 }

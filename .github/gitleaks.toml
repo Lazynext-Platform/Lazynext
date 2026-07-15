@@ -64,12 +64,10 @@ title = "Lazynext Gitleaks Config"
   tags = ["key", "private-key"]
 
 [[rules]]
-  id = "openai-api-key"
-  description = "OpenAI API Key"
-  regex = '''sk-(?:proj-)?[A-Za-z0-9]{32,}'''
-  [rules.allowlist]
-    regexes = ['''(?i)placeholder|mock|example|test|sk_test_placeholder''']
-  tags = ["openai", "api-key"]
+  id = "gemini-api-key"
+  description = "Google Gemini API Key"
+  regex = '''AIza[0-9A-Za-z\-_]{35}'''
+  tags = ["gemini", "api-key"]
 
 [[rules]]
   id = "google-api-key"

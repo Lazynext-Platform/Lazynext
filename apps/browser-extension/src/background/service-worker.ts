@@ -3,16 +3,100 @@
 
 let API_GATEWAY = "http://localhost:8005";
 let AUTH_TOKEN = "";
+let AUTH_REFRESH_TOKEN = "";
+let AUTH_USER: { id: string; name: string; email: string } | null = null;
 
-// Restore the configured gateway URL and token from extension storage, falling
-// back to the localhost default for development.
-chrome.storage.local.get(["apiGatewayUrl", "authToken"], (items: { [key: string]: any }) => {
-	if (items.apiGatewayUrl && typeof items.apiGatewayUrl === "string") {
-		API_GATEWAY = items.apiGatewayUrl;
+// Restore the configured gateway URL, token, and user from extension storage,
+// falling back to the localhost default for development.
+chrome.storage.local.get(
+	["apiGatewayUrl", "authToken", "authRefreshToken", "authUser"],
+	(items: { [key: string]: any }) => {
+		if (items.apiGatewayUrl && typeof items.apiGatewayUrl === "string") {
+			API_GATEWAY = items.apiGatewayUrl;
+		}
+		if (items.authToken && typeof items.authToken === "string") {
+			AUTH_TOKEN = items.authToken;
+		}
+		if (items.authRefreshToken && typeof items.authRefreshToken === "string") {
+			AUTH_REFRESH_TOKEN = items.authRefreshToken;
+		}
+		if (items.authUser && typeof items.authUser === "object") {
+			AUTH_USER = items.authUser;
+		}
+	},
+);
+
+// Listen for messages from the extension popup/content scripts
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+	if (message.type === "SET_AUTH_TOKEN") {
+		AUTH_TOKEN = message.token || "";
+		AUTH_REFRESH_TOKEN = message.refreshToken || "";
+		AUTH_USER = message.user || null;
+		chrome.storage.local.set({
+			authToken: AUTH_TOKEN,
+			authRefreshToken: AUTH_REFRESH_TOKEN,
+			authUser: AUTH_USER,
+		});
+		sendResponse({ success: true });
+	} else if (message.type === "GET_AUTH_TOKEN") {
+		sendResponse({
+			token: AUTH_TOKEN,
+			refreshToken: AUTH_REFRESH_TOKEN,
+			user: AUTH_USER,
+		});
+	} else if (message.type === "CLEAR_AUTH") {
+		AUTH_TOKEN = "";
+		AUTH_REFRESH_TOKEN = "";
+		AUTH_USER = null;
+		chrome.storage.local.remove(["authToken", "authRefreshToken", "authUser"]);
+		sendResponse({ success: true });
 	}
-	if (items.authToken && typeof items.authToken === "string") {
-		AUTH_TOKEN = items.authToken;
+	return true;
+});
+
+// Open a popup window for OAuth sign-in (Google, Apple, Microsoft)
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+	if (message.type === "START_OAUTH") {
+		const provider = message.provider as string;
+		const redirectUrl = message.redirectUrl as string ||
+			`${API_GATEWAY.replace(":8005", ":3000")}/api/auth/callback/${provider}`;
+		const authUrl = message.authUrl as string ||
+			`${API_GATEWAY.replace(":8005", ":3000")}/api/auth/sign-in/social?provider=${provider}&callbackURL=${redirectUrl}`;
+
+		// Open a popup for OAuth flow
+		chrome.windows.create(
+			{
+				url: authUrl,
+				type: "popup",
+				width: 500,
+				height: 700,
+			},
+			(window) => {
+				// Listen for auth completion
+				const tabId = window?.tabs?.[0]?.id;
+				if (tabId) {
+				const listener: Parameters<
+					typeof chrome.tabs.onUpdated.addListener
+				>[0] = (updatedTabId, changeInfo) => {
+					if (updatedTabId === tabId && changeInfo.url) {
+						const url = new URL(changeInfo.url);
+						const params = new URLSearchParams(url.search);
+						const token = params.get("token");
+						const errParam = params.get("error");
+
+						if (token || errParam) {
+							chrome.tabs.onUpdated.removeListener(listener);
+							chrome.windows.remove(window.id!);
+							sendResponse({ token, error: errParam });
+						}
+					}
+				};
+					chrome.tabs.onUpdated.addListener(listener);
+				}
+			},
+		);
 	}
+	return true;
 });
 
 chrome.runtime.onInstalled.addListener(() => {
@@ -30,12 +114,10 @@ chrome.contextMenus.onClicked.addListener(async (info, _tab) => {
 		const mediaUrl = info.srcUrl || info.linkUrl;
 		if (!mediaUrl) return;
 
-		// Validate URL: only accept http/https URLs to media content
 		if (!mediaUrl.startsWith("http://") && !mediaUrl.startsWith("https://")) {
 			console.warn(`Rejected non-http URL: ${mediaUrl}`);
 			return;
 		}
-		// Block internal/private IPs (SSRF prevention)
 		try {
 			const u = new URL(mediaUrl);
 			if (u.hostname === "localhost" || u.hostname === "127.0.0.1" || u.hostname === "[::1]") {

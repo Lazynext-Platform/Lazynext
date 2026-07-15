@@ -253,7 +253,7 @@ class QueryStatsAggregator {
 		}
 	}
 
-	getStats(slowQueryThreshold: number): QueryStats {
+	getStats(_slowQueryThreshold: number): QueryStats {
 		const durations = this.executions
 			.filter((e) => !e.error)
 			.map((e) => e.durationMs)

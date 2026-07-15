@@ -131,7 +131,6 @@ export const downloadFile = async (
 	url: string,
 	filename: string,
 ): Promise<void> => {
-	try {
 		const response = await fetch(url);
 		const blob = await response.blob();
 		const downloadUrl = window.URL.createObjectURL(blob);
@@ -145,7 +144,4 @@ export const downloadFile = async (
 		// Clean up
 		document.body.removeChild(link);
 		window.URL.revokeObjectURL(downloadUrl);
-	} catch (error) {
-		throw error;
-	}
 };

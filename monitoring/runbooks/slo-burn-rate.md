@@ -17,7 +17,7 @@ The error budget for the web application is being consumed faster than expected.
 
 1. **Check the Grafana dashboard**: [Lazynext Overview](https://monitoring.lazynext.ai/d/lazynext-overview)
 2. **Check recent deployments**: `kubectl rollout history deployment/lazynext-web -n lazynext`
-3. **Check Container Apps logs**: Open Azure Monitor → filter for 5xx errors
+3. **Check Docker logs**: Open Grafana Loki → filter for 5xx errors
 4. **Database connectivity**: Run `scripts/health-check.sh` from the repo root
 
 ## Common Causes
@@ -40,13 +40,13 @@ kubectl rollout restart deployment/lazynext-pgbouncer -n lazynext
 ### PostgreSQL Overload
 ```bash
 # Check active connections
-az postgres flexible-server show --name lazynext-postgres-prod --resource-group lazynext-rg-prod
+psql -h localhost -U lazynext -d lazynext -c "SELECT count(*) FROM pg_stat_activity;"
 
 # Restart if absolutely necessary (last resort)
-az postgres flexible-server restart --name lazynext-postgres-prod --resource-group lazynext-rg-prod
+docker compose -f docker-compose.prod.yml restart postgres
 ```
 
-### API Key Expired (Stripe/Resend/OpenAI)
+### API Key Expired (Stripe/Resend/Gemini)
 ```bash
 # Verify secrets
 kubectl get secret lazynext-secrets -n lazynext -o jsonpath='{.data}'

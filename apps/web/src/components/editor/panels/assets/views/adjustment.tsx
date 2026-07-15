@@ -13,14 +13,12 @@ export function AdjustmentView() {
 
 			<div className="flex flex-col gap-4">
 				<div className="space-y-2">
-					// eslint-disable-next-line react/jsx-no-comment-textnodes
 					<div className="flex justify-between text-xs">
-						// eslint-disable-next-line jsx-a11y/label-has-associated-control //
-						eslint-disable-next-line jsx-a11y/label-has-associated-control
-						<label>Brightness</label>
+						<label htmlFor="adjustment-brightness">Brightness</label>
 						<span className="text-muted-foreground">0%</span>
 					</div>
 					<input
+						id="adjustment-brightness"
 						type="range"
 						className="w-full"
 						min="-100"
@@ -30,14 +28,12 @@ export function AdjustmentView() {
 				</div>
 
 				<div className="space-y-2">
-					// eslint-disable-next-line react/jsx-no-comment-textnodes
 					<div className="flex justify-between text-xs">
-						// eslint-disable-next-line jsx-a11y/label-has-associated-control //
-						eslint-disable-next-line jsx-a11y/label-has-associated-control
-						<label>Contrast</label>
+						<label htmlFor="adjustment-contrast">Contrast</label>
 						<span className="text-muted-foreground">0%</span>
 					</div>
 					<input
+						id="adjustment-contrast"
 						type="range"
 						className="w-full"
 						min="-100"
@@ -47,14 +43,12 @@ export function AdjustmentView() {
 				</div>
 
 				<div className="space-y-2">
-					// eslint-disable-next-line react/jsx-no-comment-textnodes
 					<div className="flex justify-between text-xs">
-						// eslint-disable-next-line jsx-a11y/label-has-associated-control //
-						eslint-disable-next-line jsx-a11y/label-has-associated-control
-						<label>Saturation</label>
+						<label htmlFor="adjustment-saturation">Saturation</label>
 						<span className="text-muted-foreground">0%</span>
 					</div>
 					<input
+						id="adjustment-saturation"
 						type="range"
 						className="w-full"
 						min="-100"
@@ -64,14 +58,12 @@ export function AdjustmentView() {
 				</div>
 
 				<div className="space-y-2">
-					// eslint-disable-next-line react/jsx-no-comment-textnodes
 					<div className="flex justify-between text-xs">
-						// eslint-disable-next-line jsx-a11y/label-has-associated-control //
-						eslint-disable-next-line jsx-a11y/label-has-associated-control
-						<label>Temperature</label>
+						<label htmlFor="adjustment-temperature">Temperature</label>
 						<span className="text-muted-foreground">0</span>
 					</div>
 					<input
+						id="adjustment-temperature"
 						type="range"
 						className="w-full"
 						min="-100"

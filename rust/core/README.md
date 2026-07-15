@@ -11,7 +11,7 @@ Single source of truth for all business logic. Contains the NLE state machine, C
 | `autonomous.rs` | Lazynext AI Agent Copilot: LLM-driven autonomous editing |
 | `ffmpeg_loader.rs` | CliFfmpegLoader: real video frame decode via ffmpeg CLI |
 | `frame_cache.rs` | LRU frame cache for playback |
-| `ai_client.rs` | Multi-provider AI client (OpenAI, Anthropic, Gemini, Ollama) |
+| `ai_client.rs` | AI client (Google Gemini, Ollama) |
 | `plugin_manager.rs` | VST3 host and shader plugin lifecycle |
 | `mobile_bridge.rs` | UniFFI bridge for iOS/Android native modules |
 

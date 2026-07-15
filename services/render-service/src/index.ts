@@ -3,7 +3,7 @@
  *
  * Accepts render jobs, manages a BullMQ queue backed by Redis, builds
  * ffmpeg overlay graphs from timeline data, signs outputs with C2PA
- * provenance manifests, and uploads to Azure Blob Storage.
+ * signs outputs with C2PA provenance manifests, and stores renders locally.
  *
  * Supports two export modes:
  *   1. Legacy timeline mode — server builds ffmpeg command from timeline data
@@ -69,12 +69,9 @@ function getC2PASecret(): string {
 	return require("crypto").randomBytes(32).toString("hex");
 }
 
-/** Build the allowlist of download origins (Azure Blob, CDN, lazynext domains). */
+/** Build the allowlist of download origins (CDN, lazynext domains). */
 function getAllowedDownloadOrigins(): string[] {
 	return [
-		process.env.AZURE_STORAGE_ACCOUNT
-			? `${process.env.AZURE_STORAGE_ACCOUNT}.blob.core.windows.net`
-			: null,
 		process.env.CDN_DOMAIN || null,
 		"lazynext.com",
 		"media.lazynext.com",
@@ -192,36 +189,8 @@ async function getWorker(): Promise<Worker<RenderJob & { timelineData?: any }>> 
 	return worker;
 }
 
-// Azure Blob Storage — initialised when STORAGE_PROVIDER=azure.
-// Falls back to local filesystem storage when not configured.
-// Uses DefaultAzureCredential (Managed Identity in Container Apps, az login locally).
-let blobClient: any = null;
-
-/** Lazily create an Azure Blob Storage client via DefaultAzureCredential. */
-async function getBlobClient(): Promise<any> {
-	if (blobClient) return blobClient;
-	if (process.env.STORAGE_PROVIDER !== "azure") return null;
-
-	try {
-		const { BlobServiceClient } = await import("@azure/storage-blob");
-		const { DefaultAzureCredential } = await import("@azure/identity");
-		// Dev default "lazynextmediadev" is for local development only.
-		if (!process.env.AZURE_STORAGE_ACCOUNT) {
-			throw new Error("AZURE_STORAGE_ACCOUNT is required when STORAGE_PROVIDER=azure");
-		}
-		const account = process.env.AZURE_STORAGE_ACCOUNT;
-		const credential = new DefaultAzureCredential();
-		blobClient = new BlobServiceClient(
-			`https://${account}.blob.core.windows.net`,
-			credential,
-		);
-		console.log("[Render Farm] Azure Blob Storage configured via Managed Identity");
-	} catch (e) {
-		console.warn("[Render Farm] Azure Blob Storage not available — using local filesystem");
-		return null;
-	}
-	return blobClient;
-}
+// Local filesystem storage — render outputs stored on disk.
+// All media paths are resolved relative to MEDIA_DIR or fall back to /opt/lazynext/media.
 
 /**
  * POST /api/v1/jobs — Enqueue a new render job.
@@ -403,26 +372,7 @@ app.post(
 				console.error(`[Frame Export] C2PA signing failed:`, e);
 			}
 
-			// Upload to Azure Blob if configured
-			try {
-				const azureBlob = await getBlobClient();
-				if (azureBlob) {
-					const containerName = process.env.MEDIA_BUCKET || "media";
-					const containerClient =
-						azureBlob.getContainerClient(containerName);
-					const blockBlobClient = containerClient.getBlockBlobClient(
-						`renders/${path.basename(outputPath)}`,
-					);
-					const fileStream = fs.createReadStream(outputPath);
-					await blockBlobClient.uploadStream(fileStream);
-					console.log(
-						`[Frame Export] Uploaded ${jobId} to Azure Blob.`,
-					);
-				}
-			} catch (e) {
-				console.error(`[Frame Export] Azure upload failed:`, e);
-			}
-
+			// Output kept in local filesystem
 			res.status(200).json({ success: true, jobId, output: outputPath });
 		} catch (e: any) {
 			console.error(`[Frame Export] finalize failed:`, e.message);
@@ -503,8 +453,7 @@ interface TimelineData {
 
 /**
  * BullMQ worker processor: builds ffmpeg args from timeline data, spawns
- * ffmpeg, tracks progress via stderr timecode parsing, signs with C2PA,
- * and uploads to Azure Blob Storage.
+ * ffmpeg, tracks progress via stderr timecode parsing, and signs with C2PA.
  */
 async function renderJobProcessor(job: Job<RenderJob & { timelineData?: any }>) {
 	console.log(`[Render Farm Worker] Started job ${job.id} (Type: ${job.name})...`);
@@ -567,21 +516,7 @@ async function renderJobProcessor(job: Job<RenderJob & { timelineData?: any }>) 
 					console.error(`[Render Farm] C2PA Signing failed:`, e);
 				}
 
-				try {
-					const azureBlob = await getBlobClient();
-					if (!azureBlob) {
-						console.log(`[Render Farm] Azure Blob not configured — keeping output at ${outputPath}`);
-					} else {
-						const containerName = process.env.MEDIA_BUCKET || "media";
-						const containerClient = azureBlob.getContainerClient(containerName);
-						const blockBlobClient = containerClient.getBlockBlobClient(`renders/${job.id}.${job.data.format}`);
-						const fileStream = fs.createReadStream(outputPath);
-						await blockBlobClient.uploadStream(fileStream);
-						console.log(`[Render Farm] Successfully uploaded ${job.id} to Azure Blob.`);
-					}
-				} catch (e) {
-					console.error(`[Render Farm] Azure Blob Upload failed:`, e);
-				}
+				console.log(`[Render Farm] Keeping output at ${outputPath}`);
 
 				resolve(outputPath);
 			} else {
@@ -870,8 +805,8 @@ app.get("/api/v1/jobs/:jobId/stream", async (req: Request, res: Response) => {
  * Downloads the video if a URL is provided, then publishes to each
  * requested platform independently.
  *
- * Security: Only allows downloads from trusted origins (Azure Blob,
- * configured CDN, and local filesystem paths). Arbitrary URLs are
+ * Security: Only allows downloads from trusted origins (configured CDN,
+ * and local filesystem paths). Arbitrary URLs are
  * rejected to prevent SSRF.
  */
 app.post("/api/v1/publish", async (req: Request, res: Response) => {

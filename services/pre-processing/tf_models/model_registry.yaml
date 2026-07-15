@@ -17,7 +17,7 @@
 #       description: <string>        # Human-readable purpose
 #       task: <string>               # ML task (asr, segmentation, super_resolution, classification)
 #       framework: <string>          # Export framework (tensorflow, pytorch->onnx->tf)
-#       huggingface_id: <string>     # Upstream HuggingFace model ID
+#       modal_id: <string>            # Upstream Modal model ID
 #       download_url: <string>       # Direct URL to SavedModel artifact (.tar.gz)
 #       checksum_sha256: <string>    # SHA-256 of all files in the SavedModel directory
 #       input_shape: <list[int]>     # Expected input tensor shape (batch dim as -1)
@@ -46,8 +46,8 @@ models:
     description: "OpenAI Whisper Large-v3 for transcription and translation"
     task: "automatic_speech_recognition"
     framework: "pytorch"
-    huggingface_id: "openai/whisper-large-v3"
-    download_url: "huggingface://openai/whisper-large-v3"
+    modal_id: "openai/whisper-large-v3"
+    download_url: "modal://openai/whisper-large-v3"
     checksum_sha256: ""   # Fill after initial download with `scripts/tf-model-download.sh`
     input_shape: [-1, 80, 3000]
     output_shape: [-1, -1, 51865]
@@ -74,8 +74,8 @@ models:
     description: "Meta SAM2 Hiera-Large vision encoder for rotoscoping masks"
     task: "image_segmentation"
     framework: "pytorch"
-    huggingface_id: "facebook/sam2-hiera-large"
-    download_url: "huggingface://facebook/sam2-hiera-large"
+    modal_id: "facebook/sam2-hiera-large"
+    download_url: "modal://facebook/sam2-hiera-large"
     checksum_sha256: ""   # Fill after initial download
     input_shape: [-1, 3, 1024, 1024]
     output_shape: [-1, 256, 64, 64]
@@ -103,8 +103,8 @@ models:
     description: "Real-ESRGAN 4x upscaler for video enhancement and proxy generation"
     task: "super_resolution"
     framework: "pytorch"
-    huggingface_id: "ai-forever/Real-ESRGAN"
-    download_url: "huggingface://ai-forever/Real-ESRGAN"
+    modal_id: "ai-forever/Real-ESRGAN"
+    download_url: "modal://ai-forever/Real-ESRGAN"
     checksum_sha256: ""   # Fill after initial download
     input_shape: [-1, -1, -1, 3]
     output_shape: [-1, -1, -1, 3]
@@ -131,8 +131,8 @@ models:
     description: "MobileNetV2 1.0-224 for scene classification and clip tagging"
     task: "image_classification"
     framework: "tensorflow"
-    huggingface_id: "google/mobilenet_v2_1.0_224"
-    download_url: ""   # Use TF Hub or HuggingFace
+    modal_id: "google/mobilenet_v2_1.0_224"
+    download_url: ""   # Use Modal Hub
     checksum_sha256: ""   # Fill after initial download
     input_shape: [-1, 224, 224, 3]
     output_shape: [-1, 1001]
@@ -197,10 +197,9 @@ global:
     grpc_port: 8500
     bridge_port: 8502        # nginx tf-bridge
 
-  # Azure Container Apps deployment
-  azure:
-    resource_group: "lazynext-prod"
-    container_app_name: "tf-serving"
+  # Docker Compose deployment
+  docker:
+    compose_service: "tf-serving"
     cpu: "4.0"
     memory: "32Gi"
     gpu_type: "A10G"

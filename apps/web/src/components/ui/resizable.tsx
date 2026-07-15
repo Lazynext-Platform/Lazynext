@@ -22,7 +22,7 @@ const ResizablePanelGroup = ({
 const ResizablePanel = ResizablePrimitive.Panel;
 
 const ResizableHandle = ({
-	withHandle,
+	withHandle: _withHandle,
 	className,
 	...props
 }: React.ComponentProps<typeof ResizablePrimitive.Separator> & {

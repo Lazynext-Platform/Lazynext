@@ -7,8 +7,8 @@
 
 "use client";
 
-import React, { useState } from "react";
-import { Share2, Check, Copy } from "lucide-react";
+import { useState } from "react";
+import { Share2, Check } from "lucide-react";
 import { cn } from "@/utils/ui";
 import { toast } from "sonner";
 

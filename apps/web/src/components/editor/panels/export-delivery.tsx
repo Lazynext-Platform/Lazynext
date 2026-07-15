@@ -5,12 +5,11 @@
  * @module components/editor/panels/export-delivery
  */
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Download, Film, AudioWaveform, MonitorUp } from "lucide-react";
 import { toast } from "sonner";
 import { usePostHog } from "posthog-js/react";
 import { dispatchExport } from "../../../export/dispatch";
-import { downloadBuffer } from "../../../export/index";
 
 export function ExportDelivery({
 	projectData,
@@ -188,19 +187,19 @@ export function ExportDelivery({
 
 					<div className="space-y-4">
 						<div>
-							<label className="text-[10px] font-medium text-muted block mb-1">
+							<label htmlFor="export-resolution" className="text-[10px] font-medium text-muted block mb-1">
 								Resolution
 							</label>
-							<select className="w-full bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground focus:outline-none focus:border-indigo-500">
+							<select id="export-resolution" className="w-full bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground focus:outline-none focus:border-indigo-500">
 								<option>3840 x 2160 Ultra HD</option>
 								<option>1920 x 1080 HD</option>
 								<option>4096 x 2160 DCI 4K</option>
 							</select>
 						</div>
 						<div>
-							<label className="text-[10px] font-medium text-muted block mb-1">
+							<div className="text-[10px] font-medium text-muted block mb-1">
 								Hardware Output / SDI
-							</label>
+							</div>
 							<div className="flex items-center gap-2 bg-background border border-border p-2 rounded">
 								<MonitorUp className="w-4 h-4 text-muted" />
 								<span className="text-[10px] text-muted">

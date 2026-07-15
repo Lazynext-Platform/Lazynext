@@ -11,6 +11,9 @@ concurrency:
   group: pr-checks-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   rust-check:
     name: "Rust: fmt + clippy + build"
@@ -34,7 +37,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with: { bun-version: "1.3.14" }
       - run: bun install
-      - run: bun run lint --quiet || true && bun run typecheck || true
+      - run: bun run lint --quiet && bun run typecheck
         working-directory: apps/web
 
   test-rust:
@@ -78,19 +81,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  terraform:
-    name: "Terraform: fmt + validate"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
-      - run: terraform fmt -check -recursive
-        working-directory: infra/terraform
-      - run: terraform init -backend=false
-        working-directory: infra/terraform
-      - run: terraform validate
-        working-directory: infra/terraform
-
   dependency-review:
     name: "Security: Dependency Review"
     runs-on: ubuntu-latest
@@ -105,4 +95,3 @@ jobs:
           retry-on-snapshot-warnings-timeout: 120
           vulnerability-check: true
           license-check: false
-          allow-dependencies-licenses: "MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, 0BSD, CC0-1.0, Unlicense"

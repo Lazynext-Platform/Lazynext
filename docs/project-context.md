@@ -30,7 +30,7 @@ Lazynext is an enterprise-grade, multi-platform AI-native Non-Linear Video Edito
 | **Mobile** | React Native | Latest | Code sharing with web, UniFFI for Rust bindings |
 | **GPU** | wgpu | Latest | Cross-platform (WebGPU, Vulkan, Metal, DX12) |
 | **State** | CRDTs | Custom (LWW-Register + CmRDT) | Real-time conflict-free collaboration |
-| **Database** | PostgreSQL | 16 | Drizzle ORM, Azure Flexible Server |
+| **Database** | PostgreSQL | 16 | Drizzle ORM, self-managed on Linode |
 | **ORM** | Drizzle | Latest | Type-safe SQL, migrations |
 | **Auth** | better-auth | Latest | JWT (HS256), Upstash Redis rate limiting |
 | **Testing (Rust)** | cargo test | — | Workspace-wide unit + integration tests |
@@ -39,9 +39,9 @@ Lazynext is an enterprise-grade, multi-platform AI-native Non-Linear Video Edito
 | **Package Manager** | Bun | 1.3.14+ | Workspaces, speed, TypeScript native |
 | **Build** | Turbo + cargo + wasm-pack | — | Monorepo orchestration |
 | **CI/CD** | GitHub Actions | — | Lint, test, build, deploy |
-| **Deployment** | Azure Container Apps | — | Docker containers, Terraform IaC |
-| **Infrastructure** | Terraform + K8s + Ansible | — | Azure, optional AKS |
-| **Payments** | Stripe | — | Subscription management |
+| **Deployment** | Linode Docker Compose | — | Docker, systemd, Caddy |
+| **Infrastructure** | Docker + K8s + Ansible | — | Self-managed Linode |
+| **Payments** | Dodo Payments | — | Subscription management |
 | **Email** | Resend | — | Transactional email |
 | **Monitoring** | Prometheus + Grafana + Loki + Tempo | — | Metrics, logs, traces |
 
@@ -49,7 +49,7 @@ Lazynext is an enterprise-grade, multi-platform AI-native Non-Linear Video Edito
 
 ### Pattern
 
-**Monorepo with strict layer separation**: Rust owns all business logic. Each app under `apps/` is a pure UI shell. Backend microservices in `services/` handle async offload tasks (AI inference, rendering, analytics). Infrastructure is managed as code (Terraform, K8s, Ansible).
+**Monorepo with strict layer separation**: Rust owns all business logic. Each app under `apps/` is a pure UI shell. Backend microservices in `services/` handle async offload tasks (AI inference, rendering, analytics). Infrastructure is managed as code (Docker Compose, K8s, Ansible).
 
 ### Project Structure
 
@@ -93,13 +93,11 @@ lazynext/
 │   ├── collab-server/       # Rust (:8004) — CRDT sync + WebRTC
 │   └── analytics-service/   # Node.js (:8006) — Data ingestion
 ├── packages/                # Shared packages (api-client)
-├── plugins/                 # Plugin SDK and examples
-├── infra/terraform/         # Azure infrastructure as code
-├── k8s/                     # Kubernetes manifests (optional AKS)
+├── infra/linode/            # Linode deployment scripts + systemd
+├── k8s/                     # Kubernetes manifests (optional self-managed K8s)
 ├── monitoring/              # Prometheus, Grafana, Loki, Tempo
 ├── scripts/                 # Build and automation scripts
-├── config/                  # Traefik ingress configuration
-└── docs/                    # Mastery documentation framework
+├── docs/                    # Mastery documentation framework
 ```
 
 ### Key Architectural Decisions
@@ -167,11 +165,10 @@ bun run dev
 |---|---|---|---|
 | `DATABASE_URL` | Yes | — | PostgreSQL connection string |
 | `BETTER_AUTH_SECRET` | Yes | — | Auth secret (64 chars) |
-| `STORAGE_PROVIDER` | No | `local` | `local` or `azure` |
-| `LLM_PROVIDER` | No | — | `openai`, `anthropic`, or `gemini` |
-| `OPENAI_API_KEY` | No | — | Whisper + GPT-4o features |
-| `ANTHROPIC_API_KEY` | No | — | Claude-powered Lazynext AI Agent |
-| `FAL_KEY` | No | — | Kling 3.0 video generation |
+| `STORAGE_PROVIDER` | No | `local` | `local` for Linode filesystem storage |
+| `LLM_PROVIDER` | No | `gemini` | `gemini` for Google Gemini AI |
+| `GEMINI_API_KEY` | No | — | Google Gemini API key for AI Copilot |
+| `MODAL_API_KEY` | No | — | Modal GPU compute (SD pipeline video generation, ML inference) |
 | `NEXT_PUBLIC_*_URL` | No | localhost | Microservice URLs |
 | `UPSTASH_REDIS_URL` | No | — | Rate limiting (required in prod) |
 | `STRIPE_SECRET_KEY` | No | — | Payments |
@@ -197,7 +194,7 @@ bun run dev
 - collab-server with PostgreSQL CRDT persistence (sqlx)
 - P2P mesh networking (UDP broadcast + TCP CRDT delta exchange)
 - OpenTelemetry across all 6 microservices
-- Terraform-managed Azure infrastructure with CI/CD
+- Linode Docker Compose deployment with CI/CD
 - Full E2E pipeline test driver: `scripts/full-e2e.sh`
 
 ### Out of Scope (v1.0)

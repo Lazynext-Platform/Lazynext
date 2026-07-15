@@ -1,5 +1,4 @@
 /** @module Admin ResourceMonitor component showing GPU cluster health */
-import React from "react";
 
 export function ResourceMonitor() {
 	return (

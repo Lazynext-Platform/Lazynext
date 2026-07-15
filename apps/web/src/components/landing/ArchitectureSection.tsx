@@ -46,7 +46,7 @@ export function ArchitectureSection() {
 							One Unified Timeline.
 						</h2>
 						<p className="mt-4 text-[var(--text-muted)] dark:text-muted text-lg leading-relaxed max-w-2xl mx-auto">
-							We didn't just build an editor. We built an Lazynext AI Agent that edits
+							We didn&apos;t just build an editor. We built an Lazynext AI Agent that edits
 							footage for you based on text prompts. Lazynext acts as the
 							central nervous system bridging Python ML servers, Rust core
 							binaries, and WebAssembly to execute your natural language

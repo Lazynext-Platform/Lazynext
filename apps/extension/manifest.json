@@ -10,7 +10,8 @@
     "storage"
   ],
   "host_permissions": [
-    "<all_urls>"
+    "http://localhost:3000/*",
+    "http://localhost:8005/*"
   ],
   "background": {
     "service_worker": "background.js"

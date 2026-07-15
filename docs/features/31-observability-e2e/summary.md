@@ -22,7 +22,7 @@ Audited the OpenTelemetry instrumentation across all microservices, the end-to-e
 - `services/*/opentelemetry/` — OTLP instrumentation in each microservice
 - `scripts/full-e2e.sh` — End-to-end test orchestration driver
 - `apps/web/tests/` — Playwright E2E test suite
-- `terraform/observability/` — OpenTelemetry collector and monitoring infrastructure
+- `monitoring/` — OpenTelemetry collector and monitoring infrastructure
 - `docker-compose.observability.yml` — Local observability stack (collector, Jaeger, Prometheus)
 
 ## Conclusion

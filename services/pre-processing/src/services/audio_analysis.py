@@ -1,7 +1,7 @@
 """
 Audio analysis services: transcription and enhancement.
 
-Uses OpenAI Whisper for speech-to-text and a local SciPy DSP pipeline
+Uses TF Serving Whisper for speech-to-text and a local SciPy DSP pipeline
 for noise reduction, compression, and EQ enhancement.
 """
 
@@ -17,8 +17,7 @@ async def transcribe_audio_service(req: VideoRequest):
 
     Tries (in order):
       1. Local TF Serving whisper-large-v3
-      2. OpenAI Whisper API
-      3. Returns 503 if both unavailable
+      2. Returns 503 if unavailable
 
     Args:
         req: VideoRequest containing the video_id to transcribe.
@@ -26,7 +25,13 @@ async def transcribe_audio_service(req: VideoRequest):
     Returns:
         dict with success, video_id, language, and word-level subtitles.
     """
-    api_key = os.getenv("OPENAI_API_KEY")
+    # In production, fail fast if no transcription backend is configured.
+    if os.getenv("APP_ENV") == "production" and not os.getenv("GEMINI_API_KEY"):
+        raise HTTPException(
+            status_code=503,
+            detail="Transcription service unavailable — set GEMINI_API_KEY",
+        )
+
     tf_serving_url = os.getenv("TF_SERVING_URL", "http://tensorflow-serving:8501")
     file_path = f"/tmp/{req.video_id}.mp4"
 
@@ -79,54 +84,11 @@ async def transcribe_audio_service(req: VideoRequest):
                         "source": "tf_serving_whisper",
                     }
     except (httpx.RequestError, Exception) as e:
-        print(f"[Pre-Processing] TF Serving Whisper unavailable ({e}), falling back to OpenAI API")
-
-    # Phase 2: Fall back to OpenAI Whisper API
-    if api_key:
-        try:
-            async with httpx.AsyncClient() as client:
-                with open(file_path, "rb") as audio_file:
-                    files = {
-                        "file": (file_path, audio_file, "audio/mp4"),
-                        "model": (None, "whisper-1"),
-                        "response_format": (None, "verbose_json"),
-                        "timestamp_granularities[]": (None, "word"),
-                    }
-                    headers = {"Authorization": f"Bearer {api_key}"}
-
-                    response = await client.post(
-                        "https://api.openai.com/v1/audio/transcriptions",
-                        files=files,
-                        headers=headers,
-                        timeout=120.0,
-                    )
-                    response.raise_for_status()
-                    data = response.json()
-
-                    subtitles = []
-                    if "words" in data:
-                        for w in data["words"]:
-                            subtitles.append(
-                                {
-                                    "start": w["start"],
-                                    "end": w["end"],
-                                    "text": w["word"],
-                                }
-                            )
-
-                    return {
-                        "success": True,
-                        "video_id": req.video_id,
-                        "language": data.get("language"),
-                        "subtitles": subtitles,
-                        "source": "openai_whisper",
-                    }
-        except Exception as e:
-            print(f"[Pre-Processing] Whisper API error: {e}")
+        print(f"[Pre-Processing] TF Serving Whisper unavailable ({e})")
 
     raise HTTPException(
         status_code=503,
-        detail="Transcription service unavailable — no Whisper API key configured and TF Serving unreachable"
+        detail="Transcription service unavailable — TF Serving unreachable and no Gemini API key configured"
     )
 async def enhance_audio_service(req: EnhanceAudioRequest):
     """Enhance audio quality using a DSP pipeline (high-pass, gate, compressor, EQ).

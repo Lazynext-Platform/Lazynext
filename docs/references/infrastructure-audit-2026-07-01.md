@@ -1,7 +1,7 @@
 # 🏗️ Infrastructure Audit — Remaining Items (Human Action Required)
 
 > **Date**: 2026-07-01
-> **Scope**: CI/CD, Docker, K8s, Terraform, Ansible, Monitoring, Database
+> **Scope**: CI/CD, Docker, K8s, Ansible, Monitoring, Database
 > **Audited by**: 4 parallel subagent audits (174 findings total)
 
 ---
@@ -20,7 +20,7 @@
 | 8 | Prometheus | Fixed all 6 alert job_name mismatches (web→lazynext-web, ai-agents→lazynext-ai-agents, etc.) |
 | 9 | Ansible | NVIDIA role: Ubuntu 22.04→dynamic, driver 535→550, CUDA 12.2→12.6 |
 | 10 | production.yml | Migration job now idempotent (az update || create + start) |
-| 11 | infra/k8s | Deleted stale `infra/k8s/deployment.yaml` (AWS S3, wrong ports, wrong GHCR org) |
+| 11 | infra/k8s | Deleted stale `infra/k8s/deployment.yaml` (cloud storage, wrong ports, wrong GHCR org) |
 | 12 | Terraform | Removed unused `redis_capacity` variable |
 | 13 | DB | Created migration `0003_reconcile_schema.sql` — renames project→projects, subscription→subscriptions; adds 7 missing tables from Drizzle schema |
 | 14 | Terraform | Added Container App resources for api_gateway (8005), collab_server (8004), analytics_service (8006) |
@@ -41,18 +41,14 @@
 - `overlays/staging/` and `overlays/dev/` only patch web + sync + render. Missing: pre-processing, generative-studio, analytics-service, collab-server, mcp.
 - **Action**: Add Deployment patches for remaining services in each overlay, or document they use base defaults.
 
-### K8s Production ACR Name
-- `k8s/base/kustomization.yaml` remaps images to `lazynextacrdevlmblwn.azurecr.io`. Production overlay only overrides `newTag`, not `newName`.
-- **Action**: Add `newName: lazynextacrproduction.azurecr.io` to overlays/production/kustomization.yaml images section.
-
 ## Summary
 
 | Severity | Count | Fixed | Remaining |
 |---|---|---|---|
 | Critical | 5 | 5 | 0 |
 | High | 6 | 6 | 0 |
-| Medium | 5 | 2 | 3 |
+| Medium | 5 | 2 | 2 |
 | Low | 5 | 5 | 0 |
-| **Total** | **21** | **18** | **3** |
+| **Total** | **21** | **18** | **2** |
 
-All critical and high-severity issues resolved. 3 remaining items are low-risk configuration oversights that require cluster/registry access to validate.
+All critical and high-severity issues resolved. 2 remaining items are low-risk configuration oversights that require cluster access to validate.

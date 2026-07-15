@@ -563,7 +563,7 @@ impl AutonomousEditor {
                 .unwrap_or("{}")
                 .to_string()
         } else {
-            // OpenAI-compatible fallback
+            // Gemini-compatible fallback
             body["choices"]
                 .as_array()
                 .and_then(|choices| choices.first())

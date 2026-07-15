@@ -285,10 +285,10 @@ spec:
               value: "max_split_size_mb:512"
             - name: PYTHONUNBUFFERED
               value: "1"
-            - name: HF_HOME
-              value: "/models/huggingface"
-            - name: TRANSFORMERS_CACHE
-              value: "/models/huggingface"
+            - name: MODEL_CACHE_DIR
+              value: "/models/modal"
+            - name: MODEL_CACHE
+              value: "/models/modal"
               valueFrom:
                 secretKeyRef:
                   name: lazynext-secrets

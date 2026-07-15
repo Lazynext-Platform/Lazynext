@@ -35,40 +35,40 @@ labels:
       app.kubernetes.io/managed-by: kustomize
       app.kubernetes.io/part-of: lazynext
 
-# Transform images to use Azure Container Registry (same images as Container Apps)
+# Transform images to pull from GitHub Container Registry
 images:
   - name: ghcr.io/lazynext-platform/lazynext-web
-    newName: lazynextacrdevlmblwn.azurecr.io/lazynext-web
+    newName: ghcr.io/lazynext-platform/lazynext-web
     newTag: latest
   - name: ghcr.io/lazynext-platform/lazynext-ai-agents
-    newName: lazynextacrdevlmblwn.azurecr.io/lazynext-ai-agents
+    newName: ghcr.io/lazynext-platform/lazynext-ai-agents
     newTag: latest
   - name: ghcr.io/lazynext-platform/lazynext-render-service
-    newName: lazynextacrdevlmblwn.azurecr.io/lazynext-render-service
+    newName: ghcr.io/lazynext-platform/lazynext-render-service
     newTag: latest
   - name: ghcr.io/lazynext-platform/lazynext-pre-processing
-    newName: lazynextacrdevlmblwn.azurecr.io/lazynext-pre-processing
+    newName: ghcr.io/lazynext-platform/lazynext-pre-processing
     newTag: latest
   - name: ghcr.io/lazynext-platform/lazynext-generative-studio
-    newName: lazynextacrdevlmblwn.azurecr.io/lazynext-generative-studio
+    newName: ghcr.io/lazynext-platform/lazynext-generative-studio
     newTag: latest
   - name: ghcr.io/lazynext-platform/lazynext-mcp
-    newName: lazynextacrdevlmblwn.azurecr.io/lazynext-mcp
+    newName: ghcr.io/lazynext-platform/lazynext-mcp
     newTag: latest
   - name: ghcr.io/lazynext-platform/lazynext-analytics-service
-    newName: lazynextacrdevlmblwn.azurecr.io/lazynext-analytics-service
+    newName: ghcr.io/lazynext-platform/lazynext-analytics-service
     newTag: latest
   - name: ghcr.io/lazynext-platform/lazynext-collab-server
-    newName: lazynextacrdevlmblwn.azurecr.io/lazynext-collab-server
+    newName: ghcr.io/lazynext-platform/lazynext-collab-server
     newTag: latest
   - name: ghcr.io/lazynext-platform/lazynext-api-gateway
-    newName: lazynextacrdevlmblwn.azurecr.io/lazynext-api-gateway
+    newName: ghcr.io/lazynext-platform/lazynext-api-gateway
     newTag: latest
   - name: ghcr.io/lazynext-platform/lazynext-db-migrate
-    newName: lazynextacrdevlmblwn.azurecr.io/lazynext-db-migrate
+    newName: ghcr.io/lazynext-platform/lazynext-db-migrate
     newTag: latest
   - name: ghcr.io/lazynext-platform/lazynext-social-publish
-    newName: lazynextacrdevlmblwn.azurecr.io/lazynext-social-publish
+    newName: ghcr.io/lazynext-platform/lazynext-social-publish
     newTag: latest
 
 # Strategic merge patches for init containers

@@ -66,8 +66,6 @@ pgbouncer_pool_mode: transaction
 postgresql_backup_dir: "/var/backups/postgresql"
 postgresql_backup_retention_days: 30
 postgresql_wal_archive_dir: "/var/backups/postgresql/wal"
-azure_storage_account: "{{ vault_azure_storage_account | default('lazynextbackups') }}"
-azure_storage_container: "{{ vault_azure_storage_container | default('postgres-backups') }}"
 
 # ── Redis ─────────────────────────────────────────────────────────
 redis_version: "8"
@@ -114,7 +112,7 @@ grafana_port: 3000
 
 alertmanager_config_dir: /etc/alertmanager
 alertmanager_slack_webhook_url: "{{ vault_alertmanager_slack_webhook_url | default('https://hooks.slack.com/services/disabled') }}"
-alertmanager_pagerduty_routing_key: "{{ vault_alertmanager_pagerduty_routing_key | default('disabled') }}"
+alertmanager_grafana_oncall_url: "{{ vault_alertmanager_grafana_oncall_url | default('disabled') }}"
 
 loki_config_dir: /etc/loki
 loki_data_dir: /var/lib/loki

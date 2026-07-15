@@ -12,7 +12,7 @@ Usage:
 Lazynext-Editor whisper <file> <model> [options]
 ```
 
-`<model>` is a path to a `ggml` whisper model. You can download them from [huggingface.co/ggerganov/whisper.cpp](https://huggingface.co/ggerganov/whisper.cpp).
+`<model>` is a path to a `ggml` whisper model. You can download them from [modal.com/ggerganov/whisper.cpp](https://modal.com/ggerganov/whisper.cpp).
 
 Example:
 

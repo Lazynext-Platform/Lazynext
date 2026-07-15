@@ -472,7 +472,7 @@ export class TimelineEditor {
 			}
 
 			return result;
-		} catch (error) {
+		} catch {
 			return false;
 		}
 	}
@@ -506,7 +506,7 @@ export class TimelineEditor {
 			}
 
 			return element;
-		} catch (error) {
+		} catch {
 			return element;
 		}
 	}
@@ -551,7 +551,7 @@ export class TimelineEditor {
 					if (!secondAdded) {
 						throw new Error("Failed to add second split element");
 					}
-				} catch (splitError) {
+				} catch {
 					if (secondAdded) {
 						result.secondElement.accept(elementRemover);
 					}
@@ -560,7 +560,7 @@ export class TimelineEditor {
 					}
 					try {
 						await element.accept(elementAdder);
-					} catch (restoreError) {
+					} catch {
 						// Best effort restore; caller still receives failure.
 					}
 					return { firstElement: element, secondElement: null, success: false };
@@ -576,7 +576,7 @@ export class TimelineEditor {
 				}
 			}
 			return result;
-		} catch (error) {
+		} catch {
 			return { firstElement: element, secondElement: null, success: false };
 		}
 	}
@@ -590,7 +590,7 @@ export class TimelineEditor {
 		try {
 			const elementCloner = new ElementCloner();
 			return element.accept(elementCloner);
-		} catch (error) {
+		} catch {
 			return null;
 		}
 	}
@@ -1143,7 +1143,7 @@ export class TimelineEditor {
 						throw new Error("ELEMENT_NOT_UPDATED");
 					}
 					changed = true;
-				} catch (error) {
+				} catch {
 					// Roll back in-memory mutation if validation/update fails.
 					element.setStart(prevStart);
 					element.setEnd(prevEnd);

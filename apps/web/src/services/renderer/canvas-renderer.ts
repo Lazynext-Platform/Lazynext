@@ -44,13 +44,13 @@ export class CanvasRenderer {
         this.dummyCanvas.height = height;
 	}
 
-	async render({ node, time }: { node: any; time: number }) {
+	async render({ node: _node, time }: { node: any; time: number }) {
         // Render to dummy canvas
 		await wasmBridge.renderToCanvas(this.dummyCanvas, Math.floor(time));
 	}
 
 	async renderToCanvas({
-		node,
+		node: _node,
 		time,
 		targetCanvas,
 	}: {

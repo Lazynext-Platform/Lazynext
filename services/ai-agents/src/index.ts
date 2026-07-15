@@ -56,7 +56,7 @@ app.post("/generative/dub", generateDub);
  * Body: { prompt: string }
  *
  * Returns a structured execution plan with per-tool results.
- * Uses LLM decomposition when OPENAI_API_KEY is set,
+ * Uses LLM decomposition when GEMINI_API_KEY is set,
  * otherwise falls back to rule-based planning.
  */
 app.post("/orchestrate", async (req, res) => {
@@ -186,6 +186,6 @@ httpServer.listen(port, () => {
     `🤖 Lazynext AI-Agents Orchestrator & Sync Server running on port ${port}`,
   );
   console.log(
-    `   LLM: ${process.env.LLM_PROVIDER || "rule-based"} | OpenAI: ${process.env.OPENAI_API_KEY ? "✓" : "✗"}`,
+    `   LLM: ${process.env.LLM_PROVIDER || "rule-based"} | Gemini: ${process.env.GEMINI_API_KEY ? "✓" : "✗"}`,
   );
 });

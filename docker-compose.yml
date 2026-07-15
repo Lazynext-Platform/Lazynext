@@ -135,7 +135,7 @@ services:
       - FREESOUND_CLIENT_ID=${FREESOUND_CLIENT_ID:-}
       - FREESOUND_API_KEY=${FREESOUND_API_KEY:-}
       - MARBLE_WORKSPACE_KEY=${MARBLE_WORKSPACE_KEY:-mock_marble_key}
-      - AZURE_STORAGE_ACCOUNT=${AZURE_STORAGE_ACCOUNT:-lazynextmediadev}
+      - MEDIA_DIR=/data/media
     depends_on:
       db:
         condition: service_healthy
@@ -251,7 +251,6 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - NUMBA_CACHE_DIR=/tmp
-      - PYTHONUNBUFFERED=1
       - MEDIA_BUCKET=${MEDIA_BUCKET:-lazynext-media-dev}
     networks:
       - lazynext-network
@@ -276,9 +275,8 @@ services:
       - "8001:8001"
     environment:
       - PYTHONUNBUFFERED=1
-      - PYTHONUNBUFFERED=1
-      - HF_HOME=/tmp/huggingface
-      - TRANSFORMERS_CACHE=/tmp/huggingface
+      - MODEL_CACHE_DIR=/tmp/modal
+      - MODEL_CACHE=/tmp/modal
     networks:
       - lazynext-network
     restart: unless-stopped
@@ -411,6 +409,8 @@ services:
       - "12345:12345"
     volumes:
       - ./monitoring/alloy/config.alloy:/etc/alloy/config.alloy
+      # WARNING: Mounting the Docker socket (even read-only) gives the
+      # container significant host access. Ensure this container is trusted.
       - /var/run/docker.sock:/var/run/docker.sock:ro
     command: run --server.http.listen-addr=0.0.0.0:12345 /etc/alloy/config.alloy
     networks:
@@ -456,7 +456,7 @@ services:
 
   # Matomo — full-featured analytics (funnels, goals, ecommerce, heatmaps)
   matomo:
-    image: matomo:5-fpm
+    image: matomo:5-apache
     ports:
       - "8094:80"
     environment:
@@ -489,7 +489,9 @@ services:
     restart: unless-stopped
     profiles: [analytics, full]
 
-  # Countly — mobile & web analytics (push, crashes, events)
+  # Countly — mobile & web analytics (push, crashes, events).
+  # NOTE: Countly requires MongoDB (not PostgreSQL). Add a MongoDB service
+  # to docker-compose.yml before enabling this analytics profile.
   countly:
     image: countly/server:latest
     ports:

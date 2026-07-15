@@ -8,7 +8,6 @@
  * @module seo/SocialCards
  */
 
-import React from "react";
 
 interface SocialCardProps {
 	/** Page title for social sharing. */

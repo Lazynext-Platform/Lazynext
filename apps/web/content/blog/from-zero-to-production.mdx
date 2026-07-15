@@ -49,7 +49,7 @@ Each format is a thin shell. All editing logic — 117 Rust files, 958 TypeScrip
 
 Moving to production meant:
 
-- **CI/CD**: GitHub Actions with OIDC federation to Azure (no long-lived secrets)
+- **CI/CD**: GitHub Actions → Linode SSH deploy (no long-lived secrets)
 - **Kubernetes**: 27 manifests with NetworkPolicies, HPAs, PDBs, health checks
 - **Monitoring**: Grafana/Prometheus/Loki/Tempo with 3 SLO runbooks
 - **Database**: PostgreSQL with Drizzle ORM, 7-table schema, automated migrations

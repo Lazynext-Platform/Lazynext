@@ -161,10 +161,8 @@ services:
       - NODE_ENV=test
       - PORT=8002
       - DATABASE_URL=postgresql://lazynext:test-password@db:5432/lazynext
-      - OPENAI_API_KEY=
-      - ANTHROPIC_API_KEY=
       - GEMINI_API_KEY=
-      - LLM_PROVIDER=ollama
+      - LLM_PROVIDER=gemini
     depends_on:
       db:
         condition: service_healthy
@@ -238,8 +236,7 @@ services:
       - "8000:8000"
     environment:
       - PYTHONUNBUFFERED=1
-      - OPENAI_API_KEY=
-      - FAL_KEY=
+      - MODAL_API_KEY=
       - MEDIA_BUCKET=lazynext-media-test
       - OMP_NUM_THREADS=2
     networks:
@@ -262,9 +259,9 @@ services:
       - "8001:8001"
     environment:
       - PYTHONUNBUFFERED=1
-      - FAL_KEY=
-      - HF_HOME=/tmp/huggingface
-      - TRANSFORMERS_CACHE=/tmp/huggingface
+      - MODAL_API_KEY=
+      - MODEL_CACHE_DIR=/tmp/modal
+      - TRANSFORMERS_CACHE=/tmp/modal
     networks:
       - lazynext-network
     healthcheck:

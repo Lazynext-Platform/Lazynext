@@ -1,18 +1,16 @@
 /**
- * Root layout — wraps all pages with theme provider, all 10 analytics
+ * Root layout — wraps all pages with theme provider, 8 analytics
  * providers, SEO metadata, cookie consent, and the global TooltipProvider.
  *
- * Analytics stack: PostHog, Clarity, Plausible, GA4, Mixpanel,
+ * Analytics stack: PostHog, Clarity, Mixpanel,
  * Amplitude, Umami, Matomo, OpenPanel, Countly.
  *
  * @layout /
  */
 
 import { ThemeProvider } from "next-themes";
-import Script from "next/script";
 import "../globals.css";
 import { Toaster } from "../components/ui/sonner";
-import { ChangelogNotification } from "@/changelog/components/changelog-notification";
 import { TooltipProvider } from "../components/ui/tooltip";
 
 import { Inter } from "next/font/google";

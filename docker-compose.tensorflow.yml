@@ -89,7 +89,7 @@ services:
       - gpu
 
   # ── Model Download Init (one-shot) ───────────────────────────────────
-  # Downloads models from HuggingFace before TF Serving starts.
+  # Downloads models via Modal before TF Serving starts.
   # Run once before starting the stack:
   #   docker compose -f docker-compose.tensorflow.yml run --rm model-download
   model-download:
@@ -102,7 +102,7 @@ services:
       - ./services/pre-processing/tf_models/model_registry.yaml:/app/model_registry.yaml:ro
     environment:
       MODEL_BASE_PATH: /models
-      HF_HOME: /tmp/huggingface
+      MODEL_CACHE_DIR: /tmp/modal
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |

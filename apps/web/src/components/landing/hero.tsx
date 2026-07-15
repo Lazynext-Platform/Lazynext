@@ -8,8 +8,7 @@
 "use client";
 
 import { Button } from "../ui/button";
-import { ArrowRight, Sparkles } from "lucide-react";
-import Image from "next/image";
+import { ArrowRight } from "lucide-react";
 import { Handlebars } from "./handlebars";
 import Link from "next/link";
 

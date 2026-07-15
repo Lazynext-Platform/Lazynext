@@ -26,7 +26,7 @@ route:
   receiver: slack-critical
 
   routes:
-    # ── Critical alerts → Slack + PagerDuty ──────────────────────
+    # ── Critical alerts → Slack + Grafana OnCall ─────────────────
     - match:
         severity: critical
       group_wait: 5s
@@ -101,7 +101,7 @@ receivers:
             text: "Runbook"
             url: "{{ '{{' }} .CommonAnnotations.runbook_url {{ '}}' }}"
 
-  # ── Critical: Slack + PagerDuty ─────────────────────────────────
+  # ── Critical: Slack + Grafana OnCall ────────────────────────────
   - name: critical-alerts
     slack_configs:
       - channel: "#alerts-critical"
@@ -109,18 +109,9 @@ receivers:
         title: "[CRITICAL] {{ '{{' }} .CommonLabels.alertname {{ '}}' }}"
         text: "{{ '{{' }} .CommonAnnotations.description {{ '}}' }}"
         color: danger
-    pagerduty_configs:
-      - routing_key: "{{ alertmanager_pagerduty_routing_key }}"
-        severity: critical
-        description: "{{ '{{' }} .CommonAnnotations.description {{ '}}' }}"
-        client: "Lazynext Alertmanager"
-        client_url: "{{ '{{' }} .ExternalURL {{ '}}' }}"
-        component: "{{ '{{' }} .CommonLabels.alertname {{ '}}' }}"
-        group: "{{ '{{' }} .CommonLabels.cluster {{ '}}' }}"
-        class: "infrastructure"
-        links:
-          - href: "{{ '{{' }} .GeneratorURL {{ '}}' }}"
-            text: "Prometheus query"
+    webhook_configs:
+      - url: "{{ alertmanager_grafana_oncall_url }}"
+        send_resolved: true
 
   # ── Warnings: Slack only ────────────────────────────────────────
   - name: slack-warnings

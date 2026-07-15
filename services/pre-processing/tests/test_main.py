@@ -9,23 +9,23 @@ from src.main import app
 client = TestClient(app)
 
 def test_read_root():
-    """Root endpoint returns the service health payload."""
-    response = client.get("/")
+    """Health endpoint returns the service status payload."""
+    response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok", "service": "pre-processing"}
 
 def test_transcribe_audio_missing_file(monkeypatch):
     """/transcribe returns 404 when the referenced video file is absent."""
     monkeypatch.setenv("APP_ENV", "development")
-    monkeypatch.setenv("OPENAI_API_KEY", "dummy")
+    monkeypatch.setenv("GEMINI_API_KEY", "dummy")
     response = client.post("/transcribe", json={"video_id": "test_video_123"})
     assert response.status_code == 404
     assert "Video file not found" in response.json()["detail"]
 
 def test_transcribe_audio_production_no_key(monkeypatch):
-    """/transcribe returns 503 in production when no OpenAI key is set."""
+    """/transcribe returns 503 in production when no Gemini key is set."""
     monkeypatch.setenv("APP_ENV", "production")
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     response = client.post("/transcribe", json={"video_id": "test_video_123"})
     assert response.status_code == 503
     assert "Transcription service unavailable" in response.json()["detail"]

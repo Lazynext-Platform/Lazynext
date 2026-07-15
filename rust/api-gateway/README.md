@@ -8,7 +8,7 @@ REST API gateway providing JWT-authenticated access to the Lazynext platform. Po
 - **Database**: PostgreSQL via sqlx with Drizzle-compatible schema
 - **Payments**: Stripe webhooks with HMAC-SHA256 signature verification
 - **AI**: `/api/v1/autonomous_edit`, `/api/v1/ai/generate`, `/api/v1/ai/tts`
-- **Media**: Multipart upload, Azure Blob SAS URLs, chunked stream ingest
+- **Media**: Multipart upload, local filesystem, chunked stream ingest
 - **WebSocket**: CRDT sync via Redis pub/sub rooms
 - **Security**: CSRF, rate limiting, OpenAPI/Swagger UI
 - **Observability**: OpenTelemetry OTLP tracing

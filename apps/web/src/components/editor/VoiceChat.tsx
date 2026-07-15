@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef } from "react";
-import { Mic, MicOff, PhoneCall, Users } from "lucide-react";
+import { Mic, PhoneCall, Users } from "lucide-react";
 
 interface VoiceChatProps {
 	/** Whether voice chat is currently active. */
@@ -91,6 +91,7 @@ function AudioPeer({ id, stream }: { id: string; stream: MediaStream }) {
 
 	return (
 		<div className="flex items-center gap-3">
+			{/* eslint-disable-next-line jsx-a11y/media-has-caption */}
 			<audio ref={audioRef} autoPlay />
 			<div className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center border border-neutral-700">
 				<span className="text-neutral-400 text-xs font-bold">

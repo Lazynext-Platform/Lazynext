@@ -1,0 +1,6 @@
+{
+	"name": "@lazynext/extension",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Lazynext Chrome MV3 extension — raw unpacked extension (no build step)"
+}

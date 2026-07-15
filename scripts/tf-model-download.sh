@@ -3,7 +3,7 @@
 # tf-model-download.sh — Download TensorFlow Serving Models
 #
 # Downloads pre-converted TensorFlow SavedModel artifacts from the project's
-# artifact registry, with fallback to HuggingFace Hub + on-the-fly conversion.
+# artifact registry, with fallback to Modal Hub + on-the-fly conversion.
 #
 # Features:
 #   - Parallel downloads with progress indicators
@@ -23,7 +23,7 @@
 #
 # Environment:
 #   MODEL_DIR       — Target directory (default: /models)
-#   HF_CACHE        — HuggingFace cache dir (default: ~/.cache/huggingface)
+#   MODEL_CACHE       — Modal model cache dir (default: ~/.cache/modal)
 #   DOWNLOAD_RETRIES — Max retry attempts (default: 3)
 #   PARALLEL_JOBS   — Max concurrent downloads (default: 2)
 #   ARTIFACT_REGISTRY_URL — Base URL for pre-built model artifacts
@@ -36,7 +36,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 MODEL_DIR="${MODEL_DIR:-/models}"
-HF_CACHE="${HF_CACHE:-$HOME/.cache/huggingface}"
+MODEL_CACHE="${MODEL_CACHE:-$HOME/.cache/modal}"
 DOWNLOAD_RETRIES="${DOWNLOAD_RETRIES:-3}"
 PARALLEL_JOBS="${PARALLEL_JOBS:-2}"
 REGISTRY_FILE="${PROJECT_ROOT}/services/pre-processing/tf_models/model_registry.yaml"
@@ -80,7 +80,7 @@ Options:
 
 Environment:
   MODEL_DIR              Target directory for model storage (default: /models)
-  HF_CACHE               HuggingFace cache directory
+  MODEL_CACHE               Modal model cache directory
   ARTIFACT_REGISTRY_URL  Base URL for pre-built model artifacts
   DOWNLOAD_RETRIES       Max retry attempts per model (default: 3)
   PARALLEL_JOBS          Max concurrent downloads (default: 2)
@@ -132,10 +132,10 @@ fi
 
 # Parse YAML with basic awk (no pyyaml dependency for pure bash)
 parse_registry() {
-    # Reads model_registry.yaml and prints "name|version|download_url|checksum|hf_id|min_gpu_mb|min_ram_mb"
+    # Reads model_registry.yaml and prints "name|version|download_url|checksum|modal_id|min_gpu_mb|min_ram_mb"
     # One line per model entry.
     local in_models=false
-    local name="" version="" url="" checksum="" hf_id="" min_gpu="" min_ram=""
+    local name="" version="" url="" checksum="" modal_id="" min_gpu="" min_ram=""
 
     while IFS= read -r line; do
         # Detect entry into models list
@@ -152,13 +152,13 @@ parse_registry() {
         if [[ "$line" =~ ^[[:space:]]*-[[:space:]]name:[[:space:]]+(.+)$ ]]; then
             # Flush previous model if any
             if [[ -n "$name" ]]; then
-                echo "${name}|${version}|${url}|${checksum}|${hf_id}|${min_gpu}|${min_ram}"
+                echo "${name}|${version}|${url}|${checksum}|${modal_id}|${min_gpu}|${min_ram}"
             fi
             name="${BASH_REMATCH[1]}"
             version="1"
             url=""
             checksum=""
-            hf_id=""
+            modal_id=""
             min_gpu="0"
             min_ram="0"
             continue
@@ -172,8 +172,8 @@ parse_registry() {
             url="${BASH_REMATCH[1]}"
         elif [[ "$line" =~ checksum_sha256:[[:space:]]+[\"\']?([a-f0-9]+)[\"\']?$ ]]; then
             checksum="${BASH_REMATCH[1]}"
-        elif [[ "$line" =~ huggingface_id:[[:space:]]+[\"\']?(.+)[\"\']?$ ]]; then
-            hf_id="${BASH_REMATCH[1]}"
+        elif [[ "$line" =~ modal_id:[[:space:]]+[\"\']?(.+)[\"\']?$ ]]; then
+            modal_id="${BASH_REMATCH[1]}"
         elif [[ "$line" =~ min_gpu_memory_mb:[[:space:]]+([0-9]+) ]]; then
             min_gpu="${BASH_REMATCH[1]}"
         elif [[ "$line" =~ min_ram_mb:[[:space:]]+([0-9]+) ]]; then
@@ -183,7 +183,7 @@ parse_registry() {
 
     # Flush last model
     if [[ -n "$name" ]]; then
-        echo "${name}|${version}|${url}|${checksum}|${hf_id}|${min_gpu}|${min_ram}"
+        echo "${name}|${version}|${url}|${checksum}|${modal_id}|${min_gpu}|${min_ram}"
     fi
 }
 
@@ -298,8 +298,8 @@ download_artifact() {
 
     mkdir -p "${dest_dir}"
 
-    if [[ "$url" == huggingface://* ]]; then
-        # HuggingFace download — defer to on-the-fly conversion
+    if [[ "$url" == modal://* ]]; then
+        # Modal download — defer to on-the-fly conversion
         return 2  # special code: needs conversion
     fi
 
@@ -329,75 +329,31 @@ download_artifact() {
     return 0
 }
 
-convert_from_huggingface() {
+convert_from_modal() {
     local name="$1"
-    local hf_id="$2"
+    local modal_id="$2"
 
-    log "    Converting from HuggingFace: ${hf_id}"
+    log "    Converting from Modal: ${modal_id}"
 
     # Use the export-model.sh script for conversion
     if [[ -x "${PROJECT_ROOT}/scripts/export-model.sh" ]]; then
-        MODEL_DIR="${MODEL_DIR}" HF_CACHE="${HF_CACHE}" \
+        MODEL_DIR="${MODEL_DIR}" MODEL_CACHE="${MODEL_CACHE}" \
             bash "${PROJECT_ROOT}/scripts/export-model.sh" "${name}"
         return $?
     fi
 
-    # Fallback: inline Python conversion
-    warn "    export-model.sh not available — using inline Python conversion"
+    # Fallback: use Modal GPU for conversion
+    warn "    export-model.sh not available — using Modal GPU conversion"
 
-    python3 - "$name" "$hf_id" "${MODEL_DIR}" "${HF_CACHE}" <<'PYEOF'
-import sys, os, subprocess
+    modal run scripts/modal-export.py::export_model \
+        --model-id "${modal_id}" \
+        --model-name "${name}"
 
-name = sys.argv[1]
-hf_id = sys.argv[2]
-model_dir = sys.argv[3]
-hf_cache = sys.argv[4]
+    # Download converted model from Modal Volume
+    info "    Downloading converted model..."
+    modal volume get lazynext-models "exports/${name}/" \
+        "${MODEL_DIR}/${name}/1/"
 
-os.environ["HF_HOME"] = hf_cache
-output_dir = os.path.join(model_dir, name, "1")
-os.makedirs(output_dir, exist_ok=True)
-
-print(f"    Installing required packages...")
-subprocess.check_call([sys.executable, "-m", "pip", "install", "-q",
-                       "torch", "transformers", "onnx", "tf2onnx"])
-
-import torch
-from transformers import AutoModel, AutoConfig
-
-print(f"    Loading {hf_id}...")
-config = AutoConfig.from_pretrained(hf_id, cache_dir=hf_cache)
-config.save_pretrained(output_dir)
-
-try:
-    model = AutoModel.from_pretrained(hf_id, cache_dir=hf_cache)
-    model.eval()
-
-    # Export to ONNX, then to TensorFlow SavedModel
-    onnx_path = os.path.join(output_dir, "model.onnx")
-    dummy = torch.randn(1, 3, 224, 224)
-
-    torch.onnx.export(model, dummy, onnx_path,
-                      input_names=["input"],
-                      output_names=["output"],
-                      opset_version=14,
-                      dynamic_axes={"input": {0: "batch"}, "output": {0: "batch"}})
-
-    # Convert ONNX to TensorFlow SavedModel
-    subprocess.check_call([
-        sys.executable, "-m", "tf2onnx.convert",
-        "--onnx", onnx_path,
-        "--output", os.path.join(output_dir, "saved_model.pb"),
-        "--output-dir", output_dir,
-    ])
-
-    print(f"    Conversion complete: {output_dir}")
-except Exception as e:
-    print(f"    Warning: Could not convert model: {e}")
-    # Create a minimal placeholder so verification doesn't fail
-    with open(os.path.join(output_dir, "config.json"), "w") as f:
-        import json
-        json.dump({"model_type": name, "hf_id": hf_id, "note": "placeholder"}, f)
-PYEOF
     return $?
 }
 
@@ -463,7 +419,7 @@ download_model() {
     local version="$2"
     local url="$3"
     local checksum="$4"
-    local hf_id="$5"
+    local modal_id="$5"
     local min_gpu="$6"
     local min_ram="$7"
     local model_version_dir="${MODEL_DIR}/${name}/${version}"
@@ -489,8 +445,8 @@ download_model() {
         if [[ -n "$url" ]]; then
             log "    URL:  ${url}"
         fi
-        if [[ -n "$hf_id" ]]; then
-            log "    HF:   ${hf_id}"
+        if [[ -n "$modal_id" ]]; then
+            log "    Modal: ${modal_id}"
         fi
         log "    Dest: ${model_version_dir}"
         return 0
@@ -500,22 +456,22 @@ download_model() {
     check_resources "${name}" "${min_gpu}" "${min_ram}" || true
 
     # Download
-    if [[ -n "$url" ]] && [[ "$url" != "huggingface://"* ]]; then
+    if [[ -n "$url" ]] && [[ "$url" != "modal://"* ]]; then
         # Direct artifact URL
         download_artifact "${name}" "${url}" "${version}"
         local dl_rc=$?
-    elif [[ -n "$hf_id" ]]; then
-        # HuggingFace download + convert
+    elif [[ -n "$modal_id" ]]; then
+        # Modal download + convert
         if [[ -x "${PROJECT_ROOT}/scripts/export-model.sh" ]]; then
-            MODEL_DIR="${MODEL_DIR}" HF_CACHE="${HF_CACHE}" \
+            MODEL_DIR="${MODEL_DIR}" MODEL_CACHE="${MODEL_CACHE}" \
                 bash "${PROJECT_ROOT}/scripts/export-model.sh" "${name}"
             dl_rc=$?
         else
-            convert_from_huggingface "${name}" "${hf_id}"
+            convert_from_modal "${name}" "${modal_id}"
             dl_rc=$?
         fi
     else
-        err "  [${name}] No download URL or HuggingFace ID specified"
+        err "  [${name}] No download URL or Modal ID specified"
         return 1
     fi
 
@@ -540,7 +496,7 @@ verify_all() {
     log "Verifying all existing models..."
     local all_ok=true
 
-    while IFS='|' read -r name version url checksum hf_id min_gpu min_ram; do
+    while IFS='|' read -r name version url checksum modal_id min_gpu min_ram; do
         [[ -z "$name" ]] && continue
         local model_version_dir="${MODEL_DIR}/${name}/${version}"
 
@@ -569,7 +525,7 @@ main() {
     log "Lazynext TF Model Downloader"
     log "  Registry: ${REGISTRY_FILE}"
     log "  Model dir: ${MODEL_DIR}"
-    log "  HF cache:  ${HF_CACHE}"
+    log "  Modal cache:  ${MODEL_CACHE}"
     log "  Mode:      ${MODE}"
     log "==========================================="
 
@@ -601,7 +557,7 @@ main() {
     local fail_count=0
     local failed_models=()
 
-    while IFS='|' read -r name version url checksum hf_id min_gpu min_ram; do
+    while IFS='|' read -r name version url checksum modal_id min_gpu min_ram; do
         [[ -z "$name" ]] && continue
 
         # Apply filter
@@ -615,7 +571,7 @@ main() {
             fi
         fi
 
-        if download_model "${name}" "${version}" "${url}" "${checksum}" "${hf_id}" "${min_gpu}" "${min_ram}"; then
+        if download_model "${name}" "${version}" "${url}" "${checksum}" "${modal_id}" "${min_gpu}" "${min_ram}"; then
             download_count=$((download_count + 1))
         else
             # Already-downloaded models return 0, so this is a true failure

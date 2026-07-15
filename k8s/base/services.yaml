@@ -626,10 +626,10 @@ spec:
                   name: lazynext-secrets
                   optional: true
           volumeMounts:
-            - name: hf-cache
-              mountPath: /tmp/huggingface
+            - name: model-cache
+              mountPath: /tmp/modal
       volumes:
-        - name: hf-cache
+        - name: model-cache
           emptyDir:
             sizeLimit: 20Gi
 ---

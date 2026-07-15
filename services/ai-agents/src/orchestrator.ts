@@ -6,7 +6,7 @@
  * microservices, and returns a structured execution plan with results.
  *
  * Features:
- *   - Intelligent multi-provider routing (OpenAI / Anthropic / Gemini)
+ *   - Intelligent Gemini routing (Flash for speed, Pro for complex prompts)
  *   - Agentic Repair Loop with automatic retry on tool failures
  *   - SSE streaming for real-time plan execution progress
  *   - CRDT patch generation for autonomous timeline edits
@@ -113,8 +113,8 @@ function sanitizePrompt(prompt: unknown): { prompt: string; error?: string } {
 /**
  * Decompose a natural language editing intent into a structured plan.
  *
- * Automatically routes prompts to the most efficient provider 
- * (OpenAI for logic, Anthropic for long-context, Gemini for speed).
+ * Automatically routes prompts to the most efficient Gemini model
+ * (Gemini 3.5 Flash for speed, Gemini 3.1 Pro for complex prompts).
  */
 export async function decomposeIntent(
   prompt: string,
@@ -143,12 +143,12 @@ export async function decomposeIntent(
 }
 
 /**
- * LLM-powered intent decomposition via OpenAI-compatible API.
+ * LLM-powered intent decomposition via Google Gemini API.
  */
 async function decomposeWithLLM(
   prompt: string,
   apiKey: string,
-  provider: string = "openai",
+  provider: string = "gemini",
   mcpTools: any[] = []
 ): Promise<OrchestrationPlan> {
   let mcpToolsText = mcpTools.length > 0 
@@ -224,8 +224,8 @@ Respond ONLY with a JSON object:
   
   try {
 
-    // Gemini via OpenAI-compatible endpoint
-    const endpoint = `${process.env.GEMINI_API_BASE || "https://generativelanguage.googleapis.com/v1beta/openai"}/chat/completions`;
+    // Gemini API endpoint
+    const endpoint = `${process.env.GEMINI_API_BASE || "https://generativelanguage.googleapis.com/v1beta"}/chat/completions`;
     const modelName = provider || process.env.GEMINI_MODEL || "gemini-3.5-flash";
 
     const response = await fetch(endpoint, {

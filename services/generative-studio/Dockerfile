@@ -44,13 +44,13 @@ RUN groupadd --system --gid 1001 python && useradd --system --uid 1001 --gid pyt
 COPY --from=builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
-# Hugging Face cache directory (shared across containers in production via volume mount)
-ENV HF_HOME=/tmp/huggingface
-ENV TRANSFORMERS_CACHE=/tmp/huggingface
+# Modal model cache directory (shared across containers in production via volume mount)
+ENV MODEL_CACHE_DIR=/tmp/modal
+ENV MODEL_CACHE=/tmp/modal
 
 COPY services/generative-studio/ ./
 
-RUN mkdir -p /tmp/generative /tmp/huggingface && chown -R mlrunner:python /tmp/generative /tmp/huggingface
+RUN mkdir -p /tmp/generative /tmp/modal && chown -R mlrunner:python /tmp/generative /tmp/modal
 
 USER mlrunner
 

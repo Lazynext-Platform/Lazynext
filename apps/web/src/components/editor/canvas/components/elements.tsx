@@ -573,7 +573,7 @@ const addMediaGroup = ({
 	let frameSize;
 	let angle;
 	let framePosition;
-	let frameRadius = 0;
+	let frameRadius: number;
 	if (currentFrameEffect) {
 		frameSize = {
 			width:

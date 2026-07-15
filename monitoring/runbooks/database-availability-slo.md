@@ -60,12 +60,12 @@ This is the most severe infrastructure alert — database downtime affects ALL s
     "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle' AND age(now(), query_start) > interval '10 minutes';"
   ```
 
-### 4. Azure PostgreSQL-specific (if using managed PostgreSQL)
-- **Symptom:** Instance not reachable via FQDN
+### 4. PostgreSQL (Docker) container-specific (if using Docker-managed PostgreSQL)
+- **Symptom:** Container not reachable
 - **Fix:**
   ```bash
-  az postgres flexible-server show --name lazynext-postgres-prod --resource-group lazynext-rg-prod
-  az postgres flexible-server restart --name lazynext-postgres-prod --resource-group lazynext-rg-prod
+  docker compose -f docker-compose.prod.yml ps postgres
+  docker compose -f docker-compose.prod.yml restart postgres
   ```
 
 ### 5. Replication lag (production with read replicas)
@@ -78,7 +78,7 @@ This is the most severe infrastructure alert — database downtime affects ALL s
 
 ## Escalation
 
-- **5 minutes:** DBA on-call (PagerDuty)
+- **5 minutes:** DBA on-call (Grafana OnCall)
 - **10 minutes:** Platform team lead
 - **15 minutes:** CTO
 - **If database is unrecoverable:** Initiate point-in-time recovery (PITR) from

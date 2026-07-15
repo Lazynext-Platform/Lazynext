@@ -58,12 +58,12 @@ const nextConfig: NextConfig = {
 					"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
 					"img-src 'self' data: blob: https:; " +
 					"font-src 'self' https://fonts.gstatic.com; " +
-					"connect-src 'self' https://app.posthog.com https://eu.i.posthog.com https://www.clarity.ms https://api.mixpanel.com https://api2.amplitude.com https://api.marblecms.com wss: ws:; " +
+					"connect-src 'self' https://app.posthog.com https://eu.i.posthog.com https://www.clarity.ms https://api.mixpanel.com https://api2.amplitude.com https://api.marblecms.com https://accounts.google.com https://appleid.apple.com https://login.microsoftonline.com wss: ws:; " +
 					"media-src 'self' blob:; " +
 					"worker-src 'self' blob:; " +
-					"frame-src 'self'; " +
+					"frame-src 'self' https://accounts.google.com https://appleid.apple.com https://login.microsoftonline.com; " +
 					"base-uri 'self'; " +
-					"form-action 'self';",
+					"form-action 'self' https://accounts.google.com https://appleid.apple.com https://login.microsoftonline.com;",
 			},
 				],
 			},
@@ -93,7 +93,7 @@ const nextConfig: NextConfig = {
 
 	typescript: {
 		// TypeScript errors fail the build — fix them, don't bypass
-		ignoreBuildErrors: true,
+		ignoreBuildErrors: false,
 	},
 	webpack(config) {
 		config.experiments = {
@@ -130,6 +130,18 @@ const nextConfig: NextConfig = {
 			{
 				protocol: "https",
 				hostname: "avatars.githubusercontent.com",
+			},
+			{
+				protocol: "https",
+				hostname: "graph.microsoft.com",
+			},
+			{
+				protocol: "https",
+				hostname: "login.microsoftonline.com",
+			},
+			{
+				protocol: "https",
+				hostname: "appleid.apple.com",
 			},
 			{
 				protocol: "https",

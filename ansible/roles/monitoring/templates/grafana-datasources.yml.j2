@@ -88,17 +88,7 @@ datasources:
     secureJsonData:
       password: "{{ redis_password }}"
 
-  # ── CloudWatch / Azure Monitor (optional) ───────────────────────
-  - name: Azure Monitor
-    type: grafana-azure-monitor-datasource
-    access: proxy
-    uid: azure-monitor
-    editable: true
-    jsonData:
-      cloudName: azuremonitor
-      subscriptionId: "{{ vault_azure_subscription_id | default('00000000-0000-0000-0000-000000000000') }}"
-    secureJsonData:
-      clientSecret: "{{ vault_azure_client_secret | default('') }}"
+  # ── Cloud Monitor (optional) ─────────────────────────────────
 
 deleteDatasources:
   - name: Prometheus
@@ -106,4 +96,3 @@ deleteDatasources:
   - name: Alertmanager
   - name: PostgreSQL
   - name: Redis
-  - name: Azure Monitor

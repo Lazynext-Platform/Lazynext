@@ -59,8 +59,8 @@ export interface TranscriptionModel {
 	id: TranscriptionModelId;
 	/** Human-readable model name. */
 	name: string;
-	/** HuggingFace model ID for downloading. */
-	huggingFaceId: string;
+	/** Modal model ID for downloading. */
+	modalId: string;
 	/** Short description of the model. */
 	description: string;
 }

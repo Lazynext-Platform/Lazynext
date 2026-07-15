@@ -3,14 +3,11 @@ pyjwt>=2.13.0
 uvicorn==0.50.2
 pydantic==2.13.4
 httpx>=0.28.1
-# AI Video/Audio (import-checked for production path)
+# AI Video/Audio — all generation routed through Modal GPU endpoints
 numpy>=2.2,<2.5
 numba>=0.62.0
 torch>=2.12.1
 torchaudio>=2.11.0
-diffusers>=0.38.0
-transformers>=5.13.0
-accelerate>=1.14.0
 # Audio Synthesis
 librosa
 soundfile

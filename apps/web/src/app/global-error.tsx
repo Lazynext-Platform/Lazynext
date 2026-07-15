@@ -11,6 +11,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 
 export default function GlobalError({
 	error,
@@ -24,7 +25,7 @@ export default function GlobalError({
 	}, [error]);
 
 	return (
-		<html>
+		<html lang="en">
 			<body className="bg-background">
 				<div className="flex min-h-screen items-center justify-center px-4">
 					<div className="text-center">
@@ -44,12 +45,12 @@ export default function GlobalError({
 							>
 								Try Again
 							</button>
-							<a
-								href="/"
-								className="rounded-lg border border-border bg-panel px-6 py-2.5 text-sm font-medium text-foreground hover:bg-glass transition-colors"
+						<Link
+							href="/"
+							className="rounded-lg border border-border bg-panel px-6 py-2.5 text-sm font-medium text-foreground hover:bg-glass transition-colors"
 							>
 								Go Home
-							</a>
+							</Link>
 						</div>
 					</div>
 				</div>

@@ -10,7 +10,6 @@
 
 "use client";
 
-import React from "react";
 import Turnstile, { useTurnstile } from "react-turnstile";
 
 const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
@@ -27,7 +26,7 @@ interface CaptchaWidgetProps {
 export function CaptchaWidget({
 	onVerify,
 	onError,
-	disabled,
+	disabled: _disabled,
 }: CaptchaWidgetProps) {
 	if (!siteKey) return null;
 

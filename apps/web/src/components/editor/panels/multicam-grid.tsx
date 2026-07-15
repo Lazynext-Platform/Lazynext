@@ -4,7 +4,7 @@
  * @module components/editor/panels/multicam-grid
  */
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { LayoutGrid, CheckCircle2 } from "lucide-react";
 
 export function MulticamGrid({ isMulticamMode }: { isMulticamMode: boolean }) {
@@ -28,11 +28,12 @@ export function MulticamGrid({ isMulticamMode }: { isMulticamMode: boolean }) {
 
 			<div className="flex-1 grid grid-cols-2 grid-rows-2 gap-1 bg-background p-1">
 				{[1, 2, 3, 4].map((camNum) => (
-					// eslint-disable-next-line jsx-a11y/no-static-element-interactions
-					// eslint-disable-next-line jsx-a11y/click-events-have-key-events
 					<div
 						key={camNum}
 						onClick={() => setActiveCam(camNum)}
+						onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
+						role="button"
+						tabIndex={0}
 						className={`relative bg-background border-2 rounded overflow-hidden cursor-pointer transition-colors ${activeCam === camNum ? "border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)]" : "border-border hover:border-zinc-600"}`}
 					>
 						{/* Placeholder for camera feeds */}

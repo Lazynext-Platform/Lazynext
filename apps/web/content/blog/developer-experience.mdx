@@ -57,9 +57,9 @@ Our GitHub Actions workflow:
 2. **Python Services** (pip install → pytest) — 2 minutes
 3. **Web App** (bun install → lint → typecheck → build → unit test → E2E) — 8 minutes
 4. **Node Services** (bun install → test) — 2 minutes
-5. **Docker Deploy** (build → push → deploy to Azure) — 12 minutes
+5. **Docker Deploy** (build → push → deploy to Linode) — 3 minutes
 
-Total pipeline: ~25 minutes from push to production. OIDC federation with Azure means no long-lived secrets — each run gets a short-lived token.
+Total pipeline: ~18 minutes from push to production. SSH-based deploy uses short-lived keys — no static credentials.
 
 ## Getting Started in 5 Minutes
 

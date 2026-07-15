@@ -18,12 +18,9 @@ export function StoragePersistenceDialog() {
 	return (
 		<Dialog open={showDialog} onOpenChange={(open) => !open && onDismiss()}>
 			<DialogContent className="sm:max-w-md">
-				// eslint-disable-next-line react/jsx-no-comment-textnodes
-				<DialogHeader>
-					// eslint-disable-next-line react/no-unescaped-entities //
-					eslint-disable-next-line react/no-unescaped-entities
-					<DialogTitle>Don't lose your projects</DialogTitle>
-				</DialogHeader>
+			<DialogHeader>
+				<DialogTitle>Don&apos;t lose your projects</DialogTitle>
+			</DialogHeader>
 				<DialogBody>
 					<p className="text-base text-muted-foreground">
 						Your browser can automatically delete your projects when storage

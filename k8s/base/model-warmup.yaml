@@ -30,26 +30,38 @@ spec:
                 - sh
                 - -c
                 - |
-                  pip install --quiet huggingface-hub
-                  echo "📥 Downloading Whisper model..."
+                  pip install --quiet modal
+                  echo "📥 Checking Whisper model on Modal Volume..."
                   python3 -c "
-                  from huggingface_hub import snapshot_download
-                  snapshot_download('openai/whisper-large-v3', cache_dir='/models/huggingface')
-                  print('✅ Whisper model cached')
+                  import os
+                  path = '/models/modal/exports/whisper'
+                  if os.path.exists(path):
+                      print('✅ Whisper model cached at', path)
+                  else:
+                      print('⚠️ Whisper not found — stage on Modal Volume first')
+                      print('   modal volume put lazynext-models exports/whisper/ /models/volume/exports/whisper/')
                   "
 
-                  echo "📥 Downloading SAM2 model..."
+                  echo "📥 Checking SAM2 model on Modal Volume..."
                   python3 -c "
-                  from huggingface_hub import snapshot_download
-                  snapshot_download('facebook/sam2-hiera-large', cache_dir='/models/huggingface')
-                  print('✅ SAM2 model cached')
+                  import os
+                  path = '/models/modal/exports/sam2'
+                  if os.path.exists(path):
+                      print('✅ SAM2 model cached at', path)
+                  else:
+                      print('⚠️ SAM2 not found — stage on Modal Volume first')
+                      print('   modal volume put lazynext-models exports/sam2/ /models/volume/exports/sam2/')
                   "
 
-                  echo "📥 Verifying RealESRGAN..."
+                  echo "📥 Checking RealESRGAN on Modal Volume..."
                   python3 -c "
-                  from huggingface_hub import snapshot_download
-                  snapshot_download('ai-forever/Real-ESRGAN', cache_dir='/models/huggingface')
-                  print('✅ RealESRGAN model cached')
+                  import os
+                  path = '/models/modal/exports/realesrgan'
+                  if os.path.exists(path):
+                      print('✅ RealESRGAN cached at', path)
+                  else:
+                      print('⚠️ RealESRGAN not found — stage on Modal Volume first')
+                      print('   modal volume put lazynext-models exports/realesrgan/ /models/volume/exports/realesrgan/')
                   "
               volumeMounts:
                 - name: model-cache
@@ -86,28 +98,28 @@ spec:
             - sh
             - -c
             - |
-              pip install --quiet huggingface-hub
+              pip install --quiet modal
 
-              MODELS="openai/whisper-large-v3 facebook/sam2-hiera-large ai-forever/Real-ESRGAN google/t5-v1_1-large sentence-transformers/all-MiniLM-L6-v2"
+              MODELS="whisper-large-v3 sam2-hiera-large real-esrgan t5-v1_1-large embeddings-mini"
 
               for model in $MODELS; do
-                echo "📥 Downloading: $model"
+                echo "📥 Loading: $model from Modal Volume"
                 python3 -c "
-                from huggingface_hub import snapshot_download
-                import sys
-                try:
-                  snapshot_download('$model', cache_dir='/models/huggingface')
-                  print('✅ $model')
-                except Exception as e:
-                  print(f'⚠️ $model: {e}')
+                import os
+                model_path = f'/models/modal/exports/{os.environ.get(\"MODEL\", \"$model\")}'
+                if os.path.exists(model_path):
+                  print(f'✅ $model cached at {model_path}')
+                else:
+                  print(f'⚠️ $model not found — stage weights on Modal Volume first')
+                  print(f'   modal volume put lazynext-models exports/\$model/ /models/volume/exports/\$model/')
                 "
               done
 
               echo "📊 Cache size:"
-              du -sh /models/huggingface
+              du -sh /models/modal
 
               echo "📋 Cached models:"
-              ls /models/huggingface/models--*/
+              ls /models/modal/models--*/
           volumeMounts:
             - name: model-cache
               mountPath: /models

@@ -9,7 +9,6 @@
  * @module seo/SchemaOrg
  */
 
-import React from "react";
 
 /* ── Organization ── */
 export function OrganizationLD({

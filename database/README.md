@@ -11,14 +11,14 @@
 # ── Backup / Restore ─────────────────────────────────────────────
 #   bash scripts/backup-db.sh
 #   bash scripts/db/restore.sh <backup-file>
-#   bash scripts/db/point-in-time-restore.sh  # Azure PITR
+#   bash scripts/db/restore.sh  # Local restore
 #
 # ── Connection Strings (Development — Docker Compose) ────────────
 # PostgreSQL: postgresql://lazynext:changeme@localhost:5434/lazynext
 # Redis:      redis://localhost:6379
 #
-# ── Connection Strings (Production — Azure) ──────────────────────
-# PostgreSQL: postgresql://lazynext_app:<password>@lazynext-postgres-dev.postgres.database.azure.com:5432/lazynext?sslmode=require
+# ── Connection Strings (Production — Linode) ──────────────────────
+# PostgreSQL: postgresql://lazynext_app:<password>@127.0.0.1:5432/lazynext?sslmode=require
 # Redis:      rediss://:<token>@<upstash-endpoint>:6379
 #
 # ── Migration Architecture ───────────────────────────────────────

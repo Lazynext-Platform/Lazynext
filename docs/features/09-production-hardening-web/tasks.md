@@ -19,13 +19,13 @@
 
 ## Phase A — Security & Auth Fixes ✅ COMPLETE (pre-existing)
 
-> Verified: JWT auth, Stripe HMAC, rate limiting, and CSRF are all real implementations with 19 passing tests.
+> Verified: JWT auth, Dodo Payments HMAC, rate limiting, and CSRF are all real implementations with 19 passing tests.
 
 - [x] **A.1** — Real JWT HS256 validation in `rbac.rs` using `BETTER_AUTH_SECRET` (no hardcoded tokens)
 - [x] **A.2** — `handle_get_projects` uses `claims.sub` from validated JWT extension (no mock_user_id)
-- [x] **A.3** — Stripe webhook HMAC verification in `handle_stripe_webhook` with `verify_stripe_signature`
+- [x] **A.3** — Dodo Payments webhook HMAC verification in `handle_stripe_webhook` with `verify_stripe_signature`
 - [x] **A.4** — Full rate limiting with token-bucket + Redis (4 profiles: public, auth, AI gen, admin)
-- [x] **A.5** — CSRF double-submit cookie pattern in `csrf.rs` (skips safe methods + Stripe webhooks)
+- [x] **A.5** — CSRF double-submit cookie pattern in `csrf.rs` (skips safe methods + Dodo Payments webhooks)
 - [x] 📍 **Checkpoint A** — All 19 tests pass, `cargo test -p lazynext_api_gateway` green
 
 ---
@@ -252,7 +252,7 @@
   - [ ] Test real JWT auth flow (register → get token → access protected route)
   - [ ] Test rate limiting (send 200 requests, verify 429)
   - [ ] Test CSRF protection
-  - [ ] Test Stripe webhook with valid/invalid signatures
+  - [ ] Test Dodo Payments webhook with valid/invalid signatures
 - [ ] 📍 **Checkpoint G** — `bun test` passes with >30% coverage on new code, E2E tests pass, API gateway real integration tests pass
 
 ---

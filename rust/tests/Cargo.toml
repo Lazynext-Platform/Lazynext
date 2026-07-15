@@ -1,0 +1,13 @@
+[package]
+name = "lazynext-integration-tests"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "End-to-end integration tests for the Lazynext platform — API contracts, serialization, and integration logic."
+
+[[test]]
+name = "e2e_integration_tests"
+path = "e2e_integration_tests.rs"
+
+[dev-dependencies]
+serde_json = "1"

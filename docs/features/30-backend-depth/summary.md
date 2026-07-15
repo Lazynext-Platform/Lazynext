@@ -23,7 +23,7 @@ Audited the messaging, database, and peer-to-peer communication layers to confir
 - `rust/api-gateway/` — sqlx PostgreSQL queries and migration runner
 - `rust/core/` — P2P mesh: UDP discovery, TCP transport, peer management
 - `rust/core/src/mesh/` — Mesh protocol implementation (UDP + TCP)
-- `terraform/` — Infrastructure-as-code for Kafka, PostgreSQL, and mesh networking
+- `infra/` — Deployment configuration for Kafka, PostgreSQL, and mesh networking
 
 ## Conclusion
 

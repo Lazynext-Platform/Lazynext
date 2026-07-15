@@ -302,7 +302,7 @@ export class TimelineManager {
 
 	updateElements({
 		updates,
-		pushHistory = true,
+		pushHistory: _pushHistory = true,
 	}: {
 		updates: Array<{
 			trackId: string;

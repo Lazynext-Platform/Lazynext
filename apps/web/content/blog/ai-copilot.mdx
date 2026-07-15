@@ -16,7 +16,7 @@ Chronos Copilot does what a human editor does: it understands your intent, decom
 
 When you type "cut the silence from this interview, add cinematic color grading, and overlay b-roll of the city," Chronos doesn't just call one AI model. It:
 
-1. **Decomposes** — Breaks your intent into discrete editing steps using an LLM (OpenAI, Anthropic, or local Ollama)
+1. **Decomposes** — Breaks your intent into discrete editing steps using Google Gemini (with local Ollama fallback)
 2. **Executes** — Calls the right microservice for each step: Whisper for transcription, SAM2 for rotoscoping, Replicate for b-roll generation
 3. **Repairs** — If a step fails, it retries with adjusted parameters (our Agentic Repair Loop)
 4. **Verifies** — Checks the CRDT operation log to confirm every edit was applied
@@ -35,7 +35,7 @@ Chronos has access to 40+ editing tools, from basic operations like "add track" 
 
 | Tool | Backend |
 |------|---------|
-| Transcribe | OpenAI Whisper |
+| Transcribe | Gemini Whisper (TF Serving) |
 | Dub | ElevenLabs TTS |
 | Rotoscope | SAM2 (CPU/ONNX) |
 | B-Roll | Stable Video Diffusion / Pexels |

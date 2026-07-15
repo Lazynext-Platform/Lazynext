@@ -4,7 +4,6 @@
  * @page /super-admin
  */
 
-import React from "react";
 import { StatCard } from "@/components/admin/StatCard";
 
 export default function SuperAdminDashboard() {

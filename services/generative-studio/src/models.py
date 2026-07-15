@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 
 class DiffusionRequest(BaseModel):
-    """Text-to-video generation request (via Fal.ai + Kling 3.0)."""
+    """Text-to-video generation request (via Modal SD Pipeline)."""
     prompt: str = Field(..., min_length=1, max_length=4000)
     width: int = Field(default=1024, ge=64, le=2048, multiple_of=8)
     height: int = Field(default=576, ge=64, le=2048, multiple_of=8)
@@ -67,7 +67,7 @@ class UpscaleRequest(BaseModel):
 
 
 class InpaintRequest(BaseModel):
-    """Inpaint a masked region in a video using Stable Diffusion."""
+    """Inpaint a masked region in a video via Modal GPU endpoint."""
     video_id: str = Field(..., min_length=1, max_length=255)
     mask_url: str = Field(..., min_length=1, max_length=4096)
     prompt: str = Field(..., min_length=1, max_length=500)

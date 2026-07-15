@@ -7,8 +7,6 @@
 use serde_json::json;
 
 /// Verify the autonomous edit API request/response format.
-
-/// Verify the autonomous edit API request/response format.
 #[test]
 fn test_autonomous_edit_request_format() {
     let request = json!({

@@ -4,42 +4,35 @@ set -euo pipefail
 # Runs AFTER cross-compilation (cargo build --release --target x86_64-unknown-linux-musl)
 # Expects binaries at target/x86_64-unknown-linux-musl/release/
 
-ACR="lazynextacrdevlmblwn.azurecr.io"
+REGISTRY="ghcr.io/lazynext-platform"
 BINARY_DIR="target/x86_64-unknown-linux-musl/release"
 
 echo "=== Building Docker images for amd64 ==="
 
 # Collab Server
 docker buildx build --platform linux/amd64 \
-  -t ${ACR}/lazynext-collab-server:latest \
+  -t ${REGISTRY}/lazynext-collab-server:latest \
   -f services/collab-server/Dockerfile . --push
 
 # API Gateway
 docker buildx build --platform linux/amd64 \
-  -t ${ACR}/lazynext-api-gateway:latest \
+  -t ${REGISTRY}/lazynext-api-gateway:latest \
   -f rust/api-gateway/Dockerfile . --push
 
-echo "=== Updating Azure Container Apps ==="
+echo "=== Deploying via Docker Compose ==="
 
-az containerapp update \
-  --resource-group lazynext-rg-dev \
-  --name lazynext-collab-server-dev \
-  --image ${ACR}/lazynext-collab-server:latest
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d --force-recreate
 
-az containerapp update \
-  --resource-group lazynext-rg-dev \
-  --name lazynext-api-gateway-dev \
-  --image ${ACR}/lazynext-api-gateway:latest
-
-echo "=== Waiting for revisions to be active ==="
+echo "=== Waiting for services to be ready ==="
 sleep 30
 
 echo "=== Running E2E tests ==="
-API_GATEWAY_URL="https://lazynext-api-gateway-dev.salmonground-46f7bb5d.southeastasia.azurecontainerapps.io" \
-WEB_URL="https://lazynext-web-dev.salmonground-46f7bb5d.southeastasia.azurecontainerapps.io" \
-RENDER_SERVICE_URL="https://lazynext-render-dev.salmonground-46f7bb5d.southeastasia.azurecontainerapps.io" \
-PREPROC_URL="https://lazynext-pre-processing-dev.salmonground-46f7bb5d.southeastasia.azurecontainerapps.io" \
-AI_AGENTS_URL="https://lazynext-ai-agents-dev.salmonground-46f7bb5d.southeastasia.azurecontainerapps.io" \
+API_GATEWAY_URL="http://localhost:8005" \
+WEB_URL="http://localhost:3000" \
+RENDER_SERVICE_URL="http://localhost:8003" \
+PREPROC_URL="http://localhost:8000" \
+AI_AGENTS_URL="http://localhost:8002" \
 ./scripts/full-e2e.sh
 
 echo "=== Deployment Complete ==="

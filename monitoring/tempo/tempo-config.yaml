@@ -1,17 +1,15 @@
 # Tempo distributed tracing backend.
-# For production, enable Azure Blob Storage backend:
+# For production, enable local filesystem storage:
 #   storage:
 #     trace:
-#       backend: azure
-#       azure:
-#         container_name: tempo-traces
-#         storage_account_name: ${AZURE_STORAGE_ACCOUNT}
-#         storage_account_key: ${AZURE_STORAGE_ACCESS_KEY}
+#       backend: local
+#       local:
+#         path: /var/tempo/traces
 #   compactor:
 #     compaction:
 #       block_retention: 720h  # 30 days
 #
-# Current config uses local storage (development only).
+# Production uses local storage with persistent volumes.
 
 server:
   http_listen_port: 3200

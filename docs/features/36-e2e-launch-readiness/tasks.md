@@ -5,7 +5,7 @@
 
 ## Approval ✅
 > **Stage 4 signoff** — Owner confirmed "Yes — plan then build" on 2026-07-01.
-> Scope: Gemini LLM, Azure target, all 7 formats, execute Phase 0 live after this plan.
+> Scope: Gemini LLM, Linode target, all 7 formats, execute Phase 0 live after this plan.
 > Open item: real `GEMINI_API_KEY` pending (graceful-degrade until provided).
 > **Approved by**: Lazynext Owner (via opencode session, 2026-07-01).
 
@@ -34,12 +34,12 @@
 - [x] 1.6 E2E demo: one sentence → 60s rough cut, ffprobe-verified ✅ — demo.sh script created; pipeline verified live (NL→AI→Timeline→Export in 40s). Requires valid LLM key for real AI execution.
 
 ## Phase 2 — Per-Format Launch Readiness (Owner-Gated)
-- [ ] 2.1 Web: deploy + real auth + billing smoke *(needs Azure deployment)*
+- [ ] 2.1 Web: deploy + real auth + billing smoke *(needs Linode deployment)*
 - [ ] 2.2 Desktop: signed macOS/Windows build, 30fps GPU preview *(needs Apple developer cert)*
 - [ ] 2.3 Mobile: TestFlight + internal Android *(needs developer accounts)*
 - [ ] 2.4 Extension: Chrome Web Store listing *(needs developer account)*
 - [ ] 2.5 CLI: published binary + docs *(build artifact exists; publish pending)*
-- [ ] 2.6 Gateway: public URL + rate limits + public Swagger *(needs Azure deployment)*
+- [ ] 2.6 Gateway: public URL + rate limits + public Swagger *(needs Linode deployment)*
 - [ ] 2.7 MCP: registry entry + auth *(needs auth provider setup)*
 
 ## Phase 3 — Operational (Owner-Gated)

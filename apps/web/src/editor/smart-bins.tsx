@@ -9,7 +9,7 @@
  * @module editor/smart-bins
  */
 
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 
 async function loadWasmNeural() {
 	try {
@@ -57,7 +57,7 @@ export function SmartBinsPanel() {
 			</button>
 
 			{smartBins.length === 0 && !loading && (
-				<p className="text-sm text-muted">Click "Auto-Analyze Footage" to tag clips with the Neural Engine.</p>
+				<p className="text-sm text-muted">Click &quot;Auto-Analyze Footage&quot; to tag clips with the Neural Engine.</p>
 			)}
 
 			<div className="space-y-4">

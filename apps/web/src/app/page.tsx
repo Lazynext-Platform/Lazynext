@@ -19,14 +19,10 @@ import {
 	Edit3,
 	Video,
 	Palette,
-	Music,
-	Captions,
 	Zap,
-	Globe,
 	CheckCircle2,
 	Command,
 	Star,
-	MessageCircle,
 	Users,
 } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -264,7 +260,7 @@ export default function Home() {
 								</span>
 							</h2>
 							<p className="text-lg text-white/40 max-w-2xl mx-auto">
-								We didn't just build another editor. We combined
+								We didn&apos;t just build another editor. We combined
 								the best of every major NLE into a single
 								AI-native platform.
 							</p>
@@ -540,7 +536,7 @@ export default function Home() {
 									name: "Marcus Rivera",
 									role: "Freelance Filmmaker",
 								},
-							].map((t, i) => (
+							].map((t) => (
 								<motion.div
 									key={t.name}
 									variants={itemVariants}
@@ -555,7 +551,7 @@ export default function Home() {
 										))}
 									</div>
 									<p className="text-sm text-white/60 leading-relaxed mb-4 italic">
-										"{t.quote}"
+										&quot;{t.quote}&quot;
 									</p>
 									<div>
 										<p className="text-sm font-semibold text-white">

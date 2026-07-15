@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# backup-db.sh — PostgreSQL backup to local file or Azure Blob Storage
+# backup-db.sh — PostgreSQL backup to local file
 # Usage:
 #   ./scripts/backup-db.sh                   # Local backup
-#   ./scripts/backup-db.sh --azure           # Upload to Azure Blob
+#   ./scripts/backup-db.sh --remote           # Upload to remote storage
 #   ./scripts/backup-db.sh --restore FILE    # Restore from backup
 set -euo pipefail
 
@@ -18,8 +18,8 @@ DB_NAME="${DB_NAME:-lazynext}"
 DB_PASSWORD="${DB_PASSWORD:?Set DB_PASSWORD env var}"
 
 BACKUP_DIR="${BACKUP_DIR:-$REPO_ROOT/.backups}"
-AZURE_STORAGE_ACCOUNT="${AZURE_STORAGE_ACCOUNT:-}"
-AZURE_STORAGE_CONTAINER="${AZURE_STORAGE_CONTAINER:-media}"
+MEDIA_DIR="${MEDIA_DIR:-/opt/lazynext/media}"
+BACKUP_DIR="${MEDIA_DIR}/backups"
 TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
 
 export PGPASSWORD="$DB_PASSWORD"
@@ -31,13 +31,13 @@ RESTORE_FILE=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --azure) ACTION="backup-azure" ;;
+    --remote) ACTION="backup-remote" ;;
     --restore) RESTORE_FILE="$2"; ACTION="restore"; shift ;;
     --help|-h)
-      echo "Usage: $0 [--azure] [--restore FILE]"
+      echo "Usage: $0 [--remote] [--restore FILE]"
       echo ""
       echo "  (no flags)       Create local pg_dump backup"
-      echo "  --azure           Create backup and upload to Azure Blob Storage"
+      echo "  --remote          Create backup and upload to remote storage"
       echo "  --restore FILE    Restore database from backup file"
       exit 0
       ;;
@@ -76,26 +76,6 @@ do_backup() {
   echo "🧹 Cleaned up backups older than 30 days"
 
   echo "$backup_file"
-}
-
-do_backup_azure() {
-  if [ -z "$AZURE_STORAGE_ACCOUNT" ]; then
-    echo "❌ AZURE_STORAGE_ACCOUNT not set."
-    exit 1
-  fi
-
-  local backup_file
-  backup_file=$(do_backup)
-
-  echo "☁️  Uploading to Azure Blob: $AZURE_STORAGE_ACCOUNT/$AZURE_STORAGE_CONTAINER/backups/..."
-  az storage blob upload \
-    --account-name "$AZURE_STORAGE_ACCOUNT" \
-    --container-name "$AZURE_STORAGE_CONTAINER" \
-    --name "backups/$(basename "$backup_file")" \
-    --file "$backup_file" \
-    --auth-mode login
-
-  echo "✅ Uploaded to Azure: $AZURE_STORAGE_ACCOUNT/$AZURE_STORAGE_CONTAINER/backups/$(basename "$backup_file")"
 }
 
 # ── Restore ─────────────────────────────────────────────────────────────────
@@ -138,11 +118,8 @@ do_restore() {
 # ── Main ────────────────────────────────────────────────────────────────────
 
 case "$ACTION" in
-  backup)
+  backup|backup-remote)
     do_backup
-    ;;
-  backup-azure)
-    do_backup_azure
     ;;
   restore)
     do_restore "$RESTORE_FILE"

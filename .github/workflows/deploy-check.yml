@@ -87,9 +87,9 @@ jobs:
           ENV: ${{ needs.gate.outputs.env }}
         run: |
           REQUIRED_SECRETS=(
-            "AZURE_CLIENT_ID"
-            "AZURE_TENANT_ID"
-            "AZURE_SUBSCRIPTION_ID"
+            "LINODE_HOST"
+            "LINODE_SSH_USER"
+            "LINODE_SSH_KEY"
           )
           echo "Verifying required GitHub Actions secrets for $ENV..."
           for secret in "${REQUIRED_SECRETS[@]}"; do
@@ -231,15 +231,6 @@ jobs:
             echo "::notice ::No migration script — check if DB setup is handled elsewhere"
           fi
 
-      - name: Validate Terraform DB config
-        run: |
-          if [ -d "infra/terraform" ]; then
-            echo "Checking Terraform PostgreSQL configuration..."
-            grep -r "postgres" infra/terraform/ --include="*.tf" -l || echo "::notice ::No PostgreSQL Terraform config found"
-          else
-            echo "::notice ::No infra/terraform directory found"
-          fi
-
   # ── STEP 5: API Gateway Health Check ──────────────────────────
   api-gateway-check:
     name: "🌐 API Gateway Verification"
@@ -276,61 +267,6 @@ jobs:
             bash -n scripts/health-check.sh
             echo "Health check script is syntactically valid"
           fi
-
-  # ── STEP 6: Terraform Plan Validation ─────────────────────────
-  terraform-check:
-    name: "🏗️ Terraform Plan Validation"
-    needs: [gate, env-audit]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Check for Terraform config
-        id: tf
-        run: |
-          if [ -d "infra/terraform" ] && ls infra/terraform/*.tf >/dev/null 2>&1; then
-            echo "present=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "present=false" >> "$GITHUB_OUTPUT"
-            echo "::notice ::No Terraform config at infra/terraform — skipping"
-          fi
-
-      - uses: hashicorp/setup-terraform@v3
-        if: steps.tf.outputs.present == 'true'
-        with:
-          terraform_version: "~>1.10"
-
-      - name: Terraform Format Check
-        if: steps.tf.outputs.present == 'true'
-        run: terraform fmt -check -recursive
-        working-directory: infra/terraform
-        continue-on-error: true
-
-      - name: Terraform Init
-        if: steps.tf.outputs.present == 'true'
-        run: terraform init -backend=false
-        working-directory: infra/terraform
-
-      - name: Terraform Validate
-        if: steps.tf.outputs.present == 'true'
-        run: terraform validate
-        working-directory: infra/terraform
-
-      - name: Terraform Plan (Dry Run)
-        if: steps.tf.outputs.present == 'true'
-        run: |
-          echo "Running terraform plan — no actual infrastructure changes will be applied"
-          terraform plan -input=false -detailed-exitcode -out=/dev/null || {
-            EXIT=$?
-            if [ $EXIT -eq 2 ]; then
-              echo "::notice ::Terraform plan shows changes (expected for new deployments)"
-            else
-              echo "::error ::Terraform plan failed with exit code $EXIT"
-              exit $EXIT
-            fi
-          }
-        working-directory: infra/terraform
-        continue-on-error: true
 
   # ── STEP 7: E2E Smoke Tests ───────────────────────────────────
   e2e-smoke:
@@ -397,7 +333,6 @@ jobs:
       - security-scan
       - migration-check
       - api-gateway-check
-      - terraform-check
       - e2e-smoke
     runs-on: ubuntu-latest
     if: always()
@@ -416,7 +351,6 @@ jobs:
           echo "| Security Scan | ${{ needs.security-scan.result }} |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Migrations | ${{ needs.migration-check.result }} |" >> "$GITHUB_STEP_SUMMARY"
           echo "| API Gateway | ${{ needs.api-gateway-check.result }} |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Terraform | ${{ needs.terraform-check.result }} |" >> "$GITHUB_STEP_SUMMARY"
           echo "| E2E Smoke | ${{ needs.e2e-smoke.result }} |" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
 
@@ -428,7 +362,6 @@ jobs:
             "${{ needs.security-scan.result }}" \
             "${{ needs.migration-check.result }}" \
             "${{ needs.api-gateway-check.result }}" \
-            "${{ needs.terraform-check.result }}" \
             "${{ needs.e2e-smoke.result }}"; do
             if [ "$RESULT" = "failure" ]; then
               FAILURES=$((FAILURES + 1))

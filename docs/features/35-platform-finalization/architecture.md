@@ -35,7 +35,7 @@ services/pre-processing/src/cv_models.py      # Wire SAM2 ONNX runtime path
 services/pre-processing/src/sam2_pipeline.py  # Call real SAM2 instead of rembg
 
 # Gap F5: Local Whisper TF Serving path
-services/pre-processing/src/services/audio_analysis.py # Add local TF Serving fallback before OpenAI API
+services/pre-processing/src/services/audio_analysis.py # Add local TF Serving fallback before Gemini API
 
 # Gap F6: MCP Server tool expansion
 services/mcp-server/src/index.ts              # Expand from 1 tool to 50+ tools from orchestrator
@@ -46,9 +46,9 @@ services/analytics-service/src/index.ts       # Add SQLite persistence layer
 services/analytics-service/package.json       # Add better-sqlite3 dependency
 
 # Gap F8: Production deployment
-infra/terraform/                              # Run terraform apply
-k8s/                                          # Apply K8s manifests
-scripts/full-e2e.sh                           # Run against production URLs
+infra/linode/                                 # Run deploy script
+├── scripts/deploy-prod.sh                     # Deploy via Docker Compose on Linode
+└── scripts/full-e2e.sh                        # Run against production URLs
 ```
 
 ---
@@ -105,16 +105,16 @@ The UniFFI bindings already exist at `apps/mobile/ios/` and `apps/mobile/android
 
 ### F5: Local Whisper TF Serving
 
-**Responsibility**: Add a local Whisper inference path using TF Serving before falling back to OpenAI API.
+**Responsibility**: Add a local Whisper inference path using TF Serving before falling back to Gemini API.
 
 **Location**: `services/pre-processing/src/services/audio_analysis.py`
 
 **Changes**:
-- Before calling OpenAI API, try TF Serving at `TF_SERVING_URL/v1/models/whisper:predict`
+- Before calling Gemini API, try TF Serving at `TF_SERVING_URL/v1/models/whisper:predict`
 - If TF Serving responds, use the local result
-- If TF Serving fails, fall back to OpenAI API (existing path)
-- If OpenAI fails, return HTTP 503 (existing path)
+- If TF Serving fails, fall back to Gemini API (existing path)
 
+- If Gemini fails, return HTTP 503 (existing path)
 ### F6: MCP Server Expansion
 
 **Responsibility**: Expand the MCP server from 1 tool to matching the 50+ tools in the AI orchestrator.
@@ -142,13 +142,13 @@ The UniFFI bindings already exist at `apps/mobile/ios/` and `apps/mobile/android
 
 ### F8: Production Deployment
 
-**Responsibility**: Deploy the platform to Azure and verify end-to-end.
+**Responsibility**: Deploy the platform to Linode and verify end-to-end.
 
-**Location**: `infra/terraform/`, `scripts/full-e2e.sh`
+**Location**: `infra/linode/`, `scripts/full-e2e.sh`
 
 **Changes**:
-- Run `terraform plan` → `terraform apply` to provision Azure resources
-- Deploy Docker containers to Azure Container Apps
+- Run `./infra/linode/deploy.sh` to deploy all services to Linode
+- Deploy via Docker Compose
 - Run `scripts/full-e2e.sh` with `STAGE=production` against live URLs
 - Verify all 7 formats work against production
 

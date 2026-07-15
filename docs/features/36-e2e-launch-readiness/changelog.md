@@ -28,7 +28,7 @@
 
 #### Autonomous Editor — Async API Now Real
 5. **`process_intent` (async job API)** → Now creates real jobs with `Uuid` IDs, spawns `tokio::spawn` tasks that:
-   - Actually call the LLM via `call_llm_raw` (supports OpenAI, Anthropic, Gemini, Ollama)
+    - Actually call the LLM via `call_llm_raw` (supports Gemini, Ollama)
    - Progress through Planning → Executing → Completed/Failed
    - Store results in an in-memory `DashMap`-backed job store
 6. **`check_job_status`** → Returns real job status from the job store with descriptive errors for unknown IDs
@@ -95,6 +95,6 @@
 #### Owner-gated next steps
 1. Add `GEMINI_API_KEY` to `apps/web/.env.local` for real AI editing demo
 2. Apple Developer cert for signed desktop build
-3. Azure login for production deploy
+3. Linode SSH for production deploy
 4. Chrome Web Store developer account for extension listing
 5. Merge `feature/36-e2e-launch-readiness` → `main` (needs explicit approval per Mastery framework)

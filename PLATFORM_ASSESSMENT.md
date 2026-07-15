@@ -7,7 +7,7 @@
 > This document is the 2026-06-30 gap-analysis snapshot taken *before* the
 > Feature #09–#36 hardening pass. The **authoritative current status** is
 > [`docs/project-roadmap.md`](docs/project-roadmap.md): 34 of 36 features
-> complete (~95% code-complete; only Azure deployment + external API keys
+> complete (~95% code-complete; only deployment + external API keys
 > remain). The per-format percentages below are retained as a historical
 > reference for the original gap analysis, not as the present state.
 
@@ -182,7 +182,7 @@ The platform has progressed significantly since the original assessment (2026-06
 | # | Task | Priority | Effort |
 |---|------|----------|--------|
 | 6.1 | **Replace hardcoded auth tokens with real JWT** — Three literal tokens (`admin-token-123`, `editor-token-456`, `viewer-token-789`) must be replaced with proper better-auth JWT HS256 validation. | Critical | Medium |
-| 6.2 | **Replace SQLite with PostgreSQL** — `DbStore` uses in-memory SQLite as fallback. Must connect to Azure PostgreSQL / DATABASE_URL. | Critical | Medium |
+| 6.2 | **Replace SQLite with PostgreSQL** — `DbStore` uses in-memory SQLite as fallback. Must connect to PostgreSQL / DATABASE_URL. | Critical | Medium |
 | 6.3 | **Implement Stripe webhook verification** — `handle_stripe_webhook` only prints event type. Must verify Stripe signatures with `STRIPE_WEBHOOK_SECRET`. | Critical | Medium |
 | 6.4 | **Fix hardcoded user ID** — `handle_get_projects` uses literal `"mock_user_id"` instead of decoded JWT subject. | Critical | Small |
 | 6.5 | **Add rate limiting middleware** — No rate limiter exists on any route. | High | Medium |
@@ -245,7 +245,7 @@ These underpin all 7 formats:
 | M8 | **Implement real Kafka in analytics-service** — Entirely mock. No Kafka producer, no ClickHouse, no LTV calculation. | High | Large |
 | M9 | **Implement real collab-server persistence** — Save/load endpoints are stubs. y-sync crate unused. No CRDT state storage. | High | Large |
 | M10 | **Fix `GEN_STUDIO_URL` typo** — In ai-agents orchestrator, this undefined variable will cause runtime ReferenceError. | Critical | Small |
-| M11 | **Fix Anthropic API routing** — ai-agents sends Anthropic-format requests to OpenAI endpoint. | Critical | Medium |
+| M11 | **Fix Gemini API routing** — ai-agents sends properly-formatted requests to Gemini endpoint. | Critical | Medium |
 | M12 | **Break up Python monoliths** — Both Python services are single-file 400+ line monoliths. Need route/service/module separation. | Medium | Medium |
 | M13 | **Fix port 8002 conflict** — Both ai-agents and collab-server claim port 8002. | High | Small |
 | M14 | **Add WebSocket authentication** — Both sync implementations allow anonymous CRDT broadcast. | Critical | Medium |
@@ -264,7 +264,7 @@ These underpin all 7 formats:
 | I4 | **Consolidate docker-compose files** — 7 files, many redundant. Reduce to 2 (main + dev). | Low | Small |
 | I5 | **Standardize env var naming** — `RENDER_SERVICE_URL` vs `NEXT_PUBLIC_RENDER_SERVICE_URL` inconsistency. | Low | Small |
 | I6 | **Add OpenTelemetry instrumentation** — No OTel in any service code despite having Tempo for tracing. | Medium | Large |
-| I7 | **Configure Alertmanager receivers** — Slack/PagerDuty have placeholder keys. | Medium | Small |
+| I7 | **Configure Alertmanager receivers** — Slack/Grafana OnCall have placeholder keys. | Medium | Small |
 | I8 | **Add end-to-end integration test** — Test full `ingest → transcribe → edit → render` pipeline across all services. | High | Large |
 | I9 | **Build migration image in CI** — `Dockerfile.migrate` exists and is used by K8s init containers but not built by any CI pipeline. | Medium | Small |
 | I10 | **Add API documentation** — No OpenAPI specs for any microservice. | Medium | Medium |
@@ -353,7 +353,7 @@ The remaining ~30% is **depth work, not stub-removal**: completing the desktop G
 1. **GPU compositor** (`rust/crates/compositor/`) — 1070-line, 17 blend modes, MSDF text, stereoscopic 3D — genuinely impressive
 2. **K8s manifests** — Production-grade with NetworkPolicies, HPAs, PDBs, ExternalSecrets, CronJobs, GPU support
 3. **Monitoring stack** — Full Grafana/Prometheus/Loki/Tempo/Alloy with pre-built dashboards and SLOs
-4. **Azure Terraform** — Full Azure infrastructure with GPU node pool support
+4. **Linode Infrastructure** — Full infrastructure with Docker Compose + systemd
 5. **CRDT foundation** — LWW-Register, vector clocks, tombstones, operation-based CRDTs — correct primitives
 6. **AGENTS.md** — Excellent developer documentation, comprehensive and accurate
 7. **Web app scope** — 1000+ files covering editor, canvas, timeline, effects, masks, collaboration, storage migrations

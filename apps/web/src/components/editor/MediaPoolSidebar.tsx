@@ -90,7 +90,7 @@ interface MediaPoolSidebarProps {
 
 export function MediaPoolSidebar({
 	assets,
-	frame,
+	frame: _frame,
 	handleAiVoiceover,
 	handleAutoSubtitleTrack,
 	handleCreateMulticam,
@@ -357,12 +357,13 @@ export function MediaPoolSidebar({
 					</button>
 
 					<div className="mt-4 pt-3 border-t border-border/50">
-						<label className="text-[10px] text-muted font-bold uppercase block mb-1">
-							🤖 Generative AI B-Roll (Sora/Runway)
-						</label>
-						<div className="flex flex-col gap-2">
-							<textarea
-								placeholder="E.g., Cinematic drone shot of a cyberpunk city at night, neon lights reflecting on wet streets..."
+					<label htmlFor="gen-ai-broll" className="text-[10px] text-muted font-bold uppercase block mb-1">
+						🤖 Generative AI B-Roll (Sora/Runway)
+					</label>
+					<div className="flex flex-col gap-2">
+						<textarea
+							id="gen-ai-broll"
+							placeholder="E.g., Cinematic drone shot of a cyberpunk city at night, neon lights reflecting on wet streets..."
 								className="w-full bg-background border border-border rounded p-2 text-xs text-foreground placeholder-zinc-600 focus:outline-none focus:border-indigo-500 min-h-[60px] resize-none"
 								onKeyDown={(e) => {
 									if (e.key === "Enter" && !e.shiftKey) {
@@ -502,18 +503,21 @@ export function MediaPoolSidebar({
 									{asset.type === "video" || asset.type === "image" ? (
 										<div className="w-full aspect-video bg-background rounded overflow-hidden mb-2 border border-border/50 relative">
 											{asset.thumbnail ? (
+											/* eslint-disable-next-line @next/next/no-img-element */
 												<img
 													src={asset.thumbnail}
 													alt={asset.name}
 													className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
 												/>
 											) : asset.type === "image" ? (
+											/* eslint-disable-next-line @next/next/no-img-element */
 												<img
 													src={asset.url}
 													alt={asset.name}
 													className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
 												/>
 											) : (
+												// eslint-disable-next-line jsx-a11y/media-has-caption
 												<video
 													src={asset.url}
 													preload="metadata"
@@ -1082,7 +1086,7 @@ export function MediaPoolSidebar({
 								</span>
 
 								<span className="hover:bg-panel cursor-pointer rounded px-1 transition-colors">
-									we're
+									we&apos;re
 								</span>
 								<span className="hover:bg-panel cursor-pointer rounded px-1 transition-colors">
 									going
@@ -1102,6 +1106,9 @@ export function MediaPoolSidebar({
 									className="bg-red-500/20 text-red-300 line-through cursor-pointer rounded px-1 transition-colors"
 									title="Ripple Deleted"
 									onClick={handleRestoreRippleWord}
+									onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
+									role="button"
+									tabIndex={0}
 								>
 									um
 								</span>
@@ -1285,7 +1292,7 @@ export function MediaPoolSidebar({
 												v{plugin.version} • by {plugin.author}
 											</span>
 										</div>
-										<label className="flex items-center cursor-pointer">
+										<label aria-label={`Toggle ${plugin.name}`} className="flex items-center cursor-pointer">
 											<div className="relative">
 												<input
 													type="checkbox"
@@ -1426,6 +1433,9 @@ export function MediaPoolSidebar({
 										key={`${ev.id}-${i}`}
 										className="group flex flex-col p-2 bg-background/50 border border-border/80 hover:bg-panel hover:border-border rounded cursor-pointer transition-colors"
 										onClick={() => setFrame(ev.frame)}
+										onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
+										role="button"
+										tabIndex={0}
 									>
 										<div className="flex items-center gap-2 mb-1">
 											<div

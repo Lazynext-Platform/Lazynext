@@ -1,6 +1,6 @@
 //! Generative AI pipeline for video and audio synthesis via external APIs.
 //!
-//! Provides models for text-to-video generation (Modal + CogVideoX-2B)
+//! Provides models for text-to-video generation (Modal SD Pipeline)
 //! and text-to-speech synthesis (delegated to generative-studio service
 //! which uses Edge TTS — free, unlimited, 300+ voices).
 
@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 /// Configuration for AI-powered text-to-video generation.
 ///
 /// Delegated to the generative-studio service which uses Modal
-/// (CogVideoX-2B) — $30/mo free credits, ~35s, 5 concurrent.
+/// (SD Pipeline) — $30/mo free credits, ~35s, 3 concurrent.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VideoGenerationOptions {
     /// Natural-language prompt describing the desired video content.
@@ -59,10 +59,10 @@ impl GenerativeModel {
         Self { is_loaded: true }
     }
 
-    /// Generates a video via the generative-studio service (HF Spaces).
+    /// Generates a video via the generative-studio service (Modal).
     ///
     /// Delegates to the Python generative-studio service which uses
-    /// Hugging Face Spaces — free Wan 2.1 video, no API key needed.
+    /// Modal GPU endpoint — free Wan 2.1 video, no API key needed.
     pub async fn generate_video(&self, options: &VideoGenerationOptions) -> Result<String, String> {
         let gs_url = std::env::var("GENERATIVE_STUDIO_URL")
             .unwrap_or_else(|_| "http://localhost:8001".to_string());

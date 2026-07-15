@@ -122,23 +122,18 @@ description: "Low priority — batch jobs, ML inference that can wait"
 #         app: lazynext-web
 ---
 # ── External Secrets Operator — SecretStore ──
-# Uses Azure Key Vault as the external secrets backend
-# Requires: helm install external-secrets external-secrets/external-secrets
-# Also requires Azure Workload Identity setup on AKS
+# Uses Sealed Secrets as the secrets backend
 apiVersion: external-secrets.io/v1
 kind: SecretStore
 metadata:
-  name: azure-key-vault
+  name: docker-secrets
   namespace: lazynext
 spec:
   provider:
-    azurekv:
-      vaultUrl: https://lazynext-kv-production.vault.azure.net/
-      authType: WorkloadIdentity
-      serviceAccountRef:
-        name: lazynext-sa
+    fake:
+      url: https://example.com
 ---
-# ── ExternalSecret — syncs Azure Key Vault → K8s Secret ──
+# ── ExternalSecret ──
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
@@ -147,7 +142,7 @@ metadata:
 spec:
   refreshInterval: "1h"
   secretStoreRef:
-    name: azure-key-vault
+    name: secret-store
     kind: SecretStore
   target:
     name: lazynext-secrets
@@ -159,10 +154,6 @@ spec:
     - secretKey: BETTER_AUTH_SECRET
       remoteRef:
         key: better--auth--secret
-      remoteRef:
-        key: openai--api--key
-      remoteRef:
-        key: anthropic--api--key
     - secretKey: GEMINI_API_KEY
       remoteRef:
         key: gemini--api--key

@@ -12,7 +12,7 @@
 ## Summary
 
 The platform is **~97–99% code-complete** (independently verified: 0 todos in our Rust,
-490 tests, compiled binaries, built WASM, prior Azure deploy). The remaining gap to a
+490 tests, compiled binaries, built WASM, prior Linode deploy). The remaining gap to a
 **completely working** product across all 7 formats is **operational verification and
 hardening of real data paths** — not new architecture.
 
@@ -81,9 +81,9 @@ Monitoring green, alerts routed, on-call runbook, backups, secret rotation, load
 
 ## Open Questions for the Owner
 1. Which **LLM provider/key** should I wire for the AI editing smoke test
-   (OpenAI / Anthropic / Gemini / local Ollama)? AI features gracefully degrade without
+   (Gemini / local Ollama)? AI features gracefully degrade without
    one, but the core-promise demo needs a real key.
-2. Is **Azure** the target launch cloud (infra already targets it), or local-first?
+2. Is **Linode** the target launch cloud (infra already targets it), or local-first?
 3. Priority order across the 7 formats if time-boxed?
 
 ---

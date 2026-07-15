@@ -76,10 +76,8 @@ export function DeleteProjectDialog({
 						</AlertDescription>
 					</Alert>
 					<div className="flex flex-col gap-3">
-						// eslint-disable-next-line react/jsx-no-comment-textnodes
 						<Label className="text-xs font-semibold text-slate-500">
-							// eslint-disable-next-line react/no-unescaped-entities //
-							eslint-disable-next-line react/no-unescaped-entities Type "DELETE"
+							Type &quot;DELETE&quot;
 							to confirm
 						</Label>
 						<Input

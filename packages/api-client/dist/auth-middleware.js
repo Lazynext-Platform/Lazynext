@@ -6,9 +6,13 @@
  * Falls back to a dev key ONLY when NODE_ENV is not "production".
  * In production, refuses to start if no secret is configured.
  *
+ * Supports tokens from: email/password, Google, Apple, Microsoft OAuth,
+ * Magic Link, Passkeys, SSO/OIDC, and MFA-verified sessions.
+ *
  * Exports:
  *   authMiddleware — Express middleware (applies to all routes)
  *   requireAuth — Express middleware (applies to specific routes)
+ *   requireMfa — Express middleware (requires MFA-verified session)
  *   optionalAuth — attaches user if token present, never rejects
  */
 import jwt from "jsonwebtoken";
@@ -61,6 +65,11 @@ function verifyToken(token) {
         return null;
     }
 }
+/**
+ * Express middleware that requires a valid JWT bearer token.
+ * Responds 401 if the token is missing, invalid, or expired.
+ * On success, attaches `req.user` with decoded AuthClaims.
+ */
 export function authMiddleware(req, res, next) {
     const token = extractToken(req);
     if (!token) {
@@ -75,6 +84,11 @@ export function authMiddleware(req, res, next) {
     req.user = claims;
     next();
 }
+/**
+ * Express middleware that attaches user claims if a valid token is present,
+ * but never rejects the request. Use for endpoints that support both
+ * authenticated and anonymous access.
+ */
 export function optionalAuth(req, _res, next) {
     const token = extractToken(req);
     if (token) {
@@ -85,4 +99,25 @@ export function optionalAuth(req, _res, next) {
     }
     next();
 }
+/**
+ * Express middleware that requires the user's session to be MFA-verified.
+ * Must be used AFTER authMiddleware in the middleware chain.
+ * Responds 403 if the user has MFA enabled but the session is not verified.
+ */
+export function requireMfa(req, res, next) {
+    const user = req.user;
+    if (!user) {
+        res.status(401).json({ error: "Missing authorization token" });
+        return;
+    }
+    if (user.mfaEnabled && !user.mfaVerified) {
+        res.status(403).json({
+            error: "MFA verification required for this endpoint",
+            code: "MFA_REQUIRED",
+        });
+        return;
+    }
+    next();
+}
+/** Alias for `authMiddleware` — semantically clearer when used on specific routes. */
 export const requireAuth = authMiddleware;

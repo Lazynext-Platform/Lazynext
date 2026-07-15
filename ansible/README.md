@@ -1,6 +1,6 @@
 # Ansible
 
-Ansible manages **bare-metal node provisioning** for Lazynext. This is used when running on self-managed hardware (GPU render nodes, on-prem K8s clusters) as an alternative to the primary Azure Container Apps deployment.
+Ansible manages **bare-metal node provisioning** for Lazynext. This is used when running on self-managed hardware (GPU render nodes, on-prem K8s clusters).
 
 ## Directory Layout
 
@@ -93,4 +93,4 @@ gpu-1 ansible_host=10.0.0.20 ansible_user=ubuntu ansible_ssh_private_key_file=~/
 - **Logging**: `/var/log/ansible.log`
 - **Kubernetes version**: 1.32 (set in `inventory.ini`)
 
-This Ansible setup is designed for bare-metal/on-prem deployments. For cloud deployments, Azure resources are provisioned via Terraform in `infra/terraform/`.
+This Ansible setup is designed for bare-metal/on-prem deployments.

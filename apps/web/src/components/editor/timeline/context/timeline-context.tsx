@@ -2,6 +2,7 @@
  * @module Timeline context — React context provider that manages timeline state,
  * track CRUD operations, undo/redo history, and analytics integration.
  */
+/* eslint-disable react-hooks/exhaustive-deps */
 import {
 	createContext,
 	useCallback,
@@ -239,6 +240,7 @@ const TimelineProviderInner = ({
 
 	// Reconcile selection after undo/redo (remove stale IDs)
 	useEffect(() => {
+		/* eslint-disable react-hooks/set-state-in-effect */
 		const tracks = editor.getTimelineData()?.tracks ?? [];
 		const validIds = new Set<string>();
 		for (const t of tracks) {

@@ -8,7 +8,7 @@
  * @module editor/TranscriptEditor
  */
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useWasm } from "@/hooks/use-wasm";
 
 /**
@@ -26,7 +26,7 @@ export function TranscriptEditor() {
 		id: string; text: string; startMs: number; endMs: number; deleted: boolean;
 	}>>([]);
 
-	const handleTextSelection = (startMs: number, endMs: number) => {
+	const handleTextSelection = (startMs: number, _endMs: number) => {
 		// Just highlight/seek
 		time.setFrame((startMs / 1000.0) * 30);
 	};
@@ -54,15 +54,18 @@ export function TranscriptEditor() {
 						key={line.id}
 						className={`flex items-start justify-between p-2 rounded transition-colors ${line.deleted ? 'opacity-30 line-through bg-gray-100' : 'hover:bg-blue-50'}`}
 					>
-                        <p 
+                        <div
                             className="cursor-pointer flex-1"
                             onClick={() => !line.deleted && handleTextSelection(line.startMs, line.endMs)}
+                            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
+                            role="button"
+                            tabIndex={0}
                         >
                             <span className="text-xs text-gray-500 mr-3 inline-block w-12">
                                 {(line.startMs / 1000).toFixed(1)}s
                             </span>
 						    {line.text}
-                        </p>
+                        </div>
                         {!line.deleted && (
                             <button 
                                 onClick={() => handleDelete(line.id, line.startMs, line.endMs)}

@@ -34,10 +34,10 @@ limits_config:
   reject_old_samples_max_age: 696h  # 29 days
   ingestion_rate_mb: 16
   ingestion_burst_size_mb: 32
-  # For production, Azure Blob-backed storage is recommended:
-  # storage_config:
-  #   azure:
-  #     bucket_name: lazynext-loki-chunks
+  # For production, local filesystem-backed storage is recommended:
+  #   storage_config:
+  #     filesystem:
+  #       directory: /loki/chunks
 
 compactor:
   retention_enabled: true

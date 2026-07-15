@@ -10,7 +10,7 @@ stages:
   - deploy
 
 variables:
-  DOCKER_REGISTRY: lazynext.azurecr.io
+  DOCKER_REGISTRY: ghcr.io/lazynext-platform
   RUST_VERSION: "1.96"
   CARGO_HOME: ${CI_PROJECT_DIR}/.cargo
   BUN_INSTALL: "$CI_PROJECT_DIR/.bun"

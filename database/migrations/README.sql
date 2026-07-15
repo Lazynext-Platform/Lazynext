@@ -16,5 +16,6 @@
 --   bun run db:push:local    (Drizzle — schema push to dev DB)
 --   bun run db:migrate       (Drizzle — migration-based apply)
 --
--- To apply to Azure PostgreSQL:
---   DATABASE_URL=<azure-url> bun run db:migrate
+-- To apply to PostgreSQL:
+
+--   DATABASE_URL=<url> bun run db:migrate

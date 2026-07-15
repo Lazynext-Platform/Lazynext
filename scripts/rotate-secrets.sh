@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# rotate-secrets.sh — Rotate database passwords and API keys in Azure Key Vault
+# rotate-secrets.sh — Rotate database passwords and API keys
 # Usage:
 #   ./scripts/rotate-secrets.sh --db          # Rotate DB password
 #   ./scripts/rotate-secrets.sh --api-keys    # Rotate all API keys
@@ -9,9 +9,10 @@ set -euo pipefail
 # ── Config ──────────────────────────────────────────────────────────────────
 
 ENVIRONMENT="${ENVIRONMENT:-production}"
-KV_NAME="lazynext-kv-${ENVIRONMENT}"
-DB_SERVER="${DB_SERVER:-lazynext-postgres-${ENVIRONMENT}}"
-RG_NAME="lazynext-rg-${ENVIRONMENT}"
+DB_HOST="${DB_HOST:-localhost}"
+DB_PORT="${DB_PORT:-5434}"
+DB_USER="${DB_USER:-lazynext}"
+DB_NAME="${DB_NAME:-lazynext}"
 
 # ── Generate random passwords/keys ──────────────────────────────────────────
 
@@ -31,31 +32,29 @@ rotate_db_password() {
   local new_password
   new_password=$(generate_password 32)
 
-  echo "🔐 Rotating database password for server: $DB_SERVER"
+  echo "🔐 Rotating database password for: $DB_HOST:$DB_PORT"
 
-  # Update Azure PostgreSQL admin password
-  az postgres flexible-server update \
-    --resource-group "$RG_NAME" \
-    --name "$DB_SERVER" \
-    --admin-password "$new_password"
+  # Update PostgreSQL user password
+  export PGPASSWORD="${DB_PASSWORD:-}"
+  psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d postgres -c \
+    "ALTER USER ${DB_USER} WITH PASSWORD '${new_password}';" 2>/dev/null || {
+    echo "❌ Failed to update database password. Ensure DB credentials are set."
+    exit 1
+  }
 
-  # Update the connection string in Key Vault
-  local fqdn
-  fqdn=$(az postgres flexible-server show \
-    --resource-group "$RG_NAME" \
-    --name "$DB_SERVER" \
-    --query "fullyQualifiedDomainName" -o tsv)
+  # Update the connection string in .env or secrets file
+  local env_file="${REPO_ROOT:-.}/.env"
+  local connection_string="postgresql://${DB_USER}:${new_password}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require"
 
-  local connection_string="postgresql://lazynext_app:${new_password}@${fqdn}:5432/lazynext?sslmode=require"
+  if [ -f "$env_file" ]; then
+    sed -i.bak "s|^DATABASE_URL=.*|DATABASE_URL=${connection_string}|" "$env_file"
+    echo "✅ .env updated: DATABASE_URL"
+    rm -f "${env_file}.bak"
+  fi
 
-  az keyvault secret set \
-    --vault-name "$KV_NAME" \
-    --name "DATABASE--URL" \
-    --value "$connection_string"
-
-  echo "✅ Database password rotated. Secret updated: $KV_NAME/DATABASE--URL"
-  echo "   Restart Container Apps to pick up the new password:"
-  echo "   az containerapp revision restart --name lazynext-web-${ENVIRONMENT} --resource-group $RG_NAME"
+  echo "✅ Database password rotated."
+  echo "   Restart services via Docker Compose to pick up the new password:"
+  echo "   docker compose restart"
 }
 
 # ── Rotate API Keys ─────────────────────────────────────────────────────────
@@ -68,20 +67,21 @@ rotate_api_key() {
 
   echo "🔑 Rotating: $key_name"
 
-  az keyvault secret set \
-    --vault-name "$KV_NAME" \
-    --name "$key_name" \
-    --value "$new_value"
+  local env_file="${REPO_ROOT:-.}/.env"
+  if [ -f "$env_file" ]; then
+    sed -i.bak "s|^${key_name}=.*|${key_name}=${new_value}|" "$env_file" 2>/dev/null || \
+      echo "${key_name}=${new_value}" >> "$env_file"
+    rm -f "${env_file}.bak"
+  else
+    echo "${key_name}=${new_value}" >> "$env_file"
+  fi
 
-  echo "   Updated: $KV_NAME/$key_name"
+  echo "   Updated: $key_name"
 }
 
 rotate_all_api_keys() {
   echo "🔑 Rotating all API keys..."
-  rotate_api_key "openai--api--key" "sk"
-  rotate_api_key "anthropic--api--key" "sk-ant"
   rotate_api_key "gemini--api--key" "AIza"
-  rotate_api_key "fal--key" "fk"
   rotate_api_key "stripe--secret--key" "sk_test"
   rotate_api_key "stripe--webhook--secret" "whsec"
   rotate_api_key "resend--api--key" "re"
@@ -89,6 +89,8 @@ rotate_all_api_keys() {
 }
 
 # ── Main ────────────────────────────────────────────────────────────────────
+
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 case "${1:-}" in
   --db)

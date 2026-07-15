@@ -1,62 +1,57 @@
 # Infrastructure
 
-Lazynext infrastructure is managed as code using **Terraform** (Azure) with an optional **Kubernetes** (AKS) deployment path.
+Lazynext infrastructure is deployed on **Linode** using Docker Compose and systemd service units.
 
 ## Directory Layout
 
 ```
 infra/
-├── terraform/     # Azure infrastructure as code (primary deployment target)
-└── k8s/           # Kubernetes manifests for infra-level K8s resources (currently
-                   # empty — see /k8s/ at repo root for workload manifests)
+├── linode/         # Linode deployment (primary deployment target)
+│   ├── deploy.sh           # Full deploy script (bootstrap, build, deploy, restart)
+│   ├── docker-compose.yml  # PostgreSQL, Redis, Caddy reverse proxy
+│   ├── Caddyfile           # Caddy v2 config with automatic Let's Encrypt
+│   └── systemd/            # 10 systemd service unit files for all 9 app services + infra
+└── k8s/            # Kubernetes manifests for infra-level K8s resources (currently empty)
 ```
 
-## Terraform (`infra/terraform/`)
+## Linode (`infra/linode/`)
 
-All Azure resources are declared in Terraform (v1.10+) with remote state stored in Azure Blob Storage.
+Production deployment at 192.46.209.127 (Linode g6-standard-4, Mumbai, 4 vCPU/8GB RAM).
 
-### Modules / Files
+### Services (all via systemd)
 
-| File | Purpose |
-|---|---|
-| `main.tf` | Provider config, resource group, locals (container app specs, secrets, ACR repos) |
-| `vnet.tf` | Virtual network, subnets, NSGs |
-| `containerapps.tf` | Azure Container Apps — 8 microservices (web, ai-agents, render-service, pre-processing, generative-studio, api-gateway, collab-server, analytics-service) |
-| `aks.tf.disabled` | AKS cluster (disabled — requires Pay-As-You-Go subscription) |
-| `postgresql.tf` | PostgreSQL Flexible Server (v16) |
-| `redis.tf` | Azure Cache for Redis Enterprise (rate limiting, session store) |
-| `storage.tf` | Blob Storage for media assets |
-| `acr.tf` | Azure Container Registry (8 container images) |
-| `cdn.tf` | Azure Front Door CDN for media delivery |
-| `keyvault.tf` | Azure Key Vault (9 secrets: auth, API keys, Stripe, Resend) |
-| `waf.tf` | Application Gateway + Web Application Firewall |
-| `monitoring.tf` | Application Insights (per service), Log Analytics Workspace, Action Groups |
-| `backup.tf` | Recovery Services Vault + Data Protection Backup Vault |
-| `private-endpoints.tf` | Private endpoints for ACR, Key Vault, and Blob Storage |
-| `oidc.tf` | Workload identity federation for GitHub Actions |
-| `variables.tf` | Input variables (environment, location, etc.) |
-| `outputs.tf` | Terraform outputs (connection strings, FQDNs, IPs, identities) |
-| `terraform.tfvars` | Variable values (gitignored, sensitive) |
-| `terraform.tfvars.example` | Template for variable values |
-
-### Key Design Decisions
-
-- **Primary deployment**: Azure Container Apps (serverless containers, KEDA autoscaling)
-- **AKS is optional**: `aks.tf.disabled` — AKS requires Premium tier subscription; Container Apps is the default
-- **Managed identities**: Workload identity federation for GitHub Actions CI/CD, user-assigned identity for Container Apps → Key Vault access
-- **Private networking**: Private endpoints for ACR, Key Vault, and Storage; VNet integration for Container Apps
-- **Metrics**: Application Insights per service + shared Log Analytics Workspace
+| Service | Port | Description |
+|---|---|---|
+| `lazynext-web` | 3000 | Next.js web application |
+| `lazynext-api-gateway` | 8005 | Axum REST gateway (Rust) |
+| `lazynext-collab` | 8004 | CRDT sync + WebRTC signaling (Rust) |
+| `lazynext-ai-agents` | 8002 | AI Copilot + WebSocket sync |
+| `lazynext-render` | 8003 | FFmpeg render farm |
+| `lazynext-preprocess` | 8000 | Whisper, SAM2, NeRF (Python) |
+| `lazynext-genstudio` | 8001 | Diffusion models, dubbing, upscaling (Python) |
+| `lazynext-analytics` | 8006 | Analytics pipeline |
+| `lazynext-social` | 8007 | YouTube, TikTok, Instagram, Twitter/X publishing |
 
 ### Usage
 
 ```bash
-cd infra/terraform
-cp terraform.tfvars.example terraform.tfvars  # fill in values
-terraform init
-terraform plan
-terraform apply
+cd infra/linode
+cp .env.linode.example .env.linode  # fill in values
+./deploy.sh bootstrap               # first-time setup
+./deploy.sh                         # full deploy
+./deploy.sh restart web             # restart individual service
+./deploy.sh --skip-build            # deploy without rebuilding
 ```
+
+### Key Design Decisions
+
+- **Primary deployment**: Linode Docker Compose + systemd (self-managed, cost-effective)
+- **Reverse proxy**: Caddy v2 with automatic Let's Encrypt SSL
+- **Database**: PostgreSQL 17 (Docker container on same host)
+- **Cache**: Redis 7 (Docker container on same host)
+- **Media storage**: Local filesystem at `/opt/lazynext/media`
+- **Monitoring**: Self-hosted Prometheus, Grafana, Loki, Tempo (optional)
 
 ## Kubernetes (`infra/k8s/`)
 
-Reserved for infrastructure-level Kubernetes resources (cluster add-ons, ingress controllers) — currently empty. Workload Kubernetes manifests live at `/k8s/` in the repo root.
+Reserved for infrastructure-level Kubernetes resources — currently empty. Workload manifests at `/k8s/` in repo root for future K8s migration.

@@ -64,7 +64,7 @@ Open `.env.local` and fill in at minimum:
 | `BETTER_AUTH_SECRET` | 64 random characters: `openssl rand -hex 32` |
 | `BETTER_AUTH_URL` | `http://localhost:3000` |
 
-All AI keys (`OPENAI_API_KEY`, etc.) are optional — services gracefully degrade to local processing when keys are absent.
+All AI keys (`GEMINI_API_KEY`, etc.) are optional — services gracefully degrade to local processing when keys are absent.
 
 ### 3.3 Start infrastructure (Postgres + Redis)
 
@@ -241,7 +241,7 @@ The CI pipeline (`.github/workflows/ci.yml`) runs all of the above. PRs with lin
 - Branch from `main`.
 - Name branches: `feat/description`, `fix/description`, `chore/description`.
 - Commit messages follow conventional commits: `feat:`, `fix:`, `chore:`, `refactor:`, `docs:`.
-- Every commit message must end with `Co-Authored-By: Claude <noreply@anthropic.com>`.
+- Every commit message must end with `Co-Authored-By: Claude <noreply@google.com>`.
 
 ### 5.4 Code review checklist
 
@@ -388,7 +388,7 @@ Lazynext/
 │
 ├── scripts/                    # Infrastructure / build / deploy / DB scripts
 ├── plugins/                    # System extension points
-├── terraform/                 # Infrastructure-as-code for Azure deployment
+├── infra/linode/                 # Docker Compose infrastructure for Linode deployment
 ├── k8s/                        # Kubernetes manifests (optional)
 ├── ansible/                    # Configuration management
 ├── monitoring/                 # Prometheus / Grafana configs
@@ -715,7 +715,7 @@ The CI pipeline (`.github/workflows/ci.yml`) runs on every PR:
 | Missing features / roadmap | `docs/missing_features.md` |
 | CI/CD documentation | `docs/actions.md` |
 | Infrastructure scripts | `scripts/` |
-| Terraform (Azure) | `terraform/` |
+| Docker Compose (Linode) | `infra/linode/` |
 | Kubernetes manifests | `k8s/` |
 | Monitoring configs | `monitoring/` |
 

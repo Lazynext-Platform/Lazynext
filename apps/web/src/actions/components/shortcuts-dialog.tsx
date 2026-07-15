@@ -1,4 +1,5 @@
 /** @module Keyboard shortcuts dialog component displaying all available editor shortcuts */
+/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
 // @ts-nocheck — module resolution false positives with tsc vs bundler
 "use client";
 

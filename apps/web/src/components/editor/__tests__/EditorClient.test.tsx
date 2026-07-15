@@ -1,5 +1,4 @@
 /** @module __tests__/EditorClient Test suite for EditorClient component */
-import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import EditorClient from "../EditorClient";

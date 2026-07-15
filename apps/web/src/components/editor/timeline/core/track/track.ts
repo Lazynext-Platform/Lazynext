@@ -329,21 +329,17 @@ export class Track {
 			return true;
 		}
 
-		try {
-			const isValid = this.validateElement(element);
-			if (isValid) {
-				if (this.isElementColliding(element)) {
-					throw new ValidationError(
-						"Element is colliding with another element",
-						["COLLISION_ERROR"],
-					);
-				} else {
-					this.elements.push(element);
-					return true;
-				}
+		const isValid = this.validateElement(element);
+		if (isValid) {
+			if (this.isElementColliding(element)) {
+				throw new ValidationError(
+					"Element is colliding with another element",
+					["COLLISION_ERROR"],
+				);
+			} else {
+				this.elements.push(element);
+				return true;
 			}
-		} catch (error) {
-			throw error;
 		}
 		return false;
 	}

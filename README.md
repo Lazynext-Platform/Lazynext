@@ -160,15 +160,15 @@ bun run dev                    # → http://localhost:3000
 | **State Management** | CRDTs (LWW-Register + operation-based) |
 | **Database** | PostgreSQL via Drizzle ORM |
 | **Auth** | better-auth with Upstash Redis rate limiting |
-| **AI Inference** | OpenAI, Anthropic, Gemini, Ollama (pluggable) |
-| **Transcription** | OpenAI Whisper (local + API) |
+| **AI Inference** | Google Gemini, Ollama (pluggable) |
+| **Transcription** | Gemini Whisper (TF Serving local) |
 | **Image/Video Gen** | Stable Video Diffusion, SAM2, NeRF |
 | **Audio DSP** | Custom Rust DSP crate (EQ, compressor, VST host) |
 | **Export** | FFMPEG with type-safe filter graph builder |
 | **GPU** | wgpu (cross-platform) |
-| **CI/CD** | GitHub Actions → Azure Container Apps |
-| **Infrastructure** | Terraform (Azure), optional Kubernetes |
-| **Payments** | Stripe |
+| **CI/CD** | GitHub Actions → Linode Docker deploy |
+| **Infrastructure** | Docker Compose (Linode), optional Kubernetes |
+| **Payments** | Dodo Payments |
 | **Email** | Resend |
 
 ---
@@ -186,7 +186,7 @@ The integrated LLM orchestrator understands your timeline. It accepts natural la
 - **Smart reframe** — AI subject tracking auto-crops 16:9 to 9:16 for social.
 - **Color match** — Match the palette of one clip to a reference frame or image.
 
-Chronos supports OpenAI, Anthropic, Gemini, and local Ollama models. All features gracefully degrade to local processing when API keys are absent — no mock data.
+Chronos is powered by Google Gemini with local Ollama fallback. All features gracefully degrade to local processing when API keys are absent — no mock data.
 
 ### Real-Time Collaboration
 
@@ -297,11 +297,10 @@ See `.env.example` for the full list. Key variables:
 |----------|----------|-------------|
 | `DATABASE_URL` | Yes | PostgreSQL connection string |
 | `BETTER_AUTH_SECRET` | Yes | Auth secret (64 chars) |
-| `STORAGE_PROVIDER` | No | `local` (default) or `azure` |
+| `STORAGE_PROVIDER` | No | `local` (default) |
 | `LLM_PROVIDER | No | gemini (default)` |
-| `OPENAI_API_KEY` | No | Whisper + GPT-4o features |
-| `ANTHROPIC_API_KEY` | No | Claude-powered Chronos |
-| `FAL_KEY` | No | Kling 3.0 video generation |
+| `GEMINI_API_KEY` | No | Gemini AI Copilot features |
+| `MODAL_API_KEY` | No | Modal GPU compute (SD Pipeline video generation, ML inference) |
 | `NEXT_PUBLIC_*_URL` | No | Microservice URLs (defaults to localhost) |
 | `UPSTASH_REDIS_URL` | No | Rate limiting (required in production) |
 | `STRIPE_SECRET_KEY` | No | Payments |
@@ -349,7 +348,7 @@ lazynext/
 │   ├── render-service/         # Node.js FFMPEG farm (:8003)
 │   ├── collab-server/          # Rust CRDT sync + WebRTC signaling (:8004)
 │   └── analytics-service/      # Node.js data ingestion + LTV (:8006)
-├── infra/terraform/            # Infrastructure as code
+├── infra/linode/               # Infrastructure as code
 ├── k8s/                        # Kubernetes manifests (optional AKS)
 ├── .github/workflows/          # CI/CD (ci.yml, production.yml)
 └── docs/                       # Architecture, ADRs, runbooks, API reference
@@ -385,10 +384,10 @@ The earlier technical docs (architecture, API reference, security model, OpenAPI
 
 ## Infrastructure
 
-- **CI/CD**: GitHub Actions — Rust test/lint, web test/typecheck/lint, Docker build/push, Azure Container Apps deploy.
-- **Deployment**: Azure Container Apps (8 services) + Azure PostgreSQL Flexible Server with private VNet. Optional AKS for GPU workloads.
-- **Infrastructure as Code**: Terraform in `infra/terraform/` — VNet, delegated subnets, Blob Storage backend, Key Vault.
-- **Database**: PostgreSQL 16 via Drizzle ORM. Migrations in `apps/web/src/drizzle/`. Schema in `apps/web/src/db/schema.ts`.
+- **CI/CD**: GitHub Actions — Rust test/lint, web test/typecheck/lint, Docker build/push, Linode deploy.
+- **Deployment**: Docker Compose on Linode (9 services) + PostgreSQL 17 + Redis 7. Caddy reverse proxy with Let's Encrypt SSL.
+- **Infrastructure as Code**: Docker Compose in `infra/linode/` — systemd service units, deploy scripts.
+- **Database**: PostgreSQL 17 via Drizzle ORM. Migrations in `apps/web/src/drizzle/`. Schema in `apps/web/src/db/schema.ts`.
 
 ---
 

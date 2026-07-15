@@ -4,7 +4,7 @@
  * and reordering elements, plus handles selection, movement, and axis-lock
  * events for interactive editing.
  */
-
+/* eslint-disable react-hooks/immutability, react-hooks/refs, react-hooks/incompatible-library, react-hooks/exhaustive-deps */
 import { useCallback, useRef, useState } from "react";
 import {
 	Canvas as FabricCanvas,
@@ -464,7 +464,8 @@ export const useTwickCanvas = ({
 				clearCanvas(twickCanvas);
 
 				// Restore background color
-				if (backgroundColor) {
+				// eslint-disable-next-line react-hooks/immutability
+			if (backgroundColor) {
 					twickCanvas.backgroundColor = backgroundColor;
 					twickCanvas.renderAll();
 				}

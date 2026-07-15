@@ -254,7 +254,7 @@ Export Pipeline:
 
 ### Key Management
 
-- Signing keys are stored in Azure Key Vault (production) or OPFS (local development).
+- Signing keys are stored in Docker secrets (production) or OPFS (local development).
 - The signing certificate is published at a public URL for downstream verification.
 - Private keys are never exposed to the client; signing happens server-side in the render service.
 
@@ -336,7 +336,7 @@ The API Gateway extracts the key, hashes it, and looks up the hash in the databa
 
 ### Server-Side
 
-1. **Secrets Management**: All secrets stored in environment variables or Azure Key Vault. Never hardcoded, never committed. Use `.env.example` as the canonical reference.
+1. **Secrets Management**: All secrets stored in environment variables or Docker secrets. Never hardcoded, never committed. Use `.env.example` as the canonical reference.
 
 2. **Dependency Auditing**: Run `cargo audit` and `bun audit` in CI on every PR. Vulnerabilities at `critical` or `high` severity block merge.
 
@@ -366,7 +366,7 @@ The API Gateway extracts the key, hashes it, and looks up the hash in the databa
 
 1. **Container Hardening**: Docker images built from `distroless` base images where possible. Run as non-root user. Read-only root filesystem for stateless services.
 
-2. **Network Segmentation**: All services communicate over the internal `lazynext-network` Docker bridge. Only the API Gateway (8005) and web app (3000) are exposed through the Azure Container Apps ingress.
+2. **Network Segmentation**: All services communicate over the internal `lazynext-network` Docker bridge. Only the API Gateway (8005) and web app (3000) are exposed through the Docker Compose on Linode ingress.
 
 3. **PostgreSQL**: TLS enforced for all connections. Private VNet, no public endpoint. Automated backups every 6 hours with 30-day retention.
 
@@ -392,7 +392,7 @@ The API Gateway extracts the key, hashes it, and looks up the hash in the databa
 Lazynext adheres to:
 
 - **SOC 2 Type II**: Annual audit for security, availability, and confidentiality.
-- **GDPR**: Data processing agreement available. EU data residency via Azure West Europe region option.
+- **GDPR**: Data processing agreement available. EU data residency via Linode Mumbai region option.
 - **C2PA 1.3**: Content provenance specification compliance for all exported media.
 
 For compliance documentation or data processing inquiries, contact `compliance@lazynext.app`.

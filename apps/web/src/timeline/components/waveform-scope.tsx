@@ -5,7 +5,7 @@
  * @module timeline/components/waveform-scope
  */
 
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 // import { useWasm } from "@/hooks/use-wasm";
 
 /**

@@ -10,17 +10,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useWasm } from "@/hooks/use-wasm";
 import { wasmBridge } from "@/core/wasm-bridge";
-import { PromptMode } from "@/editor/PromptMode";
-import { ExecutionContract } from "@/editor/ExecutionContract";
 import { QuickActions } from "@/components/editor/QuickActions";
 import { KeyboardShortcutHints } from "@/components/editor/KeyboardShortcutHints";
 import { AutoSaveIndicator } from "@/components/editor/AutoSaveIndicator";
 import { MobileGate } from "@/components/editor/mobile-gate";
 import { VoiceInput } from "@/components/editor/VoiceInput";
 import {
-	Send,
 	Bot,
-	User,
 	Loader2,
 	Video,
 	Settings,
@@ -35,7 +31,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function EditorPage() {
-	const { isReady, time, frame, projectData } = useWasm();
+	const { isReady, time, frame, projectData: _projectData } = useWasm();
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	const [prompt, setPrompt] = useState("");
@@ -60,7 +56,7 @@ export default function EditorPage() {
 	// Render frame to canvas
 	useEffect(() => {
 		if (isReady && canvasRef.current) {
-			wasmBridge.renderToCanvas(canvasRef.current, frame).catch(err => {
+			wasmBridge.renderToCanvas(canvasRef.current, frame).catch(() => {
 				// Suppress render errors if WASM isn't fully ready
 			});
 		}
@@ -114,7 +110,7 @@ export default function EditorPage() {
 					return newChat;
 				});
 			}
-		} catch (err) {
+		} catch {
 			setChat(prev => {
 				const newChat = [...prev];
 				newChat[newChat.length - 1] = {

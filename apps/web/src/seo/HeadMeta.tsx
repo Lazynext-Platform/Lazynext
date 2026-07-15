@@ -9,7 +9,6 @@
  * @module seo/HeadMeta
  */
 
-import React from "react";
 
 export function SEOHeadTags() {
 	return (

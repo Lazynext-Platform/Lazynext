@@ -9,7 +9,7 @@
 ## Acceptance Criteria
 
 - [ ] API Gateway accepts real JWT tokens, rejects invalid/hardcoded tokens
-- [ ] Stripe webhook verifies HMAC signatures, rejects unverified payloads
+- [ ] Dodo Payments webhook verifies HMAC signatures, rejects unverified payloads
 - [ ] Single Drizzle ORM with consistent schema across all auth + app tables
 - [ ] Admin dashboards show real data from PostgreSQL (or empty states when no data)
 - [ ] No mock-db.ts serving fake data in any route
@@ -56,18 +56,18 @@
 | **Status** | ⬜ Not Run |
 | **Notes** | — |
 
-### TC-04: Stripe Webhook — Valid Signature
+### TC-04: Dodo Payments Webhook — Valid Signature
 
 | Property | Value |
 |---|---|
 | **Category** | Happy Path |
 | **Precondition** | `STRIPE_WEBHOOK_SECRET` configured |
-| **Steps** | 1. Construct Stripe event JSON → 2. Sign with `STRIPE_WEBHOOK_SECRET` → 3. POST to `/api/stripe/webhook` with valid `stripe-signature` header |
+| **Steps** | 1. Construct Dodo Payments event JSON → 2. Sign with `STRIPE_WEBHOOK_SECRET` → 3. POST to `/api/stripe/webhook` with valid `stripe-signature` header |
 | **Expected Result** | 200 OK, event processed |
 | **Status** | ⬜ Not Run |
 | **Notes** | — |
 
-### TC-05: Stripe Webhook — Invalid Signature
+### TC-05: Dodo Payments Webhook — Invalid Signature
 
 | Property | Value |
 |---|---|
@@ -209,7 +209,7 @@
 | 1 | Hardcoded token `admin-token-123` on `/api/v1/projects` | 401 Unauthorized (rejected) |
 | 2 | Hardcoded token `editor-token-456` on `/api/v1/projects` | 401 Unauthorized (rejected) |
 | 3 | Hardcoded token `viewer-token-789` on `/api/v1/projects` | 401 Unauthorized (rejected) |
-| 4 | Stripe webhook with forged signature | 400 Bad Request |
+| 4 | Dodo Payments webhook with forged signature | 400 Bad Request |
 | 5 | CSRF: POST without CSRF header | 403 Forbidden |
 | 6 | JWT with tampered claims (modified role) | 401 Unauthorized |
 | 7 | JWT with `none` algorithm | 401 Unauthorized (rejected) |

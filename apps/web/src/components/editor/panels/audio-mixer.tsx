@@ -5,7 +5,7 @@
  * @module components/editor/panels/audio-mixer
  */
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Volume2, VolumeX, Sliders } from "lucide-react";
 
 export function AudioMixer({
