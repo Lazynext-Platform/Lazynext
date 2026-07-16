@@ -13,6 +13,7 @@ FROM oven/bun:1.3-alpine
 WORKDIR /app
 
 # Copy only what's needed for migrations — no workspace resolution
+COPY rust/wasm/pkg/ rust/wasm/pkg/
 COPY apps/web/package.json apps/web/
 COPY apps/web/drizzle.config.ts apps/web/
 COPY apps/web/drizzle/ apps/web/drizzle/
