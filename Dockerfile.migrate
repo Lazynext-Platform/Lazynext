@@ -21,7 +21,15 @@ COPY apps/web/src/db/ apps/web/src/db/
 
 # Install just the web app dependencies (standalone, no workspace)
 WORKDIR /app/apps/web
-RUN bun install --no-lockfile 
+RUN bun install --no-lockfile
+
+# Drop root: the oven/bun image ships a non-root 'bun' user (uid 1000).
+RUN chown -R bun:bun /app
+USER bun
+
+# Liveness probe: confirm the migration runner (bun) is available. This is a
+# run-once Job image, so the check simply verifies the runtime is present.
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["bun", "--version"]
 
 # Verify DATABASE_URL is set before running migrations.
 # Exit code 0 on success (even if no pending migrations).
