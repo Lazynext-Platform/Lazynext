@@ -30,8 +30,9 @@ function evictStaleJobs() {
 		}
 	}
 	if (localJobs.size > MAX_JOB_ENTRIES) {
-		const entries = [...localJobs.entries()]
-			.sort((a, b) => a[1].createdAt - b[1].createdAt);
+		const entries = [...localJobs.entries()].sort(
+			(a, b) => a[1].createdAt - b[1].createdAt,
+		);
 		for (const [jobId] of entries.slice(0, entries.length - MAX_JOB_ENTRIES)) {
 			localJobs.delete(jobId);
 		}
@@ -57,9 +58,18 @@ export async function GET(request: Request) {
 			);
 		}
 
+		// Constrain jobId to a safe id shape to prevent request-forgery/SSRF via
+		// path injection into the render-service URL.
+		if (!/^[A-Za-z0-9_-]{1,128}$/.test(jobId)) {
+			return NextResponse.json(
+				{ success: false, error: "Invalid Job ID" },
+				{ status: 400 },
+			);
+		}
+
 		try {
 			const response = await fetch(
-				`${RENDER_SERVICE_URL}/api/v1/jobs/${jobId}`,
+				`${RENDER_SERVICE_URL}/api/v1/jobs/${encodeURIComponent(jobId)}`,
 			);
 
 			if (response.ok) {
@@ -103,7 +113,8 @@ export async function GET(request: Request) {
 			jobId,
 			progress: 0,
 			status: "offline",
-			message: "Render service is offline. Start render-service on port 8003 to process exports.",
+			message:
+				"Render service is offline. Start render-service on port 8003 to process exports.",
 		});
 	} catch (error: unknown) {
 		console.error("Render Status API Error:", error);
