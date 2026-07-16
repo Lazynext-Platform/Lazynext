@@ -178,6 +178,7 @@ jobs:
           curl -sf -o /dev/null https://collab.lazynext.com/health || echo "Collab not ready"
 
       - name: Notify Slack
+        continue-on-error: true
         uses: slackapi/slack-github-action@v2
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
