@@ -37,7 +37,11 @@ export async function POST(request: Request) {
 
 			if (process.env.NODE_ENV === "production") {
 				console.log(
-					`[Vitals] ${vital.name}=${vital.value.toFixed(1)} (${vital.rating}) on ${vital.page}`,
+					"[Vitals] %s=%s (%s) on %s",
+					vital.name,
+					vital.value.toFixed(1),
+					vital.rating,
+					vital.page,
 					{ delta: vital.delta, id: vital.id },
 				);
 			}
@@ -67,32 +71,76 @@ async function sendToPlausible(v: VitalsPayload) {
 				"Content-Type": "application/json",
 				Authorization: `Bearer ${process.env.PLAUSIBLE_API_KEY}`,
 			},
-			body: JSON.stringify({ name: `web-vital-${v.name.toLowerCase()}`, url: v.page, props: { value: v.value, rating: v.rating, delta: v.delta } }),
+			body: JSON.stringify({
+				name: `web-vital-${v.name.toLowerCase()}`,
+				url: v.page,
+				props: { value: v.value, rating: v.rating, delta: v.delta },
+			}),
 		});
-	} catch { /* best-effort */ }
+	} catch {
+		/* best-effort */
+	}
 }
 
 async function sendToGA4(v: VitalsPayload) {
 	if (!process.env.GA4_MEASUREMENT_ID || !process.env.GA4_API_SECRET) return;
 	try {
-		await fetch(`https://www.google-analytics.com/mp/collect?measurement_id=${process.env.GA4_MEASUREMENT_ID}&api_secret=${process.env.GA4_API_SECRET}`, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ client_id: v.id || "web-vitals", events: [{ name: `web_vital_${v.name.toLowerCase()}`, params: { value: v.value, rating: v.rating, page: v.page, delta: v.delta } }] }),
-		});
-	} catch { /* best-effort */ }
+		await fetch(
+			`https://www.google-analytics.com/mp/collect?measurement_id=${process.env.GA4_MEASUREMENT_ID}&api_secret=${process.env.GA4_API_SECRET}`,
+			{
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					client_id: v.id || "web-vitals",
+					events: [
+						{
+							name: `web_vital_${v.name.toLowerCase()}`,
+							params: {
+								value: v.value,
+								rating: v.rating,
+								page: v.page,
+								delta: v.delta,
+							},
+						},
+					],
+				}),
+			},
+		);
+	} catch {
+		/* best-effort */
+	}
 }
 
 async function sendToMixpanel(v: VitalsPayload) {
-	if (!process.env.MIXPANEL_PROJECT_TOKEN || !process.env.MIXPANEL_API_SECRET) return;
+	if (!process.env.MIXPANEL_PROJECT_TOKEN || !process.env.MIXPANEL_API_SECRET)
+		return;
 	try {
-		const token = Buffer.from(`${process.env.MIXPANEL_API_SECRET}:`).toString("base64");
+		const token = Buffer.from(`${process.env.MIXPANEL_API_SECRET}:`).toString(
+			"base64",
+		);
 		await fetch("https://api.mixpanel.com/import?strict=1", {
 			method: "POST",
-			headers: { "Content-Type": "application/json", Authorization: `Basic ${token}` },
-			body: JSON.stringify([{ event: `web_vital_${v.name.toLowerCase()}`, properties: { distinct_id: v.id || "anon", value: v.value, rating: v.rating, page: v.page, delta: v.delta, token: process.env.MIXPANEL_PROJECT_TOKEN } }]),
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Basic ${token}`,
+			},
+			body: JSON.stringify([
+				{
+					event: `web_vital_${v.name.toLowerCase()}`,
+					properties: {
+						distinct_id: v.id || "anon",
+						value: v.value,
+						rating: v.rating,
+						page: v.page,
+						delta: v.delta,
+						token: process.env.MIXPANEL_PROJECT_TOKEN,
+					},
+				},
+			]),
 		});
-	} catch { /* best-effort */ }
+	} catch {
+		/* best-effort */
+	}
 }
 
 async function sendToAmplitude(v: VitalsPayload) {
@@ -101,7 +149,23 @@ async function sendToAmplitude(v: VitalsPayload) {
 		await fetch("https://api2.amplitude.com/2/httpapi", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ api_key: process.env.AMPLITUDE_API_KEY, events: [{ event_type: `web_vital_${v.name.toLowerCase()}`, user_id: v.id || "anon", event_properties: { value: v.value, rating: v.rating, page: v.page, delta: v.delta } }] }),
+			body: JSON.stringify({
+				api_key: process.env.AMPLITUDE_API_KEY,
+				events: [
+					{
+						event_type: `web_vital_${v.name.toLowerCase()}`,
+						user_id: v.id || "anon",
+						event_properties: {
+							value: v.value,
+							rating: v.rating,
+							page: v.page,
+							delta: v.delta,
+						},
+					},
+				],
+			}),
 		});
-	} catch { /* best-effort */ }
+	} catch {
+		/* best-effort */
+	}
 }

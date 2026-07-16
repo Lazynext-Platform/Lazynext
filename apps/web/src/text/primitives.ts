@@ -85,7 +85,7 @@ export function quoteFontFamily({
 }: {
 	fontFamily: string;
 }): string {
-	return `"${fontFamily.replace(/"/g, '\\"')}"`;
+	return `"${fontFamily.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 }
 
 export function buildTextFontString({
