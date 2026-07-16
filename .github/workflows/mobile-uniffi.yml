@@ -81,7 +81,7 @@ jobs:
       run: rustup target add aarch64-apple-ios x86_64-apple-ios
 
     - name: Download bindings
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: uniffi-bindings
         path: rust/core/generated/
@@ -132,7 +132,7 @@ jobs:
       run: cargo install cargo-ndk
 
     - name: Download bindings
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: uniffi-bindings
         path: rust/core/generated/
@@ -166,12 +166,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Download iOS SDK
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: lazynext-ios-sdk
 
     - name: Download Android SDK
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: lazynext-android-sdk
 
