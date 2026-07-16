@@ -27,6 +27,12 @@ spec:
       serviceAccountName: lazynext-sa
       priorityClassName: lazynext-low
       terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
       initContainers:
         - name: wait-for-postgres
           image: postgres:17-alpine
@@ -54,6 +60,7 @@ spec:
               memory: "64Mi"
           securityContext:
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
             runAsNonRoot: true
@@ -66,6 +73,7 @@ spec:
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
             runAsNonRoot: true
@@ -160,13 +168,20 @@ spec:
                   optional: true
             - name: REDIS_URL
               value: "redis://redis-db:6379/5"
+            - name: OUTPUT_DIR
+              value: "/tmp/social-publish/outputs"
           volumeMounts:
             - name: social-tmp
               mountPath: /tmp/social-publish
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: social-tmp
           emptyDir:
             sizeLimit: 5Gi
+        - name: tmp
+          emptyDir:
+            sizeLimit: 512Mi
 ---
 apiVersion: v1
 kind: Service

@@ -33,11 +33,19 @@ export function setupCrdtSync(
 
 			// Orchestrator patches arrive as an array of {op, path, value} objects;
 			// normal CRDT operations arrive as a single serde-tagged CrdtOperation object.
-			if (Array.isArray(raw) && raw.length > 0 && typeof raw[0].op === "string") {
+			if (
+				Array.isArray(raw) &&
+				raw.length > 0 &&
+				typeof raw[0].op === "string"
+			) {
 				// AI orchestrator patches — normalise before applying
 				const patches = raw as OrchestratorPatch[];
 				applyOrchestrationPatches(engine, patches);
-			} else if (typeof raw === "object" && raw !== null && !Array.isArray(raw)) {
+			} else if (
+				typeof raw === "object" &&
+				raw !== null &&
+				!Array.isArray(raw)
+			) {
 				// Standard CRDT operation from a peer
 				const applied = engine.applyOperation(raw);
 				if (applied) {
@@ -80,9 +88,9 @@ export function syncTimelineFromEngine(_engine: CrdtEngine): void {
 		if (hydratedScenes.length > 0) {
 			const editor = EditorCore.getInstance();
 			const currentActive = editor.scenes.getActiveSceneOrNull();
-			editor.scenes.setScenes({ 
+			editor.scenes.setScenes({
 				scenes: hydratedScenes,
-				activeSceneId: currentActive?.id
+				activeSceneId: currentActive?.id,
 			});
 		}
 	} catch (e) {
@@ -119,7 +127,7 @@ export function normalizeOrchestratorPatches(
 		const segments = p.path.split("/").filter(Boolean);
 		// "/tracks/caption_track/clips/caption_1" → "caption_track/caption_1"
 		const entityId =
-			segments.length >= 4 ? `${segments[1]}/${segments[3]}` : p.path.replace(/\//g, "/");
+			segments.length >= 4 ? `${segments[1]}/${segments[3]}` : p.path;
 		const entityType = segments.length >= 4 ? segments[2] : "generic";
 
 		switch (p.op) {
@@ -141,12 +149,17 @@ export function normalizeOrchestratorPatches(
 				return {
 					PropertyUpdate: {
 						target_id: entityId,
-						property: segments.length >= 4 ? segments.slice(4).join("/") : "value",
+						property:
+							segments.length >= 4 ? segments.slice(4).join("/") : "value",
 						value: p.value ?? {},
 					},
 				};
 			default:
-				console.warn("[CRDT-Sync] Unknown patch op:", p.op, "— treating as add");
+				console.warn(
+					"[CRDT-Sync] Unknown patch op:",
+					p.op,
+					"— treating as add",
+				);
 				return {
 					EntityInsert: {
 						entity_id: entityId,

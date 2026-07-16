@@ -11,6 +11,7 @@ import os
 import httpx
 from fastapi import HTTPException
 from src.models import VideoRequest, EnhanceAudioRequest
+from src.services.pathsafe import safe_tmp_path
 
 async def transcribe_audio_service(req: VideoRequest):
     """Transcribe speech to word-level subtitles using Whisper.
@@ -33,7 +34,7 @@ async def transcribe_audio_service(req: VideoRequest):
         )
 
     tf_serving_url = os.getenv("TF_SERVING_URL", "http://tensorflow-serving:8501")
-    file_path = f"/tmp/{req.video_id}.mp4"
+    file_path = safe_tmp_path(f"{req.video_id}.mp4")
 
     if not os.path.exists(file_path):
         raise HTTPException(
@@ -105,8 +106,8 @@ async def enhance_audio_service(req: EnhanceAudioRequest):
     Raises:
         HTTPException: 503 if DSP dependencies are missing, 500 on processing error.
     """
-    audio_path = f"/tmp/{req.video_id}.wav"
-    output_path = f"/tmp/{req.video_id}_enhanced.wav"
+    audio_path = safe_tmp_path(f"{req.video_id}.wav")
+    output_path = safe_tmp_path(f"{req.video_id}_enhanced.wav")
     method = None
 
     try:

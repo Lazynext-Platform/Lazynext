@@ -1310,6 +1310,15 @@ async fn handle_sse_events()
 #[tokio::main]
 async fn main() {
     let args: Vec<String> = std::env::args().collect();
+
+    // Lightweight liveness probe for container HEALTHCHECK. The MCP server is
+    // a stdio service with no network endpoint, so this simply confirms the
+    // binary is present and can start, then exits 0.
+    if args.iter().any(|arg| arg == "--health-check") {
+        println!("ok");
+        return;
+    }
+
     let use_sse = args.iter().any(|arg| arg == "--sse");
 
     if use_sse {
