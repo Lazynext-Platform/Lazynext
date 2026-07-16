@@ -19,7 +19,7 @@ jobs:
     name: "Rust: fmt + clippy + build"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install -y libasound2-dev libudev-dev
       - uses: dtolnay/rust-toolchain@stable
@@ -33,7 +33,7 @@ jobs:
     name: "TS: lint + typecheck"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with: { bun-version: "1.3.14" }
       - run: bun install
@@ -44,7 +44,7 @@ jobs:
     name: "Test: Rust (fast)"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install -y libasound2-dev libudev-dev
       - uses: dtolnay/rust-toolchain@stable
@@ -55,7 +55,7 @@ jobs:
     name: "Test: Web"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with: { bun-version: "1.3.14" }
       - run: bun install
@@ -66,7 +66,7 @@ jobs:
     name: "Test: Extension"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with: { bun-version: "1.3.14" }
       - run: cd apps/browser-extension && bun install && bun test
@@ -75,7 +75,7 @@ jobs:
     name: "Security: Gitleaks"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { fetch-depth: 0 }
       - uses: gitleaks/gitleaks-action@v3
         env:
@@ -85,7 +85,7 @@ jobs:
     name: "Security: Dependency Review"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
         with:

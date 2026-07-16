@@ -56,7 +56,7 @@ jobs:
       always() &&
       (github.event_name == 'workflow_dispatch' || needs.check-label.outputs.should-run == 'true')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -188,7 +188,7 @@ jobs:
       always() &&
       (github.event_name == 'workflow_dispatch' || needs.check-label.outputs.should-run == 'true')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -283,7 +283,7 @@ jobs:
       always() &&
       (github.event_name == 'workflow_dispatch' || needs.check-label.outputs.should-run == 'true')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -412,7 +412,7 @@ jobs:
     needs: [rust-bench, web-bench, render-bench]
     if: always() && github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build and Post Comment
         uses: actions/github-script@v9
