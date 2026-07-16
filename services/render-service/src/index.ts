@@ -12,58 +12,79 @@
  */
 
 import "./tracing";
-import express, { Request, Response } from "express";
+import express, { type Request, type Response } from "express";
 import cors from "cors";
+import rateLimit from "express-rate-limit";
 import { v4 as uuidv4 } from "uuid";
 import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
 import { authMiddleware } from "@lazynext/api-client/auth-middleware";
 
-const OUTPUT_DIR = process.env.OUTPUT_DIR || path.join(import.meta.dirname, "../outputs");
-const RENDER_TIMEOUT_MS = parseInt(process.env.RENDER_TIMEOUT_MS || "300000", 10); // 5 min default
+const OUTPUT_DIR =
+	process.env.OUTPUT_DIR || path.join(import.meta.dirname, "../outputs");
+const RENDER_TIMEOUT_MS = parseInt(
+	process.env.RENDER_TIMEOUT_MS || "300000",
+	10,
+); // 5 min default
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Rate limiter — protects the compute/IO-heavy render and publish routes
+// from abuse. Health check above is intentionally left unlimited.
+const apiLimiter = rateLimit({
+	windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || "60000", 10),
+	limit: parseInt(process.env.RATE_LIMIT_MAX || "100", 10),
+	standardHeaders: "draft-7",
+	legacyHeaders: false,
+	message: { error: "Too many requests — please retry later." },
+});
+
 app.get("/health", async (_req: Request, res: Response) => {
-  try {
-    const ok = await ensureRedis();
-    let counts = null;
-    if (ok) {
-      const q = await getQueue();
-      counts = await Promise.race([
-        q.getJobCounts(),
-        new Promise<null>((_, reject) => setTimeout(() => reject(new Error("timeout")), 3000))
-      ]);
-    }
-    res.json({
+	try {
+		const ok = await ensureRedis();
+		let counts = null;
+		if (ok) {
+			const q = await getQueue();
+			counts = await Promise.race([
+				q.getJobCounts(),
+				new Promise<null>((_, reject) =>
+					setTimeout(() => reject(new Error("timeout")), 3000),
+				),
+			]);
+		}
+		res.json({
 			status: "ok",
 			service: "render-service",
-      queue_size: counts ? counts.waiting + counts.active : 0,
-      ffmpeg_available: true,
-      redis_available: ok,
-    });
-  } catch {
-    res.json({
+			queue_size: counts ? counts.waiting + counts.active : 0,
+			ffmpeg_available: true,
+			redis_available: ok,
+		});
+	} catch {
+		res.json({
 			status: "ok",
 			service: "render-service",
-      queue_size: 0,
-      ffmpeg_available: true,
-      redis_available: false,
-    });
-  }
+			queue_size: 0,
+			ffmpeg_available: true,
+			redis_available: false,
+		});
+	}
 });
 
 app.use(authMiddleware);
+app.use(apiLimiter);
 
 /** Resolve the C2PA signing secret from env, Docker secret, or generate a dev fallback. */
 function getC2PASecret(): string {
-	const secret = process.env.C2PA_SIGNING_SECRET || process.env.BETTER_AUTH_SECRET;
+	const secret =
+		process.env.C2PA_SIGNING_SECRET || process.env.BETTER_AUTH_SECRET;
 	if (secret && secret.length >= 16) return secret;
 	if (process.env.NODE_ENV === "production") {
-		throw new Error("FATAL: C2PA_SIGNING_SECRET or BETTER_AUTH_SECRET must be set in production");
+		throw new Error(
+			"FATAL: C2PA_SIGNING_SECRET or BETTER_AUTH_SECRET must be set in production",
+		);
 	}
 	// Dev fallback only — uses a random value per process, not a static secret
 	return require("crypto").randomBytes(32).toString("hex");
@@ -119,7 +140,7 @@ interface RenderJob {
 	createdAt: string;
 }
 
-import { Queue, Worker, Job } from "bullmq";
+import { Queue, Worker, type Job } from "bullmq";
 import Redis from "ioredis";
 import { publish } from "./social-publish";
 import {
@@ -177,7 +198,9 @@ async function getQueue(): Promise<Queue<RenderJob>> {
 }
 
 /** Lazily create the BullMQ worker for render job processing. */
-async function getWorker(): Promise<Worker<RenderJob & { timelineData?: any }>> {
+async function getWorker(): Promise<
+	Worker<RenderJob & { timelineData?: any }>
+> {
 	if (!worker) {
 		const r = getRedis();
 		worker = new Worker<RenderJob & { timelineData?: any }>(
@@ -222,7 +245,9 @@ app.post("/api/v1/jobs", async (req: Request, res: Response) => {
 	const q = await getQueue();
 	await q.add("render" as any, jobData, { jobId });
 
-	console.log(`[BullMQ] Queued job ${jobId} for project ${projectId} (Format: ${format})`);
+	console.log(
+		`[BullMQ] Queued job ${jobId} for project ${projectId} (Format: ${format})`,
+	);
 	res.status(202).json({ success: true, jobId });
 });
 
@@ -260,16 +285,26 @@ app.post("/api/v1/export", async (req: Request, res: Response) => {
 
 		// Reject NaN or non-positive values
 		if (
-			!Number.isFinite(parsedWidth) || parsedWidth <= 0 ||
-			!Number.isFinite(parsedHeight) || parsedHeight <= 0 ||
-			!Number.isFinite(parsedFramerate) || parsedFramerate <= 0 ||
-			!Number.isFinite(parsedTotalFrames) || parsedTotalFrames <= 0
+			!Number.isFinite(parsedWidth) ||
+			parsedWidth <= 0 ||
+			!Number.isFinite(parsedHeight) ||
+			parsedHeight <= 0 ||
+			!Number.isFinite(parsedFramerate) ||
+			parsedFramerate <= 0 ||
+			!Number.isFinite(parsedTotalFrames) ||
+			parsedTotalFrames <= 0
 		) {
 			return res.status(400).json({ error: "Invalid frame-stream dimensions" });
 		}
 
-		if (parsedWidth > 16384 || parsedHeight > 16384 || parsedTotalFrames > 10000000) {
-			return res.status(400).json({ error: "Dimension or frame count exceeds maximum" });
+		if (
+			parsedWidth > 16384 ||
+			parsedHeight > 16384 ||
+			parsedTotalFrames > 10000000
+		) {
+			return res
+				.status(400)
+				.json({ error: "Dimension or frame count exceeds maximum" });
 		}
 
 		const jobId = uuidv4();
@@ -314,7 +349,9 @@ app.post("/api/v1/export", async (req: Request, res: Response) => {
 	const q = await getQueue();
 	await q.add("export-timeline" as any, jobData, { jobId });
 
-	console.log(`[BullMQ] Queued timeline compiler job ${jobId} for project ${projectId}`);
+	console.log(
+		`[BullMQ] Queued timeline compiler job ${jobId} for project ${projectId}`,
+	);
 	res.status(202).json({ success: true, jobId });
 });
 
@@ -359,10 +396,7 @@ app.post(
 		if (!job) return res.status(404).json({ error: "Job not found" });
 
 		try {
-			const outputPath = await finalizeFrameJob(
-				jobId,
-				RENDER_TIMEOUT_MS,
-			);
+			const outputPath = await finalizeFrameJob(jobId, RENDER_TIMEOUT_MS);
 			console.log(`[Frame Export] Encoded ${jobId} → ${outputPath}`);
 
 			// C2PA provenance (sidecar in dev, embedded in prod — see signWithC2PA)
@@ -455,8 +489,12 @@ interface TimelineData {
  * BullMQ worker processor: builds ffmpeg args from timeline data, spawns
  * ffmpeg, tracks progress via stderr timecode parsing, and signs with C2PA.
  */
-async function renderJobProcessor(job: Job<RenderJob & { timelineData?: any }>) {
-	console.log(`[Render Farm Worker] Started job ${job.id} (Type: ${job.name})...`);
+async function renderJobProcessor(
+	job: Job<RenderJob & { timelineData?: any }>,
+) {
+	console.log(
+		`[Render Farm Worker] Started job ${job.id} (Type: ${job.name})...`,
+	);
 	job.data.status = "rendering";
 	await job.updateData(job.data);
 
@@ -480,7 +518,9 @@ async function renderJobProcessor(job: Job<RenderJob & { timelineData?: any }>) 
 		format: job.data.format,
 	});
 
-	console.log(`[Render Farm Worker] FFMPEG args: ${ffmpegArgs.slice(0, 8).join(" ")}...`);
+	console.log(
+		`[Render Farm Worker] FFMPEG args: ${ffmpegArgs.slice(0, 8).join(" ")}...`,
+	);
 
 	return new Promise((resolve, reject) => {
 		const ffmpeg = spawn("ffmpeg", ffmpegArgs, { timeout: RENDER_TIMEOUT_MS });
@@ -506,9 +546,13 @@ async function renderJobProcessor(job: Job<RenderJob & { timelineData?: any }>) 
 				job.data.status = "completed";
 				job.data.progress = 100;
 				await job.updateData(job.data);
-				console.log(`[Render Farm] Finished job ${job.id}! FFMPEG output generated.`);
+				console.log(
+					`[Render Farm] Finished job ${job.id}! FFMPEG output generated.`,
+				);
 
-				console.log(`[Render Farm] Signing output with C2PA Provenance Manifest...`);
+				console.log(
+					`[Render Farm] Signing output with C2PA Provenance Manifest...`,
+				);
 				try {
 					await signWithC2PA(outputPath, job.data.timelineData);
 					console.log(`[Render Farm] Successfully embedded C2PA credentials.`);
@@ -540,7 +584,13 @@ async function renderJobProcessor(job: Job<RenderJob & { timelineData?: any }>) 
 function buildFfmpegArgs(
 	timeline: TimelineData | undefined,
 	outputPath: string,
-	opts: { width: number; height: number; framerate: number; duration: number; format: string },
+	opts: {
+		width: number;
+		height: number;
+		framerate: number;
+		duration: number;
+		format: string;
+	},
 ): string[] {
 	const args: string[] = ["-y"];
 
@@ -570,8 +620,10 @@ function buildFfmpegArgs(
 
 		// Background canvas as first input
 		args.push(
-			"-f", "lavfi",
-			"-i", `color=c=0x0a0a0a:s=${opts.width}x${opts.height}:d=${opts.duration}:r=${opts.framerate}`
+			"-f",
+			"lavfi",
+			"-i",
+			`color=c=0x0a0a0a:s=${opts.width}x${opts.height}:d=${opts.duration}:r=${opts.framerate}`,
 		);
 		const bgLabel = `[0:v]`;
 		inputIdx++; // this is 1
@@ -581,7 +633,7 @@ function buildFfmpegArgs(
 		for (const clip of videoClips) {
 			const clipDuration = clip.end - clip.start;
 			args.push("-ss", "0", "-t", String(clipDuration), "-i", clip.url!);
-			
+
 			const clipLabel = `[${inputIdx}:v]`;
 			const startSec = clip.start;
 			overlayChains.push(
@@ -592,7 +644,7 @@ function buildFfmpegArgs(
 
 		// Build filter complex: overlay each clip onto the background
 		let filterComplex = "";
-		let prevLabel = bgLabel.replace(/[\[\]]/g, "");
+		let prevLabel = bgLabel.replace(/[[\]]/g, "");
 
 		for (let i = 0; i < overlayChains.length; i++) {
 			const ovLabel = `ov${i + 1}`;
@@ -606,30 +658,37 @@ function buildFfmpegArgs(
 			args.push("-map", `[${prevLabel}]`);
 		}
 
-	// Audio mixing
-	if (audioClips.length > 0) {
-		const audioInputs: string[] = [];
-		for (const clip of audioClips) {
-			const clipDuration = clip.end - clip.start;
-			args.push("-i", clip.url!);
-			args.push("-ss", String(clip.start), "-t", String(clipDuration));
-			audioInputs.push(`[${inputIdx++}:a]`);
-		}
-		// Mix all audio streams
-		const amixInputs = audioInputs.join("");
-		args.push("-filter_complex", `${amixInputs}amix=inputs=${audioClips.length}:duration=longest[aout]`);
-		args.push("-map", "[aout]");
+		// Audio mixing
+		if (audioClips.length > 0) {
+			const audioInputs: string[] = [];
+			for (const clip of audioClips) {
+				const clipDuration = clip.end - clip.start;
+				args.push("-i", clip.url!);
+				args.push("-ss", String(clip.start), "-t", String(clipDuration));
+				audioInputs.push(`[${inputIdx++}:a]`);
+			}
+			// Mix all audio streams
+			const amixInputs = audioInputs.join("");
+			args.push(
+				"-filter_complex",
+				`${amixInputs}amix=inputs=${audioClips.length}:duration=longest[aout]`,
+			);
+			args.push("-map", "[aout]");
 		}
 	} else {
 		// ── Fallback: synthetic test pattern ────────────────────────────
 		args.push(
-			"-f", "lavfi",
-			"-i", `color=c=0x0a0a0a:s=${opts.width}x${opts.height}:d=${opts.duration}:r=${opts.framerate}`,
+			"-f",
+			"lavfi",
+			"-i",
+			`color=c=0x0a0a0a:s=${opts.width}x${opts.height}:d=${opts.duration}:r=${opts.framerate}`,
 		);
 		// Add a moving rectangle overlay for visual interest
 		args.push(
-			"-f", "lavfi",
-			"-i", `color=c=0x00e5ff:s=200x200:d=${opts.duration}:r=${opts.framerate}`,
+			"-f",
+			"lavfi",
+			"-i",
+			`color=c=0x00e5ff:s=200x200:d=${opts.duration}:r=${opts.framerate}`,
 		);
 		args.push(
 			"-filter_complex",
@@ -671,87 +730,91 @@ function buildFfmpegArgs(
  * For development, it generates a self-signed assertion.
  */
 async function signWithC2PA(
-  outputPath: string,
-  timelineData?: any,
+	outputPath: string,
+	timelineData?: any,
 ): Promise<void> {
-  const crypto = await import("crypto");
-  const fs = await import("fs");
+	const crypto = await import("crypto");
+	const fs = await import("fs");
 
-  // Read the rendered output and compute its SHA-256 hash
-  const fileBuffer = fs.readFileSync(outputPath);
-  const outputHash = crypto.createHash("sha256").update(fileBuffer).digest("hex");
+	// Read the rendered output and compute its SHA-256 hash
+	const fileBuffer = fs.readFileSync(outputPath);
+	const outputHash = crypto
+		.createHash("sha256")
+		.update(fileBuffer)
+		.digest("hex");
 
-  const manifestContent = {
-    // C2PA Assertion
-    "c2pa.assertions": {
-      "stds.schema-org.CreativeWork": {
-        "@type": "CreativeWork",
-        "name": "Lazynext Render Output",
-        "author": {
-          "@type": "Organization",
-          "name": "Lazynext",
-        },
-        "dateCreated": new Date().toISOString(),
-        "sdPublisher": {
-          "@type": "Organization",
-          "name": "Lazynext",
-          "url": "https://lazynext.ai",
-        },
-        "version": "1.0",
-      },
-      "lazynext.editing_operations": timelineData
-        ? {
-            tracks: timelineData.tracks?.length || 0,
-            total_clips: timelineData.tracks?.reduce(
-              (sum: number, t: any) => sum + (t.clips?.length || 0),
-              0,
-            ) || 0,
-            duration_seconds: timelineData.duration || 0,
-            editing_engine: "Lazynext NLE Core (CRDT-based)",
-          }
-        : { editing_engine: "Lazynext NLE Core" },
-    },
-    // Content hash for tamper detection
-    "c2pa.hash": {
-      algorithm: "sha256",
-      value: outputHash,
-    },
-    // Software agent
-    "c2pa.actions": [
-      {
-        action: "c2pa.edited",
-        softwareAgent: "Lazynext Render Farm v1.0.0",
-        when: new Date().toISOString(),
-      },
-    ],
-    // Manifest signature is computed AFTER this object (see below).
-  };
+	const manifestContent = {
+		// C2PA Assertion
+		"c2pa.assertions": {
+			"stds.schema-org.CreativeWork": {
+				"@type": "CreativeWork",
+				name: "Lazynext Render Output",
+				author: {
+					"@type": "Organization",
+					name: "Lazynext",
+				},
+				dateCreated: new Date().toISOString(),
+				sdPublisher: {
+					"@type": "Organization",
+					name: "Lazynext",
+					url: "https://lazynext.ai",
+				},
+				version: "1.0",
+			},
+			"lazynext.editing_operations": timelineData
+				? {
+						tracks: timelineData.tracks?.length || 0,
+						total_clips:
+							timelineData.tracks?.reduce(
+								(sum: number, t: any) => sum + (t.clips?.length || 0),
+								0,
+							) || 0,
+						duration_seconds: timelineData.duration || 0,
+						editing_engine: "Lazynext NLE Core (CRDT-based)",
+					}
+				: { editing_engine: "Lazynext NLE Core" },
+		},
+		// Content hash for tamper detection
+		"c2pa.hash": {
+			algorithm: "sha256",
+			value: outputHash,
+		},
+		// Software agent
+		"c2pa.actions": [
+			{
+				action: "c2pa.edited",
+				softwareAgent: "Lazynext Render Farm v1.0.0",
+				when: new Date().toISOString(),
+			},
+		],
+		// Manifest signature is computed AFTER this object (see below).
+	};
 
-  // Manifest signature (self-signed in dev, CA-signed in production).
-  // Computed over the manifest content so the signature covers the assertions,
-  // hash, and actions, then attached to produce the final manifest.
-  const signature = {
-    algorithm: "ES256",
-    value: crypto
-      .createHmac("sha256", getC2PASecret())
-      .update(JSON.stringify(manifestContent))
-      .digest("base64"),
-    issuer: process.env.C2PA_SIGNING_CERT_ISSUER || "Lazynext Development CA",
-  };
+	// Manifest signature (self-signed in dev, CA-signed in production).
+	// Computed over the manifest content so the signature covers the assertions,
+	// hash, and actions, then attached to produce the final manifest.
+	const signature = {
+		algorithm: "ES256",
+		value: crypto
+			.createHmac("sha256", getC2PASecret())
+			.update(JSON.stringify(manifestContent))
+			.digest("base64"),
+		issuer: process.env.C2PA_SIGNING_CERT_ISSUER || "Lazynext Development CA",
+	};
 
-  const manifest = {
-    ...manifestContent,
-    "c2pa.signature": signature,
-  };
+	const manifest = {
+		...manifestContent,
+		"c2pa.signature": signature,
+	};
 
-  // Write the C2PA manifest as a sidecar file
-  // In production, this is embedded into the MP4/MOV as a c2pa box
-  const sidecarPath = outputPath.replace(/\.\w+$/, ".c2pa.json");
-  fs.writeFileSync(sidecarPath, JSON.stringify(manifest, null, 2));
+	// Write the C2PA manifest as a sidecar file
+	// In production, this is embedded into the MP4/MOV as a c2pa box
+	const sidecarPath = outputPath.replace(/\.\w+$/, ".c2pa.json");
+	fs.writeFileSync(sidecarPath, JSON.stringify(manifest, null, 2));
 
-  console.log(
-    `[C2PA] Manifest written: ${sidecarPath} (output hash: ${outputHash.substring(0, 12)}...)`,
-  );
+	console.log(
+		`[C2PA] Manifest written: ${sidecarPath} (output hash: ${outputHash.substring(0, 12)}...)`,
+	);
 }
 
 /**
@@ -784,7 +847,9 @@ app.get("/api/v1/jobs/:jobId/stream", async (req: Request, res: Response) => {
 		}
 
 		const state = await currentJob.getState();
-		res.write(`data: ${JSON.stringify({ ...currentJob.data, state, progress: currentJob.progress })}\n\n`);
+		res.write(
+			`data: ${JSON.stringify({ ...currentJob.data, state, progress: currentJob.progress })}\n\n`,
+		);
 
 		if (state === "completed" || state === "failed") {
 			clearInterval(intervalId);
@@ -793,7 +858,7 @@ app.get("/api/v1/jobs/:jobId/stream", async (req: Request, res: Response) => {
 	};
 
 	sendProgress();
-	let intervalId = setInterval(sendProgress, 1500);
+	const intervalId = setInterval(sendProgress, 1500);
 
 	req.on("close", () => clearInterval(intervalId));
 });
@@ -829,7 +894,8 @@ app.post("/api/v1/publish", async (req: Request, res: Response) => {
 			}
 
 			const downloadResp = await fetch(video_url);
-			if (!downloadResp.ok) throw new Error(`Download failed: ${downloadResp.status}`);
+			if (!downloadResp.ok)
+				throw new Error(`Download failed: ${downloadResp.status}`);
 
 			let totalBytes = 0;
 			const chunks: Buffer[] = [];
@@ -839,7 +905,9 @@ app.post("/api/v1/publish", async (req: Request, res: Response) => {
 			for await (const chunk of convertToAsyncIterable(reader)) {
 				totalBytes += chunk.length;
 				if (totalBytes > MAX_DOWNLOAD_BYTES) {
-					throw new Error(`Video exceeds maximum size of ${MAX_DOWNLOAD_BYTES} bytes`);
+					throw new Error(
+						`Video exceeds maximum size of ${MAX_DOWNLOAD_BYTES} bytes`,
+					);
 				}
 				chunks.push(chunk);
 			}
@@ -851,9 +919,7 @@ app.post("/api/v1/publish", async (req: Request, res: Response) => {
 			await fs.promises.writeFile(videoPath, Buffer.concat(chunks));
 		}
 
-		const platforms = Array.isArray(platform)
-			? platform
-			: [platform];
+		const platforms = Array.isArray(platform) ? platform : [platform];
 
 		const results = await publish(videoPath, platforms, {
 			caption: description,
@@ -861,18 +927,18 @@ app.post("/api/v1/publish", async (req: Request, res: Response) => {
 			tags,
 		});
 
-		const succeeded = results.filter(r => r.success);
-		const failed = results.filter(r => !r.success);
+		const succeeded = results.filter((r) => r.success);
+		const failed = results.filter((r) => !r.success);
 
 		res.status(200).json({
 			success: true,
 			platform,
-			results: succeeded.map(r => ({
+			results: succeeded.map((r) => ({
 				platform: r.platform,
 				post_url: r.postUrl,
 				status: "published",
 			})),
-			errors: failed.map(r => ({
+			errors: failed.map((r) => ({
 				platform: r.platform,
 				error: r.error,
 			})),
@@ -910,7 +976,9 @@ async function start() {
 		await getWorker();
 		console.log("[Render Farm] Redis connected, worker started.");
 	} else {
-		console.log("[Render Farm] Starting without Redis — queue operations will return 503.");
+		console.log(
+			"[Render Farm] Starting without Redis — queue operations will return 503.",
+		);
 	}
 
 	app.listen(PORT, () => {

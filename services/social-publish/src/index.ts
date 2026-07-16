@@ -9,8 +9,9 @@
  * return informative errors instead of throwing when keys are absent.
  */
 
-import express, { Request, Response } from "express";
+import express, { type Request, type Response } from "express";
 import cors from "cors";
+import rateLimit from "express-rate-limit";
 import { v4 as uuidv4 } from "uuid";
 import { spawn } from "child_process";
 import path from "path";
@@ -20,12 +21,14 @@ import {
 	publishToTikTok,
 	publishToYouTube,
 	publishToInstagram,
+	assertSafeVideoPath,
 	type PublishResult,
 } from "@lazynext/social-publish-core";
 
 type FetchResponse = globalThis.Response;
 
-const OUTPUT_DIR = process.env.OUTPUT_DIR || path.join(import.meta.dirname, "../outputs");
+const OUTPUT_DIR =
+	process.env.OUTPUT_DIR || path.join(import.meta.dirname, "../outputs");
 const PORT = parseInt(process.env.PORT || "8007", 10);
 const MAX_VIDEO_SIZE_BYTES = 2 * 1024 * 1024 * 1024; // 2 GB max
 
@@ -39,14 +42,18 @@ function validateVideoPath(inputPath: unknown): string | null {
 		return null;
 	}
 	const cleaned = inputPath.trim().replace(/^(\.\.(\/|\\|$))+/g, "");
-	if (cleaned.includes("../") || cleaned.includes("..\\")) {
+	if (
+		cleaned.includes("../") ||
+		cleaned.includes("..\\") ||
+		cleaned.includes("\0")
+	) {
 		return null;
 	}
-	const resolved = path.isAbsolute(cleaned)
-		? cleaned
-		: path.join(OUTPUT_DIR, cleaned);
-	// Prevent access outside OUTPUT_DIR
-	if (!resolved.startsWith(path.resolve(OUTPUT_DIR))) {
+	const base = path.resolve(OUTPUT_DIR);
+	// Always resolve *relative to* the trusted base and re-normalise, so an
+	// absolute or traversal input can never escape OUTPUT_DIR.
+	const resolved = path.resolve(base, `.${path.sep}${path.normalize(cleaned)}`);
+	if (resolved !== base && !resolved.startsWith(base + path.sep)) {
 		return null;
 	}
 	return resolved;
@@ -81,6 +88,18 @@ app.get("/health", (_req: Request, res: Response) => {
 });
 
 app.use(authMiddleware);
+
+// Rate limiter — protects publish/reframe/thumbnail routes (fs + ffmpeg heavy)
+// from abuse. Health check above is intentionally left unlimited.
+app.use(
+	rateLimit({
+		windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || "60000", 10),
+		limit: parseInt(process.env.RATE_LIMIT_MAX || "60", 10),
+		standardHeaders: "draft-7",
+		legacyHeaders: false,
+		message: { error: "Too many requests — please retry later." },
+	}),
+);
 
 // ── Types ───────────────────────────────────────────────────────────────
 
@@ -194,7 +213,10 @@ const schedulers = new Map<string, Timer>();
 
 // ── Platform Aspect Ratio Config ────────────────────────────────────────
 
-const PLATFORM_SPECS: Record<string, { aspect: string; width: number; height: number }> = {
+const PLATFORM_SPECS: Record<
+	string,
+	{ aspect: string; width: number; height: number }
+> = {
 	tiktok: { aspect: "9:16", width: 1080, height: 1920 },
 	reels: { aspect: "9:16", width: 1080, height: 1920 },
 	instagram: { aspect: "9:16", width: 1080, height: 1920 },
@@ -215,7 +237,8 @@ const PLATFORM_SPECS: Record<string, { aspect: string; width: number; height: nu
  */
 function buildPlatformPublisher(platform: string) {
 	return async (req: Request, res: Response) => {
-		const { video_path, title, description, tags, hashtags, privacy } = req.body as PublishRequest;
+		const { video_path, title, description, tags, hashtags, privacy } =
+			req.body as PublishRequest;
 		const videoPath = validateVideoPath(video_path);
 		if (!videoPath) {
 			return res.status(400).json({ error: "Invalid video_path" });
@@ -227,7 +250,7 @@ function buildPlatformPublisher(platform: string) {
 		try {
 			const result = await publishToPlatform(platform, {
 				platform,
-				video_path,
+				video_path: videoPath,
 				title,
 				description,
 				tags,
@@ -272,13 +295,22 @@ async function publishToPlatform(
 		case "tiktok":
 			return publishToTikTok(req.video_path, req.description, req.hashtags);
 		case "youtube":
-			return publishToYouTube(req.video_path, req.title, req.description, req.tags);
+			return publishToYouTube(
+				req.video_path,
+				req.title,
+				req.description,
+				req.tags,
+			);
 		case "instagram":
 			return publishToInstagram(req.video_path, req.description);
 		case "twitter":
 			return publishTwitter(req.video_path, req.description);
 		default:
-			return { platform, success: false, error: `Unsupported platform: ${platform}` };
+			return {
+				platform,
+				success: false,
+				error: `Unsupported platform: ${platform}`,
+			};
 	}
 }
 
@@ -289,11 +321,16 @@ async function publishToPlatform(
  */
 function platformKey(platform: string, suffix: string): string {
 	switch (platform) {
-		case "tiktok": return suffix === "CLIENT_ID" ? "TIKTOK_CLIENT_KEY" : `TIKTOK_${suffix}`;
-		case "youtube": return `GOOGLE_${suffix}`;
-		case "instagram": return `INSTAGRAM_${suffix === "CLIENT_ID" ? "APP_ID" : "APP_SECRET"}`;
-		case "twitter": return `TWITTER_${suffix}`;
-		default: return `${platform.toUpperCase()}_${suffix}`;
+		case "tiktok":
+			return suffix === "CLIENT_ID" ? "TIKTOK_CLIENT_KEY" : `TIKTOK_${suffix}`;
+		case "youtube":
+			return `GOOGLE_${suffix}`;
+		case "instagram":
+			return `INSTAGRAM_${suffix === "CLIENT_ID" ? "APP_ID" : "APP_SECRET"}`;
+		case "twitter":
+			return `TWITTER_${suffix}`;
+		default:
+			return `${platform.toUpperCase()}_${suffix}`;
 	}
 }
 
@@ -315,7 +352,8 @@ async function publishTwitter(
 	const token = process.env.TWITTER_OAUTH_TOKEN;
 	const TWITTER_API = "https://api.twitter.com/2";
 	const TWITTER_MEDIA_URL = "https://upload.twitter.com/1.1/media/upload.json";
-	const fileSize = fs.statSync(videoPath).size;
+	const safePath = assertSafeVideoPath(videoPath);
+	const fileSize = fs.statSync(safePath).size;
 
 	// Step 1: INIT — initialise media upload
 	const initBody = new URLSearchParams({
@@ -331,25 +369,39 @@ async function publishTwitter(
 		body: initBody.toString(),
 	});
 
-	const initData = (await initResp.json()) as { data?: { media_id_string: string }; media_id_string?: string };
-	const mediaId = initData.data?.media_id_string || initData.media_id_string || "";
+	const initData = (await initResp.json()) as {
+		data?: { media_id_string: string };
+		media_id_string?: string;
+	};
+	const mediaId =
+		initData.data?.media_id_string || initData.media_id_string || "";
 
 	if (!mediaId) {
-		return { platform: "twitter", success: false, error: "Failed to initialize Twitter media upload" };
+		return {
+			platform: "twitter",
+			success: false,
+			error: "Failed to initialize Twitter media upload",
+		};
 	}
 
 	// Step 2: APPEND — upload chunks
 	const CHUNK_SIZE = 2 * 1024 * 1024; // 2 MB for Twitter
-	const videoBuffer = fs.readFileSync(videoPath);
+	const videoBuffer = fs.readFileSync(safePath);
 
-	for (let segment = 0, start = 0; start < fileSize; segment++, start += CHUNK_SIZE) {
+	for (
+		let segment = 0, start = 0;
+		start < fileSize;
+		segment++, start += CHUNK_SIZE
+	) {
 		const formData = new FormData();
 		formData.append("command", "APPEND");
 		formData.append("media_id", mediaId);
 		formData.append("segment_index", String(segment));
 		formData.append(
 			"media",
-			new Blob([videoBuffer.subarray(start, Math.min(start + CHUNK_SIZE, fileSize))]),
+			new Blob([
+				videoBuffer.subarray(start, Math.min(start + CHUNK_SIZE, fileSize)),
+			]),
 		);
 
 		await fetchWithRetry(TWITTER_MEDIA_URL, {
@@ -360,7 +412,10 @@ async function publishTwitter(
 	}
 
 	// Step 3: FINALIZE
-	const finalizeBody = new URLSearchParams({ command: "FINALIZE", media_id: mediaId });
+	const finalizeBody = new URLSearchParams({
+		command: "FINALIZE",
+		media_id: mediaId,
+	});
 	await fetchWithRetry(TWITTER_MEDIA_URL, {
 		method: "POST",
 		headers: { Authorization: `Bearer ${token}` },
@@ -397,16 +452,22 @@ app.post("/auto-reframe", async (req: Request, res: Response) => {
 	const { video_path, target_platform } = req.body as ReframeRequest;
 
 	if (!video_path || !target_platform) {
-		return res.status(400).json({ success: false, error: "Missing video_path or target_platform" });
+		return res
+			.status(400)
+			.json({ success: false, error: "Missing video_path or target_platform" });
 	}
 
 	const videoPath = validateVideoPath(video_path);
 	if (!videoPath) {
-		return res.status(400).json({ success: false, error: "Invalid video_path" });
+		return res
+			.status(400)
+			.json({ success: false, error: "Invalid video_path" });
 	}
 
 	if (!fs.existsSync(videoPath)) {
-		return res.status(400).json({ success: false, error: `File not found: ${video_path}` });
+		return res
+			.status(400)
+			.json({ success: false, error: `File not found: ${video_path}` });
 	}
 
 	const spec = PLATFORM_SPECS[target_platform.toLowerCase()];
@@ -470,15 +531,22 @@ function reframeVideo(
 	return new Promise((resolve, reject) => {
 		const args = [
 			"-y",
-			"-i", inputPath,
+			"-i",
+			inputPath,
 			"-vf",
 			`scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2:black`,
-			"-c:v", "libx264",
-			"-preset", "fast",
-			"-crf", "18",
-			"-pix_fmt", "yuv420p",
-			"-c:a", "aac",
-			"-b:a", "192k",
+			"-c:v",
+			"libx264",
+			"-preset",
+			"fast",
+			"-crf",
+			"18",
+			"-pix_fmt",
+			"yuv420p",
+			"-c:a",
+			"aac",
+			"-b:a",
+			"192k",
 			outputPath,
 		];
 
@@ -493,7 +561,9 @@ function reframeVideo(
 			if (code === 0) {
 				resolve();
 			} else {
-				reject(new Error(`ffmpeg exited with code ${code}: ${stderr.slice(-500)}`));
+				reject(
+					new Error(`ffmpeg exited with code ${code}: ${stderr.slice(-500)}`),
+				);
 			}
 		});
 
@@ -504,7 +574,8 @@ function reframeVideo(
 // ── AI Metadata Generation ──────────────────────────────────────────────
 
 app.post("/generate-metadata", async (req: Request, res: Response) => {
-	const { title, description, platform, tags, video_topic } = req.body as MetadataRequest;
+	const { title, description, platform, tags, video_topic } =
+		req.body as MetadataRequest;
 
 	if (!platform) {
 		return res.status(400).json({ success: false, error: "Missing platform" });
@@ -576,7 +647,10 @@ function generatePlatformMetadata(
 	};
 
 	// Platform-specific description templates
-	const descTemplates: Record<string, (topic: string, tags: string[]) => string> = {
+	const descTemplates: Record<
+		string,
+		(topic: string, tags: string[]) => string
+	> = {
 		tiktok: (t, tags) =>
 			`${t} 🔥\n\nWatch till the end! 💯\n\n${tags.map((h) => `#${h}`).join(" ")} #fyp #viral #trending`,
 		youtube: (t, tags) =>
@@ -599,11 +673,15 @@ function generatePlatformMetadata(
 
 	const title = titleTemplates[platform] || baseTitle;
 	const description =
-		input.baseDescription || descTemplates[platform]?.(topic, input.tags) || topic;
+		input.baseDescription ||
+		descTemplates[platform]?.(topic, input.tags) ||
+		topic;
 
 	// Merge user tags with platform hashtags, deduplicate
 	const baseHashtags = hashtagBases[platform] || [];
-	const userHashtags = (input.tags || []).map((t: string) => t.replace(/^#/, ""));
+	const userHashtags = (input.tags || []).map((t: string) =>
+		t.replace(/^#/, ""),
+	);
 	const hashtags = [...new Set([...userHashtags, ...baseHashtags])];
 
 	return {
@@ -611,7 +689,8 @@ function generatePlatformMetadata(
 		title,
 		description,
 		hashtags,
-		suggested_posting_time: bestTimes[platform] || "Weekdays 12 PM (local timezone)",
+		suggested_posting_time:
+			bestTimes[platform] || "Weekdays 12 PM (local timezone)",
 	};
 }
 
@@ -619,15 +698,22 @@ function generatePlatformMetadata(
 
 app.post("/thumbnails/generate", async (req: Request, res: Response) => {
 	const video_path = req.body?.video_path;
-	const count = Math.min(Math.max(parseInt(req.body?.count || "5", 10) || 5, 1), 10);
+	const count = Math.min(
+		Math.max(parseInt(req.body?.count || "5", 10) || 5, 1),
+		10,
+	);
 
 	if (!video_path || typeof video_path !== "string") {
-		return res.status(400).json({ success: false, error: "Missing video_path" });
+		return res
+			.status(400)
+			.json({ success: false, error: "Missing video_path" });
 	}
 
 	const videoPath = validateVideoPath(video_path);
 	if (!videoPath) {
-		return res.status(400).json({ success: false, error: "Invalid video_path" });
+		return res
+			.status(400)
+			.json({ success: false, error: "Invalid video_path" });
 	}
 
 	if (!fs.existsSync(videoPath)) {
@@ -649,12 +735,16 @@ app.post("/thumbnails/generate", async (req: Request, res: Response) => {
 		const interval = Math.max(1, duration / (count + 1));
 		for (let i = 1; i <= count; i++) {
 			const timestamp = Math.min(duration - 0.5, interval * i);
-			const thumbPath = path.join(thumbDir, `thumb_${i}_${timestamp.toFixed(1)}s.jpg`);
+			const thumbPath = path.join(
+				thumbDir,
+				`thumb_${i}_${timestamp.toFixed(1)}s.jpg`,
+			);
 
 			await extractThumbnail(videoPath, thumbPath, timestamp);
 
 			// Score based on position in video (middle frames tend to be better)
-			const positionScore = 1.0 - Math.abs(timestamp - duration / 2) / (duration / 2);
+			const positionScore =
+				1.0 - Math.abs(timestamp - duration / 2) / (duration / 2);
 			candidates.push({
 				path: thumbPath,
 				timestamp,
@@ -664,7 +754,9 @@ app.post("/thumbnails/generate", async (req: Request, res: Response) => {
 
 		res.json({ success: true, candidates, total: candidates.length });
 	} catch (err: any) {
-		res.status(500).json({ success: false, error: err?.message || String(err) });
+		res
+			.status(500)
+			.json({ success: false, error: err?.message || String(err) });
 	}
 });
 
@@ -675,9 +767,12 @@ app.post("/thumbnails/generate", async (req: Request, res: Response) => {
 function getVideoDuration(inputPath: string): Promise<number> {
 	return new Promise((resolve, reject) => {
 		const args = [
-			"-v", "error",
-			"-show_entries", "format=duration",
-			"-of", "default=noprint_wrappers=1:nokey=1",
+			"-v",
+			"error",
+			"-show_entries",
+			"format=duration",
+			"-of",
+			"default=noprint_wrappers=1:nokey=1",
 			inputPath,
 		];
 
@@ -716,10 +811,14 @@ function extractThumbnail(
 	return new Promise((resolve, reject) => {
 		const args = [
 			"-y",
-			"-ss", String(timestamp),
-			"-i", inputPath,
-			"-vframes", "1",
-			"-q:v", "2",
+			"-ss",
+			String(timestamp),
+			"-i",
+			inputPath,
+			"-vframes",
+			"1",
+			"-q:v",
+			"2",
 			outputPath,
 		];
 
@@ -738,7 +837,9 @@ app.post("/thumbnails/test", async (req: Request, res: Response) => {
 	const { candidates } = req.body as { candidates?: ThumbnailCandidate[] };
 
 	if (!candidates || !Array.isArray(candidates) || candidates.length === 0) {
-		return res.status(400).json({ success: false, error: "Missing or empty candidates array" });
+		return res
+			.status(400)
+			.json({ success: false, error: "Missing or empty candidates array" });
 	}
 
 	/**
@@ -750,16 +851,18 @@ app.post("/thumbnails/test", async (req: Request, res: Response) => {
 	 */
 	const scored = candidates.map((c) => {
 		// Position-based appeal: early frames (hooks) and climax frames score higher
-		const positionAppeal = c.timestamp < 3
-			? 0.85  // Hook frames
-			: c.timestamp < 10
-				? 0.70  // Content frames
-				: 0.60; // Late frames
+		const positionAppeal =
+			c.timestamp < 3
+				? 0.85 // Hook frames
+				: c.timestamp < 10
+					? 0.7 // Content frames
+					: 0.6; // Late frames
 
 		// Simulated visual appeal (in real impl: analyze via sharp)
 		const visualAppeal = 0.6 + Math.random() * 0.4;
 
-		const clickScore = (positionAppeal * 0.4 + visualAppeal * 0.35 + Math.random() * 0.25);
+		const clickScore =
+			positionAppeal * 0.4 + visualAppeal * 0.35 + Math.random() * 0.25;
 		const appealScore = Math.round(clickScore * 100);
 
 		return {
@@ -779,7 +882,11 @@ app.post("/thumbnails/test", async (req: Request, res: Response) => {
 		success: true,
 		candidates: scored,
 		winner: winner
-			? { path: winner.path, timestamp: winner.timestamp, appeal_score: winner.appeal_score }
+			? {
+					path: winner.path,
+					timestamp: winner.timestamp,
+					appeal_score: winner.appeal_score,
+				}
 			: null,
 		test_id: uuidv4(),
 	});
@@ -788,7 +895,15 @@ app.post("/thumbnails/test", async (req: Request, res: Response) => {
 // ── Scheduled Posting ───────────────────────────────────────────────────
 
 app.post("/schedule", (req: Request, res: Response) => {
-	const { video_path, platform, title, description, tags, hashtags, scheduled_at } = req.body;
+	const {
+		video_path,
+		platform,
+		title,
+		description,
+		tags,
+		hashtags,
+		scheduled_at,
+	} = req.body;
 
 	if (!video_path || !platform || !scheduled_at) {
 		return res.status(400).json({
@@ -799,11 +914,15 @@ app.post("/schedule", (req: Request, res: Response) => {
 
 	const scheduledDate = new Date(scheduled_at);
 	if (isNaN(scheduledDate.getTime())) {
-		return res.status(400).json({ success: false, error: "Invalid scheduled_at date" });
+		return res
+			.status(400)
+			.json({ success: false, error: "Invalid scheduled_at date" });
 	}
 
 	if (scheduledDate.getTime() <= Date.now()) {
-		return res.status(400).json({ success: false, error: "schedule_at must be in the future" });
+		return res
+			.status(400)
+			.json({ success: false, error: "schedule_at must be in the future" });
 	}
 
 	const id = uuidv4();
@@ -858,7 +977,8 @@ app.post("/schedule", (req: Request, res: Response) => {
 
 app.get("/schedule", (_req: Request, res: Response) => {
 	const posts = Array.from(scheduledPosts.values()).sort(
-		(a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime(),
+		(a, b) =>
+			new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime(),
 	);
 	res.json({ success: true, posts });
 });
@@ -868,11 +988,16 @@ app.delete("/schedule/:id", (req: Request, res: Response) => {
 
 	const post = scheduledPosts.get(id);
 	if (!post) {
-		return res.status(404).json({ success: false, error: "Scheduled post not found" });
+		return res
+			.status(404)
+			.json({ success: false, error: "Scheduled post not found" });
 	}
 
 	if (post.status === "published") {
-		return res.status(400).json({ success: false, error: "Cannot cancel an already published post" });
+		return res.status(400).json({
+			success: false,
+			error: "Cannot cancel an already published post",
+		});
 	}
 
 	// Cancel the timer
@@ -934,7 +1059,7 @@ async function fetchWithRetry(
 			}
 
 			if (attempt < maxRetries) {
-				const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt - 1);
+				const delay = RETRY_BASE_DELAY_MS * 2 ** (attempt - 1);
 				await new Promise((r) => setTimeout(r, delay));
 			}
 		}

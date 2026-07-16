@@ -8,6 +8,13 @@
  * - TikTok, YouTube, Instagram publishers
  * - Unified publish() entry point
  */
+/**
+ * Validate a video path, guaranteeing the result stays inside one of the
+ * {@link allowedBaseDirs}. Rejects traversal and null bytes. Relative paths
+ * resolve against the first allowed base. Throws on violation so tainted
+ * input can never reach the filesystem.
+ */
+export declare function assertSafeVideoPath(inputPath: string): string;
 export interface PlatformMetadata {
     caption?: string;
     hashtags?: string[];

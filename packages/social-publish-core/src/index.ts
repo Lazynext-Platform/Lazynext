@@ -12,6 +12,50 @@
 import fs from "fs";
 import path from "path";
 
+// ── Path safety ───────────────────────────────────────────────────────
+
+/**
+ * Directories that video paths are allowed to resolve inside. Configurable
+ * via `SOCIAL_PUBLISH_OUTPUT_DIR` / `OUTPUT_DIR`; always includes the
+ * conventional local output folders and the render scratch directory.
+ */
+function allowedBaseDirs(): string[] {
+	const dirs = [
+		process.env.SOCIAL_PUBLISH_OUTPUT_DIR,
+		process.env.OUTPUT_DIR,
+		path.join(process.cwd(), "output"),
+		path.join(process.cwd(), "outputs"),
+		"/tmp/lazynext",
+	].filter((d): d is string => Boolean(d));
+	return dirs.map((d) => path.resolve(d));
+}
+
+/**
+ * Validate a video path, guaranteeing the result stays inside one of the
+ * {@link allowedBaseDirs}. Rejects traversal and null bytes. Relative paths
+ * resolve against the first allowed base. Throws on violation so tainted
+ * input can never reach the filesystem.
+ */
+export function assertSafeVideoPath(inputPath: string): string {
+	if (typeof inputPath !== "string" || inputPath.trim().length === 0) {
+		throw new Error("Invalid video path");
+	}
+	if (inputPath.includes("\0")) {
+		throw new Error("Invalid video path");
+	}
+	const bases = allowedBaseDirs();
+	const trimmed = inputPath.trim();
+	const resolved = path.isAbsolute(trimmed)
+		? path.resolve(trimmed)
+		: path.resolve(bases[0], trimmed);
+	for (const base of bases) {
+		if (resolved === base || resolved.startsWith(base + path.sep)) {
+			return resolved;
+		}
+	}
+	throw new Error("Resolved path escapes the allowed directories");
+}
+
 // ── Types ─────────────────────────────────────────────────────────────
 
 export interface PlatformMetadata {
@@ -61,7 +105,7 @@ async function withRetry<T>(
 			lastError = err;
 			if (err?.status && err.status >= 400 && err.status < 500) throw err;
 			if (attempt < MAX_RETRIES) {
-				const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt - 1);
+				const delay = RETRY_BASE_DELAY_MS * 2 ** (attempt - 1);
 				console.warn(
 					`[Social] ${label} attempt ${attempt} failed, retrying in ${delay}ms...`,
 				);
@@ -157,8 +201,9 @@ export async function publishToTikTok(
 
 	try {
 		const token = await getValidToken("tiktok", clientId, clientSecret);
-		const fileSize = fs.statSync(videoPath).size;
-		const videoBuffer = fs.readFileSync(videoPath);
+		const safePath = assertSafeVideoPath(videoPath);
+		const fileSize = fs.statSync(safePath).size;
+		const videoBuffer = fs.readFileSync(safePath);
 
 		const captionText = [caption, hashtags?.map((h) => `#${h}`).join(" ")]
 			.filter(Boolean)
@@ -242,8 +287,9 @@ export async function publishToYouTube(
 
 	try {
 		const token = await getValidToken("youtube", clientId, clientSecret);
-		const fileSize = fs.statSync(videoPath).size;
-		const defaultTitle = path.basename(videoPath, path.extname(videoPath));
+		const safePath = assertSafeVideoPath(videoPath);
+		const fileSize = fs.statSync(safePath).size;
+		const defaultTitle = path.basename(safePath, path.extname(safePath));
 
 		const initResp = await withRetry(async () => {
 			return await fetchWithStatus(
@@ -281,26 +327,29 @@ export async function publishToYouTube(
 		}
 
 		const CHUNK_SIZE = 5 * 1024 * 1024;
-		const videoBuffer = fs.readFileSync(videoPath);
+		const videoBuffer = fs.readFileSync(safePath);
 
 		for (let start = 0; start < fileSize; start += CHUNK_SIZE) {
 			const end = Math.min(start + CHUNK_SIZE, fileSize);
 			const chunk = videoBuffer.subarray(start, end);
 
-			const uploaded = await withRetry(async () => {
-				const resp = await fetchWithStatus(uploadUrl, {
-					method: "PUT",
-					headers: {
-						"Content-Length": String(chunk.length),
-						"Content-Range": `bytes ${start}-${end - 1}/${fileSize}`,
-					},
-					body: Buffer.from(chunk),
-				});
-				if (resp.status === 200 || resp.status === 201) {
-					return { done: true, data: (await resp.json()) as { id: string } };
-				}
-				return { done: false, data: null as any };
-			}, `YouTube chunk ${start}-${end - 1}`);
+			const uploaded = await withRetry(
+				async () => {
+					const resp = await fetchWithStatus(uploadUrl, {
+						method: "PUT",
+						headers: {
+							"Content-Length": String(chunk.length),
+							"Content-Range": `bytes ${start}-${end - 1}/${fileSize}`,
+						},
+						body: Buffer.from(chunk),
+					});
+					if (resp.status === 200 || resp.status === 201) {
+						return { done: true, data: (await resp.json()) as { id: string } };
+					}
+					return { done: false, data: null as any };
+				},
+				`YouTube chunk ${start}-${end - 1}`,
+			);
 
 			if (uploaded.done) {
 				console.log(`[Social] Published to YouTube: ${uploaded.data.id}`);
@@ -347,6 +396,7 @@ export async function publishToInstagram(
 	try {
 		const token = await getValidToken("instagram", appId, appSecret);
 		const instagramUserId = process.env.INSTAGRAM_USER_ID;
+		const safePath = assertSafeVideoPath(videoPath);
 
 		if (!instagramUserId) {
 			return {
@@ -367,7 +417,7 @@ export async function publishToInstagram(
 					},
 					body: new URLSearchParams({
 						media_type: "REELS",
-						video_url: `file://${videoPath}`,
+						video_url: `file://${safePath}`,
 						caption: caption || "Posted via Lazynext",
 						share_to_feed: "true",
 					}).toString(),
@@ -446,9 +496,21 @@ export async function publish(
 	platforms: string[],
 	metadata: PlatformMetadata = {},
 ): Promise<PublishResult[]> {
-	if (!fs.existsSync(videoPath)) {
+	let safePath: string;
+	try {
+		safePath = assertSafeVideoPath(videoPath);
+	} catch (err: any) {
 		return [
-			{ platform: "all", success: false, error: `File not found: ${videoPath}` },
+			{
+				platform: "all",
+				success: false,
+				error: err?.message || "Invalid video path",
+			},
+		];
+	}
+	if (!fs.existsSync(safePath)) {
+		return [
+			{ platform: "all", success: false, error: `File not found: ${safePath}` },
 		];
 	}
 
@@ -460,18 +522,22 @@ export async function publish(
 
 		switch (platform.toLowerCase()) {
 			case "tiktok":
-				result = await publishToTikTok(videoPath, metadata.caption, metadata.hashtags);
+				result = await publishToTikTok(
+					safePath,
+					metadata.caption,
+					metadata.hashtags,
+				);
 				break;
 			case "youtube":
 				result = await publishToYouTube(
-					videoPath,
+					safePath,
 					metadata.title,
 					metadata.description,
 					metadata.tags,
 				);
 				break;
 			case "instagram":
-				result = await publishToInstagram(videoPath, metadata.caption);
+				result = await publishToInstagram(safePath, metadata.caption);
 				break;
 			default:
 				result = {

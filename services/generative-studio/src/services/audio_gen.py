@@ -7,21 +7,19 @@ F5-TTS for zero-shot voice cloning — MIT licensed, 300M params, CPU-capable (~
 
 import asyncio
 import os
-import re
 import sys
 import httpx
 from fastapi import HTTPException
 from src.models import DubRequest, OverdubRequest, StemSplitRequest
+from src.services.pathsafe import BASE_TMP_DIR, safe_slug, safe_tmp_path
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from demucs_pipeline import DemucsPipeline, DemucsConfig
 
 
 def _safe_slug(value: str, fallback: str = "output") -> str:
-    """Sanitize a user-supplied identifier for safe use in a filename."""
-    slug = re.sub(r"[^A-Za-z0-9_-]", "_", (value or "").strip())
-    slug = slug.strip("._")
-    return slug or fallback
+    """Backwards-compatible alias for :func:`src.services.pathsafe.safe_slug`."""
+    return safe_slug(value, fallback)
 
 
 async def _edge_tts(text: str, language: str = "en-US") -> bytes:
@@ -66,7 +64,7 @@ async def dub_video_service(req: DubRequest):
         audio_bytes = await _edge_tts(req.text_to_dub, req.target_language)
         safe_clip = _safe_slug(req.clip_id, "clip")
         safe_lang = _safe_slug(req.target_language, "lang")
-        output_path = f"/tmp/dubbed_{safe_clip}_{safe_lang}.mp3"
+        output_path = safe_tmp_path(f"dubbed_{safe_clip}_{safe_lang}.mp3")
         with open(output_path, "wb") as audio_file:
             audio_file.write(audio_bytes)
         return {
@@ -93,17 +91,21 @@ async def overdub_audio_service(req: OverdubRequest):
     F5-TTS provides zero-shot voice cloning from reference audio.
     """
     # Local F5-TTS (works on CPU)
-    ref_audio = "/tmp/speaker_reference.wav"
+    ref_audio = os.path.join(BASE_TMP_DIR, "speaker_reference.wav")
     ref_text = req.voice_id or ""
 
     if req.original_audio_url and req.original_audio_url.startswith("file://"):
-        ref_audio = req.original_audio_url.replace("file://", "")
+        # Confine the user-supplied reference to the trusted tmp directory —
+        # only its basename is honoured, never an absolute/traversal path.
+        requested = req.original_audio_url.replace("file://", "")
+        ref_audio = safe_tmp_path(os.path.basename(requested), "speaker_reference.wav")
 
     if not os.path.exists(ref_audio):
-        for candidate in ["/tmp/speaker_reference.wav", "/tmp/ref_edge.wav",
-            "/tmp/edge_tts_long.mp3", "/tmp/edge_tts_test.mp3"]:
-            if os.path.exists(candidate):
-                ref_audio = candidate
+        for candidate in ["speaker_reference.wav", "ref_edge.wav",
+            "edge_tts_long.mp3", "edge_tts_test.mp3"]:
+            candidate_path = os.path.join(BASE_TMP_DIR, candidate)
+            if os.path.exists(candidate_path):
+                ref_audio = candidate_path
                 break
 
     # Auto-generate reference with Edge TTS if none exists
@@ -126,7 +128,7 @@ async def overdub_audio_service(req: OverdubRequest):
             detail="No reference audio found. Provide original_audio_url or place speaker_reference.wav in /tmp/.",
         )
 
-    output_path = f"/tmp/overdub_{hash(req.text)}.wav"
+    output_path = safe_tmp_path(f"overdub_{hash(req.text)}.wav")
 
     try:
         import subprocess
@@ -137,7 +139,7 @@ async def overdub_audio_service(req: OverdubRequest):
             "--ref_audio", ref_audio,
             "--ref_text", ref_text or "Hello, this is a reference voice.",
             "--gen_text", req.text,
-            "--output_dir", "/tmp",
+            "--output_dir", BASE_TMP_DIR,
             "--output_file", os.path.basename(output_path),
             "--remove_silence",
             "--device", "cpu",
@@ -163,7 +165,8 @@ async def overdub_audio_service(req: OverdubRequest):
 
 async def split_stems_service(req: StemSplitRequest):
     """Separate audio into vocal/instrumental stems using Demucs, Spleeter, or librosa."""
-    audio_path = f"/tmp/{req.audio_id}.wav"
+    safe_audio_id = safe_slug(req.audio_id, "audio")
+    audio_path = safe_tmp_path(f"{safe_audio_id}.wav")
     stems_output = {}
     method = None
 
@@ -182,7 +185,7 @@ async def split_stems_service(req: StemSplitRequest):
         try:
             from spleeter.separator import Separator
             separator = Separator('spleeter:{}stems'.format(min(req.stems, 5)))
-            out_dir = f"/tmp/spleeter_{req.audio_id}"
+            out_dir = safe_tmp_path(f"spleeter_{safe_audio_id}")
             separator.separate_to_file(audio_path, out_dir)
             import glob
             for stem_file in glob.glob(f"{out_dir}/**/*.wav", recursive=True):
@@ -200,7 +203,7 @@ async def split_stems_service(req: StemSplitRequest):
             if os.path.exists(audio_path):
                 y, sr = librosa.load(audio_path, sr=44100)
                 y_harmonic, y_percussive = librosa.effects.hpss(y)
-                hpss_dir = f"/tmp/hpss_{req.audio_id}"
+                hpss_dir = safe_tmp_path(f"hpss_{safe_audio_id}")
                 os.makedirs(hpss_dir, exist_ok=True)
                 sf.write(f"{hpss_dir}/vocals.wav", y_harmonic, sr)
                 sf.write(f"{hpss_dir}/other.wav", y_percussive, sr)

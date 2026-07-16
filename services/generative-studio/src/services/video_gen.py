@@ -17,6 +17,7 @@ from src.models import (
 	StyleTransferRequest, GenerativeFillRequest, AvatarRequest
 )
 from upscale_pipeline import UpscalePipeline, UpscaleConfig
+from src.services.pathsafe import safe_slug, safe_tmp_path
 
 
 async def generate_video_service(req: DiffusionRequest):
@@ -59,7 +60,7 @@ async def generate_video_service(req: DiffusionRequest):
 				raise HTTPException(status_code=502, detail="Modal returned no video")
 
 			video_bytes = base64.b64decode(video_b64)
-			output_path = f"/tmp/generated_{hash(req.prompt)}.mp4"
+			output_path = safe_tmp_path(f"generated_{hash(req.prompt)}.mp4")
 			with open(output_path, "wb") as f:
 				f.write(video_bytes)
 
@@ -83,8 +84,9 @@ async def generate_video_service(req: DiffusionRequest):
 
 async def upscale_video_service(req: UpscaleRequest):
 	"""Upscale video resolution using RealESRGAN (2x or 4x)."""
-	video_path = f"/tmp/{req.video_id}.mp4"
-	output_path = f"/tmp/{req.video_id}_{req.scale}x.mp4"
+	safe_video_id = safe_slug(req.video_id, "video")
+	video_path = safe_tmp_path(f"{safe_video_id}.mp4")
+	output_path = safe_tmp_path(f"{safe_video_id}_{int(req.scale)}x.mp4")
 	config = UpscaleConfig(scale=req.scale, model="RealESRGAN_x4plus" if req.scale == 4 else "RealESRGAN_x2plus")
 	pipeline = UpscalePipeline(config)
 	loop = asyncio.get_running_loop()
@@ -98,7 +100,8 @@ async def extract_nerf_service(req: NeRFRequest):
 
 
 async def style_transfer_service(req: StyleTransferRequest):
-	video_path = f"/tmp/{req.video_id}.mp4"; output_path = f"/tmp/{req.video_id}_styled.mp4"
+	safe_video_id = safe_slug(req.video_id, "video")
+	video_path = safe_tmp_path(f"{safe_video_id}.mp4"); output_path = safe_tmp_path(f"{safe_video_id}_styled.mp4")
 	if not os.path.exists(video_path): raise HTTPException(status_code=500, detail="Video not found")
 	try:
 		import cv2, numpy as np, subprocess, tempfile
@@ -134,7 +137,8 @@ async def style_transfer_service(req: StyleTransferRequest):
 
 
 async def generative_fill_service(req: GenerativeFillRequest):
-	video_path = f"/tmp/{req.video_id}.mp4"; mask_path = f"/tmp/{req.video_id}_mask.png"; output_path = f"/tmp/{req.video_id}_filled.mp4"
+	safe_video_id = safe_slug(req.video_id, "video")
+	video_path = safe_tmp_path(f"{safe_video_id}.mp4"); mask_path = safe_tmp_path(f"{safe_video_id}_mask.png"); output_path = safe_tmp_path(f"{safe_video_id}_filled.mp4")
 	if not os.path.exists(video_path): raise HTTPException(status_code=503, detail="Video not found")
 	try:
 		import cv2, numpy as np, subprocess, tempfile
@@ -167,9 +171,9 @@ async def generative_fill_service(req: GenerativeFillRequest):
 
 async def generate_avatar_service(req: AvatarRequest):
 	try:
-		from src.services.audio_gen import _edge_tts, _safe_slug
+		from src.services.audio_gen import _edge_tts
 		audio_bytes = await _edge_tts(req.script, "en-US")
-		output_path = f"/tmp/avatar_{_safe_slug(req.avatar_model, 'avatar')}.mp3"
+		output_path = safe_tmp_path(f"avatar_{safe_slug(req.avatar_model, 'avatar')}.mp3")
 		with open(output_path, "wb") as f: f.write(audio_bytes)
 		return {"success": True, "avatar_id": req.avatar_model, "script": req.script, "source": "edge-tts", "audio_url": f"file://{output_path}", "bytes": len(audio_bytes)}
 	except Exception as e: print(f"[GenerativeStudio] Avatar error: {e}")
