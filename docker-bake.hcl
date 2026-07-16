@@ -53,44 +53,44 @@ target "web" {
   args = {
     BUILDKIT_INLINE_CACHE = "1"
   }
-  cache-from = ["type=registry,ref=${REGISTRY}/lazynext-web:buildcache"]
-  cache-to   = ["type=registry,ref=${REGISTRY}/lazynext-web:buildcache,mode=max"]
+  cache-from = ["type=gha,scope=web"]
+  cache-to   = ["type=gha,scope=web,mode=max"]
 }
 
 target "ai-agents" {
-  context    = "./services/ai-agents"
-  dockerfile = "Dockerfile"
+  context    = "."
+  dockerfile = "services/ai-agents/Dockerfile"
   platforms  = split(",", PLATFORMS)
   tags       = ["${REGISTRY}/lazynext-ai-agents:${TAG}"]
-  cache-from = ["type=registry,ref=${REGISTRY}/lazynext-ai-agents:buildcache"]
-  cache-to   = ["type=registry,ref=${REGISTRY}/lazynext-ai-agents:buildcache,mode=max"]
+  cache-from = ["type=gha,scope=ai-agents"]
+  cache-to   = ["type=gha,scope=ai-agents,mode=max"]
 }
 
 target "render-service" {
-  context    = "./services/render-service"
-  dockerfile = "Dockerfile"
+  context    = "."
+  dockerfile = "services/render-service/Dockerfile"
   platforms  = split(",", PLATFORMS)
   tags       = ["${REGISTRY}/lazynext-render-service:${TAG}"]
-  cache-from = ["type=registry,ref=${REGISTRY}/lazynext-render-service:buildcache"]
-  cache-to   = ["type=registry,ref=${REGISTRY}/lazynext-render-service:buildcache,mode=max"]
+  cache-from = ["type=gha,scope=render-service"]
+  cache-to   = ["type=gha,scope=render-service,mode=max"]
 }
 
 target "pre-processing" {
-  context    = "./services/pre-processing"
-  dockerfile = "Dockerfile"
+  context    = "."
+  dockerfile = "services/pre-processing/Dockerfile"
   platforms  = split(",", PLATFORMS)
   tags       = ["${REGISTRY}/lazynext-pre-processing:${TAG}"]
-  cache-from = ["type=registry,ref=${REGISTRY}/lazynext-pre-processing:buildcache"]
-  cache-to   = ["type=registry,ref=${REGISTRY}/lazynext-pre-processing:buildcache,mode=max"]
+  cache-from = ["type=gha,scope=pre-processing"]
+  cache-to   = ["type=gha,scope=pre-processing,mode=max"]
 }
 
 target "generative-studio" {
-  context    = "./services/generative-studio"
-  dockerfile = "Dockerfile"
+  context    = "."
+  dockerfile = "services/generative-studio/Dockerfile"
   platforms  = split(",", PLATFORMS)
   tags       = ["${REGISTRY}/lazynext-generative-studio:${TAG}"]
-  cache-from = ["type=registry,ref=${REGISTRY}/lazynext-generative-studio:buildcache"]
-  cache-to   = ["type=registry,ref=${REGISTRY}/lazynext-generative-studio:buildcache,mode=max"]
+  cache-from = ["type=gha,scope=generative-studio"]
+  cache-to   = ["type=gha,scope=generative-studio,mode=max"]
 }
 
 target "db-migrate" {
@@ -98,8 +98,8 @@ target "db-migrate" {
   dockerfile = "Dockerfile.migrate"
   platforms  = split(",", PLATFORMS)
   tags       = ["${REGISTRY}/lazynext-db-migrate:${TAG}"]
-  cache-from = ["type=registry,ref=${REGISTRY}/lazynext-db-migrate:buildcache"]
-  cache-to   = ["type=registry,ref=${REGISTRY}/lazynext-db-migrate:buildcache,mode=max"]
+  cache-from = ["type=gha,scope=db-migrate"]
+  cache-to   = ["type=gha,scope=db-migrate,mode=max"]
 }
 
 target "collab-server" {
@@ -107,17 +107,17 @@ target "collab-server" {
   dockerfile = "services/collab-server/Dockerfile"
   platforms  = split(",", PLATFORMS)
   tags       = ["${REGISTRY}/lazynext-collab-server:${TAG}"]
-  cache-from = ["type=registry,ref=${REGISTRY}/lazynext-collab-server:buildcache"]
-  cache-to   = ["type=registry,ref=${REGISTRY}/lazynext-collab-server:buildcache,mode=max"]
+  cache-from = ["type=gha,scope=collab-server"]
+  cache-to   = ["type=gha,scope=collab-server,mode=max"]
 }
 
 target "analytics-service" {
-  context    = "./services/analytics-service"
-  dockerfile = "Dockerfile"
+  context    = "."
+  dockerfile = "services/analytics-service/Dockerfile"
   platforms  = split(",", PLATFORMS)
   tags       = ["${REGISTRY}/lazynext-analytics-service:${TAG}"]
-  cache-from = ["type=registry,ref=${REGISTRY}/lazynext-analytics-service:buildcache"]
-  cache-to   = ["type=registry,ref=${REGISTRY}/lazynext-analytics-service:buildcache,mode=max"]
+  cache-from = ["type=gha,scope=analytics-service"]
+  cache-to   = ["type=gha,scope=analytics-service,mode=max"]
 }
 
 target "api-gateway" {
@@ -125,8 +125,8 @@ target "api-gateway" {
   dockerfile = "rust/api-gateway/Dockerfile"
   platforms  = split(",", PLATFORMS)
   tags       = ["${REGISTRY}/lazynext-api-gateway:${TAG}"]
-  cache-from = ["type=registry,ref=${REGISTRY}/lazynext-api-gateway:buildcache"]
-  cache-to   = ["type=registry,ref=${REGISTRY}/lazynext-api-gateway:buildcache,mode=max"]
+  cache-from = ["type=gha,scope=api-gateway"]
+  cache-to   = ["type=gha,scope=api-gateway,mode=max"]
 }
 
 // ── GPU Images ─────────────────────────────────────────────────
