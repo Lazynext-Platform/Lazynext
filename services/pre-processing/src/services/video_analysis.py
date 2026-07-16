@@ -12,6 +12,7 @@ from src.models import (
     ProcessRequest, TrackRequest, ReframeRequest,
     RetouchRequest, ExtractHookRequest, ProxyRequest, IngestRequest
 )
+from src.services.pathsafe import safe_tmp_path
 
 async def process_video_service(req: ProcessRequest):
     """Execute one or more video processing operations (auto_editor, scene_detect, clean_audio).
@@ -28,7 +29,7 @@ async def process_video_service(req: ProcessRequest):
 
     audio_samples = None
     sample_rate = 44100
-    audio_path = f"/tmp/{req.video_id}.wav"
+    audio_path = safe_tmp_path(f"{req.video_id}.wav")
 
     try:
         import numpy as np
@@ -110,7 +111,7 @@ async def process_video_service(req: ProcessRequest):
                 })
 
         elif op == "scene_detect":
-            video_path = f"/tmp/{req.video_id}.mp4"
+            video_path = safe_tmp_path(f"{req.video_id}.mp4")
             cuts = []
             try:
                 import cv2
@@ -226,7 +227,7 @@ async def track_motion_service(req: TrackRequest):
         import cv2
         import numpy as np
 
-        video_path = f"/tmp/{req.video_id}.mp4"
+        video_path = safe_tmp_path(f"{req.video_id}.mp4")
         if os.path.exists(video_path):
             cap = cv2.VideoCapture(video_path)
             if cap.isOpened():
@@ -294,8 +295,8 @@ async def auto_reframe_service(req: ReframeRequest):
     Returns:
         dict with success, dimensions, method, keyframes, and output_url.
     """
-    video_path = f"/tmp/{req.video_id}.mp4"
-    output_path = f"/tmp/{req.video_id}_reframed.mp4"
+    video_path = safe_tmp_path(f"{req.video_id}.mp4")
+    output_path = safe_tmp_path(f"{req.video_id}_reframed.mp4")
     method = "center_crop"
 
     # Parse target aspect ratio (e.g. "9:16" → width/height = 9/16)
@@ -422,8 +423,8 @@ async def retouch_service(req: RetouchRequest):
     Raises:
         HTTPException: 503 if OpenCV unavailable, 500 on processing error.
     """
-    video_path = f"/tmp/{req.video_id}.mp4"
-    output_path = f"/tmp/{req.video_id}_retouched.mp4"
+    video_path = safe_tmp_path(f"{req.video_id}.mp4")
+    output_path = safe_tmp_path(f"{req.video_id}_retouched.mp4")
     method = None
     frames_processed = 0
 
@@ -536,7 +537,7 @@ async def extract_hook_service(req: ExtractHookRequest):
     Returns:
         dict with success, hook_start_time, hook_duration, and detection method.
     """
-    video_path = f"/tmp/{req.video_id}.mp4"
+    video_path = safe_tmp_path(f"{req.video_id}.mp4")
     hook_start = 0.0
     hook_end = req.target_duration
     method = "ffmpeg_rms"
@@ -616,8 +617,8 @@ async def generate_proxies_service(req: ProxyRequest):
     Returns:
         dict with success, proxy_quality, scale, bitrate, method, and proxy_url.
     """
-    video_path = f"/tmp/{req.video_id}.mp4"
-    output_path = f"/tmp/{req.video_id}_proxy.mp4"
+    video_path = safe_tmp_path(f"{req.video_id}.mp4")
+    output_path = safe_tmp_path(f"{req.video_id}_proxy.mp4")
     quality_presets = {
         "360p_low":    ("-2:360",  "800k",  "ultrafast"),
         "480p_med":    ("-2:480",  "1500k", "veryfast"),

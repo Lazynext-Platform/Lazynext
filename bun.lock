@@ -231,6 +231,7 @@
         "@opentelemetry/sdk-node": "^0.220.0",
         "cors": "^2.8.6",
         "express": "^5.2.1",
+        "express-rate-limit": "^8.5.2",
         "jsonwebtoken": "^9.0.2",
         "socket.io": "^4.8.3",
       },
@@ -253,6 +254,7 @@
         "@opentelemetry/exporter-trace-otlp-grpc": "^0.220.0",
         "@opentelemetry/sdk-node": "^0.220.0",
         "express": "^5.2.1",
+        "express-rate-limit": "^8.5.2",
         "kafkajs": "^2.2.4",
       },
       "devDependencies": {

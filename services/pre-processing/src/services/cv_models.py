@@ -12,6 +12,7 @@ import httpx
 from fastapi import HTTPException
 from src.models import RotoscopeRequest, NeRFRequest
 import sys
+from src.services.pathsafe import safe_tmp_path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 # Gracefully degrade: CV pipelines need scipy/opencv/onnx which have no
@@ -56,7 +57,7 @@ async def rotoscope_service(req: RotoscopeRequest):
             detail="Rotoscoping unavailable: scipy/opencv/onnx are not installed (Python 3.13 wheel gap).",
         )
 
-    video_path = f"/tmp/{req.video_id}.mp4"
+    video_path = safe_tmp_path(f"{req.video_id}.mp4")
     mask_dir = f"/tmp/masks_{req.video_id}"
     os.makedirs(mask_dir, exist_ok=True)
     
@@ -115,7 +116,7 @@ async def extract_nerf_service(req: NeRFRequest):
             detail="NeRF extraction unavailable: scipy/opencv/onnx are not installed (Python 3.13 wheel gap).",
         )
 
-    video_path = f"/tmp/{req.video_id}.mp4"
+    video_path = safe_tmp_path(f"{req.video_id}.mp4")
     output_dir = f"/tmp/nerf_{req.video_id}"
 
     config = NerfConfig(method=req.method)

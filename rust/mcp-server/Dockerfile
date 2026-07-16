@@ -35,4 +35,8 @@ USER mcpserver
 
 # MCP servers use stdio, not TCP.  No port is exposed.
 # STDIN/STDOUT carry JSON-RPC 2.0 messages.
+# Health is verified by confirming the server binary is present and executable
+# (there is no network endpoint to probe for a stdio service).
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD ["/usr/local/bin/mcp_server", "--health-check"]
 CMD ["/usr/local/bin/mcp_server"]

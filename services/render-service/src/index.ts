@@ -367,7 +367,16 @@ app.post(
 	express.raw({ type: "application/octet-stream", limit: "200mb" }),
 	async (req: Request, res: Response) => {
 		const jobId = req.params.jobId as string;
-		const seq = Number(req.headers["x-frame-seq"] as string);
+		// Headers may be string | string[]; normalise to a single value before
+		// numeric parsing to avoid type-confusion.
+		const rawSeq = req.headers["x-frame-seq"];
+		const seqHeader = Array.isArray(rawSeq) ? rawSeq[0] : rawSeq;
+		const seq = Number.parseInt(seqHeader ?? "", 10);
+		if (!Number.isInteger(seq) || seq < 0) {
+			return res
+				.status(400)
+				.json({ error: "Invalid or missing x-frame-seq header" });
+		}
 		const job = getFrameJob(jobId);
 		if (!job) return res.status(404).json({ error: "Job not found" });
 
@@ -886,14 +895,28 @@ app.post("/api/v1/publish", async (req: Request, res: Response) => {
 		let videoPath = video_url;
 		if (video_url.startsWith("http://") || video_url.startsWith("https://")) {
 			const allowedOrigins = getAllowedDownloadOrigins();
-			const urlObj = new URL(video_url);
-			if (!allowedOrigins.some((origin) => urlObj.hostname.endsWith(origin))) {
+			let urlObj: URL;
+			try {
+				urlObj = new URL(video_url);
+			} catch {
+				return res.status(400).json({ error: "Invalid video_url" });
+			}
+			// Enforce HTTPS and an exact host / dot-bounded subdomain match to
+			// prevent SSRF and allowlist-suffix bypasses (e.g. evillazynext.com).
+			const host = urlObj.hostname.toLowerCase();
+			const originAllowed =
+				urlObj.protocol === "https:" &&
+				allowedOrigins.some((origin) => {
+					const o = origin.toLowerCase();
+					return host === o || host.endsWith(`.${o}`);
+				});
+			if (!originAllowed) {
 				return res.status(400).json({
-					error: `Download from '${urlObj.hostname}' is not allowed. Only trusted storage origins are permitted.`,
+					error: `Download from '${urlObj.hostname}' is not allowed. Only trusted HTTPS storage origins are permitted.`,
 				});
 			}
 
-			const downloadResp = await fetch(video_url);
+			const downloadResp = await fetch(urlObj.href);
 			if (!downloadResp.ok)
 				throw new Error(`Download failed: ${downloadResp.status}`);
 

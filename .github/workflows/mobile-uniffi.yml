@@ -28,6 +28,9 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
 
+permissions:
+  contents: read
+
 jobs:
   generate-bindings:
     runs-on: ubuntu-latest

@@ -14,7 +14,9 @@ async function getAuthToken(): Promise<string | null> {
 
 /** Build request headers with the stored auth token for API Gateway calls. */
 async function authHeaders(): Promise<Record<string, string>> {
-	const headers: Record<string, string> = { "Content-Type": "application/json" };
+	const headers: Record<string, string> = {
+		"Content-Type": "application/json",
+	};
 	const token = await getAuthToken();
 	if (token) {
 		headers["Authorization"] = `Bearer ${token}`;
@@ -46,10 +48,20 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 		}
 
 		try {
-			const stream = (video as HTMLVideoElement & { captureStream?(): MediaStream; mozCaptureStream?(): MediaStream }).captureStream
-				? (video as HTMLVideoElement & { captureStream(): MediaStream }).captureStream()
-				: (video as HTMLVideoElement & { mozCaptureStream?(): MediaStream }).mozCaptureStream
-					? (video as HTMLVideoElement & { mozCaptureStream(): MediaStream }).mozCaptureStream()
+			const stream = (
+				video as HTMLVideoElement & {
+					captureStream?(): MediaStream;
+					mozCaptureStream?(): MediaStream;
+				}
+			).captureStream
+				? (
+						video as HTMLVideoElement & { captureStream(): MediaStream }
+					).captureStream()
+				: (video as HTMLVideoElement & { mozCaptureStream?(): MediaStream })
+							.mozCaptureStream
+					? (
+							video as HTMLVideoElement & { mozCaptureStream(): MediaStream }
+						).mozCaptureStream()
 					: null;
 			if (!stream) {
 				sendResponse({
@@ -63,7 +75,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 				mimeType: "video/webm",
 			});
 			let chunkIndex = 0;
-			const sessionId = `rec_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+			const sessionId = `rec_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
 
 			recorder.ondataavailable = async (e) => {
 				if (e.data.size === 0) return;

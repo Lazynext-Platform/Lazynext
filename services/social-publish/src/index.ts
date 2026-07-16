@@ -627,6 +627,19 @@ function generatePlatformMetadata(
 	platform: string,
 	input: MetadataInput,
 ): Omit<MetadataResult, "success"> {
+	// Constrain platform to a known allowlist so it can never dispatch to an
+	// inherited Object method (e.g. "constructor"/"hasOwnProperty").
+	const ALLOWED_PLATFORMS = [
+		"tiktok",
+		"youtube",
+		"instagram",
+		"twitter",
+	] as const;
+	const safePlatform = (ALLOWED_PLATFORMS as readonly string[]).includes(
+		platform,
+	)
+		? platform
+		: "youtube";
 	const topic = input.videoTopic || input.tags.join(" ") || "video";
 	const baseTitle = input.baseTitle || topic;
 
@@ -671,14 +684,14 @@ function generatePlatformMetadata(
 		twitter: ["content", "creator", "video", "lazynext"],
 	};
 
-	const title = titleTemplates[platform] || baseTitle;
+	const title = titleTemplates[safePlatform] || baseTitle;
 	const description =
 		input.baseDescription ||
-		descTemplates[platform]?.(topic, input.tags) ||
+		descTemplates[safePlatform]?.(topic, input.tags) ||
 		topic;
 
 	// Merge user tags with platform hashtags, deduplicate
-	const baseHashtags = hashtagBases[platform] || [];
+	const baseHashtags = hashtagBases[safePlatform] || [];
 	const userHashtags = (input.tags || []).map((t: string) =>
 		t.replace(/^#/, ""),
 	);
@@ -690,7 +703,7 @@ function generatePlatformMetadata(
 		description,
 		hashtags,
 		suggested_posting_time:
-			bestTimes[platform] || "Weekdays 12 PM (local timezone)",
+			bestTimes[safePlatform] || "Weekdays 12 PM (local timezone)",
 	};
 }
 

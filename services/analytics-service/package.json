@@ -17,12 +17,13 @@
     "@opentelemetry/exporter-trace-otlp-grpc": "^0.220.0",
     "@opentelemetry/sdk-node": "^0.220.0",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
     "kafkajs": "^2.2.4"
   },
-	"devDependencies": {
-		"@types/express": "^5.0.6",
-		"@types/node": "^26.0.1",
-		"bun-types": "^1.3.14",
-		"typescript": "^6.0.3"
-	}
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.0.1",
+    "bun-types": "^1.3.14",
+    "typescript": "^6.0.3"
+  }
 }
