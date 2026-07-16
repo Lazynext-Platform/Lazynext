@@ -1,7 +1,7 @@
 # ML/Computer Vision packages — install if wheels are available, skip otherwise.
 # The service degrades gracefully when these are absent (see cv_models.py).
 # Python 3.13 has incomplete pre-built wheel support for these.
-scipy>=1.14,<1.15
+scipy>=1.18.0,<1.19
 opencv-python>=5.0.0.93
 onnxruntime>=1.27.0,<1.28
 rembg>=2.0.76
