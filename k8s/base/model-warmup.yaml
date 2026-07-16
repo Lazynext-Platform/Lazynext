@@ -26,6 +26,12 @@ spec:
           containers:
             - name: warmup-whisper
               image: python:3.12-slim
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+                seccompProfile:
+                  type: RuntimeDefault
               command:
                 - sh
                 - -c
@@ -94,6 +100,12 @@ spec:
       containers:
         - name: warmup-all
           image: python:3.12-slim
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
           command:
             - sh
             - -c

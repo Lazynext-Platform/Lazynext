@@ -130,9 +130,22 @@ spec:
       labels:
         app: postgres-exporter
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: postgres-exporter
           image: quay.io/prometheuscommunity/postgres-exporter:v0.15.0
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
           ports:
             - name: metrics
               containerPort: 9187
@@ -198,9 +211,22 @@ spec:
       labels:
         app: redis-exporter
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 59000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: redis-exporter
           image: oliver006/redis_exporter:v1.62.0
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
           ports:
             - name: metrics
               containerPort: 9121

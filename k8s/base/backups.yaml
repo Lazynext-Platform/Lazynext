@@ -25,6 +25,14 @@ spec:
           containers:
             - name: pg-dump
               image: postgres:17-alpine
+              securityContext:
+                allowPrivilegeEscalation: false
+                runAsNonRoot: true
+                runAsUser: 70
+                capabilities:
+                  drop: ["ALL"]
+                seccompProfile:
+                  type: RuntimeDefault
               command:
                 - sh
                 - -c
@@ -102,6 +110,14 @@ spec:
           containers:
             - name: redis-backup
               image: redis:8-alpine
+              securityContext:
+                allowPrivilegeEscalation: false
+                runAsNonRoot: true
+                runAsUser: 999
+                capabilities:
+                  drop: ["ALL"]
+                seccompProfile:
+                  type: RuntimeDefault
               command:
                 - sh
                 - -c
@@ -181,6 +197,14 @@ spec:
           containers:
             - name: pg-maintenance
               image: postgres:17-alpine
+              securityContext:
+                allowPrivilegeEscalation: false
+                runAsNonRoot: true
+                runAsUser: 70
+                capabilities:
+                  drop: ["ALL"]
+                seccompProfile:
+                  type: RuntimeDefault
               command:
                 - sh
                 - -c
