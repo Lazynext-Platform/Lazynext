@@ -9,21 +9,31 @@
   <meta charset="utf-8">
   <title>Lazynext Capture</title>
   <style>
-    :root {
+    :root, html.light {
       --bg-main: #fcfcfc;
       --text-primary: #09090b;
       --text-secondary: #71717a;
       --accent: #00d4df;
       --accent-hover: #00b3bc;
+      color-scheme: light;
     }
     @media (prefers-color-scheme: dark) {
-      :root {
+      :root:not(.light) {
         --bg-main: #121212;
         --text-primary: #ffffff;
         --text-secondary: #aaaaaa;
         --accent: #00d4df;
         --accent-hover: #00b3bc;
+        color-scheme: dark;
       }
+    }
+    html.dark {
+      --bg-main: #121212;
+      --text-primary: #ffffff;
+      --text-secondary: #aaaaaa;
+      --accent: #00d4df;
+      --accent-hover: #00b3bc;
+      color-scheme: dark;
     }
     body {
       width: 250px;
