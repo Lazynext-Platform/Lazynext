@@ -108,6 +108,13 @@ impl Render for Dashboard {
             }
         }
 
+        let current_override = std::env::var("LAZYNEXT_THEME").unwrap_or_else(|_| "system".to_string());
+        let mode_label = if current_override == "system" {
+            format!("Theme: System ({:?})", theme.mode)
+        } else {
+            format!("Theme: {}", current_override)
+        };
+
         div()
             .flex()
             .flex_col()
@@ -122,8 +129,26 @@ impl Render for Dashboard {
                     .top_4()
                     .right_4()
                     .text_xs()
-                    .text_color(theme.text_muted)
-                    .child(format!("Mode: {:?}", theme.mode)),
+                    .font_weight(FontWeight::BOLD)
+                    .text_color(theme.text_primary)
+                    .bg(theme.bg_panel)
+                    .border_1()
+                    .border_color(theme.border)
+                    .rounded_md()
+                    .p_2()
+                    .cursor_pointer()
+                    .hover(|s| s.bg(theme.bg_hover))
+                    .on_mouse_down(gpui::MouseButton::Left, move |_, _, _cx| {
+                        let next = match current_override.as_str() {
+                            "system" => "dark",
+                            "dark" => "light",
+                            _ => "system",
+                        };
+                        unsafe {
+                            std::env::set_var("LAZYNEXT_THEME", next);
+                        }
+                    })
+                    .child(mode_label),
             )
             .child(
                 div()

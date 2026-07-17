@@ -167,6 +167,12 @@ impl Render for EditorShell {
         }
 
         let theme = crate::theme::Theme::from_appearance(_window.appearance());
+        let current_override = std::env::var("LAZYNEXT_THEME").unwrap_or_else(|_| "system".to_string());
+        let mode_label = if current_override == "system" {
+            format!("Theme: System ({:?})", theme.mode)
+        } else {
+            format!("Theme: {}", current_override)
+        };
         let bg_color = theme.bg_main;
         let panel_bg = theme.bg_panel;
         let border_color = theme.border;
@@ -259,6 +265,33 @@ impl Render for EditorShell {
             .h_full()
             .bg(bg_color)
             .text_color(theme.text_primary)
+            .child(
+                div()
+                    .absolute()
+                    .top_2()
+                    .right_2()
+                    .text_xs()
+                    .font_weight(FontWeight::BOLD)
+                    .text_color(theme.text_primary)
+                    .bg(theme.bg_panel)
+                    .border_1()
+                    .border_color(theme.border)
+                    .rounded_md()
+                    .p_1()
+                    .cursor_pointer()
+                    .hover(|s| s.bg(theme.bg_hover))
+                    .on_mouse_down(gpui::MouseButton::Left, move |_, _, _cx| {
+                        let next = match current_override.as_str() {
+                            "system" => "dark",
+                            "dark" => "light",
+                            _ => "system",
+                        };
+                        unsafe {
+                            std::env::set_var("LAZYNEXT_THEME", next);
+                        }
+                    })
+                    .child(mode_label)
+            )
             .child(
                 // Left Toolbar
                 div()
