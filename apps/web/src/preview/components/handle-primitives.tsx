@@ -435,7 +435,7 @@ export function LineOverlay({
 					...sharedStyle,
 					top: cy - 0.5,
 					height: 1,
-					backgroundColor: "white",
+					backgroundColor: "var(--text-primary)",
 					opacity: 0.75,
 				}}
 			/>
