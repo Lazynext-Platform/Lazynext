@@ -156,11 +156,11 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 						initial={{ scale: 0.95, opacity: 0, y: 10 }}
 						animate={{ scale: 1, opacity: 1, y: 0 }}
 						exit={{ scale: 0.95, opacity: 0, y: 10 }}
-						className="relative w-full max-w-md p-6 overflow-hidden border rounded-2xl bg-panel/80 border-white/10 shadow-2xl backdrop-blur-xl"
+						className="relative w-full max-w-md p-6 overflow-hidden border rounded-2xl bg-panel border-border shadow-2xl backdrop-blur-xl"
 					>
 						<button
 							onClick={onClose}
-							className="absolute top-4 right-4 p-2 text-muted hover:text-white rounded-full hover:bg-white/10 transition-colors"
+							className="absolute top-4 right-4 p-2 text-muted hover:text-foreground rounded-full hover:bg-hover transition-colors"
 						>
 							<X className="w-4 h-4" />
 						</button>
@@ -179,7 +179,7 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 						<form onSubmit={handleSubmit} className="space-y-4">
 							{!isLogin && (
 								<div className="space-y-2">
-								<label htmlFor="login-name" className="text-sm font-medium text-white/80">Name</label>
+								<label htmlFor="login-name" className="text-sm font-medium text-foreground">Name</label>
 								<input
 									id="login-name"
 									type="text"
@@ -187,14 +187,14 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 										onChange={(e) => setName(e.target.value)}
 										required
 										autoComplete="name"
-										className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/50 transition-all text-sm"
+										className="w-full px-4 py-2 bg-glass border border-border rounded-lg focus:outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/50 transition-all text-sm"
 										placeholder="Your name"
 									/>
 								</div>
 							)}
 
 							<div className="space-y-2">
-								<label htmlFor="login-email" className="text-sm font-medium text-white/80">Email</label>
+								<label htmlFor="login-email" className="text-sm font-medium text-foreground">Email</label>
 								<div className="relative">
 									<Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
 									<input
@@ -204,7 +204,7 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 										onChange={(e) => setEmail(e.target.value)}
 										required
 										autoComplete="email"
-										className="w-full pl-10 pr-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/50 transition-all text-sm"
+										className="w-full pl-10 pr-4 py-2 bg-glass border border-border rounded-lg focus:outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/50 transition-all text-sm"
 										placeholder="editor@lazynext.com"
 									/>
 								</div>
@@ -212,7 +212,7 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 
 							{(!isLogin || loginMode === "password") && (
 								<div className="space-y-2">
-								<label htmlFor="login-password" className="text-sm font-medium text-white/80">Password</label>
+								<label htmlFor="login-password" className="text-sm font-medium text-foreground">Password</label>
 								<div className="relative">
 									<Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
 									<input
@@ -223,7 +223,7 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 											required
 											minLength={8}
 											autoComplete={isLogin ? "current-password" : "new-password"}
-											className="w-full pl-10 pr-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/50 transition-all text-sm"
+											className="w-full pl-10 pr-4 py-2 bg-glass border border-border rounded-lg focus:outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/50 transition-all text-sm"
 											placeholder="••••••••"
 										/>
 									</div>
@@ -255,7 +255,7 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 							<button
 								type="submit"
 								disabled={isLoading}
-								className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white rounded-lg font-medium transition-all transform active:scale-[0.98] flex items-center justify-center gap-2"
+								className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-black rounded-lg font-bold font-medium transition-all transform active:scale-[0.98] flex items-center justify-center gap-2"
 							>
 								{isLoading ? (
 									<div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
