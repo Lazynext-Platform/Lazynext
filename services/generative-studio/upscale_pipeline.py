@@ -141,7 +141,7 @@ class UpscalePipeline:
             elapsed = time.perf_counter() - start_time
             # Final fallback: ffmpeg lanczos
             try:
-                method = self._upscale_ffmpeg_lanczos(video_path, output_path)
+                self._upscale_ffmpeg_lanczos(video_path, output_path)
                 return UpscaleResult(
                     success=True,
                     scale=self.config.scale,
@@ -226,7 +226,7 @@ class UpscalePipeline:
     
     def _upscale_realesrgan_cli(self, video_path: str, output_path: str) -> str:
         """Use the RealESRGAN CLI tool."""
-        model_path = self._find_model_file()
+        self._find_model_file()
         subprocess.run([
             "realesrgan-ncnn-vulkan",
             "-i", video_path,

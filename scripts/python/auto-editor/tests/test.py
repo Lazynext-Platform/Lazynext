@@ -289,11 +289,9 @@ class Runner:
 
     def test_example(self) -> None:
         out = self.main(["example.mp4"], [], output="example_ALTERED.mp4")
-        outdur = 0
         with av.open(out) as container:
             assert container.duration is not None
             assert container.duration > 17300000 and container.duration < 2 << 24
-            outdur = container.duration
 
             assert len(container.streams) == 2
             video = container.streams[0]
@@ -407,7 +405,7 @@ class Runner:
 
     def test_pcm_f32le(self):
         input = ["resources/wav/pcm-f32le.wav"]
-        out = self.main(input, ["--edit", "audio", "--debug"], "f32out.wav")
+        self.main(input, ["--edit", "audio", "--debug"], "f32out.wav")
 
     def test_margin(self):
         inputs = ["resources/testsrc.mp4"]  # only one ever.
@@ -1014,7 +1012,8 @@ class Runner:
         Files with audio before video in stream order must not produce black screens.
         Replicates a file created with: ffmpeg -i example.mp4 -map 0:a:0 -map 0:v:0 -c copy out.mp4
         """
-        import ctypes, math
+        import ctypes
+        import math
         input_path = os.path.join(self.temp_dir, "audio_first.mp4")
         fps, sr, duration, width, height = Fraction(30), 48000, 2, 320, 240
         with av.open(input_path, "w") as dst:
@@ -1099,7 +1098,8 @@ def run_tests(tests: list[Callable], args) -> None:
 
     if not os.environ.get("AE_PRIVATE_LK"):
         def make_skip(t):
-            f = lambda: (_ for _ in ()).throw(SkipTest())
+            def f():
+                return (_ for _ in ()).throw(SkipTest())
             f.__name__ = t.__name__
             return f
         tests = [make_skip(t) if getattr(t.__func__, "_requires_lk", False) else t for t in tests]

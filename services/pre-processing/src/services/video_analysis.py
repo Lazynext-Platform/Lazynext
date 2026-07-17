@@ -221,7 +221,7 @@ async def track_motion_service(req: TrackRequest):
     """
     tracker_name = "dev-fallback"
     keyframes = []
-    num_frames = max(req.end_frame - req.start_frame, 60)
+    max(req.end_frame - req.start_frame, 60)
 
     try:
         import cv2

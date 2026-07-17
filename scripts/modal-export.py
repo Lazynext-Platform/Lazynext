@@ -7,7 +7,6 @@ Pure PyTorch model loading.
 Converts PyTorch → ONNX → TensorFlow SavedModel on Modal GPU.
 """
 
-import modal
 from modal import App, Image, Volume
 
 app = App("lazynext-model-export")
@@ -94,7 +93,7 @@ def export_model(model_id: str, model_name: str):
 
 	if not state_dict:
 		print(f"  ⚠️  No weights found at {model_dir}")
-		print(f"  Please stage weights on Modal Volume first:")
+		print("  Please stage weights on Modal Volume first:")
 		print(f"      modal volume put lazynext-models {model_name}/ /models/volume/{model_name}/")
 		# Save config as placeholder
 		placeholder_config = {"model_name": model_name, "model_id": model_id, "status": "weights_missing"}
@@ -152,7 +151,7 @@ def export_model(model_id: str, model_name: str):
 		)
 
 		# Convert ONNX to TensorFlow SavedModel
-		print(f"  Converting ONNX → TensorFlow SavedModel...")
+		print("  Converting ONNX → TensorFlow SavedModel...")
 		subprocess.check_call([
 			sys.executable, "-m", "tf2onnx.convert",
 			"--onnx", onnx_path,
@@ -166,7 +165,7 @@ def export_model(model_id: str, model_name: str):
 		print(f"  Config saved to {output_dir}/config.json")
 
 	model_volume.commit()
-	print(f"[Modal Export] Done — volume committed")
+	print("[Modal Export] Done — volume committed")
 
 
 def _infer_config(state_dict: dict) -> dict:

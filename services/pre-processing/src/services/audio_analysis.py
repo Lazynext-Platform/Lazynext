@@ -136,7 +136,7 @@ async def enhance_audio_service(req: EnhanceAudioRequest):
                 knee = 6.0
                 makeup_gain = 10.0 ** (6.0 / 20.0)
 
-                threshold_linear = 10.0 ** (threshold / 20.0)
+                10.0 ** (threshold / 20.0)
                 knee_half = knee / 2.0
 
                 for i in range(len(ch)):

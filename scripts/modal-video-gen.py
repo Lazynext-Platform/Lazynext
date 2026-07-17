@@ -566,5 +566,5 @@ def download_weights():
 	save_file(vae.state_dict(), os.path.join(MODEL_DIR, "vae.safetensors"))
 
 	print(f"[Modal] Placeholder weights saved to {MODEL_DIR}")
-	print(f"[Modal] Replace with real SD v1.5 weights for actual image generation.")
+	print("[Modal] Replace with real SD v1.5 weights for actual image generation.")
 	model_volume.commit()

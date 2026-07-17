@@ -16,7 +16,6 @@ Usage:
 import pytest
 import httpx
 import os
-import asyncio
 
 # The api-gateway handles ingress. We assume it runs locally on port 8005 or is defined by API_GATEWAY_URL.
 API_GATEWAY_URL = os.getenv("API_GATEWAY_URL", "http://localhost:8005")

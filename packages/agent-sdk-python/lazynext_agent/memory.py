@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
-from typing import Generic, TypeVar
+from typing import TypeVar
 
 T = TypeVar("T")
 

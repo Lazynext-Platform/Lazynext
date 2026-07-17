@@ -10,12 +10,8 @@ Usage:
 """
 
 import sys
-import os
-import json
 import asyncio
 import shutil
-import subprocess
-import time
 from pathlib import Path
 
 # Add service paths
@@ -135,7 +131,7 @@ def test_audio_processing():
 
         # Enhance audio service
         from src.services.audio_analysis import enhance_audio_service
-        result = asyncio.run(
+        asyncio.run(
             enhance_audio_service_impl(signal.tolist(), sr)
         )
         assert_ok(True, "Audio processing module imported successfully")

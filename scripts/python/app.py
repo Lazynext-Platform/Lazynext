@@ -8,7 +8,6 @@ Usage:
 """
 
 import os
-import time
 import httpx
 
 from fastapi import FastAPI, BackgroundTasks
