@@ -9,28 +9,44 @@
   <meta charset="utf-8">
   <title>Lazynext Capture</title>
   <style>
+    :root {
+      --bg-main: #fcfcfc;
+      --text-primary: #09090b;
+      --text-secondary: #71717a;
+      --accent: #00d4df;
+      --accent-hover: #00b3bc;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-main: #121212;
+        --text-primary: #ffffff;
+        --text-secondary: #aaaaaa;
+        --accent: #00d4df;
+        --accent-hover: #00b3bc;
+      }
+    }
     body {
       width: 250px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       padding: 16px;
-      background-color: #121212;
-      color: #ffffff;
+      background-color: var(--bg-main);
+      color: var(--text-primary);
       margin: 0;
     }
     h2 {
       margin-top: 0;
       font-size: 18px;
-      color: #00d4df;
+      color: var(--accent);
     }
     p {
       font-size: 13px;
-      color: #aaaaaa;
+      color: var(--text-secondary);
       margin-bottom: 16px;
     }
     button {
       width: 100%;
       padding: 10px;
-      background-color: #00d4df;
+      background-color: var(--accent);
       color: #000000;
       border: none;
       border-radius: 6px;
@@ -40,10 +56,10 @@
       transition: background-color 0.2s;
     }
     button:hover {
-      background-color: #00e5f0;
+      background-color: var(--accent-hover);
     }
     button:active {
-      background-color: #00b3bc;
+      background-color: var(--accent-hover);
     }
     #status {
       margin-top: 12px;

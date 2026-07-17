@@ -176,13 +176,13 @@ function App() {
         display: "flex",
         flexDirection: "column",
         gap: "14px",
-        backgroundColor: "rgba(24,24,27,0.5)",
+        backgroundColor: "var(--bg-panel)",
         backdropFilter: "blur(16px)",
         width: "320px",
         minHeight: "240px",
-        border: "1px solid rgba(255,255,255,0.08)",
+        border: "1px solid var(--border-glass)",
         borderRadius: "24px",
-        color: "white",
+        color: "var(--text-primary)",
         fontFamily:
           'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
@@ -195,12 +195,12 @@ function App() {
           letterSpacing: "-0.5px",
         }}
       >
-        LAZYNEXT<span style={{ color: "#00e5ff" }}>.</span>
+        LAZYNEXT<span style={{ color: "var(--accent-primary)" }}>.</span>
       </h1>
 
       {detectedVideos.length > 0 ? (
         <>
-          <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.6)", margin: 0 }}>
+          <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: 0 }}>
             {detectedVideos.length} video{detectedVideos.length > 1 ? "s" : ""} detected
           </p>
 
@@ -211,20 +211,21 @@ function App() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                background: "rgba(255,255,255,0.05)",
+                background: "var(--bg-hover)",
                 borderRadius: "10px",
                 padding: "8px 12px",
-                border: "1px solid rgba(255,255,255,0.06)",
+                border: "1px solid var(--border-glass)",
               }}
             >
               <span
                 style={{
                   fontSize: "12px",
-                  color: "rgba(255,255,255,0.8)",
+                  color: "var(--text-primary)",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
                   maxWidth: "160px",
+                  opacity: 0.9,
                 }}
                 title={src}
               >
@@ -234,8 +235,8 @@ function App() {
                 onClick={() => handleImport(src)}
                 disabled={importing}
                 style={{
-                  background: "#00e5ff",
-                  color: "#050505",
+                  background: "var(--accent-primary)",
+                  color: "var(--text-on-accent)",
                   border: "none",
                   padding: "6px 14px",
                   borderRadius: "8px",
@@ -252,7 +253,7 @@ function App() {
           ))}
         </>
       ) : (
-        <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.5)", margin: 0 }}>
+        <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: 0 }}>
           No videos detected on this page.
           <br />
           Navigate to a page with video content and try again.
@@ -266,7 +267,7 @@ function App() {
             color: status.startsWith("✓") ? "#10b981" : "#f59e0b",
             margin: 0,
             padding: "8px 12px",
-            background: "rgba(255,255,255,0.05)",
+            background: "var(--bg-hover)",
             borderRadius: "8px",
           }}
         >
@@ -285,7 +286,7 @@ function App() {
           }}
           style={{
             background: "rgba(0, 229, 255, 0.1)",
-            color: "#00e5ff",
+            color: "var(--accent-primary)",
             border: "1px solid rgba(0, 229, 255, 0.3)",
             padding: "10px",
             borderRadius: "8px",
@@ -302,7 +303,7 @@ function App() {
         style={{
           marginTop: "16px",
           fontSize: "11px",
-          color: "rgba(255,255,255,0.3)",
+          color: "var(--text-muted)",
           textAlign: "center",
         }}
       >
