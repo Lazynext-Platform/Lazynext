@@ -766,7 +766,7 @@ function KeyframeIndicators({
 					icon={KeyframeIcon}
 					className={cn(
 						"size-3.5 text-black",
-						isIndicatorSelected ? "fill-primary" : "fill-white",
+						isIndicatorSelected ? "fill-primary" : "fill-foreground",
 					)}
 					strokeWidth={1.5}
 				/>
@@ -919,7 +919,7 @@ function ExpandedKeyframeLanes({
 										icon={KeyframeIcon}
 										className={cn(
 											"size-3.5 text-black mr-1",
-											isSelected ? "fill-primary" : "fill-white",
+											isSelected ? "fill-primary" : "fill-foreground",
 										)}
 										strokeWidth={1.5}
 									/>

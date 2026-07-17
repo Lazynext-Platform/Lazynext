@@ -23,7 +23,7 @@ export default async function SuperAdminDashboard() {
 	const aiMetrics = await adminData.getAIProviderMetrics();
 
 	return (
-		<div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)]">
+		<div className="min-h-screen bg-background text-foreground">
 			<Header />
 
 			<div className="flex flex-col md:flex-row max-w-7xl mx-auto py-8 px-4 gap-8">
@@ -39,21 +39,21 @@ export default async function SuperAdminDashboard() {
 						</Link>
 					<button
 						type="button"
-						className="flex items-center gap-3 px-4 py-3 text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] rounded-lg transition-colors"
+						className="flex items-center gap-3 px-4 py-3 text-muted hover:bg-hover hover:text-foreground rounded-lg transition-colors"
 					>
 						<Server className="w-5 h-5" />
 						Render Farm Nodes
 					</button>
 					<button
 						type="button"
-						className="flex items-center gap-3 px-4 py-3 text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] rounded-lg transition-colors"
+						className="flex items-center gap-3 px-4 py-3 text-muted hover:bg-hover hover:text-foreground rounded-lg transition-colors"
 					>
 						<Cpu className="w-5 h-5" />
 						AI Model Routing
 					</button>
 					<button
 						type="button"
-						className="flex items-center gap-3 px-4 py-3 text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] rounded-lg transition-colors"
+						className="flex items-center gap-3 px-4 py-3 text-muted hover:bg-hover hover:text-foreground rounded-lg transition-colors"
 					>
 						<ShieldAlert className="w-5 h-5" />
 						User Moderation
@@ -63,7 +63,7 @@ export default async function SuperAdminDashboard() {
 
 				{/* Main Content Area */}
 				<main className="flex-1 flex flex-col gap-6">
-					<div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[var(--border-glass)] pb-6">
+					<div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border pb-6">
 						<div>
 							<div className="flex items-center gap-3">
 								<h1 className="text-3xl font-bold tracking-tight text-foreground">
@@ -73,12 +73,12 @@ export default async function SuperAdminDashboard() {
 									LIVE
 								</span>
 							</div>
-							<p className="text-[var(--text-muted)] mt-1">
+							<p className="text-muted mt-1">
 								Lazynext Multi-Format SaaS Telemetry.
 							</p>
 						</div>
 						<div className="flex gap-3">
-							<button className="bg-[var(--bg-panel)] border border-[var(--border-glass)] text-[var(--text-primary)] px-4 py-2 rounded-lg font-medium hover:bg-[var(--bg-hover)] transition-colors">
+							<button className="bg-[var(--bg-panel)] border border-border text-foreground px-4 py-2 rounded-lg font-medium hover:bg-hover transition-colors">
 								Export Logs
 							</button>
 							<button className="bg-red-600 text-foreground px-4 py-2 rounded-lg font-medium hover:bg-red-500 transition-colors shadow-[0_0_15px_rgba(220,38,38,0.4)]">
@@ -93,32 +93,32 @@ export default async function SuperAdminDashboard() {
 						Infrastructure Health
 					</h2>
 					<div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-						<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] p-5 rounded-xl flex flex-col justify-between">
-							<h3 className="text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wider">
+						<div className="bg-[var(--bg-panel)] border border-border p-5 rounded-xl flex flex-col justify-between">
+							<h3 className="text-muted text-xs font-semibold uppercase tracking-wider">
 								Total Users
 							</h3>
 							<p className="text-4xl font-black mt-2 text-[var(--accent-primary)]">
 								{metrics.totalUsers.toLocaleString()}
 							</p>
 						</div>
-						<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] p-5 rounded-xl flex flex-col justify-between">
-							<h3 className="text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wider">
+						<div className="bg-[var(--bg-panel)] border border-border p-5 rounded-xl flex flex-col justify-between">
+							<h3 className="text-muted text-xs font-semibold uppercase tracking-wider">
 								Paid Subscribers
 							</h3>
 							<p className="text-4xl font-black mt-2 text-amber-400">
 								{metrics.activeSubscriptions}
 							</p>
 						</div>
-						<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] p-5 rounded-xl flex flex-col justify-between">
-							<h3 className="text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wider">
+						<div className="bg-[var(--bg-panel)] border border-border p-5 rounded-xl flex flex-col justify-between">
+							<h3 className="text-muted text-xs font-semibold uppercase tracking-wider">
 								Total Projects
 							</h3>
 							<p className="text-4xl font-black mt-2 text-foreground">
 								{metrics.totalProjects.toLocaleString()}
 							</p>
 						</div>
-						<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] p-5 rounded-xl flex flex-col justify-between">
-							<h3 className="text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wider">
+						<div className="bg-[var(--bg-panel)] border border-border p-5 rounded-xl flex flex-col justify-between">
+							<h3 className="text-muted text-xs font-semibold uppercase tracking-wider">
 								Est. MRR
 							</h3>
 							<p className="text-4xl font-black mt-2 text-emerald-400">
@@ -132,9 +132,9 @@ export default async function SuperAdminDashboard() {
 						<Cpu className="w-5 h-5 text-[var(--accent-primary)]" />
 						AI Provider Status
 					</h2>
-					<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] rounded-xl overflow-hidden">
+					<div className="bg-[var(--bg-panel)] border border-border rounded-xl overflow-hidden">
 						<table className="w-full text-sm text-left">
-							<thead className="text-xs text-[var(--text-muted)] uppercase bg-[var(--bg-main)] border-b border-[var(--border-glass)]">
+							<thead className="text-xs text-muted uppercase bg-background border-b border-border">
 								<tr>
 									<th className="px-6 py-3">Provider / Model</th>
 									<th className="px-6 py-3">Requests / Min</th>
@@ -144,7 +144,7 @@ export default async function SuperAdminDashboard() {
 							</thead>
 							<tbody className="divide-y divide-[var(--border-glass)]">
 								{aiMetrics.map((provider) => (
-									<tr key={provider.name} className="hover:bg-[var(--bg-hover)] transition-colors">
+									<tr key={provider.name} className="hover:bg-hover transition-colors">
 										<td className="px-6 py-4 font-medium text-foreground flex items-center gap-2">
 											<div
 												className="w-2 h-2 rounded-full"

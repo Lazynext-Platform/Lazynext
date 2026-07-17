@@ -60,24 +60,24 @@ const PIE_COLORS = ["#a855f7", "#3b82f6"];
 /** React component rendering AnalyticsDashboard. */
 export default function AnalyticsDashboard() {
 	return (
-		<div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)]">
+		<div className="min-h-screen bg-background text-foreground">
 			<Header />
 
 			<div className="max-w-7xl mx-auto py-8 px-4">
 				{/* Top Bar */}
-				<div className="flex items-center gap-4 border-b border-[var(--border-glass)] pb-6 mb-8">
+				<div className="flex items-center gap-4 border-b border-border pb-6 mb-8">
 					<Link
 						href="/superadmin"
-						className="p-2 rounded-full hover:bg-[var(--bg-hover)] transition-colors border border-transparent hover:border-[var(--border-glass)]"
+						className="p-2 rounded-full hover:bg-hover transition-colors border border-transparent hover:border-border"
 					>
-						<ArrowLeft className="w-5 h-5 text-[var(--text-muted)]" />
+						<ArrowLeft className="w-5 h-5 text-muted" />
 					</Link>
 					<div>
 						<h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
 							<Activity className="w-8 h-8 text-[var(--accent-secondary)]" />
 							Analytics & Telemetry
 						</h1>
-						<p className="text-[var(--text-muted)] mt-1">
+						<p className="text-muted mt-1">
 							Deep dive into Kafka-ingested event telemetry and product usage.
 						</p>
 					</div>
@@ -85,9 +85,9 @@ export default function AnalyticsDashboard() {
 
 				{/* KPI Cards */}
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-					<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] p-5 rounded-xl">
+					<div className="bg-[var(--bg-panel)] border border-border p-5 rounded-xl">
 						<div className="flex justify-between items-start">
-							<h3 className="text-[var(--text-muted)] text-sm font-semibold">
+							<h3 className="text-muted text-sm font-semibold">
 								Daily Active Users
 							</h3>
 							<Users className="w-4 h-4 text-purple-400" />
@@ -98,22 +98,22 @@ export default function AnalyticsDashboard() {
 						</p>
 					</div>
 
-					<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] p-5 rounded-xl">
+					<div className="bg-[var(--bg-panel)] border border-border p-5 rounded-xl">
 						<div className="flex justify-between items-start">
-							<h3 className="text-[var(--text-muted)] text-sm font-semibold">
+							<h3 className="text-muted text-sm font-semibold">
 								Event Ingestion Rate
 							</h3>
 							<Zap className="w-4 h-4 text-amber-400" />
 						</div>
 						<p className="text-3xl font-black mt-3">1.2k / sec</p>
-						<p className="text-xs text-[var(--text-muted)] mt-2">
+						<p className="text-xs text-muted mt-2">
 							Kafka topic: user_telemetry_events
 						</p>
 					</div>
 
-					<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] p-5 rounded-xl">
+					<div className="bg-[var(--bg-panel)] border border-border p-5 rounded-xl">
 						<div className="flex justify-between items-start">
-							<h3 className="text-[var(--text-muted)] text-sm font-semibold">
+							<h3 className="text-muted text-sm font-semibold">
 								Average LTV
 							</h3>
 							<Activity className="w-4 h-4 text-green-400" />
@@ -124,9 +124,9 @@ export default function AnalyticsDashboard() {
 						</p>
 					</div>
 
-					<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] p-5 rounded-xl">
+					<div className="bg-[var(--bg-panel)] border border-border p-5 rounded-xl">
 						<div className="flex justify-between items-start">
-							<h3 className="text-[var(--text-muted)] text-sm font-semibold">
+							<h3 className="text-muted text-sm font-semibold">
 								Platform Churn (30d)
 							</h3>
 							<Server className="w-4 h-4 text-red-400" />
@@ -140,7 +140,7 @@ export default function AnalyticsDashboard() {
 
 				{/* Charts Row 1 */}
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-					<div className="lg:col-span-2 bg-[var(--bg-panel)] border border-[var(--border-glass)] p-6 rounded-xl">
+					<div className="lg:col-span-2 bg-[var(--bg-panel)] border border-border p-6 rounded-xl">
 						<h3 className="text-lg font-bold mb-6">Global Event Velocity</h3>
 						<div className="h-[300px] w-full">
 							<ResponsiveContainer width="100%" height="100%">
@@ -197,7 +197,7 @@ export default function AnalyticsDashboard() {
 						</div>
 					</div>
 
-					<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] p-6 rounded-xl">
+					<div className="bg-[var(--bg-panel)] border border-border p-6 rounded-xl">
 						<h3 className="text-lg font-bold mb-6">Platform Distribution</h3>
 						<div className="h-[300px] w-full flex items-center justify-center">
 							<ResponsiveContainer width="100%" height="100%">
@@ -232,13 +232,13 @@ export default function AnalyticsDashboard() {
 						<div className="flex justify-center gap-6 mt-2">
 							<div className="flex items-center gap-2">
 								<div className="w-3 h-3 rounded-full bg-purple-500"></div>
-								<span className="text-sm text-[var(--text-muted)]">
+								<span className="text-sm text-muted">
 									Web 65%
 								</span>
 							</div>
 							<div className="flex items-center gap-2">
 								<div className="w-3 h-3 rounded-full bg-blue-500"></div>
-								<span className="text-sm text-[var(--text-muted)]">
+								<span className="text-sm text-muted">
 									Desktop 35%
 								</span>
 							</div>
@@ -247,7 +247,7 @@ export default function AnalyticsDashboard() {
 				</div>
 
 				{/* Charts Row 2 */}
-				<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] p-6 rounded-xl">
+				<div className="bg-[var(--bg-panel)] border border-border p-6 rounded-xl">
 					<h3 className="text-lg font-bold mb-6">Top Event Triggers</h3>
 					<div className="h-[300px] w-full">
 						<ResponsiveContainer width="100%" height="100%">

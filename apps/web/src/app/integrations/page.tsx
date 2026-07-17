@@ -52,7 +52,7 @@ export default function IntegrationsPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] font-sans p-8 md:p-24 selection:bg-[var(--accent-primary)]/30 selection:text-[var(--accent-primary)] relative overflow-hidden">
+		<div className="min-h-screen bg-background text-foreground font-sans p-8 md:p-24 selection:bg-[var(--accent-primary)]/30 selection:text-[var(--accent-primary)] relative overflow-hidden">
 			<div className="absolute top-[-10%] left-[-10%] w-[800px] h-[800px] bg-[var(--accent-primary)]/5 rounded-full blur-[120px] pointer-events-none" />
 
 			<motion.div
@@ -62,8 +62,8 @@ export default function IntegrationsPage() {
 				className="max-w-6xl mx-auto relative z-10"
 			>
 				<motion.div variants={itemVariants} className="mb-16">
-					<h1 className="text-4xl md:text-5xl font-bold mb-4 text-[var(--text-primary)] tracking-tight">Integrations</h1>
-					<p className="text-[var(--text-muted)] text-lg">Connect Lazynext with your favorite creator platforms for autonomous publishing.</p>
+					<h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground tracking-tight">Integrations</h1>
+					<p className="text-muted text-lg">Connect Lazynext with your favorite creator platforms for autonomous publishing.</p>
 				</motion.div>
 
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
@@ -72,21 +72,21 @@ export default function IntegrationsPage() {
 							key={app.name} 
 							variants={itemVariants}
 							whileHover={{ y: -5 }}
-							className="bg-[var(--bg-panel)] backdrop-blur-xl border border-[var(--border-glass)] rounded-3xl p-8 shadow-lg hover:border-[var(--accent-primary)]/30 transition-all duration-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
+							className="bg-[var(--bg-panel)] backdrop-blur-xl border border-border rounded-3xl p-8 shadow-lg hover:border-[var(--accent-primary)]/30 transition-all duration-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
 						>
 							<div className="flex items-center gap-6">
-								<div className="w-16 h-16 bg-[var(--bg-hover)] border border-[var(--border-glass)] rounded-2xl flex items-center justify-center">
+								<div className="w-16 h-16 bg-hover border border-border rounded-2xl flex items-center justify-center">
 									{app.icon}
 								</div>
 								<div>
-									<h2 className="text-2xl font-bold text-[var(--text-primary)] mb-1">{app.name}</h2>
-									<p className="text-[var(--text-muted)] text-sm max-w-xs">{app.desc}</p>
+									<h2 className="text-2xl font-bold text-foreground mb-1">{app.name}</h2>
+									<p className="text-muted text-sm max-w-xs">{app.desc}</p>
 								</div>
 							</div>
 							
 							<div className="w-full sm:w-auto">
 								{app.loading ? (
-									<button disabled className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[var(--bg-hover)] text-[var(--text-primary)] border border-[var(--border-glass)] px-6 py-3 rounded-xl font-medium cursor-wait">
+									<button disabled className="w-full sm:w-auto flex items-center justify-center gap-2 bg-hover text-foreground border border-border px-6 py-3 rounded-xl font-medium cursor-wait">
 										<Loader2 className="w-5 h-5 animate-spin" /> Connecting...
 									</button>
 								) : app.connected ? (

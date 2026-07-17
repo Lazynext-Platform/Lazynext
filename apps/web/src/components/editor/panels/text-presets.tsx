@@ -56,7 +56,7 @@ export function TextPresets({
 						>
 							{preset.icon}
 							<div className="absolute inset-0 bg-background/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-								<Play className="w-4 h-4 text-foreground fill-white" />
+								<Play className="w-4 h-4 text-foreground fill-foreground" />
 							</div>
 						</div>
 						<span className="text-[10px] font-semibold text-foreground text-center">

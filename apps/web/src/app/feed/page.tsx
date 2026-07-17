@@ -119,7 +119,7 @@ export default function FeedPage() {
 				{/* Navigation Overlay */}
 				<div className="absolute top-0 left-0 w-full p-6 z-50 flex justify-between items-start pointer-events-none">
 					<Link href="/" className="pointer-events-auto">
-						<div className="p-3 bg-glass backdrop-blur-xl border border-[var(--border-glass)] rounded-full text-foreground hover:bg-hover hover:scale-105 transition-all shadow-lg">
+						<div className="p-3 bg-glass backdrop-blur-xl border border-border rounded-full text-foreground hover:bg-hover hover:scale-105 transition-all shadow-lg">
 							<ArrowLeft className="w-5 h-5" />
 						</div>
 					</Link>

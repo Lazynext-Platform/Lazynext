@@ -117,8 +117,8 @@ export function BillingPageClient() {
 
 	if (isPending) {
 		return (
-			<div className="flex min-h-screen items-center justify-center bg-[var(--bg-main)]">
-				<div className="text-[var(--text-muted)] animate-pulse">
+			<div className="flex min-h-screen items-center justify-center bg-background">
+				<div className="text-muted animate-pulse">
 					Loading SaaS Portal...
 				</div>
 			</div>
@@ -157,7 +157,7 @@ export function BillingPageClient() {
 	};
 
 	return (
-		<div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)]">
+		<div className="min-h-screen bg-background text-foreground">
 			<Header />
 			<div className="mx-auto max-w-6xl px-4 py-16">
 				<div className="mb-12 text-center">
@@ -165,7 +165,7 @@ export function BillingPageClient() {
 						Simple pricing for{" "}
 						<span className="text-[var(--accent-primary)]">heavy renders</span>.
 					</h1>
-					<p className="mt-4 text-[var(--text-muted)] text-lg max-w-2xl mx-auto">
+					<p className="mt-4 text-muted text-lg max-w-2xl mx-auto">
 						Unlock the power of 18 integrated AI models and dedicated Rust
 						headless compositors.
 					</p>
@@ -173,10 +173,10 @@ export function BillingPageClient() {
 
 				{/* Current Usage Banner */}
 				{org && (
-					<div className="mb-12 bg-[var(--bg-panel)] border border-[var(--border-glass)] rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+					<div className="mb-12 bg-[var(--bg-panel)] border border-border rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
 						<div>
 							<h2 className="font-bold text-xl">Current Billing Cycle</h2>
-							<p className="text-[var(--text-muted)] text-sm mt-1">
+							<p className="text-muted text-sm mt-1">
 								Your usage resets in 14 days.
 							</p>
 						</div>
@@ -186,10 +186,10 @@ export function BillingPageClient() {
 									<Zap className="w-6 h-6" />
 								</div>
 								<div>
-									<p className="text-[var(--text-muted)] text-xs font-semibold uppercase">
+									<p className="text-muted text-xs font-semibold uppercase">
 										AI Credits
 									</p>
-									<p className="font-bold text-xl text-[var(--text-primary)]">
+									<p className="font-bold text-xl text-foreground">
 										{realCredits !== null
 											? realCredits.toLocaleString()
 											: org.aiCreditsUsed.toLocaleString()}{" "}
@@ -202,10 +202,10 @@ export function BillingPageClient() {
 									<Server className="w-6 h-6" />
 								</div>
 								<div>
-									<p className="text-[var(--text-muted)] text-xs font-semibold uppercase">
+									<p className="text-muted text-xs font-semibold uppercase">
 										Render Hours
 									</p>
-									<p className="font-bold text-xl text-[var(--text-primary)]">
+									<p className="font-bold text-xl text-foreground">
 										{org.renderHoursUsed}h / 200h
 									</p>
 								</div>
@@ -222,7 +222,7 @@ export function BillingPageClient() {
 							className={`relative rounded-3xl p-8 flex flex-col transition-all duration-300 ${
 								plan.highlight
 									? "border border-[var(--accent-primary)] bg-[var(--accent-primary)]/5 shadow-[var(--accent-glow)] scale-105 z-10"
-									: "border border-[var(--border-glass)] bg-[var(--bg-panel)]"
+									: "border border-border bg-[var(--bg-panel)]"
 							}`}
 						>
 							{plan.highlight && (
@@ -232,14 +232,14 @@ export function BillingPageClient() {
 							)}
 
 							<h3
-								className={`text-2xl font-bold ${plan.highlight ? "text-[var(--accent-primary)]" : "text-[var(--text-primary)]"}`}
+								className={`text-2xl font-bold ${plan.highlight ? "text-[var(--accent-primary)]" : "text-foreground"}`}
 							>
 								{plan.name}
 							</h3>
 
-							<div className="mt-4 pb-6 border-b border-[var(--border-glass)]">
+							<div className="mt-4 pb-6 border-b border-border">
 								<span className="text-5xl font-black">{plan.price}</span>
-								<span className="ml-2 text-sm text-[var(--text-muted)]">
+								<span className="ml-2 text-sm text-muted">
 									{plan.period}
 								</span>
 							</div>
@@ -248,7 +248,7 @@ export function BillingPageClient() {
 								{plan.features.map((f) => (
 									<li
 										key={f}
-										className="flex items-start gap-3 text-[var(--text-secondary)]"
+										className="flex items-start gap-3 text-secondary"
 									>
 										<Check
 											className={`w-5 h-5 shrink-0 mt-0.5 ${plan.highlight ? "text-[var(--accent-primary)]" : "text-emerald-400"}`}
@@ -266,10 +266,10 @@ export function BillingPageClient() {
 								}
 								className={`mt-8 w-full rounded-xl py-4 font-bold transition-all ${
 									plan.current
-										? "bg-[var(--bg-main)] border border-[var(--border-glass)] text-[var(--text-muted)] cursor-not-allowed"
+										? "bg-background border border-border text-muted cursor-not-allowed"
 										: plan.highlight
 											? "bg-[var(--accent-primary)] text-[#050505] hover:opacity-90 shadow-lg shadow-[var(--accent-primary)]/20"
-											: "bg-[var(--bg-main)] border border-[var(--border-glass)] text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
+											: "bg-background border border-border text-foreground hover:bg-hover"
 								}`}
 							>
 								{plan.cta}

@@ -150,7 +150,7 @@ export default function ProjectsClient({
 	}, [editor.project, initialProjects]);
 
 	return (
-		<div className="bg-[var(--bg-main)] min-h-screen text-[var(--text-primary)] selection:bg-[var(--accent-primary)]/30 relative">
+		<div className="bg-background min-h-screen text-foreground selection:bg-[var(--accent-primary)]/30 relative">
 			{/* Ambient Background */}
 			<div className="fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[var(--accent-primary)]/10 via-[var(--bg-main)] to-[var(--bg-main)] pointer-events-none" />
 			<div className="fixed inset-0 z-0 bg-[url('/noise.png')] opacity-[0.02] mix-blend-overlay pointer-events-none" />
@@ -197,7 +197,7 @@ function ProjectsHeader() {
 	const { viewMode, isHydrated, setViewMode } = useProjectsStore();
 
 	return (
-		<header className="sticky top-0 z-20 px-8 bg-[var(--bg-main)]/80 backdrop-blur-xl border-b border-[var(--border-glass)] flex flex-col gap-2">
+		<header className="sticky top-0 z-20 px-8 bg-background/80 backdrop-blur-xl border-b border-border flex flex-col gap-2">
 			<div className="flex items-center justify-between h-16 pt-2">
 				<div className="flex items-center gap-5">
 					<Breadcrumb>
@@ -282,7 +282,7 @@ function ProjectsToolbar({ projectIds }: { projectIds: string[] }) {
 	};
 
 	return (
-		<div className="sticky top-16 z-10 flex items-center justify-between px-6 h-14 pt-2 bg-[var(--bg-main)]/80 backdrop-blur-xl border-b border-[var(--border-glass)]">
+		<div className="sticky top-16 z-10 flex items-center justify-between px-6 h-14 pt-2 bg-background/80 backdrop-blur-xl border-b border-border">
 			<div className="flex items-center gap-2">
 				<Label
 					className="flex items-center gap-3 cursor-pointer px-2"
@@ -634,7 +634,7 @@ function ProjectItem({
 	};
 
 	const gridContent = (
-		<Card 				className="bg-[var(--bg-panel)] backdrop-blur-xl border border-[var(--border-glass)] overflow-hidden p-0 transition-all duration-300 hover:scale-[1.02] hover:border-[var(--accent-primary)] hover:shadow-[var(--accent-glow)] group rounded-2xl">
+		<Card 				className="bg-[var(--bg-panel)] backdrop-blur-xl border border-border overflow-hidden p-0 transition-all duration-300 hover:scale-[1.02] hover:border-[var(--accent-primary)] hover:shadow-[var(--accent-glow)] group rounded-2xl">
 			<div className="bg-panel/50 relative aspect-video overflow-hidden">
 				<div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105">
 					{project.thumbnail ? (
@@ -646,7 +646,7 @@ function ProjectItem({
 						/>
 					) : (
 						<div className="flex size-full items-center justify-center bg-gradient-to-br from-[var(--bg-main)] to-[var(--bg-panel)]">
-							<OcVideoIcon className="text-[var(--text-muted)] size-12 shrink-0 group-hover:text-[var(--accent-primary)]/50 transition-colors" />
+							<OcVideoIcon className="text-muted size-12 shrink-0 group-hover:text-[var(--accent-primary)]/50 transition-colors" />
 						</div>
 					)}
 					{/* Glassmorphism overlay on hover */}
@@ -661,7 +661,7 @@ function ProjectItem({
 			</div>
 
 			<CardContent className="flex flex-col gap-2 p-5">
-				<h3 className="text-[var(--text-primary)] group-hover:text-[var(--accent-primary)] line-clamp-2 text-base leading-snug font-semibold transition-colors">
+				<h3 className="text-foreground group-hover:text-[var(--accent-primary)] line-clamp-2 text-base leading-snug font-semibold transition-colors">
 					{project.name}
 				</h3>
 				<div className="text-muted flex items-center gap-2 text-xs font-medium">
@@ -708,7 +708,7 @@ function ProjectItem({
 			className={`flex items-center gap-4 py-3 px-5 rounded-xl border transition-all duration-200 group ${
 				isSelected
 					? "bg-[var(--accent-primary)]/10 border-[var(--accent-primary)]/50 shadow-[0_0_20px_-5px_rgba(1,243,254,0.15)]"
-					: "bg-[var(--bg-panel)] hover:bg-[var(--bg-main)] backdrop-blur-sm border-[var(--border-glass)] hover:border-[var(--accent-primary)]/50"
+					: "bg-[var(--bg-panel)] hover:bg-background backdrop-blur-sm border-border hover:border-[var(--accent-primary)]/50"
 			}`}
 		>
 			<Checkbox

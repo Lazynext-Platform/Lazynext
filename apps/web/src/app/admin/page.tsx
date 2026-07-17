@@ -13,50 +13,50 @@ export default async function AdminDashboard() {
 	const users = await getRecentUsers();
 
 	return (
-		<div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] max-w-6xl mx-auto space-y-8 p-4 pt-8">
+		<div className="min-h-screen bg-background text-foreground max-w-6xl mx-auto space-y-8 p-4 pt-8">
 			{/* Metric Cards */}
 			<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-				<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] p-6 rounded-2xl flex items-center gap-4">
+				<div className="bg-[var(--bg-panel)] border border-border p-6 rounded-2xl flex items-center gap-4">
 					<div className="p-4 bg-[var(--accent-primary)]/10 text-[var(--accent-primary)] rounded-xl">
 						<Users className="w-8 h-8" />
 					</div>
 					<div>
-						<p className="text-[var(--text-muted)] text-sm">Total Users</p>
+						<p className="text-muted text-sm">Total Users</p>
 						<p className="text-3xl font-bold">{metrics.totalUsers}</p>
 					</div>
 				</div>
 
-				<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] p-6 rounded-2xl flex items-center gap-4">
+				<div className="bg-[var(--bg-panel)] border border-border p-6 rounded-2xl flex items-center gap-4">
 					<div className="p-4 bg-[var(--accent-primary)]/10 text-[var(--accent-primary)] rounded-xl">
 						<CreditCard className="w-8 h-8" />
 					</div>
 					<div>
-						<p className="text-[var(--text-muted)] text-sm">MRR (Monthly Revenue)</p>
+						<p className="text-muted text-sm">MRR (Monthly Revenue)</p>
 						<p className="text-3xl font-bold">
 							${metrics.monthlyRecurringRevenue}
 						</p>
 					</div>
 				</div>
 
-				<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] p-6 rounded-2xl flex items-center gap-4">
+				<div className="bg-[var(--bg-panel)] border border-border p-6 rounded-2xl flex items-center gap-4">
 					<div className="p-4 bg-[var(--accent-secondary)]/10 text-[var(--accent-secondary)] rounded-xl">
 						<Server className="w-8 h-8" />
 					</div>
 					<div>
-						<p className="text-[var(--text-muted)] text-sm">Active Subscriptions</p>
+						<p className="text-muted text-sm">Active Subscriptions</p>
 						<p className="text-3xl font-bold">{metrics.activeSubscriptions}</p>
 					</div>
 				</div>
 			</div>
 
 			{/* Users Table */}
-			<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] rounded-2xl overflow-hidden">
-				<div className="p-6 border-b border-[var(--border-glass)]">
+			<div className="bg-[var(--bg-panel)] border border-border rounded-2xl overflow-hidden">
+				<div className="p-6 border-b border-border">
 					<h2 className="text-xl font-bold">Recent Users</h2>
 				</div>
 				<div className="overflow-x-auto">
 					<table className="w-full text-left text-sm">
-						<thead className="bg-[var(--bg-main)] text-[var(--text-muted)]">
+						<thead className="bg-background text-muted">
 							<tr>
 								<th className="px-6 py-4 font-medium">User ID</th>
 								<th className="px-6 py-4 font-medium">Email</th>
@@ -68,9 +68,9 @@ export default async function AdminDashboard() {
 							{users.map((user) => (
 								<tr
 									key={user.id}
-									className="hover:bg-[var(--bg-hover)] transition-colors"
+									className="hover:bg-hover transition-colors"
 								>
-									<td className="px-6 py-4 text-[var(--text-secondary)] font-mono text-xs">
+									<td className="px-6 py-4 text-secondary font-mono text-xs">
 										{user.id}
 									</td>
 									<td className="px-6 py-4 font-medium">{user.email}</td>
@@ -79,13 +79,13 @@ export default async function AdminDashboard() {
 											className={`px-2 py-1 rounded-full text-xs font-medium ${
 												user.role === "admin"
 													? "bg-[var(--accent-primary)]/20 text-[var(--accent-primary)]"
-													: "bg-[var(--bg-main)] text-[var(--text-muted)]"
+													: "bg-background text-muted"
 											}`}
 										>
 											{user.role}
 										</span>
 									</td>
-									<td className="px-6 py-4 text-[var(--text-muted)]">
+									<td className="px-6 py-4 text-muted">
 										{new Date(user.createdAt).toLocaleDateString()}
 									</td>
 								</tr>
@@ -94,7 +94,7 @@ export default async function AdminDashboard() {
 								<tr>
 									<td
 										colSpan={4}
-										className="px-6 py-8 text-center text-[var(--text-muted)]"
+										className="px-6 py-8 text-center text-muted"
 									>
 										No users found.
 									</td>

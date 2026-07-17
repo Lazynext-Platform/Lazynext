@@ -115,7 +115,7 @@ export default function Home() {
 	return (
 		<div
 			ref={containerRef}
-			className="min-h-screen bg-background text-foreground font-sans selection:bg-[#00e5ff]/30 selection:text-[#00e5ff] overflow-x-hidden"
+			className="min-h-screen bg-background text-foreground font-sans selection:bg-[var(--accent-primary)]/30 selection:text-[var(--accent-primary)] overflow-x-hidden"
 		>
 			<MarketingNavbar />
 
@@ -145,8 +145,8 @@ export default function Home() {
 							className="inline-flex items-center justify-center mb-8"
 						>
 							<div className="relative group cursor-pointer">
-								<div className="absolute -inset-0.5 bg-gradient-to-r from-[#00e5ff] to-[#0033ff] rounded-full blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200 animate-tilt" />
-								<div className="relative inline-flex items-center gap-2 px-5 py-2 rounded-full bg-glass backdrop-blur-xl border border-border text-[#00e5ff] font-medium text-sm">
+								<div className="absolute -inset-0.5 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] rounded-full blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200 animate-tilt" />
+								<div className="relative inline-flex items-center gap-2 px-5 py-2 rounded-full bg-glass backdrop-blur-xl border border-border text-[var(--accent-primary)] font-medium text-sm">
 									<Sparkles className="w-4 h-4 animate-pulse" />
 									<span>Visionary Engine v2.0 — Now Live</span>
 								</div>
@@ -159,7 +159,7 @@ export default function Home() {
 							className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tighter mb-6 leading-[1.05]"
 						>
 							The{" "}
-							<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00e5ff] via-blue-400 to-[#0033ff]">
+							<span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent-primary)] via-blue-400 to-[var(--accent-secondary)]">
 								Autonomous
 							</span>
 							<br />
@@ -171,7 +171,7 @@ export default function Home() {
 							variants={itemVariants}
 							className="flex items-center justify-center gap-3 mb-8"
 						>
-							<span className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#00e5ff] to-foreground/80">
+							<span className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent-primary)] to-foreground/80">
 								Type. Speak. Edit.
 							</span>
 						</motion.div>
@@ -195,7 +195,7 @@ export default function Home() {
 								href="/dashboard"
 								className="w-full sm:w-auto relative group overflow-hidden rounded-full p-[1px]"
 							>
-								<span className="absolute inset-0 bg-gradient-to-r from-[#00e5ff] to-[#0033ff] opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
+								<span className="absolute inset-0 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
 								<div className="relative px-8 py-4 bg-background rounded-full flex items-center justify-center gap-2 group-hover:bg-opacity-0 transition duration-300">
 									<span className="font-semibold text-foreground tracking-wide">
 										Start Editing Free
@@ -207,7 +207,7 @@ export default function Home() {
 								type="button"
 								className="w-full sm:w-auto px-8 py-4 rounded-full bg-glass hover:bg-hover border border-border font-semibold transition-all duration-300 backdrop-blur-md flex items-center justify-center gap-2 cursor-pointer"
 							>
-								<PlayCircle className="w-5 h-5 text-[#00e5ff]" />
+								<PlayCircle className="w-5 h-5 text-[var(--accent-primary)]" />
 								Watch Demo
 							</button>
 						</motion.div>
@@ -217,7 +217,7 @@ export default function Home() {
 							variants={itemVariants}
 							className="relative max-w-4xl mx-auto"
 						>
-							<div className="absolute -inset-1 bg-gradient-to-r from-[#00e5ff]/30 via-blue-500/30 to-[#0033ff]/30 rounded-2xl blur-xl" />
+							<div className="absolute -inset-1 bg-gradient-to-r from-[var(--accent-primary)]/30 via-blue-500/30 to-[var(--accent-secondary)]/30 rounded-2xl blur-xl" />
 							<div className="relative aspect-video bg-glass border border-border rounded-2xl overflow-hidden flex items-center justify-center">
 								<div className="flex flex-col items-center gap-4">
 									<div className="w-20 h-20 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-500 flex items-center justify-center shadow-[0_0_40px_rgba(0,229,255,0.3)] animate-pulse">
@@ -255,7 +255,7 @@ export default function Home() {
 							<h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground mb-6">
 								Everything your tools do.
 								<br />
-								<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00e5ff] to-[#0033ff]">
+								<span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)]">
 									All in one place.
 								</span>
 							</h2>
@@ -363,7 +363,7 @@ export default function Home() {
 									description:
 										"Your edit is applied instantly. Export in any format, any resolution, any platform. Or keep refining with more natural language commands.",
 									icon: CheckCircle2,
-									gradient: "from-purple-500 to-[#00e5ff]",
+									gradient: "from-purple-500 to-[var(--accent-primary)]",
 								},
 							].map((step) => (
 								<motion.div
@@ -378,7 +378,7 @@ export default function Home() {
 										>
 											<step.icon className="w-7 h-7 text-foreground" />
 										</div>
-										<span className="text-xs font-bold text-[#00e5ff] uppercase tracking-widest mb-3 block">
+										<span className="text-xs font-bold text-[var(--accent-primary)] uppercase tracking-widest mb-3 block">
 											Step {step.step}
 										</span>
 										<h3 className="text-xl font-bold text-foreground mb-3">
@@ -428,9 +428,9 @@ export default function Home() {
 								whileHover={{ y: -10 }}
 								className="relative bg-panel p-10 border border-border rounded-3xl overflow-hidden group"
 							>
-								<div className="absolute inset-0 bg-gradient-to-b from-[#00e5ff]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+								<div className="absolute inset-0 bg-gradient-to-b from-[var(--accent-primary)]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 								<div className="relative z-10">
-									<div className="w-16 h-16 bg-[#00e5ff]/10 text-[#00e5ff] rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-[#00e5ff]/20 transition-all duration-500 shadow-[0_0_30px_rgba(0,229,255,0.1)]">
+									<div className="w-16 h-16 bg-[var(--accent-primary)]/10 text-[var(--accent-primary)] rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-[var(--accent-primary)]/20 transition-all duration-500 shadow-[0_0_30px_rgba(0,229,255,0.1)]">
 										<Type className="w-8 h-8" />
 										<Mic className="w-5 h-5 -ml-1" />
 									</div>
@@ -452,9 +452,9 @@ export default function Home() {
 								whileHover={{ y: -10 }}
 								className="relative bg-panel p-10 border border-border rounded-3xl overflow-hidden group"
 							>
-								<div className="absolute inset-0 bg-gradient-to-b from-[#0033ff]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+								<div className="absolute inset-0 bg-gradient-to-b from-[var(--accent-secondary)]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 								<div className="relative z-10">
-									<div className="w-16 h-16 bg-[#0033ff]/20 text-[#00e5ff] rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-[#0033ff]/30 transition-all duration-500 shadow-[0_0_30px_rgba(0,51,255,0.1)]">
+									<div className="w-16 h-16 bg-[var(--accent-secondary)]/20 text-[var(--accent-primary)] rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-[var(--accent-secondary)]/30 transition-all duration-500 shadow-[0_0_30px_rgba(0,51,255,0.1)]">
 										<Users className="w-8 h-8" />
 									</div>
 									<h3 className="text-3xl font-bold mb-4 text-foreground tracking-tight">
@@ -586,7 +586,7 @@ export default function Home() {
 									key={stat.label}
 									className="text-center"
 								>
-									<div className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00e5ff] to-blue-400 mb-1">
+									<div className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent-primary)] to-blue-400 mb-1">
 										{stat.value}
 									</div>
 									<div className="text-xs text-muted/50 uppercase tracking-wider">
@@ -618,7 +618,7 @@ export default function Home() {
 						>
 							Start Editing Free
 							<br />
-							<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00e5ff] to-[#0033ff]">
+							<span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)]">
 								No Manual Work Required.
 							</span>
 						</motion.h2>
@@ -640,9 +640,9 @@ export default function Home() {
 								href="/sign-up"
 								className="group relative overflow-hidden rounded-full p-[1px]"
 							>
-								<span className="absolute inset-0 bg-gradient-to-r from-[#00e5ff] to-[#0033ff] opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
+								<span className="absolute inset-0 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
 								<div className="relative px-10 py-4 bg-background rounded-full flex items-center justify-center gap-2">
-									<Sparkles className="w-5 h-5 text-[#00e5ff]" />
+									<Sparkles className="w-5 h-5 text-[var(--accent-primary)]" />
 									<span className="font-bold text-foreground">
 										Start Editing Free
 									</span>

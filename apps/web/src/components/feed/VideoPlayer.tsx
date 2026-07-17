@@ -96,7 +96,7 @@ export function VideoPlayer({
 			{!isPlaying && (
 				<div className="absolute inset-0 flex items-center justify-center pointer-events-none">
 					<div className="bg-background/50 p-4 rounded-full backdrop-blur-sm">
-						<Play className="w-12 h-12 text-white fill-white opacity-80" />
+						<Play className="w-12 h-12 text-foreground fill-foreground opacity-80" />
 					</div>
 				</div>
 			)}
@@ -105,7 +105,7 @@ export function VideoPlayer({
 			<div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end pt-32">
 				<div className="flex justify-between items-end">
 					{/* Info */}
-					<div className="text-white space-y-2 w-3/4">
+					<div className="text-foreground space-y-2 w-3/4">
 						<h3 className="font-bold text-lg">@{author}</h3>
 						<p className="text-sm font-light text-neutral-200">{description}</p>
 						<div className="flex items-center gap-2 text-sm font-medium">
@@ -116,7 +116,7 @@ export function VideoPlayer({
 						</div>
 						<button
 							onClick={handleRemix}
-							className="mt-2 bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 transition-colors"
+							className="mt-2 bg-cyan-600 hover:bg-cyan-500 text-foreground px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 transition-colors"
 						>
 							<Scissors className="w-4 h-4" />
 							Remix in Lazynext
@@ -131,24 +131,24 @@ export function VideoPlayer({
 						>
 							<div className="p-3 bg-neutral-800/50 rounded-full backdrop-blur-md group-hover:bg-neutral-800/80 transition-colors">
 								<Heart
-									className={`w-7 h-7 ${isLiked ? "text-rose-500 fill-rose-500" : "text-white"}`}
+									className={`w-7 h-7 ${isLiked ? "text-rose-500 fill-rose-500" : "text-foreground"}`}
 								/>
 							</div>
-							<span className="text-white text-xs font-bold">
+							<span className="text-foreground text-xs font-bold">
 								{likes + (isLiked ? 1 : 0)}
 							</span>
 						</button>
 						<button className="flex flex-col items-center gap-1 group">
 							<div className="p-3 bg-neutral-800/50 rounded-full backdrop-blur-md group-hover:bg-neutral-800/80 transition-colors">
-								<MessageCircle className="w-7 h-7 text-white" />
+								<MessageCircle className="w-7 h-7 text-foreground" />
 							</div>
-							<span className="text-white text-xs font-bold">{comments}</span>
+							<span className="text-foreground text-xs font-bold">{comments}</span>
 						</button>
 						<button className="flex flex-col items-center gap-1 group">
 							<div className="p-3 bg-neutral-800/50 rounded-full backdrop-blur-md group-hover:bg-neutral-800/80 transition-colors">
-								<Share2 className="w-7 h-7 text-white" />
+								<Share2 className="w-7 h-7 text-foreground" />
 							</div>
-							<span className="text-white text-xs font-bold">Share</span>
+							<span className="text-foreground text-xs font-bold">Share</span>
 						</button>
 					</div>
 				</div>

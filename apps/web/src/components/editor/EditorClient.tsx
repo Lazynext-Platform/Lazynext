@@ -12355,8 +12355,8 @@ export default function EditorClient({ project }: { project: Project }) {
 				))}
 
 			{/* Phase 31: Lazynext AI Agent Command Bar (Prompt-to-Edit Engine) */}
-			<div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[800px] max-w-[90vw] max-h-[50vh] bg-[var(--bg-panel)]/95 backdrop-blur-3xl border border-[var(--border-glass)] rounded-2xl shadow-[0_0_60px_rgba(1,243,254,0.15)] flex flex-col pointer-events-auto overflow-hidden animate-in fade-in slide-in-from-bottom-4">
-				<div className="bg-[var(--accent-primary)]/10 border-b border-[var(--border-glass)] px-4 py-3 flex justify-between items-center relative overflow-hidden">
+			<div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[800px] max-w-[90vw] max-h-[50vh] bg-[var(--bg-panel)]/95 backdrop-blur-3xl border border-border rounded-2xl shadow-[0_0_60px_rgba(1,243,254,0.15)] flex flex-col pointer-events-auto overflow-hidden animate-in fade-in slide-in-from-bottom-4">
+				<div className="bg-[var(--accent-primary)]/10 border-b border-border px-4 py-3 flex justify-between items-center relative overflow-hidden">
 					<div className="absolute inset-0 bg-gradient-to-r from-[var(--accent-primary)]/20 to-transparent blur-xl pointer-events-none" />
 					<div className="flex items-center gap-3 relative z-10">
 						<div className="relative flex items-center justify-center">
@@ -12364,7 +12364,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							<Bot className="w-5 h-5 text-[var(--accent-primary)] relative z-10" />
 						</div>
 						<div>
-							<span className="text-sm font-bold text-[var(--text-primary)] tracking-wide">
+							<span className="text-sm font-bold text-foreground tracking-wide">
 								Prompt-to-Edit Copilot
 							</span>
 							<p className="text-[10px] text-[var(--accent-primary)] uppercase tracking-widest font-semibold">
@@ -12379,7 +12379,7 @@ export default function EditorClient({ project }: { project: Project }) {
 						<div key={msg.id} className="flex flex-col gap-1">
 							{msg.role === "system" && (
 								<>
-									<div className="text-[var(--text-muted)] text-[10px] mb-1">
+									<div className="text-muted text-[10px] mb-1">
 										SYSTEM
 									</div>
 									<div className="text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 p-2 rounded-lg">
@@ -12390,10 +12390,10 @@ export default function EditorClient({ project }: { project: Project }) {
 
 							{msg.role === "user" && (
 								<div className="flex flex-col gap-1 items-end">
-									<div className="text-[var(--text-muted)] text-[10px] mb-1">
+									<div className="text-muted text-[10px] mb-1">
 										YOU
 									</div>
-									<div className="bg-[var(--bg-main)] border border-[var(--border-glass)] text-[var(--text-primary)] p-2 rounded-lg max-w-[90%]">
+									<div className="bg-background border border-border text-foreground p-2 rounded-lg max-w-[90%]">
 										{msg.content}
 									</div>
 								</div>
@@ -12404,11 +12404,11 @@ export default function EditorClient({ project }: { project: Project }) {
 									<div className="text-[var(--accent-primary)] text-[10px] font-bold mb-1 flex items-center gap-1">
 										<Sparkles className="w-3 h-3" /> LAZYNEXT AI AGENT
 									</div>
-									<div className="bg-[var(--bg-main)] border border-[var(--border-glass)] p-3 rounded-lg flex flex-col gap-2 relative overflow-hidden">
+									<div className="bg-background border border-border p-3 rounded-lg flex flex-col gap-2 relative overflow-hidden">
 										<div className="absolute inset-0 bg-[var(--accent-primary)]/5 pointer-events-none" />
 
 										{msg.tools && msg.tools.length > 0 && (
-											<div className="pl-3 border-l border-[var(--border-glass)] flex flex-col gap-2 mb-2">
+											<div className="pl-3 border-l border-border flex flex-col gap-2 mb-2">
 												{msg.tools.map((t, idx) => (
 													<div
 														key={idx}
@@ -12421,7 +12421,7 @@ export default function EditorClient({ project }: { project: Project }) {
 											</div>
 										)}
 
-										<div className="flex items-center gap-2 text-[var(--text-primary)]">
+										<div className="flex items-center gap-2 text-foreground">
 											{msg.tools && msg.tools.length > 0 ? (
 												<Check className="w-3 h-3 text-green-400" />
 											) : null}
@@ -12438,9 +12438,9 @@ export default function EditorClient({ project }: { project: Project }) {
 							<div className="text-[var(--accent-primary)] text-[10px] font-bold mb-1 flex items-center gap-1">
 								<Sparkles className="w-3 h-3" /> LAZYNEXT AI AGENT
 							</div>
-							<div className="bg-[var(--bg-main)] border border-[var(--border-glass)] p-3 rounded-lg flex flex-col gap-2 relative overflow-hidden">
+							<div className="bg-background border border-border p-3 rounded-lg flex flex-col gap-2 relative overflow-hidden">
 								<div className="absolute inset-0 bg-[var(--accent-primary)]/5 pointer-events-none" />
-								<div className="flex items-center gap-2 text-[var(--text-primary)]">
+								<div className="flex items-center gap-2 text-foreground">
 									<div className="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)] animate-pulse" />
 									Analyzing intent and mapping to WASM hooks...
 								</div>
@@ -12449,7 +12449,7 @@ export default function EditorClient({ project }: { project: Project }) {
 					)}
 				</div>
 
-				<div className="p-3 border-t border-[var(--border-glass)] bg-[var(--bg-main)]/50">
+				<div className="p-3 border-t border-border bg-background/50">
 					<div className="relative group">
 						<div className="absolute -inset-0.5 bg-gradient-to-r from-[var(--accent-primary)] to-purple-600 rounded-xl opacity-20 group-hover:opacity-40 blur transition duration-500" />
 						<input
@@ -12460,7 +12460,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							onKeyDown={(e) => {
 								if (e.key === "Enter") handleCopilotSubmit();
 							}}
-							className="relative w-full bg-[var(--bg-panel)] border border-[var(--border-glass)] rounded-xl py-3 pl-4 pr-12 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none focus:border-[var(--accent-primary)] transition-all"
+							className="relative w-full bg-[var(--bg-panel)] border border-border rounded-xl py-3 pl-4 pr-12 text-sm text-foreground placeholder-[var(--text-muted)] outline-none focus:border-[var(--accent-primary)] transition-all"
 						/>
 						<button
 							onClick={handleCopilotSubmit}
@@ -12474,7 +12474,7 @@ export default function EditorClient({ project }: { project: Project }) {
 						<div className="mt-2 flex justify-end">
 							<button
 								onClick={handleUndoAi}
-								className="text-xs flex items-center gap-1 text-[var(--text-muted)] hover:text-[var(--accent-primary)] transition-colors"
+								className="text-xs flex items-center gap-1 text-muted hover:text-[var(--accent-primary)] transition-colors"
 							>
 								<Undo className="w-3 h-3" />
 								Undo last AI edit
@@ -12485,24 +12485,24 @@ export default function EditorClient({ project }: { project: Project }) {
 			</div>
 
 			{/* Mobile Bottom Navigation Bar (md:hidden) */}
-			<div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[var(--bg-panel)] backdrop-blur-xl border-t border-[var(--border-glass)] flex items-center justify-around px-4 z-50 shadow-2xl">
+			<div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[var(--bg-panel)] backdrop-blur-xl border-t border-border flex items-center justify-around px-4 z-50 shadow-2xl">
 				<button className="flex flex-col items-center justify-center gap-1 text-[var(--accent-primary)] transition-all transform active:scale-95">
 					<Layers className="w-5 h-5" />
 					<span className="text-[10px] font-semibold tracking-wide">
 						Timeline
 					</span>
 				</button>
-				<button className="flex flex-col items-center justify-center gap-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all transform active:scale-95">
+				<button className="flex flex-col items-center justify-center gap-1 text-muted hover:text-foreground transition-all transform active:scale-95">
 					<Video className="w-5 h-5" />
 					<span className="text-[10px] font-semibold tracking-wide">Media</span>
 				</button>
-				<button className="flex flex-col items-center justify-center gap-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all transform active:scale-95">
+				<button className="flex flex-col items-center justify-center gap-1 text-muted hover:text-foreground transition-all transform active:scale-95">
 					<Settings2 className="w-5 h-5" />
 					<span className="text-[10px] font-semibold tracking-wide">
 						Adjust
 					</span>
 				</button>
-				<button className="flex flex-col items-center justify-center gap-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all transform active:scale-95">
+				<button className="flex flex-col items-center justify-center gap-1 text-muted hover:text-foreground transition-all transform active:scale-95">
 					<Download className="w-5 h-5" />
 					<span className="text-[10px] font-semibold tracking-wide">
 						Export
