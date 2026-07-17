@@ -1,5 +1,6 @@
 /** @module screens/EditorScreen Editor screen component for mobile */
 import React, { useState, useEffect, useRef } from "react";
+import { useTheme, Theme } from "../theme";
 import {
 	View,
 	Text,
@@ -37,6 +38,8 @@ interface MaskPoint {
 
 /** Full editor screen with timeline, mask drawing, and voice control. */
 export const EditorScreen = () => {
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => getStyles(theme), [theme]);
 	const [clips, setClips] = useState<Clip[]>([]);
 	const [currentFrame, setCurrentFrame] = useState(0);
 	const [projectName, setProjectName] = useState("");
@@ -275,7 +278,7 @@ export const EditorScreen = () => {
 	);
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: Theme) => StyleSheet.create({
 	container: {
 		flex: 1,
 		backgroundColor: "#0a0a0c",
@@ -369,7 +372,7 @@ const styles = StyleSheet.create({
 		borderColor: "rgba(0, 229, 255, 0.3)",
 	},
 	pencilActiveText: {
-		color: "#00e5ff",
+		color: theme.accentPrimary,
 		fontSize: 10,
 		fontWeight: "700",
 	},
@@ -382,7 +385,7 @@ const styles = StyleSheet.create({
 	},
 	pressureFill: {
 		height: "100%",
-		backgroundColor: "#00e5ff",
+		backgroundColor: theme.accentPrimary,
 		borderRadius: 2,
 	},
 	maskCanvas: {
@@ -401,7 +404,7 @@ const styles = StyleSheet.create({
 	},
 	maskPoint: {
 		position: "absolute",
-		backgroundColor: "#00e5ff",
+		backgroundColor: theme.accentPrimary,
 	},
 	// ── Editor Timeline ──
 	editorContainer: {
@@ -425,7 +428,7 @@ const styles = StyleSheet.create({
 		letterSpacing: 1,
 	},
 	headerFrame: {
-		color: "#fff",
+		color: theme.textPrimary,
 		fontSize: 11,
 		fontFamily: "Menlo",
 	},
@@ -463,7 +466,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 8,
 	},
 	clipText: {
-		color: "#fff",
+		color: theme.textPrimary,
 		fontSize: 10,
 		fontWeight: "500",
 	},

@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from "react";
+import { useTheme, Theme } from "../theme";
 import {
 	View,
 	Text,
@@ -18,6 +19,8 @@ import { useAuth } from "../contexts/AuthContext";
 
 /** React component rendering PasskeySignInScreen. */
 export function PasskeySignInScreen({ navigation }: { navigation: any }) {
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => getStyles(theme), [theme]);
 	const { session } = useAuth();
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
@@ -27,7 +30,7 @@ export function PasskeySignInScreen({ navigation }: { navigation: any }) {
 		setError("");
 		try {
 			// Passkey auth — generates a challenge, user verifies with biometrics
-			const challenge = crypto.randomUUID();
+			const challenge = Math.random().toString(36).substring(2, 15);
 			const result = await authenticateWithPasskey(challenge);
 			if (result.error) {
 				setError(result.error.message || "Could not authenticate with passkey");
@@ -72,19 +75,19 @@ export function PasskeySignInScreen({ navigation }: { navigation: any }) {
 	);
 }
 
-const styles = StyleSheet.create({
-	container: { flex: 1, backgroundColor: "#050505", padding: 24, justifyContent: "center" },
+const getStyles = (theme: Theme) => StyleSheet.create({
+	container: { flex: 1, backgroundColor: theme.bgMain, padding: 24, justifyContent: "center" },
 	card: {
-		backgroundColor: "rgba(24,24,27,0.5)",
+		backgroundColor: theme.bgPanel,
 		borderRadius: 24,
 		padding: 24,
 		borderWidth: 1,
-		borderColor: "rgba(255,255,255,0.08)",
+		borderColor: theme.borderGlass,
 		alignItems: "center",
 	},
-	title: { fontSize: 20, fontWeight: "700", color: "#fff", marginBottom: 8 },
+	title: { fontSize: 20, fontWeight: "700", color: theme.textPrimary, marginBottom: 8 },
 	subtitle: {
-		color: "rgba(255,255,255,0.5)",
+		color: theme.textMuted,
 		fontSize: 14,
 		textAlign: "center",
 		marginBottom: 24,
@@ -103,6 +106,6 @@ const styles = StyleSheet.create({
 	},
 	buttonDisabled: { opacity: 0.4 },
 	fingerprintEmoji: { fontSize: 32 },
-	passkeyButtonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
-	altLink: { color: "#00e5ff", fontSize: 14, marginTop: 20 },
+	passkeyButtonText: { color: theme.textPrimary, fontSize: 16, fontWeight: "600" },
+	altLink: { color: theme.accentPrimary, fontSize: 14, marginTop: 20 },
 });

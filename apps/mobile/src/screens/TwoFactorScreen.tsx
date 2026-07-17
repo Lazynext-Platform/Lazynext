@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from "react";
+import { useTheme, Theme } from "../theme";
 import {
 	View,
 	Text,
@@ -20,6 +21,8 @@ import { useAuth } from "../contexts/AuthContext";
 
 /** React component rendering TwoFactorScreen. */
 export function TwoFactorScreen({ navigation, route }: { navigation: any; route: any }) {
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => getStyles(theme), [theme]);
 	const { verifyTwoFactor } = useAuth();
 	const { email, password } = route.params || {};
 	const [code, setCode] = useState("");
@@ -87,28 +90,28 @@ export function TwoFactorScreen({ navigation, route }: { navigation: any; route:
 	);
 }
 
-const styles = StyleSheet.create({
-	container: { flex: 1, backgroundColor: "#050505" },
+const getStyles = (theme: Theme) => StyleSheet.create({
+	container: { flex: 1, backgroundColor: theme.bgMain },
 	inner: { flex: 1, justifyContent: "center", padding: 24 },
 	card: {
-		backgroundColor: "rgba(24,24,27,0.5)",
+		backgroundColor: theme.bgPanel,
 		borderRadius: 24,
 		padding: 24,
 		borderWidth: 1,
-		borderColor: "rgba(255,255,255,0.08)",
+		borderColor: theme.borderGlass,
 		alignItems: "center",
 	},
-	title: { fontSize: 20, fontWeight: "700", color: "#fff", marginBottom: 8 },
+	title: { fontSize: 20, fontWeight: "700", color: theme.textPrimary, marginBottom: 8 },
 	subtitle: {
-		color: "rgba(255,255,255,0.5)",
+		color: theme.textMuted,
 		fontSize: 14,
 		textAlign: "center",
 		marginBottom: 20,
 	},
 	errorText: { color: "#ef4444", fontSize: 13, marginBottom: 12 },
 	codeInput: {
-		backgroundColor: "rgba(255,255,255,0.05)",
-		color: "#fff",
+		backgroundColor: theme.bgHover,
+		color: theme.textPrimary,
 		fontSize: 28,
 		fontWeight: "700",
 		letterSpacing: 10,
@@ -116,21 +119,21 @@ const styles = StyleSheet.create({
 		paddingVertical: 16,
 		borderRadius: 12,
 		borderWidth: 1,
-		borderColor: "rgba(255,255,255,0.08)",
+		borderColor: theme.borderGlass,
 		width: "100%",
 		marginBottom: 20,
 	},
 	button: {
-		backgroundColor: "#00e5ff",
+		backgroundColor: theme.accentPrimary,
 		paddingVertical: 14,
 		borderRadius: 12,
 		alignItems: "center",
 		width: "100%",
 	},
 	buttonDisabled: { opacity: 0.4 },
-	buttonText: { color: "#050505", fontWeight: "bold", fontSize: 16 },
+	buttonText: { color: theme.textOnAccent, fontWeight: "bold", fontSize: 16 },
 	backLink: {
-		color: "#00e5ff",
+		color: theme.accentPrimary,
 		fontSize: 14,
 		marginTop: 16,
 	},

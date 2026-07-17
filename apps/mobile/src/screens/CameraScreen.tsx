@@ -1,5 +1,6 @@
 /** @module screens/CameraScreen Full camera recording with grid overlay */
 import React, { useRef, useState, useCallback, useEffect } from "react";
+import { useTheme, Theme } from "../theme";
 import {
 	StyleSheet,
 	Text,
@@ -22,6 +23,8 @@ const RECORDING_MAX_MS = 300000;
 
 /** Camera capture screen with grid overlay, recording controls, and media library integration. */
 export function CameraScreen() {
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => getStyles(theme), [theme]);
 	const [cameraPermission, requestCameraPermission] = useCameraPermissions();
 	const [micPermission, requestMicPermission] = useMicrophonePermissions();
 	const [mediaPermission, requestMediaPermission] = MediaLibrary.usePermissions();
@@ -241,30 +244,30 @@ export function CameraScreen() {
 	);
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: Theme) => StyleSheet.create({
 	container: { flex: 1, backgroundColor: "#000000" },
 	camera: { flex: 1 },
 	permissionContainer: {
 		flex: 1,
-		backgroundColor: "#050505",
+		backgroundColor: theme.bgMain,
 		justifyContent: "center",
 		alignItems: "center",
 		padding: 32,
 	},
 	permissionText: {
-		color: "#ffffff",
+		color: theme.textPrimary,
 		fontSize: 16,
 		textAlign: "center",
 		marginBottom: 24,
 	},
 	permissionButton: {
-		backgroundColor: "#00e5ff",
+		backgroundColor: theme.accentPrimary,
 		paddingHorizontal: 32,
 		paddingVertical: 14,
 		borderRadius: 12,
 	},
 	permissionButtonText: {
-		color: "#050505",
+		color: theme.textOnAccent,
 		fontWeight: "bold",
 		fontSize: 16,
 	},
@@ -329,7 +332,7 @@ const styles = StyleSheet.create({
 		backgroundColor: "#ff0044",
 	},
 	timerText: {
-		color: "#ffffff",
+		color: theme.textPrimary,
 		fontSize: 16,
 		fontWeight: "700",
 		fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
@@ -348,7 +351,7 @@ const styles = StyleSheet.create({
 		height: 80,
 		borderRadius: 40,
 		borderWidth: 4,
-		borderColor: "#ffffff",
+		borderColor: theme.textPrimary,
 		justifyContent: "center",
 		alignItems: "center",
 	},

@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from "react";
+import { useTheme, Theme } from "../theme";
 import {
 	View,
 	Text,
@@ -22,6 +23,8 @@ import { useAuth } from "../contexts/AuthContext";
 
 /** React component rendering SignInScreen. */
 export function SignInScreen({ navigation }: { navigation: any }) {
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => getStyles(theme), [theme]);
 	const { signIn, signInWithMagicLink, signInWithOAuth } = useAuth();
 	const [mode, setMode] = useState<"password" | "magicLink">("password");
 	const [email, setEmail] = useState("");
@@ -206,19 +209,19 @@ export function SignInScreen({ navigation }: { navigation: any }) {
 	);
 }
 
-const styles = StyleSheet.create({
-	container: { flex: 1, backgroundColor: "#050505" },
+const getStyles = (theme: Theme) => StyleSheet.create({
+	container: { flex: 1, backgroundColor: theme.bgMain },
 	inner: { flexGrow: 1, justifyContent: "center", padding: 24 },
 	header: { alignItems: "center", marginBottom: 32 },
-	title: { fontSize: 32, fontWeight: "900", color: "#fff", letterSpacing: -1 },
-	cyan: { color: "#00e5ff" },
-	subtitle: { color: "rgba(255,255,255,0.6)", marginTop: 8, fontSize: 15 },
+	title: { fontSize: 32, fontWeight: "900", color: theme.textPrimary, letterSpacing: -1 },
+	cyan: { color: theme.accentPrimary },
+	subtitle: { color: theme.textSecondary, marginTop: 8, fontSize: 15 },
 	card: {
-		backgroundColor: "rgba(24,24,27,0.5)",
+		backgroundColor: theme.bgPanel,
 		borderRadius: 24,
 		padding: 24,
 		borderWidth: 1,
-		borderColor: "rgba(255,255,255,0.08)",
+		borderColor: theme.borderGlass,
 	},
 	errorText: {
 		color: "#ef4444",
@@ -227,45 +230,45 @@ const styles = StyleSheet.create({
 		textAlign: "center",
 	},
 	label: {
-		color: "rgba(255,255,255,0.5)",
+		color: theme.textMuted,
 		fontSize: 12,
 		fontWeight: "600",
 		marginBottom: 6,
 		marginTop: 12,
 	},
 	input: {
-		backgroundColor: "rgba(255,255,255,0.05)",
-		color: "#fff",
+		backgroundColor: theme.bgHover,
+		color: theme.textPrimary,
 		paddingHorizontal: 16,
 		paddingVertical: 12,
 		borderRadius: 12,
 		borderWidth: 1,
-		borderColor: "rgba(255,255,255,0.08)",
+		borderColor: theme.borderGlass,
 		fontSize: 15,
 	},
 	link: {
-		color: "#00e5ff",
+		color: theme.accentPrimary,
 		fontSize: 13,
 		textAlign: "right",
 		marginTop: 8,
 	},
 	button: {
-		backgroundColor: "#00e5ff",
+		backgroundColor: theme.accentPrimary,
 		paddingVertical: 14,
 		borderRadius: 12,
 		alignItems: "center",
 		marginTop: 20,
 	},
 	buttonDisabled: { opacity: 0.4 },
-	buttonText: { color: "#050505", fontWeight: "bold", fontSize: 16 },
+	buttonText: { color: theme.textOnAccent, fontWeight: "bold", fontSize: 16 },
 	switchModeText: {
-		color: "#00e5ff",
+		color: theme.accentPrimary,
 		fontSize: 13,
 		textAlign: "center",
 		marginTop: 12,
 	},
 	switchText: {
-		color: "rgba(255,255,255,0.5)",
+		color: theme.textMuted,
 		fontSize: 13,
 		textAlign: "center",
 		marginTop: 16,
@@ -282,7 +285,7 @@ const styles = StyleSheet.create({
 		backgroundColor: "rgba(255,255,255,0.1)",
 	},
 	dividerText: {
-		color: "rgba(255,255,255,0.3)",
+		color: theme.textMuted,
 		fontSize: 11,
 		marginHorizontal: 12,
 		textTransform: "uppercase",
@@ -303,7 +306,7 @@ const styles = StyleSheet.create({
 		borderColor: "rgba(255,255,255,0.1)",
 	},
 	socialButtonText: {
-		color: "#fff",
+		color: theme.textPrimary,
 		fontSize: 16,
 		fontWeight: "700",
 	},
