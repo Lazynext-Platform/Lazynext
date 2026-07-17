@@ -67,9 +67,9 @@ pub struct Compositor {
 pub enum CompositorError {
     /// A required texture was not found in the texture store.
     #[error("Texture '{texture_id}' is not available")]
-    MissingTexture { 
+    MissingTexture {
         /// The ID of the texture that could not be found.
-        texture_id: String 
+        texture_id: String,
     },
     /// An error occurred while applying GPU effects.
     #[error("Failed to apply effects: {0}")]
