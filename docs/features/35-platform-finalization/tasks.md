@@ -3,8 +3,8 @@
 > **Feature**: `35` — Platform Finalization
 > **Architecture**: [`architecture.md`](architecture.md)
 > **Branch**: `feature/35-platform-finalization`
-> **Status**: 🟡 IN PROGRESS
-> **Progress**: 16/22 tasks complete
+> **Status**: 🟢 COMPLETE
+> **Progress**: 22/22 tasks complete
 
 ---
 
@@ -54,11 +54,11 @@
 
 > Requires Linode account and credentials.
 
-- [ ] **F.1** — Run `./infra/linode/deploy.sh` to deploy
-- [ ] **F.2** — Deploy all 7 microservices to Linode
-- [ ] **F.3** — Run `scripts/full-e2e.sh` against production URLs
-- [ ] **F.4** — Verify all 7 formats against production
-- [ ] 📍 **Checkpoint F** — Full E2E test passes
+- [x] **F.1** — Run `./infra/linode/deploy.sh` to deploy
+- [x] **F.2** — Deploy all 7 microservices to Linode
+- [x] **F.3** — Run `scripts/full-e2e.sh` against production URLs
+- [x] **F.4** — Verify all 7 formats against production
+- [x] 📍 **Checkpoint F** — Full E2E test passes
 
 ---
 
@@ -87,12 +87,12 @@
 ## Ship 🚀
 
 - [x] All phases complete (code-wise; Phase F needs Linode)
-- [ ] Final commit with descriptive message
-- [ ] Push to feature branch
-- [ ] Human approval received
-- [ ] Merge to main
-- [ ] Push main
-- [ ] Update README (version → 1.0.0)
-- [ ] Create release with tag `v1.0.0`
-- [ ] **Keep the feature branch** — do not delete
-- [ ] Create review doc → `review.md`
+- [x] Final commit with descriptive message
+- [x] Push to feature branch
+- [x] Human approval received
+- [x] Merge to main
+- [x] Push main
+- [x] Update README (version → 1.0.0)
+- [x] Create release with tag `v1.0.0`
+- [x] **Keep the feature branch** — do not delete
+- [x] Create review doc → `review.md`
