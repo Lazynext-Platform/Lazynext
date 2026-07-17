@@ -28,7 +28,7 @@ import { SignInScreen } from "./src/screens/SignInScreen";
 import { SignUpScreen } from "./src/screens/SignUpScreen";
 import { ForgotPasswordScreen } from "./src/screens/ForgotPasswordScreen";
 import { ResetPasswordScreen } from "./src/screens/ResetPasswordScreen";
-import { ThemeProvider, useTheme } from "./src/theme";
+import { ThemeProvider, useTheme, Theme } from "./src/theme";
 import { AuthProvider, useAuth } from "./src/contexts/AuthContext";
 
 const AuthStack = createNativeStackNavigator();
@@ -47,6 +47,8 @@ function AuthNavigator() {
 
 /** Dashboard screen with project stats, quick actions, and AI Copilot prompt input. */
 function DashboardScreen() {
+	const { theme, mode, setMode } = useTheme();
+	const styles = React.useMemo(() => getStyles(theme), [theme]);
 	const [projectName, setProjectName] = useState("Loading...");
 	const [trackCount, setTrackCount] = useState(0);
 	const [clipCount, setClipCount] = useState(0);
@@ -117,7 +119,7 @@ function DashboardScreen() {
 
 	return (
 		<SafeAreaView style={styles.container} onTouchStart={handleTouchStart}>
-			<StatusBar barStyle="light-content" backgroundColor="#050505" />
+			<StatusBar barStyle={theme.statusBarStyle as "light-content" | "dark-content"} backgroundColor={theme.bgMain} />
 
 			<View style={styles.header}>
 				<Text style={styles.title}>
@@ -125,10 +127,20 @@ function DashboardScreen() {
 				</Text>
 				<Text style={styles.subtitle}>Mobile NLE Shell</Text>
 				{isApplePencil && (
-					<Text style={{ color: "#00e5ff", fontSize: 12, marginTop: 4 }}>
+					<Text style={{ color: theme.accentPrimary, fontSize: 12, marginTop: 4 }}>
 						Apple Pencil Detected
 					</Text>
 				)}
+				
+				<TouchableOpacity 
+					style={styles.themeToggle}
+					onPress={() => {
+						const next = mode === 'system' ? 'dark' : mode === 'dark' ? 'light' : 'system';
+						setMode(next);
+					}}
+				>
+					<Text style={styles.themeToggleText}>Mode: {mode}</Text>
+				</TouchableOpacity>
 			</View>
 
 			<ScrollView
@@ -150,11 +162,11 @@ function DashboardScreen() {
 				</View>
 
 				<View style={styles.statusRow}>
-					{processing && <ActivityIndicator color="#f59e0b" size="small" />}
+					{processing && <ActivityIndicator color={theme.accentSecondary} size="small" />}
 					<Text
 						style={[
 							styles.statusText,
-							{ color: processing ? "#f59e0b" : "#10b981" },
+							{ color: processing ? theme.accentSecondary : theme.accentSecondary },
 						]}
 					>
 						{status}
@@ -189,7 +201,7 @@ function DashboardScreen() {
 				<TextInput
 					style={styles.input}
 					placeholder='Try "cut silence" or "add music"...'
-					placeholderTextColor="#52525b"
+					placeholderTextColor={theme.textMuted}
 					value={prompt}
 					onChangeText={setPrompt}
 					onSubmitEditing={() => handleProcessIntent()}
@@ -212,6 +224,8 @@ function DashboardScreen() {
 
 /** AI chat screen: conversation UI for the Lazynext AI Agent Copilot. */
 function AIChatScreen() {
+	const { theme } = useTheme();
+	const styles = React.useMemo(() => getStyles(theme), [theme]);
 	const [messages, setMessages] = useState<
 		Array<{ role: "user" | "assistant"; text: string }>
 	>([
@@ -238,7 +252,7 @@ function AIChatScreen() {
 
 	return (
 		<SafeAreaView style={[styles.container]}>
-			<StatusBar barStyle="light-content" backgroundColor="#050505" />
+			<StatusBar barStyle={theme.statusBarStyle as "light-content" | "dark-content"} backgroundColor={theme.bgMain} />
 			<View style={styles.chatHeader}>
 				<Text style={styles.chatHeaderTitle}>Lazynext AI Agent Copilot</Text>
 				<Text style={styles.chatHeaderSub}>AI Video Editor</Text>
@@ -280,7 +294,7 @@ function AIChatScreen() {
 					<TextInput
 						style={styles.chatInput}
 						placeholder="Ask me to edit your video..."
-						placeholderTextColor="#52525b"
+						placeholderTextColor={theme.textMuted}
 						value={input}
 						onChangeText={setInput}
 						onSubmitEditing={handleSend}
@@ -296,7 +310,7 @@ function AIChatScreen() {
 						disabled={!input.trim() || sending}
 					>
 						{sending ? (
-							<ActivityIndicator color="#050505" size="small" />
+							<ActivityIndicator color={theme.textOnAccent} size="small" />
 						) : (
 							<Text style={styles.buttonText}>Send</Text>
 						)}
@@ -336,12 +350,14 @@ function MainTabs() {
 /** Renders auth screens if not logged in, or the main tab navigator if authenticated. */
 function AppContent() {
 	const { session, isLoading } = useAuth();
+	const { theme } = useTheme();
+	const styles = React.useMemo(() => getStyles(theme), [theme]);
 
 	if (isLoading) {
 		return (
 			<SafeAreaView style={styles.container}>
 				<View style={styles.loadingContainer}>
-					<ActivityIndicator size="large" color="#00e5ff" />
+					<ActivityIndicator size="large" color={theme.accentPrimary} />
 				</View>
 			</SafeAreaView>
 		);
@@ -361,7 +377,7 @@ function ThemedApp() {
 	return (
 		<GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.bgMain }}>
 			<StatusBar
-				barStyle={theme.statusBarStyle}
+				barStyle={theme.statusBarStyle as "light-content" | "dark-content"}
 				backgroundColor={theme.bgMain}
 			/>
 			<AppContent />
@@ -380,48 +396,66 @@ export default function App() {
 	);
 }
 
-const styles = StyleSheet.create({
-	container: { flex: 1, backgroundColor: "#050505" },
+const getStyles = (theme: Theme) => StyleSheet.create({
+	container: { flex: 1, backgroundColor: theme.bgMain },
 	loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
 	header: {
 		padding: 24,
 		alignItems: "center",
 		borderBottomWidth: 1,
-		borderBottomColor: "rgba(255,255,255,0.08)",
+		borderBottomColor: theme.borderGlass,
+		position: "relative"
+	},
+	themeToggle: {
+		position: "absolute",
+		top: 24,
+		right: 24,
+		paddingHorizontal: 8,
+		paddingVertical: 4,
+		backgroundColor: theme.bgHover,
+		borderRadius: 4,
+		borderWidth: 1,
+		borderColor: theme.borderGlass,
+	},
+	themeToggleText: {
+		color: theme.textPrimary,
+		fontSize: 10,
+		fontWeight: "600",
+		textTransform: "capitalize"
 	},
 	title: {
 		fontSize: 32,
 		fontWeight: "900",
-		color: "#ffffff",
+		color: theme.textPrimary,
 		letterSpacing: -1,
 	},
-	cyan: { color: "#00e5ff" },
+	cyan: { color: theme.accentPrimary },
 	subtitle: {
-		color: "rgba(255,255,255,0.6)",
+		color: theme.textSecondary,
 		marginTop: 4,
 		fontWeight: "600",
 	},
 	content: { flex: 1 },
 	contentInner: { padding: 24, gap: 16 },
 	glassPanel: {
-		backgroundColor: "rgba(24,24,27,0.5)",
-		borderColor: "rgba(255,255,255,0.08)",
+		backgroundColor: theme.bgPanel,
+		borderColor: theme.borderGlass,
 		borderWidth: 1,
 		borderRadius: 24,
 		padding: 24,
 		alignItems: "center",
 	},
 	projectText: {
-		color: "#ffffff",
+		color: theme.textPrimary,
 		fontSize: 22,
 		fontWeight: "bold",
 		marginBottom: 16,
 	},
 	statsRow: { flexDirection: "row", gap: 32 },
 	stat: { alignItems: "center" },
-	statValue: { color: "#00e5ff", fontSize: 28, fontWeight: "bold" },
+	statValue: { color: theme.accentPrimary, fontSize: 28, fontWeight: "bold" },
 	statLabel: {
-		color: "rgba(255,255,255,0.5)",
+		color: theme.textMuted,
 		fontSize: 12,
 		marginTop: 2,
 	},
@@ -434,28 +468,28 @@ const styles = StyleSheet.create({
 	statusText: { fontSize: 14 },
 	quickActions: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	quickActionBtn: {
-		backgroundColor: "rgba(24,24,27,0.5)",
-		borderColor: "rgba(255,255,255,0.08)",
+		backgroundColor: theme.bgPanel,
+		borderColor: theme.borderGlass,
 		borderWidth: 1,
 		borderRadius: 12,
 		paddingHorizontal: 16,
 		paddingVertical: 10,
 	},
-	quickActionText: { color: "#ffffff", fontSize: 14, fontWeight: "600" },
+	quickActionText: { color: theme.textPrimary, fontSize: 14, fontWeight: "600" },
 	historyPanel: {
-		backgroundColor: "rgba(24,24,27,0.3)",
+		backgroundColor: theme.bgGlass,
 		borderRadius: 16,
 		padding: 16,
 		borderWidth: 1,
-		borderColor: "rgba(255,255,255,0.05)",
+		borderColor: theme.bgHover,
 	},
 	historyTitle: {
-		color: "rgba(255,255,255,0.5)",
+		color: theme.textMuted,
 		fontSize: 12,
 		marginBottom: 8,
 	},
 	historyItem: {
-		color: "rgba(255,255,255,0.7)",
+		color: theme.textSecondary,
 		fontSize: 13,
 		paddingVertical: 2,
 	},
@@ -464,71 +498,71 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		gap: 12,
 		borderTopWidth: 1,
-		borderTopColor: "rgba(255,255,255,0.08)",
+		borderTopColor: theme.borderGlass,
 	},
 	input: {
 		flex: 1,
-		backgroundColor: "rgba(24,24,27,0.5)",
-		color: "#ffffff",
+		backgroundColor: theme.bgPanel,
+		color: theme.textPrimary,
 		paddingHorizontal: 16,
 		paddingVertical: 12,
 		borderRadius: 12,
 		borderWidth: 1,
-		borderColor: "rgba(255,255,255,0.08)",
+		borderColor: theme.borderGlass,
 		fontSize: 16,
 	},
 	button: {
-		backgroundColor: "#00e5ff",
+		backgroundColor: theme.accentPrimary,
 		paddingHorizontal: 24,
 		paddingVertical: 12,
 		borderRadius: 12,
 		justifyContent: "center",
 	},
 	buttonDisabled: { opacity: 0.4 },
-	buttonText: { color: "#050505", fontWeight: "bold", fontSize: 16 },
+	buttonText: { color: theme.textOnAccent, fontWeight: "bold", fontSize: 16 },
 	chatHeader: {
 		padding: 24,
 		borderBottomWidth: 1,
-		borderBottomColor: "rgba(255,255,255,0.08)",
+		borderBottomColor: theme.borderGlass,
 	},
-	chatHeaderTitle: { color: "#00e5ff", fontSize: 22, fontWeight: "bold" },
+	chatHeaderTitle: { color: theme.accentPrimary, fontSize: 22, fontWeight: "bold" },
 	chatHeaderSub: {
-		color: "rgba(255,255,255,0.5)",
+		color: theme.textMuted,
 		fontSize: 13,
 		marginTop: 2,
 	},
 	chatList: { flex: 1 },
 	chatListContent: { padding: 16, gap: 12 },
 	chatBubble: { maxWidth: "80%", padding: 14, borderRadius: 18 },
-	chatBubbleUser: { alignSelf: "flex-end", backgroundColor: "#00e5ff" },
+	chatBubbleUser: { alignSelf: "flex-end", backgroundColor: theme.accentPrimary },
 	chatBubbleAssistant: {
 		alignSelf: "flex-start",
-		backgroundColor: "rgba(24,24,27,0.7)",
+		backgroundColor: theme.bgPanel,
 		borderWidth: 1,
-		borderColor: "rgba(255,255,255,0.08)",
+		borderColor: theme.borderGlass,
 	},
-	chatTextUser: { color: "#050505", fontSize: 15 },
-	chatTextAssistant: { color: "#ffffff", fontSize: 15, lineHeight: 21 },
+	chatTextUser: { color: theme.textOnAccent, fontSize: 15 },
+	chatTextAssistant: { color: theme.textPrimary, fontSize: 15, lineHeight: 21 },
 	chatInputContainer: {
 		flexDirection: "row",
 		gap: 12,
 		padding: 16,
 		borderTopWidth: 1,
-		borderTopColor: "rgba(255,255,255,0.08)",
+		borderTopColor: theme.borderGlass,
 	},
 	chatInput: {
 		flex: 1,
-		backgroundColor: "rgba(24,24,27,0.5)",
-		color: "#ffffff",
+		backgroundColor: theme.bgPanel,
+		color: theme.textPrimary,
 		paddingHorizontal: 16,
 		paddingVertical: 12,
 		borderRadius: 12,
 		borderWidth: 1,
-		borderColor: "rgba(255,255,255,0.08)",
+		borderColor: theme.borderGlass,
 		fontSize: 16,
 	},
 	chatSendBtn: {
-		backgroundColor: "#00e5ff",
+		backgroundColor: theme.accentPrimary,
 		paddingHorizontal: 20,
 		paddingVertical: 12,
 		borderRadius: 12,
