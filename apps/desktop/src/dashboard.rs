@@ -108,7 +108,8 @@ impl Render for Dashboard {
             }
         }
 
-        let current_override = std::env::var("LAZYNEXT_THEME").unwrap_or_else(|_| "system".to_string());
+        let current_override =
+            std::env::var("LAZYNEXT_THEME").unwrap_or_else(|_| "system".to_string());
         let mode_label = if current_override == "system" {
             let actual_os = match _window.appearance() {
                 gpui::WindowAppearance::Dark | gpui::WindowAppearance::VibrantDark => "Dark",
@@ -469,11 +470,7 @@ mod tests {
         let rt_handle = tokio::runtime::Handle::current();
         let engine = Arc::new(Mutex::new(CoreEngine::init(nle.clone()).await.unwrap()));
 
-        let dashboard = Dashboard::new(
-            nle,
-            engine,
-            rt_handle,
-        );
+        let dashboard = Dashboard::new(nle, engine, rt_handle);
         assert_eq!(dashboard.version, "0.1.0");
     }
 }

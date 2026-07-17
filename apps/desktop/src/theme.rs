@@ -117,8 +117,10 @@ impl Theme {
             Ok("dark") => Theme::dark(),
             _ => match appearance {
                 gpui::WindowAppearance::Dark | gpui::WindowAppearance::VibrantDark => Theme::dark(),
-                gpui::WindowAppearance::Light | gpui::WindowAppearance::VibrantLight => Theme::light(),
-            }
+                gpui::WindowAppearance::Light | gpui::WindowAppearance::VibrantLight => {
+                    Theme::light()
+                }
+            },
         };
 
         // Explicitly override the mode string if it's set to "system" (so the UI prints "System")
