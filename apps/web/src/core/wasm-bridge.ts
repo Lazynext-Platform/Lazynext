@@ -47,4 +47,5 @@ class WasmBridge {
 	}
 }
 
+/** Utility representing wasmBridge. */
 export const wasmBridge = WasmBridge.getInstance();

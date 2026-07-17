@@ -26,6 +26,7 @@ function getRangeIds({
 	return orderedIds.slice(rangeStart, rangeEnd + 1);
 }
 
+/** Utility representing replaceSelection. */
 export function replaceSelection({
 	ids,
 	anchorId,
@@ -40,6 +41,7 @@ export function replaceSelection({
 	};
 }
 
+/** Utility representing clearSelection. */
 export function clearSelection(): SelectionState {
 	return {
 		selectedIds: [],
@@ -47,6 +49,7 @@ export function clearSelection(): SelectionState {
 	};
 }
 
+/** Utility representing pruneSelection. */
 export function pruneSelection({
 	state,
 	orderedIds,
@@ -74,6 +77,7 @@ export function pruneSelection({
 	};
 }
 
+/** Utility representing isSelected. */
 export function isSelected({
 	state,
 	id,
@@ -84,6 +88,7 @@ export function isSelected({
 	return state.selectedIds.includes(id);
 }
 
+/** Utility representing toggleSelection. */
 export function toggleSelection({
 	state,
 	id,
@@ -111,6 +116,7 @@ export function toggleSelection({
 	});
 }
 
+/** Utility representing selectRange. */
 export function selectRange({
 	state,
 	orderedIds,
@@ -143,6 +149,7 @@ export function selectRange({
 	});
 }
 
+/** Utility representing applyBoxSelection. */
 export function applyBoxSelection({
 	intersectedIds,
 	initialSelectedIds,

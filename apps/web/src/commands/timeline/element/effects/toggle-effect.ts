@@ -4,6 +4,7 @@ import { EditorCore } from "@/core";
 import { isVisualElement, updateElementInSceneTracks } from "@/timeline";
 import type { SceneTracks, VisualElement } from "@/timeline";
 
+/** Utility representing toggleEffectOnElement. */
 export function toggleEffectOnElement({
 	element,
 	effectId,
@@ -18,6 +19,7 @@ export function toggleEffectOnElement({
 	return { ...element, effects: updated };
 }
 
+/** Class representing ToggleClipEffectCommand. */
 export class ToggleClipEffectCommand extends Command {
 	private savedState: SceneTracks | null = null;
 	private readonly trackId: string;

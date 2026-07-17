@@ -45,6 +45,7 @@ function removeKeyframeAndPersist({
 	return { ...baseElement, animations: nextAnimations };
 }
 
+/** Class representing RemoveKeyframeCommand. */
 export class RemoveKeyframeCommand extends Command {
 	private savedState: SceneTracks | null = null;
 	private readonly trackId: string;

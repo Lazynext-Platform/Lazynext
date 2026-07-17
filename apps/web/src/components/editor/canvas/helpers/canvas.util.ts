@@ -175,6 +175,7 @@ export const getCanvasObjectById = (
 	return objects.find((obj) => (obj as any).get?.("id") === elementId);
 };
 
+/** Type definition for ZOrderDirection. */
 export type ZOrderDirection = "front" | "back" | "forward" | "backward";
 
 /**

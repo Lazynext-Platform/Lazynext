@@ -35,14 +35,17 @@ function withMaskId({ mask, id }: { mask: MaskWithoutId; id: string }): Mask {
 	}
 }
 
+/** Utility representing getMaskDefinition. */
 export function getMaskDefinition(maskType: MaskType) {
 	return masksRegistry.get(maskType);
 }
 
+/** Utility representing getMaskDefinitionsForMenu. */
 export function getMaskDefinitionsForMenu() {
 	return masksRegistry.getAll();
 }
 
+/** Utility representing buildDefaultMaskInstance. */
 export function buildDefaultMaskInstance({
 	maskType,
 	elementSize,

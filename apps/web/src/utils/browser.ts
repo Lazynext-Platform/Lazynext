@@ -16,6 +16,7 @@ export function downloadBlob({
 	URL.revokeObjectURL(url);
 }
 
+/** Utility representing findScrollParent. */
 export function findScrollParent({
 	element,
 }: {
@@ -30,6 +31,7 @@ export function findScrollParent({
 	return null;
 }
 
+/** Utility representing isTypableDOMElement. */
 export function isTypableDOMElement({
 	element,
 }: {

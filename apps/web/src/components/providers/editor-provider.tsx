@@ -27,6 +27,7 @@ interface EditorProviderProps {
 	children: React.ReactNode;
 }
 
+/** React component rendering EditorProvider. */
 export function EditorProvider({ projectId, children }: EditorProviderProps) {
 	const activeProject = useEditor((e) => e.project.getActiveOrNull());
 	const router = useRouter();

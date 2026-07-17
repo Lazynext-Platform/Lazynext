@@ -5,6 +5,7 @@ import { getProjectId, isRecord } from "./utils";
 // Frozen snapshot of the v15-era fallback. See ./README.md.
 const STICKER_INTRINSIC_SIZE_FALLBACK = 200;
 
+/** Utility representing transformProjectV14ToV15. */
 export function transformProjectV14ToV15({
 	project,
 }: {

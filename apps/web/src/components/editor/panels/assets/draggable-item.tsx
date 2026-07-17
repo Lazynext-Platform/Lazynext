@@ -16,6 +16,7 @@ import type { TimelineDragData } from "@/timeline/drag";
 import { cn } from "@/utils/ui";
 import type { MediaTime } from "@/wasm";
 
+/** Type definition for DraggableItemProps. */
 export interface DraggableItemProps {
 	/** Display name of the asset. */
 	name: string;
@@ -45,6 +46,7 @@ export interface DraggableItemProps {
 	isDraggable?: boolean;
 }
 
+/** React component rendering DraggableItem. */
 export function DraggableItem({
 	name,
 	preview,

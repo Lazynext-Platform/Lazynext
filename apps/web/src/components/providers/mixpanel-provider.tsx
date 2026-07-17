@@ -9,6 +9,7 @@
 
 import Script from "next/script";
 
+/** React component rendering MixpanelProvider. */
 export function MixpanelProvider() {
 	const token = process.env.NEXT_PUBLIC_MIXPANEL_TOKEN;
 	if (!token) return null;

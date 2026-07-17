@@ -54,6 +54,7 @@ const QUICK_ACTIONS = [
 	},
 ];
 
+/** React component rendering DashboardClient. */
 export function DashboardClient() {
 	const { data: session, isPending } = useSession();
 	const router = useRouter();

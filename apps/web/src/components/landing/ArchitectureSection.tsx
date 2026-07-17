@@ -27,6 +27,7 @@ const PROJECTS = [
 	"GPUI",
 ];
 
+/** React component rendering ArchitectureSection. */
 export function ArchitectureSection() {
 	return (
 		<section className="relative overflow-hidden bg-[var(--bg-main)] dark:bg-background px-4 py-24 border-y border-[var(--border-glass)] dark:border-border transition-colors duration-300">

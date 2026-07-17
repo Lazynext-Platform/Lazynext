@@ -7,8 +7,10 @@
 
 import type { TrackType } from "@/timeline";
 
+/** Utility representing TIMELINE_AUDIO_WAVEFORM_COLOR. */
 export const TIMELINE_AUDIO_WAVEFORM_COLOR = "rgba(255, 255, 255, 0.7)";
 
+/** Utility representing TIMELINE_TRACK_THEME. */
 export const TIMELINE_TRACK_THEME: Record<
 	TrackType,
 	{
@@ -26,9 +28,12 @@ export const TIMELINE_TRACK_THEME: Record<
 	effect: { elementClassName: "bg-[#5d93ba]" },
 } as const;
 
+/** Utility representing SELECTED_TRACK_ROW_CLASS. */
 export const SELECTED_TRACK_ROW_CLASS = "bg-accent/50";
+/** Utility representing DEFAULT_TIMELINE_BOOKMARK_COLOR. */
 export const DEFAULT_TIMELINE_BOOKMARK_COLOR = "#009dff";
 
+/** Utility representing getTimelineElementClassName. */
 export function getTimelineElementClassName({
 	type,
 }: {

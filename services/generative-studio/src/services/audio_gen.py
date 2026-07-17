@@ -8,7 +8,6 @@ F5-TTS for zero-shot voice cloning — MIT licensed, 300M params, CPU-capable (~
 import asyncio
 import os
 import sys
-import httpx
 from fastapi import HTTPException
 from src.models import DubRequest, OverdubRequest, StemSplitRequest
 from src.services.pathsafe import BASE_TMP_DIR, safe_slug, safe_tmp_path

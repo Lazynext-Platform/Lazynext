@@ -1,18 +1,21 @@
 /** @module Color conversion and parsing utilities (hex ↔ HSV, HSL, RGB) */
 import { converter, formatHex, formatHex8, parse, type Rgb } from "culori";
 
+/** Type definition for ColorFormat. */
 export type ColorFormat = "hex" | "rgb" | "hsl" | "hsv";
 
 const toRgb = converter("rgb");
 const toHsv = converter("hsv");
 const toHsl = converter("hsl");
 
+/** Utility representing hexToHsv. */
 export function hexToHsv({ hex }: { hex: string }): [number, number, number] {
 	const color = toHsv(`#${hex}`);
 	if (!color) return [0, 0, 0];
 	return [color.h ?? 0, color.s ?? 0, color.v ?? 0];
 }
 
+/** Utility representing hsvToHex. */
 export function hsvToHex({
 	h,
 	s,
@@ -26,6 +29,7 @@ export function hsvToHex({
 	return hex.slice(1);
 }
 
+/** Utility representing parseHexAlpha. */
 export function parseHexAlpha({ hex }: { hex: string }): {
 	rgb: string;
 	alpha: number;
@@ -40,6 +44,7 @@ export function parseHexAlpha({ hex }: { hex: string }): {
 	};
 }
 
+/** Utility representing appendAlpha. */
 export function appendAlpha({
 	rgbHex,
 	alpha,
@@ -78,6 +83,7 @@ function colorToHexWithAlpha({ color }: { color: Rgb }): string {
 	return hex;
 }
 
+/** Utility representing extractColorFromText. */
 export function extractColorFromText({
 	text,
 }: {
@@ -105,6 +111,7 @@ export function extractColorFromText({
 	return null;
 }
 
+/** Utility representing formatColorValue. */
 export function formatColorValue({
 	hex,
 	format,
@@ -133,6 +140,7 @@ export function formatColorValue({
 	}
 }
 
+/** Utility representing parseColorInput. */
 export function parseColorInput({
 	input,
 	format,

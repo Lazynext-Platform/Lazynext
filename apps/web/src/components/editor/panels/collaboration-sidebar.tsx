@@ -8,6 +8,7 @@
 import { useState } from "react";
 import { MessageSquare, Send } from "lucide-react";
 
+/** React component rendering CollaborationSidebar. */
 export function CollaborationSidebar({
 	currentFrame,
 	onNavigateToFrame,

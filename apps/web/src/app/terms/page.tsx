@@ -16,6 +16,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SOCIAL_LINKS } from "@/site/social";
 
+/** Utility representing metadata. */
 export const metadata: Metadata = {
 	title: "Terms of Service - Lazynext",
 	description:
@@ -28,6 +29,7 @@ export const metadata: Metadata = {
 	},
 };
 
+/** React component rendering TermsPage. */
 export default function TermsPage() {
 	return (
 		<BasePage

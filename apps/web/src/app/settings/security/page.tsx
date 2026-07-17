@@ -11,6 +11,7 @@ import { headers } from "next/headers";
 import { auth } from "@/auth/server";
 import { SecuritySettingsClient } from "./client";
 
+/** Utility representing metadata. */
 export const metadata: Metadata = {
 	title: "Security Settings — Lazynext",
 	description:

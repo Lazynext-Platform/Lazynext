@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EXTERNAL_TOOLS } from "@/site/external-tools";
 import { BasePage } from "../base-page";
 
+/** Utility representing metadata. */
 export const metadata: Metadata = {
 	title: "Contributors - Lazynext",
 	description:

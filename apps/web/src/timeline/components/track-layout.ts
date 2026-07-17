@@ -12,10 +12,12 @@ import {
 	TIMELINE_TRACK_HEIGHTS_PX,
 } from "./layout";
 
+/** Type definition for getTrackHeight. */
 export function getTrackHeight({ type }: { type: TrackType }): number {
 	return TIMELINE_TRACK_HEIGHTS_PX[type];
 }
 
+/** Utility representing getExpandedTrackHeight. */
 export function getExpandedTrackHeight({
 	type,
 	expandedLaneCount,
@@ -29,6 +31,7 @@ export function getExpandedTrackHeight({
 	);
 }
 
+/** Utility representing getCumulativeHeightBefore. */
 export function getCumulativeHeightBefore({
 	tracks,
 	trackIndex,
@@ -50,6 +53,7 @@ export function getCumulativeHeightBefore({
 		);
 }
 
+/** Utility representing getTotalTracksHeight. */
 export function getTotalTracksHeight({
 	tracks,
 	getExtraHeight,

@@ -12,6 +12,7 @@ import { useEditor } from "@/editor/use-editor";
 import type { PreviewOverlayControl } from "@/preview/overlays";
 import { toast } from "sonner";
 
+/** React component rendering PreviewContextMenu. */
 export function PreviewContextMenu({
 	onToggleFullscreen,
 	container,

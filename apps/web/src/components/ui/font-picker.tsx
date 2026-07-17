@@ -50,6 +50,7 @@ interface FontPickerProps {
 	className?: string;
 }
 
+/** React component rendering FontPicker. */
 export function FontPicker({
 	defaultValue,
 	onValueChange,

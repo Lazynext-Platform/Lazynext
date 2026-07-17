@@ -18,6 +18,7 @@ interface UseFileUploadOptions {
 	onFilesSelected?: (files: File[]) => void;
 }
 
+/** Custom hook providing useFileUpload functionality. */
 export function useFileUpload({
 	accept,
 	multiple,

@@ -18,6 +18,7 @@ import {
 } from "react-native";
 import { useAuth } from "../contexts/AuthContext";
 
+/** React component rendering TwoFactorScreen. */
 export function TwoFactorScreen({ navigation, route }: { navigation: any; route: any }) {
 	const { verifyTwoFactor } = useAuth();
 	const { email, password } = route.params || {};

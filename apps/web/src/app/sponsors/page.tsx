@@ -15,6 +15,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { LinkSquare02Icon } from "@hugeicons/core-free-icons";
 import { cn } from "@/utils/ui";
 
+/** Utility representing metadata. */
 export const metadata: Metadata = {
 	title: "Sponsors - Lazynext",
 	description:
@@ -27,6 +28,7 @@ export const metadata: Metadata = {
 	},
 };
 
+/** React component rendering SponsorsPage. */
 export default function SponsorsPage() {
 	return (
 		<BasePage>

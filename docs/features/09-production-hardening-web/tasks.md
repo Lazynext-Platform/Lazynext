@@ -23,7 +23,7 @@
 
 - [x] **A.1** — Real JWT HS256 validation in `rbac.rs` using `BETTER_AUTH_SECRET` (no hardcoded tokens)
 - [x] **A.2** — `handle_get_projects` uses `claims.sub` from validated JWT extension (no mock_user_id)
-- [x] **A.3** — Dodo Payments webhook HMAC verification in `handle_stripe_webhook` with `verify_stripe_signature`
+- [x] **A.3** — Dodo Payments webhook HMAC verification in `handle_dodo_webhook` with `verify_dodo_signature`
 - [x] **A.4** — Full rate limiting with token-bucket + Redis (4 profiles: public, auth, AI gen, admin)
 - [x] **A.5** — CSRF double-submit cookie pattern in `csrf.rs` (skips safe methods + Dodo Payments webhooks)
 - [x] 📍 **Checkpoint A** — All 19 tests pass, `cargo test -p lazynext_api_gateway` green

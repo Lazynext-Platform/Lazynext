@@ -2,6 +2,7 @@
 import type { RetimeConfig } from "@/timeline";
 import { getSourceTimeAtClipTime } from "./resolve";
 
+/** Utility representing getSourceSpanAtClipTime. */
 export function getSourceSpanAtClipTime({
 	clipTime,
 	retime,
@@ -12,6 +13,7 @@ export function getSourceSpanAtClipTime({
 	return Math.max(0, getSourceTimeAtClipTime({ clipTime, retime }));
 }
 
+/** Utility representing splitRetimeAtClipTime. */
 export function splitRetimeAtClipTime({
 	retime,
 }: {
@@ -24,6 +26,7 @@ export function splitRetimeAtClipTime({
 	return { left: retime, right: retime };
 }
 
+/** Utility representing adjustRetimeForTrimChange. */
 export function adjustRetimeForTrimChange({
 	retime,
 }: {

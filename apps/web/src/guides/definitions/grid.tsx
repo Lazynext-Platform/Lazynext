@@ -113,6 +113,7 @@ function GridGuideOptions() {
 	);
 }
 
+/** Utility representing gridGuide. */
 export const gridGuide = {
 	id: "grid",
 	label: "Grid",

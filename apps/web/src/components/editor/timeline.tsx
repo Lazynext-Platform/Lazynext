@@ -111,6 +111,7 @@ interface TimelineProps {
 	isQuantumSuperposition?: boolean;
 }
 
+/** React component rendering Timeline. */
 export default function Timeline({
 	project,
 	frame,

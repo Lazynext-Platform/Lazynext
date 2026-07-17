@@ -35,6 +35,7 @@ import { getElementFontFamilies } from "@/timeline/element-utils";
 import { getRaisedProjectFpsForImportedMedia } from "@/fps/utils";
 import type { MediaAsset } from "@/media/types";
 
+/** Type definition for MigrationState. */
 export interface MigrationState {
 	/** Whether a migration is in progress. */
 	isMigrating: boolean;
@@ -46,6 +47,7 @@ export interface MigrationState {
 	projectName: string | null;
 }
 
+/** Class representing ProjectManager. */
 export class ProjectManager {
 	private active: TProject | null = null;
 	private savedProjects: TProjectMetadata[] = [];

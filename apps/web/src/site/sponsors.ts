@@ -12,6 +12,7 @@ export type Sponsor = {
 	invertOnDark?: boolean;
 };
 
+/** Utility representing SPONSORS. */
 export const SPONSORS: Sponsor[] = [
 	{
 		name: "Modal",

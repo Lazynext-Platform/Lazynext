@@ -40,6 +40,7 @@ function computePeakBuckets({
 	});
 }
 
+/** Type definition for SampleBucket. */
 export interface SampleBucket {
 	/** Start sample index (inclusive). */
 	bucketStart: number;
@@ -47,6 +48,7 @@ export interface SampleBucket {
 	bucketEnd: number;
 }
 
+/** Type definition for SourceWaveformSummary. */
 export interface SourceWaveformSummary {
 	/** Unique key identifying the source (e.g. "media:abc123"). */
 	sourceKey: string;
@@ -60,6 +62,7 @@ export interface SourceWaveformSummary {
 	amplitudes: Float32Array;
 }
 
+/** Utility representing buildWaveformSourceKey. */
 export function buildWaveformSourceKey({
 	kind,
 	id,
@@ -70,6 +73,7 @@ export function buildWaveformSourceKey({
 	return `${kind}:${id}`;
 }
 
+/** Utility representing buildSourceWaveformSummary. */
 export function buildSourceWaveformSummary({
 	sourceKey,
 	buffer,
@@ -99,6 +103,7 @@ export function buildSourceWaveformSummary({
 	};
 }
 
+/** Utility representing buildWaveformSampleBuckets. */
 export function buildWaveformSampleBuckets({
 	clipLeftPx,
 	clipRightPx,
@@ -156,6 +161,7 @@ export function buildWaveformSampleBuckets({
 	});
 }
 
+/** Utility representing sampleSourceWaveformSummary. */
 export function sampleSourceWaveformSummary({
 	summary,
 	buckets,
@@ -189,6 +195,7 @@ export function sampleSourceWaveformSummary({
 	});
 }
 
+/** Utility representing computeRmsBuckets. */
 export function computeRmsBuckets({
 	buffer,
 	buckets,

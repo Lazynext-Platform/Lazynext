@@ -15,6 +15,7 @@ import { readVideoFile } from "./mediabunny";
 import type { VideoFileData } from "./mediabunny";
 import { renderThumbnailDataUrl } from "./thumbnail";
 
+/** Type definition for ProcessedMediaAsset. */
 export type ProcessedMediaAsset = Omit<MediaAsset, "id">;
 
 const getUnsupportedVideoDescription = ({

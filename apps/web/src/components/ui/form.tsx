@@ -21,6 +21,7 @@ import { Label } from "./label";
 
 const DRAFT_DEBOUNCE_MS = 500;
 
+/** Type definition for DraftStorage. */
 export interface DraftStorage {
 	/** Retrieve a stored draft by key. */
 	getItem(key: string): string | null;
@@ -100,6 +101,7 @@ function Form<
 	);
 }
 
+/** Utility representing clearFormDraft. */
 export function clearFormDraft({
 	key,
 	storage,

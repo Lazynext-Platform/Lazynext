@@ -29,6 +29,7 @@ const Y_CLAMP_MAX = 1.5;
 
 type BezierHandle = "c1" | "c2";
 
+/** React component rendering BEZIER_GRAPH_MIN_HEIGHT. */
 export const BEZIER_GRAPH_MIN_HEIGHT = SVG_HEIGHT;
 
 function snap({
@@ -119,6 +120,7 @@ function clampHandleY({ svgY }: { svgY: number }) {
 	return Math.max(HANDLE_RADIUS, Math.min(SVG_HEIGHT - HANDLE_RADIUS, svgY));
 }
 
+/** React component rendering BezierGraph. */
 export function BezierGraph({
 	value,
 	onChange,

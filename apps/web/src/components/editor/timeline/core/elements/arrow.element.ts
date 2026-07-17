@@ -10,6 +10,7 @@ import { TrackElement } from "./base.element";
 import type { ElementVisitor } from "../visitor/element-visitor";
 import { TIMELINE_ELEMENT_TYPE } from "../../utils/constants";
 
+/** Class representing ArrowElement. */
 export class ArrowElement extends TrackElement {
 	declare protected props: ArrowProps;
 

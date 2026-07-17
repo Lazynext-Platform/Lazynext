@@ -6,6 +6,7 @@ import { updateElementInSceneTracks } from "@/timeline";
 import { isVisualElement } from "@/timeline/element-utils";
 import type { SceneTracks } from "@/timeline";
 
+/** Class representing RemoveEffectParamKeyframeCommand. */
 export class RemoveEffectParamKeyframeCommand extends Command {
 	private savedState: SceneTracks | null = null;
 	private readonly trackId: string;

@@ -107,6 +107,7 @@ const VIEW_MODE_OPTIONS = [
 	{ mode: "list" as const, icon: LeftToRightListDashIcon, label: "List view" },
 ];
 
+/** React component rendering ProjectsClient. */
 export default function ProjectsClient({
 	initialProjects,
 }: {

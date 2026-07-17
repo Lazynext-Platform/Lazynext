@@ -3,6 +3,7 @@ import { Command, type CommandResult } from "@/commands/base-command";
 import { EditorCore } from "@/core";
 import type { TProject, TProjectSettings } from "@/project/types";
 
+/** Class representing UpdateProjectSettingsCommand. */
 export class UpdateProjectSettingsCommand extends Command {
 	private savedSettings: TProjectSettings | null = null;
 	private savedUpdatedAt: Date | null = null;

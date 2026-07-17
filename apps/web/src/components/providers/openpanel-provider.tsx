@@ -9,6 +9,7 @@
 
 import Script from "next/script";
 
+/** React component rendering OpenPanelProvider. */
 export function OpenPanelProvider() {
 	const clientId = process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID;
 	const apiUrl = process.env.NEXT_PUBLIC_OPENPANEL_URL;

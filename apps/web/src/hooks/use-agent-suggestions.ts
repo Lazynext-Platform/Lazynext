@@ -19,12 +19,16 @@ export type SuggestionCategory =
 	| "CaptionSync"
 	| "ExportOptimization";
 
+/** Type definition for RiskLevel. */
 export type RiskLevel = "Low" | "Medium" | "High";
 
+/** Type definition for AgentMode. */
 export type AgentMode = "SuggestOnly" | "AutoExecute";
 
+/** Type definition for AgentStatus. */
 export type AgentStatus = "Active" | "Stopped";
 
+/** Type definition for AgentSuggestion. */
 export interface AgentSuggestion {
 	/** Unique suggestion identifier. */
 	id: string;
@@ -38,6 +42,7 @@ export interface AgentSuggestion {
 	riskLevel: RiskLevel;
 }
 
+/** Type definition for AgentState. */
 export interface AgentState {
 	/** Current agent status. */
 	status: AgentStatus;

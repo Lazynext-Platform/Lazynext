@@ -12,6 +12,7 @@ export interface FontOption {
 	hasClassName?: boolean;
 }
 
+/** Type definition for GoogleFontMeta. */
 export interface GoogleFontMeta {
 	/** Font family name. */
 	family: string;
@@ -19,6 +20,7 @@ export interface GoogleFontMeta {
 	category: string;
 }
 
+/** Type definition for FontAtlasEntry. */
 export interface FontAtlasEntry {
 	/** Atlas X offset. */
 	x: number;
@@ -32,6 +34,7 @@ export interface FontAtlasEntry {
 	s: string[];
 }
 
+/** Type definition for FontAtlas. */
 export interface FontAtlas {
 	/** Map of font family to atlas entry. */
 	fonts: Record<string, FontAtlasEntry>;

@@ -30,6 +30,7 @@ import {
 	ContextMenuTrigger,
 } from "./ui/context-menu";
 
+/** React component rendering Header. */
 export function Header() {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const closeMenu = () => setIsMenuOpen(false);

@@ -10,6 +10,7 @@
 
 import Script from "next/script";
 
+/** React component rendering MatomoProvider. */
 export function MatomoProvider() {
 	const siteId = process.env.NEXT_PUBLIC_MATOMO_SITE_ID;
 	const matomoUrl = process.env.NEXT_PUBLIC_MATOMO_URL;

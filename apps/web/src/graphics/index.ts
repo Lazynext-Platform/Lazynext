@@ -40,6 +40,7 @@ function buildFallbackPreviewUrl({
 	return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
+/** Utility representing getGraphicDefinition. */
 export function getGraphicDefinition({
 	definitionId,
 }: {
@@ -49,6 +50,7 @@ export function getGraphicDefinition({
 	return graphicsRegistry.get(definitionId);
 }
 
+/** Utility representing buildDefaultGraphicInstance. */
 export function buildDefaultGraphicInstance({
 	definitionId,
 }: {
@@ -61,6 +63,7 @@ export function buildDefaultGraphicInstance({
 	};
 }
 
+/** Utility representing resolveGraphicParams. */
 export function resolveGraphicParams({
 	definition,
 	params,
@@ -74,6 +77,7 @@ export function resolveGraphicParams({
 	};
 }
 
+/** Utility representing resolveGraphicElementParamsAtTime. */
 export function resolveGraphicElementParamsAtTime({
 	element,
 	localTime,
@@ -99,6 +103,7 @@ export function resolveGraphicElementParamsAtTime({
 	});
 }
 
+/** Utility representing buildGraphicPreviewUrl. */
 export function buildGraphicPreviewUrl({
 	definitionId,
 	params,
@@ -149,6 +154,7 @@ export {
 	registerDefaultGraphics,
 	starGraphicDefinition,
 };
+/** Documentation for this export. */
 export type {
 	GraphicDefinition,
 	GraphicInstance,

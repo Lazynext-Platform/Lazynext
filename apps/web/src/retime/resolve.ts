@@ -6,6 +6,7 @@ function getSafeRate({ rate }: { rate: number }): number {
 	return clampRetimeRate({ rate });
 }
 
+/** Utility representing getSourceTimeAtClipTime. */
 export function getSourceTimeAtClipTime({
 	clipTime,
 	retime,
@@ -16,6 +17,7 @@ export function getSourceTimeAtClipTime({
 	return clipTime * getSafeRate({ rate: retime?.rate ?? 1 });
 }
 
+/** Utility representing getClipTimeAtSourceTime. */
 export function getClipTimeAtSourceTime({
 	sourceTime,
 	retime,
@@ -26,6 +28,7 @@ export function getClipTimeAtSourceTime({
 	return sourceTime / getSafeRate({ rate: retime?.rate ?? 1 });
 }
 
+/** Utility representing getEffectiveRateAt. */
 export function getEffectiveRateAt({
 	retime,
 }: {
@@ -35,6 +38,7 @@ export function getEffectiveRateAt({
 	return getSafeRate({ rate: retime?.rate ?? 1 });
 }
 
+/** Utility representing getTimelineDurationForSourceSpan. */
 export function getTimelineDurationForSourceSpan({
 	sourceSpan,
 	retime,

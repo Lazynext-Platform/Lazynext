@@ -7,6 +7,7 @@
 import { useState } from "react";
 import { LayoutGrid, CheckCircle2 } from "lucide-react";
 
+/** React component rendering MulticamGrid. */
 export function MulticamGrid({ isMulticamMode }: { isMulticamMode: boolean }) {
 	const [activeCam, setActiveCam] = useState<number>(1);
 

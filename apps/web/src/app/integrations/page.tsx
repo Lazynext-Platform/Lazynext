@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { Film, MonitorPlay, Cloud, Link as LinkIcon, CheckCircle2, Loader2 } from "lucide-react";
 import { useState } from "react";
 
+/** React component rendering IntegrationsPage. */
 export default function IntegrationsPage() {
 	const containerVariants = {
 		hidden: { opacity: 0 },

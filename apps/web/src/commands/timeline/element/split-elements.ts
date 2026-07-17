@@ -17,6 +17,7 @@ import {
 	subMediaTime,
 } from "@/wasm";
 
+/** Class representing SplitElementsCommand. */
 export class SplitElementsCommand extends Command {
 	private savedState: SceneTracks | null = null;
 	private rightSideElements: { trackId: string; elementId: string }[] = [];

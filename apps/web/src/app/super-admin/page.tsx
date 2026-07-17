@@ -6,6 +6,7 @@
 
 import { StatCard } from "@/components/admin/StatCard";
 
+/** React component rendering SuperAdminDashboard. */
 export default function SuperAdminDashboard() {
 	return (
 		<div className="min-h-screen bg-[--bg-main] text-[--text-primary] p-8">

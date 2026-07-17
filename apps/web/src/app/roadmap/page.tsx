@@ -71,6 +71,7 @@ const roadmapItems: RoadmapItem[] = [
 	},
 ];
 
+/** Utility representing metadata. */
 export const metadata: Metadata = {
 	title: "Roadmap - Lazynext",
 	description:
@@ -98,6 +99,7 @@ export const metadata: Metadata = {
 	},
 };
 
+/** React component rendering RoadmapPage. */
 export default function RoadmapPage() {
 	return (
 		<BasePage

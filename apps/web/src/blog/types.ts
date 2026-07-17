@@ -52,6 +52,7 @@ export type Post = {
 	} | null;
 };
 
+/** Type definition for Pagination. */
 export type Pagination = {
 	/** Items per page limit. */
 	limit: number;
@@ -67,6 +68,7 @@ export type Pagination = {
 	totalPages: number;
 };
 
+/** Type definition for MarblePostList. */
 export type MarblePostList = {
 	/** List of posts. */
 	posts: Post[];
@@ -74,11 +76,13 @@ export type MarblePostList = {
 	pagination: Pagination;
 };
 
+/** Type definition for MarblePost. */
 export type MarblePost = {
 	/** Single post object. */
 	post: Post;
 };
 
+/** Type definition for Tag. */
 export type Tag = {
 	/** Unique tag identifier. */
 	id: string;
@@ -88,11 +92,13 @@ export type Tag = {
 	slug: string;
 };
 
+/** Type definition for MarbleTag. */
 export type MarbleTag = {
 	/** Single tag object. */
 	tag: Tag;
 };
 
+/** Type definition for MarbleTagList. */
 export type MarbleTagList = {
 	/** List of tags. */
 	tags: Tag[];
@@ -100,6 +106,7 @@ export type MarbleTagList = {
 	pagination: Pagination;
 };
 
+/** Type definition for Category. */
 export type Category = {
 	/** Unique category identifier. */
 	id: string;
@@ -109,11 +116,13 @@ export type Category = {
 	slug: string;
 };
 
+/** Type definition for MarbleCategory. */
 export type MarbleCategory = {
 	/** Single category object. */
 	category: Category;
 };
 
+/** Type definition for MarbleCategoryList. */
 export type MarbleCategoryList = {
 	/** List of categories. */
 	categories: Category[];
@@ -121,6 +130,7 @@ export type MarbleCategoryList = {
 	pagination: Pagination;
 };
 
+/** Type definition for Author. */
 export type Author = {
 	/** Unique author identifier. */
 	id: string;
@@ -130,11 +140,13 @@ export type Author = {
 	image: string;
 };
 
+/** Type definition for MarbleAuthor. */
 export type MarbleAuthor = {
 	/** Single author object. */
 	author: Author;
 };
 
+/** Type definition for MarbleAuthorList. */
 export type MarbleAuthorList = {
 	/** List of authors. */
 	authors: Author[];

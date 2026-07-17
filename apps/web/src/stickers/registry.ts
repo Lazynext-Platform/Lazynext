@@ -6,6 +6,7 @@
 import type { StickerProvider } from "@/stickers/types";
 import { DefinitionRegistry } from "@/params/registry";
 
+/** Class representing StickersRegistry. */
 export class StickersRegistry extends DefinitionRegistry<
 	string,
 	StickerProvider
@@ -15,4 +16,5 @@ export class StickersRegistry extends DefinitionRegistry<
 	}
 }
 
+/** Utility representing stickersRegistry. */
 export const stickersRegistry = new StickersRegistry();

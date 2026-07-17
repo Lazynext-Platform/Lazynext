@@ -41,6 +41,7 @@ const getCaptionText = (element: ElementJSON): string => {
 	return (fromTextField || fromProps).trim();
 };
 
+/** Utility representing getCaptionElements. */
 export const getCaptionElements = (
 	project: ProjectJSON,
 	language?: string,
@@ -64,6 +65,7 @@ export const getCaptionElements = (
 	return captions;
 };
 
+/** Utility representing getCaptionLanguages. */
 export const getCaptionLanguages = (project: ProjectJSON): string[] => {
 	const languages = (project.tracks || [])
 		.filter((track) => track.type === "caption")
@@ -71,6 +73,7 @@ export const getCaptionLanguages = (project: ProjectJSON): string[] => {
 	return [...new Set(languages)];
 };
 
+/** Utility representing exportCaptionsAsSRT. */
 export const exportCaptionsAsSRT = (
 	project: ProjectJSON,
 	language?: string,
@@ -86,6 +89,7 @@ export const exportCaptionsAsSRT = (
 		.join("\n");
 };
 
+/** Utility representing exportCaptionsAsVTT. */
 export const exportCaptionsAsVTT = (
 	project: ProjectJSON,
 	language?: string,

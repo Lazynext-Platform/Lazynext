@@ -15,6 +15,7 @@ import { db } from "@/db";
 import { user, subscriptions, projects } from "@/db/schema";
 import { sql, count } from "drizzle-orm";
 
+/** Type definition for AdminMetrics. */
 export type AdminMetrics = {
   /** Total number of registered users. */
   totalUsers: number;
@@ -26,6 +27,7 @@ export type AdminMetrics = {
   totalProjects: number;
 };
 
+/** Type definition for SystemStatus. */
 export type SystemStatus = {
   /** Number of active Rust render nodes, or null if unknown. */
   activeRustNodes: number | null;
@@ -35,6 +37,7 @@ export type SystemStatus = {
   lastUpdated: string;
 };
 
+/** Type definition for AIProviderMetric. */
 export type AIProviderMetric = {
   /** Display name of the AI model. */
   name: string;
@@ -130,6 +133,7 @@ export async function getRecentUsers(limit = 10) {
   }
 }
 
+/** Utility representing adminData. */
 export const adminData = {
   getAdminMetrics,
   getSystemStatus,

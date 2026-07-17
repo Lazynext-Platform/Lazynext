@@ -1,6 +1,7 @@
 /** @module Freeform path mask data structures for point-based mask outlines */
 import type { ElementBounds } from "@/preview/element-bounds";
 
+/** Type definition for FreeformPathPoint. */
 export interface FreeformPathPoint {
 	/** Unique point identifier. */
 	id: string;
@@ -41,6 +42,7 @@ function isFreeformPathPoint(value: unknown): value is FreeformPathPoint {
 	);
 }
 
+/** Utility representing parseFreeformPath. */
 export function parseFreeformPath({
 	path,
 }: {
@@ -58,6 +60,7 @@ export function parseFreeformPath({
 	}
 }
 
+/** Utility representing serializeFreeformPath. */
 export function serializeFreeformPath({
 	points,
 }: {
@@ -66,6 +69,7 @@ export function serializeFreeformPath({
 	return JSON.stringify(points);
 }
 
+/** Utility representing removeFreeformPathPoints. */
 export function removeFreeformPathPoints({
 	points,
 	pointIds,
@@ -80,6 +84,7 @@ export function removeFreeformPathPoints({
 	return points.filter((point) => !pointIdsToRemove.has(point.id));
 }
 
+/** Utility representing getFreeformPathClosedStateAfterPointRemoval. */
 export function getFreeformPathClosedStateAfterPointRemoval({
 	wasClosed,
 	remainingPointCount,
@@ -108,6 +113,7 @@ function rotatePoint({
 	};
 }
 
+/** Utility representing getFreeformCenterCanvasPoint. */
 export function getFreeformCenterCanvasPoint({
 	centerX,
 	centerY,
@@ -123,6 +129,7 @@ export function getFreeformCenterCanvasPoint({
 	};
 }
 
+/** Utility representing freeformLocalPointToCanvas. */
 export function freeformLocalPointToCanvas({
 	point,
 	centerX,
@@ -155,6 +162,7 @@ export function freeformLocalPointToCanvas({
 	};
 }
 
+/** Utility representing freeformCanvasPointToLocal. */
 export function freeformCanvasPointToLocal({
 	point,
 	centerX,
@@ -187,6 +195,7 @@ export function freeformCanvasPointToLocal({
 	};
 }
 
+/** Utility representing getFreeformCanvasGeometry. */
 export function getFreeformCanvasGeometry({
 	points,
 	centerX,
@@ -252,6 +261,7 @@ export function getFreeformCanvasGeometry({
 	};
 }
 
+/** Type definition for CanvasPoint. */
 export interface CanvasPoint {
 	/** X coordinate in canvas space. */
 	x: number;
@@ -298,6 +308,7 @@ function getCanvasPointBounds({ points }: { points: CanvasPoint[] }): {
 	};
 }
 
+/** Type definition for FreeformCanvasSegment. */
 export interface FreeformCanvasSegment {
 	/** Segment index in the path. */
 	index: number;
@@ -396,6 +407,7 @@ function getFreeformSegmentIndices({
 	};
 }
 
+/** Utility representing getFreeformSegmentCount. */
 export function getFreeformSegmentCount({
 	points,
 	closed,
@@ -409,6 +421,7 @@ export function getFreeformSegmentCount({
 	return closed ? points.length : points.length - 1;
 }
 
+/** Utility representing getFreeformCanvasSegments. */
 export function getFreeformCanvasSegments({
 	points,
 	centerX,
@@ -452,6 +465,7 @@ export function getFreeformCanvasSegments({
 	});
 }
 
+/** Utility representing findClosestPointOnFreeformSegment. */
 export function findClosestPointOnFreeformSegment({
 	points,
 	segmentIndex,
@@ -549,6 +563,7 @@ export function findClosestPointOnFreeformSegment({
 	};
 }
 
+/** Utility representing insertPointIntoFreeformSegment. */
 export function insertPointIntoFreeformSegment({
 	points,
 	segmentIndex,
@@ -614,6 +629,7 @@ export function insertPointIntoFreeformSegment({
 	return nextPoints;
 }
 
+/** Utility representing getFreeformLocalBounds. */
 export function getFreeformLocalBounds({
 	points,
 	bounds,
@@ -650,6 +666,7 @@ export function getFreeformLocalBounds({
 	};
 }
 
+/** Utility representing recenterFreeformPath. */
 export function recenterFreeformPath({
 	points,
 	centerX,
@@ -737,6 +754,7 @@ export function recenterFreeformPath({
 	};
 }
 
+/** Utility representing buildFreeformPath2D. */
 export function buildFreeformPath2D({
 	points,
 	centerX,
@@ -800,6 +818,7 @@ export function buildFreeformPath2D({
 	return path;
 }
 
+/** Utility representing buildFreeformSvgPath. */
 export function buildFreeformSvgPath({
 	points,
 	centerX,

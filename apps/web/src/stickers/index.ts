@@ -312,6 +312,7 @@ export async function resolveStickerIntrinsicSize({
 
 export { resolveStickerId };
 export { resolveQueryToRegions, getRegionLabel } from "./providers/flags";
+/** Documentation for this export. */
 export type {
 	StickerBrowseResult,
 	StickerBrowseSection,

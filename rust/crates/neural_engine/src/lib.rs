@@ -119,7 +119,10 @@ impl FacialRecognitionModel {
         // ONNX inference path
         #[cfg(feature = "onnx")]
         {
-            return self.detect_faces_onnx(frame_data, width, height);
+            let faces = self.detect_faces_onnx(frame_data, width, height);
+            if !faces.is_empty() {
+                return faces;
+            }
         }
 
         // Heuristic path: skin-tone color analysis
@@ -198,6 +201,7 @@ impl FacialRecognitionModel {
     }
 
     #[cfg(feature = "onnx")]
+    #[allow(clippy::type_complexity)]
     // Runs SCRFD/YOLO-face ONNX inference, falling back to the heuristic on failure.
     fn detect_faces_onnx(&self, frame_data: &[u8], width: u32, height: u32) -> Vec<FaceDetection> {
         println!("[NeuralEngine] Running hardware-accelerated ONNX facial detection...");
@@ -211,7 +215,7 @@ impl FacialRecognitionModel {
                     return Err("ONNX model file not found".into());
                 }
 
-                let model = ort::Session::builder()?.commit_from_file(model_path)?;
+                let mut model = ort::session::Session::builder()?.commit_from_file(model_path)?;
 
                 // Preprocess RGBA frame to RGB float32 tensor
                 let w = width as usize;
@@ -231,7 +235,8 @@ impl FacialRecognitionModel {
                 }
 
                 let tensor = ndarray::Array4::from_shape_vec((1, 3, h, w), rgb_data)?;
-                let inputs = ort::inputs!["input.1" => tensor]?;
+                let tensor_val = ort::value::Tensor::from_array(tensor)?;
+                let inputs = ort::inputs!["input.1" => tensor_val];
 
                 // Run inference
                 let outputs = model.run(inputs)?;
@@ -247,14 +252,14 @@ impl FacialRecognitionModel {
                     let score_key = format!("score_{}", stride);
                     let bbox_key = format!("bbox_{}", stride);
 
-                    let scores = match outputs.get(&score_key) {
+                    let scores_val = match outputs.get(&score_key) {
                         Some(t) => t,
                         None => {
                             match outputs.iter().find(|(k, _)| {
                                 k.contains(&format!("score_{}", stride))
                                     || k.contains(&format!("cls_{}", stride))
                             }) {
-                                Some((_, t)) => t,
+                                Some((k, _)) => outputs.get(k).unwrap(),
                                 None => {
                                     println!(
                                         "[NeuralEngine] Warning: output '{}' not found, skipping stride {}",
@@ -266,14 +271,14 @@ impl FacialRecognitionModel {
                         }
                     };
 
-                    let bboxes = match outputs.get(&bbox_key) {
+                    let bboxes_val = match outputs.get(&bbox_key) {
                         Some(t) => t,
                         None => {
                             match outputs
                                 .iter()
                                 .find(|(k, _)| k.contains(&format!("bbox_{}", stride)))
                             {
-                                Some((_, t)) => t,
+                                Some((k, _)) => outputs.get(k).unwrap(),
                                 None => {
                                     println!(
                                         "[NeuralEngine] Warning: output '{}' not found, skipping stride {}",
@@ -285,10 +290,26 @@ impl FacialRecognitionModel {
                         }
                     };
 
+                    let scores_tensor = match scores_val.try_extract_array::<f32>() {
+                        Ok(t) => t,
+                        Err(e) => {
+                            println!("[NeuralEngine] Failed to extract scores tensor: {}", e);
+                            continue;
+                        }
+                    };
+
+                    let bboxes_tensor = match bboxes_val.try_extract_array::<f32>() {
+                        Ok(t) => t,
+                        Err(e) => {
+                            println!("[NeuralEngine] Failed to extract bboxes tensor: {}", e);
+                            continue;
+                        }
+                    };
+
                     // Decode detections from this scale
                     let decoded = scrfd_decode_boxes(
-                        scores,
-                        bboxes,
+                        &scores_tensor,
+                        &bboxes_tensor,
                         width as f32,
                         height as f32,
                         stride as f32,
@@ -314,37 +335,34 @@ impl FacialRecognitionModel {
                 Ok(final_detections)
             })();
 
-        match raw_boxes {
-            Ok(detections) => {
-                let faces: Vec<FaceDetection> = detections
-                    .into_iter()
-                    .map(|(score, x1, y1, x2, y2)| {
-                        let w = x2 - x1;
-                        let h = y2 - y1;
-                        FaceDetection {
-                            actor_id: format!("Face_{:.0}", score * 100.0),
-                            confidence: score,
-                            bounding_box: BoundingBox {
-                                x: x1 / width as f32,
-                                y: y1 / height as f32,
-                                width: w / width as f32,
-                                height: h / height as f32,
-                            },
-                        }
-                    })
-                    .collect();
+        if let Ok(detections) = raw_boxes {
+            let faces: Vec<FaceDetection> = detections
+                .into_iter()
+                .map(|(score, x1, y1, x2, y2)| {
+                    let w = x2 - x1;
+                    let h = y2 - y1;
+                    FaceDetection {
+                        actor_id: format!("Face_{:.0}", score * 100.0),
+                        confidence: score,
+                        bounding_box: BoundingBox {
+                            x: x1 / width as f32,
+                            y: y1 / height as f32,
+                            width: w / width as f32,
+                            height: h / height as f32,
+                        },
+                    }
+                })
+                .collect();
 
-                if !faces.is_empty() {
-                    println!(
-                        "[NeuralEngine] ONNX SCRFD detected {} faces. Confidence range: {:.2}-{:.2}",
-                        faces.len(),
-                        faces.iter().map(|f| f.confidence).fold(0.0f32, f32::max),
-                        faces.iter().map(|f| f.confidence).fold(1.0f32, f32::min)
-                    );
-                    return faces;
-                }
+            if !faces.is_empty() {
+                println!(
+                    "[NeuralEngine] ONNX SCRFD detected {} faces. Confidence range: {:.2}-{:.2}",
+                    faces.len(),
+                    faces.iter().map(|f| f.confidence).fold(0.0f32, f32::max),
+                    faces.iter().map(|f| f.confidence).fold(1.0f32, f32::min)
+                );
+                return faces;
             }
-            _ => {}
         }
 
         println!(
@@ -593,23 +611,31 @@ impl NeuralComputePipeline {
 /// Returns `Vec<(score, x1, y1, x2, y2)>` in pixel coordinates.
 #[cfg(feature = "onnx")]
 #[allow(clippy::too_many_arguments)]
-fn scrfd_decode_boxes(
-    scores: &ndarray::ArrayBase<impl ndarray::RawData, ndarray::Dim<impl ndarray::Dimension>>,
-    bboxes: &ndarray::ArrayBase<impl ndarray::RawData, ndarray::Dim<impl ndarray::Dimension>>,
+fn scrfd_decode_boxes<S1, D1, S2, D2>(
+    scores: &ndarray::ArrayBase<S1, D1>,
+    bboxes: &ndarray::ArrayBase<S2, D2>,
     img_w: f32,
     img_h: f32,
     stride: f32,
     num_anchors: usize,
-) -> Vec<(f32, f32, f32, f32, f32)> {
+) -> Vec<(f32, f32, f32, f32, f32)>
+where
+    S1: ndarray::Data<Elem = f32>,
+    D1: ndarray::Dimension,
+    S2: ndarray::Data<Elem = f32>,
+    D2: ndarray::Dimension,
+{
     let mut detections = Vec::new();
 
     // Try to extract the score and bbox tensors as 4D: [1, C, H, W]
     // SCRFD raw output shape is typically [1, num_anchors*2, H, W] for scores
     // and [1, num_anchors*4, H, W] for boxes
     // Extract a tensor's dimensions as a 4-tuple, promoting 3D `[C, H, W]` to `[1, C, H, W]`.
-    fn extract_4d(
-        t: &ndarray::ArrayBase<impl ndarray::RawData, ndarray::Dim<impl ndarray::Dimension>>,
-    ) -> Option<(usize, usize, usize, usize)> {
+    fn extract_4d<S, D>(t: &ndarray::ArrayBase<S, D>) -> Option<(usize, usize, usize, usize)>
+    where
+        S: ndarray::RawData,
+        D: ndarray::Dimension,
+    {
         let shape = t.shape();
         if shape.len() == 4 {
             Some((shape[0], shape[1], shape[2], shape[3]))
@@ -723,23 +749,24 @@ fn scrfd_decode_boxes(
 
 /// Extract a single f32 value from a tensor at the given indices.
 #[cfg(feature = "onnx")]
-fn get_tensor_f32(
-    t: &ndarray::ArrayBase<impl ndarray::RawData, ndarray::Dim<impl ndarray::Dimension>>,
-    indices: &[usize],
-) -> Option<f32> {
+fn get_tensor_f32<S, D>(t: &ndarray::ArrayBase<S, D>, indices: &[usize]) -> Option<f32>
+where
+    S: ndarray::Data<Elem = f32>,
+    D: ndarray::Dimension,
+{
     // Use dynamic indexing via ndarray's array view
     if indices.len() > t.shape().len() {
         return None;
     }
-    let view = t.view();
+    let _view = t.view();
     // For the generic case, we can't use ndarray's static indexing,
     // so we rely on shape checks and the Dyn dimension type.
     // The ort crate's Tensor type has extract_tensor() and try_extract_tensor()
     // that return ndarray views. We do a best-effort extraction here.
-    if t.shape() == &[indices[0]] {
-        if let Some(val) = t.iter().nth(indices[0]) {
-            return Some(*val);
-        }
+    if t.shape() == [indices[0]]
+        && let Some(val) = t.iter().nth(indices[0])
+    {
+        return Some(*val);
     }
     // Fallback: linear index into the raw data
     let mut linear_idx = 0usize;

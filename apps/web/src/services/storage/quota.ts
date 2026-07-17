@@ -3,8 +3,10 @@ import { formatNumberForDisplay } from "@/utils/math";
 
 const BYTE_UNITS = ["B", "KB", "MB", "GB", "TB"] as const;
 
+/** Utility representing STORAGE_HEADROOM_RESERVE_BYTES. */
 export const STORAGE_HEADROOM_RESERVE_BYTES = 50 * 1024 * 1024;
 
+/** Type definition for StorageQuotaStatus. */
 export interface StorageQuotaStatus {
 	/** Total quota in bytes. */
 	quotaBytes: number | null;
@@ -16,6 +18,7 @@ export interface StorageQuotaStatus {
 	availableBytes: number | null;
 }
 
+/** Type definition for StorageCapacityCheckResult. */
 export interface StorageCapacityCheckResult {
 	/** Whether the required data can be stored. */
 	canStore: boolean;
@@ -33,6 +36,7 @@ function normalizeByteValue({ value }: { value: unknown }): number | null {
 	return value;
 }
 
+/** Utility representing formatStorageBytes. */
 export function formatStorageBytes({ bytes }: { bytes: number }): string {
 	if (!Number.isFinite(bytes) || bytes <= 0) {
 		return "0 B";
@@ -91,6 +95,7 @@ export async function readStorageQuotaStatus(): Promise<StorageQuotaStatus> {
 	};
 }
 
+/** Utility representing evaluateStorageCapacity. */
 export function evaluateStorageCapacity({
 	requiredBytes,
 	quotaStatus,
@@ -121,6 +126,7 @@ export function evaluateStorageCapacity({
 	};
 }
 
+/** Class representing StorageQuotaExceededError. */
 export class StorageQuotaExceededError extends Error {
 	requiredBytes: number;
 
@@ -134,6 +140,7 @@ export class StorageQuotaExceededError extends Error {
 	}
 }
 
+/** Utility representing isStorageQuotaExceededError. */
 export function isStorageQuotaExceededError({
 	error,
 }: {

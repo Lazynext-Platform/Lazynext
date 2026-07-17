@@ -7,6 +7,7 @@
 
 import type { MediaAsset, MediaType } from "@/media/types";
 
+/** Utility representing SUPPORTS_AUDIO. */
 export const SUPPORTS_AUDIO: readonly MediaType[] = ["audio", "video"];
 
 /** Returns true if the media asset type supports an audio track. */

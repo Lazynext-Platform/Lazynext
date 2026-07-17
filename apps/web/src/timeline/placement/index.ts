@@ -21,6 +21,7 @@ export {
 } from "./main-track";
 
 export { buildEmptyTrack } from "./track-factory";
+/** Documentation for this export. */
 export type {
 	PlacementResult,
 	PlacementStrategy,

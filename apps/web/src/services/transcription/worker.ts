@@ -1,11 +1,13 @@
 /** @module Transcription web worker routing to Modal Whisper API */
 import type { TranscriptionSegment } from "@/transcription/types";
 
+/** Type definition for WorkerMessage. */
 export type WorkerMessage =
 	| { type: "init"; modelId: string }
 	| { type: "transcribe"; audio: Float32Array; language: string }
 	| { type: "cancel" };
 
+/** Type definition for WorkerResponse. */
 export type WorkerResponse =
 	| { type: "init-progress"; progress: number }
 	| { type: "init-complete" }

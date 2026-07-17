@@ -13,6 +13,7 @@ import {
 } from "@/wasm";
 import { resolveAnimationTarget } from "@/timeline/animation-targets";
 
+/** Class representing RetimeKeyframeCommand. */
 export class RetimeKeyframeCommand extends Command {
 	private savedState: SceneTracks | null = null;
 	private readonly trackId: string;

@@ -2,6 +2,7 @@
 import { PasteCommand } from "@/commands/timeline";
 import type { ClipboardHandler } from "../types";
 
+/** Utility representing ElementsClipboardHandler. */
 export const ElementsClipboardHandler = {
 	type: "elements",
 

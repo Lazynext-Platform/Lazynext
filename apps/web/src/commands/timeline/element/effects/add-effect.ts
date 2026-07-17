@@ -17,6 +17,7 @@ function addEffectToElement({
 	return { ...element, effects: [...currentEffects, instance] };
 }
 
+/** Class representing AddClipEffectCommand. */
 export class AddClipEffectCommand extends Command {
 	private savedState: SceneTracks | null = null;
 	private effectId: string | null = null;

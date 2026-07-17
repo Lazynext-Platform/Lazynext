@@ -37,6 +37,7 @@ interface BezierEditorModalProps {
 	commitState: (data: any) => void;
 }
 
+/** React component rendering BezierEditorModal. */
 export function BezierEditorModal({
 	bezierEditor,
 	setBezierEditor,

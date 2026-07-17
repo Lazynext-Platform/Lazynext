@@ -13,6 +13,7 @@ import type { ElementVisitor } from "../visitor/element-visitor";
 import { TIMELINE_ELEMENT_TYPE } from "../../utils/constants";
 import { ElementFrameEffect } from "../addOns/frame-effect";
 
+/** Class representing ImageElement. */
 export class ImageElement extends TrackElement {
 	protected backgroundColor!: string;
 	protected parentSize: Size;

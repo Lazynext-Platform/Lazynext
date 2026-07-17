@@ -13,6 +13,7 @@ interface Clip {
   end: number;
 }
 
+/** React component rendering Timeline. */
 export const Timeline: React.FC = () => {
   const [clips, _setClips] = useState<Clip[]>([
     { id: 'clip_1', name: 'Intro Sequence', start: 0, end: 120 },

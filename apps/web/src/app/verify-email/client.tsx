@@ -14,6 +14,7 @@ interface VerifyEmailClientProps {
 	message: string;
 }
 
+/** React component rendering VerifyEmailClient. */
 export function VerifyEmailClient({ status, message }: VerifyEmailClientProps) {
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-background px-4">

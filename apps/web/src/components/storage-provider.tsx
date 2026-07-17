@@ -25,6 +25,7 @@ interface StorageContextType {
 
 const StorageContext = createContext<StorageContextType | null>(null);
 
+/** Custom hook providing useStorage functionality. */
 export function useStorage() {
 	const context = useContext(StorageContext);
 	if (!context) {
@@ -38,6 +39,7 @@ interface StorageProviderProps {
 	children: React.ReactNode;
 }
 
+/** React component rendering StorageProvider. */
 export function StorageProvider({ children }: StorageProviderProps) {
 	const [status, setStatus] = useState<StorageContextType>({
 		isInitialized: false,

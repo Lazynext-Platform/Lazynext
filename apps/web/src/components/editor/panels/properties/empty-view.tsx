@@ -2,6 +2,7 @@
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Settings05Icon } from "@hugeicons/core-free-icons";
 
+/** React component rendering EmptyView. */
 export function EmptyView() {
 	return (
 		<div className="bg-background flex h-full flex-col items-center justify-center gap-3 p-4">

@@ -19,6 +19,7 @@ import type { SelectableSurfaceProps, SelectionState } from "@/selection/types";
 import { useBoxSelect } from "@/selection/hooks/use-box-select";
 import { cn } from "@/utils/ui";
 
+/** React component rendering SelectableSurface. */
 export function SelectableSurface({
 	orderedIds,
 	children,

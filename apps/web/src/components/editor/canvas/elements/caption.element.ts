@@ -8,6 +8,7 @@ import {
 import { ELEMENT_TYPES } from "../helpers/constants";
 import { CANVAS_OPERATIONS } from "../helpers/constants";
 
+/** Utility representing CaptionElement. */
 export const CaptionElement: CanvasElementHandler = {
 	name: ELEMENT_TYPES.CAPTION,
 

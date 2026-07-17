@@ -46,7 +46,7 @@ psql -h localhost -U lazynext -d lazynext -c "SELECT count(*) FROM pg_stat_activ
 docker compose -f docker-compose.prod.yml restart postgres
 ```
 
-### API Key Expired (Stripe/Resend/Gemini)
+### API Key Expired (Dodo/Resend/Gemini)
 ```bash
 # Verify secrets
 kubectl get secret lazynext-secrets -n lazynext -o jsonpath='{.data}'

@@ -10,6 +10,7 @@ export type ScopeEntry = {
 
 let activeScope: ScopeEntry | null = null;
 
+/** Utility representing activateScope. */
 export function activateScope({ entry }: { entry: ScopeEntry }): () => void {
 	if (activeScope && activeScope !== entry) {
 		activeScope.clear();
@@ -24,6 +25,7 @@ export function activateScope({ entry }: { entry: ScopeEntry }): () => void {
 	};
 }
 
+/** Utility representing clearActiveScope. */
 export function clearActiveScope(): boolean {
 	if (!activeScope?.hasSelection()) {
 		return false;

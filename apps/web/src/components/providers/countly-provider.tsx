@@ -9,6 +9,7 @@
 
 import Script from "next/script";
 
+/** React component rendering CountlyProvider. */
 export function CountlyProvider() {
 	const appKey = process.env.NEXT_PUBLIC_COUNTLY_APP_KEY;
 	const countlyUrl = process.env.NEXT_PUBLIC_COUNTLY_URL;

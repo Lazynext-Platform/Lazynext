@@ -113,6 +113,7 @@ interface GeneratedMetadata {
 	suggested_posting_time: string;
 }
 
+/** React component rendering SocialPublish. */
 export function SocialPublish({
 	projectData,
 }: {

@@ -31,6 +31,7 @@ interface EditorUIClientProps {
 	projectName: string;
 }
 
+/** React component rendering EditorUIClient. */
 export function EditorUIClient({ project, projectId, projectName }: EditorUIClientProps) {
 	const { setShowCommandPalette } = useEditorState();
 

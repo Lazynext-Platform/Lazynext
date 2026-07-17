@@ -6,7 +6,7 @@ REST API gateway providing JWT-authenticated access to the Lazynext platform. Po
 
 - **Auth**: JWT (HS256) via better-auth, RBAC (Viewer/Editor/Admin)
 - **Database**: PostgreSQL via sqlx with Drizzle-compatible schema
-- **Payments**: Stripe webhooks with HMAC-SHA256 signature verification
+- **Payments**: Dodo Payments webhooks with HMAC-SHA256 signature verification
 - **AI**: `/api/v1/autonomous_edit`, `/api/v1/ai/generate`, `/api/v1/ai/tts`
 - **Media**: Multipart upload, local filesystem, chunked stream ingest
 - **WebSocket**: CRDT sync via Redis pub/sub rooms

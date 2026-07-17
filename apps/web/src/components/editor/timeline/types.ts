@@ -10,6 +10,7 @@ export interface Position {
 	y: number;
 }
 
+/** Type definition for Size. */
 export interface Size {
 	/** Width in pixels. */
 	width: number;
@@ -17,6 +18,7 @@ export interface Size {
 	height: number;
 }
 
+/** Type definition for Frame. */
 export interface Frame {
 	/** Horizontal position. */
 	x?: number;
@@ -69,6 +71,7 @@ export interface ElementJSON {
 	[key: string]: any;
 }
 
+/** Type definition for TrackJSON. */
 export interface TrackJSON {
 	/** Unique track identifier. */
 	id: string;
@@ -129,6 +132,7 @@ export interface ProjectAssetJSON {
 	};
 }
 
+/** Type definition for ProjectJSON. */
 export interface ProjectJSON {
 	/** Optional global watermark settings. */
 	watermark?: WatermarkJSON;
@@ -154,6 +158,7 @@ export interface ProjectJSON {
 	version: number;
 }
 
+/** Type definition for ChapterMarker. */
 export interface ChapterMarker {
 	/** Unique chapter identifier. */
 	id: string;
@@ -165,6 +170,7 @@ export interface ChapterMarker {
 	description?: string;
 }
 
+/** Type definition for ProjectMetadata. */
 export interface ProjectMetadata {
 	/** Project title. */
 	title?: string;
@@ -182,8 +188,10 @@ export interface ProjectMetadata {
 	custom?: Record<string, unknown>;
 }
 
+/** Type definition for ElementMetadata. */
 export type ElementMetadata = Record<string, unknown>;
 
+/** Type definition for WatermarkJSON. */
 export interface WatermarkJSON {
 	/** Unique watermark identifier. */
 	id: string;
@@ -219,6 +227,7 @@ export interface BaseMediaProps {
 	controls?: boolean;
 }
 
+/** Type definition for VideoProps. */
 export interface VideoProps extends BaseMediaProps {
 	/** Rendered width in pixels. */
 	width?: number;
@@ -236,6 +245,7 @@ export interface VideoProps extends BaseMediaProps {
 	volume?: number;
 }
 
+/** Type definition for AudioProps. */
 export interface AudioProps extends BaseMediaProps {
 	/** Media source URL (overrides inherited field). */
 	src: string;
@@ -249,6 +259,7 @@ export interface AudioProps extends BaseMediaProps {
 	loop?: boolean;
 }
 
+/** Type definition for ImageProps. */
 export interface ImageProps {
 	/** Image source URL. */
 	src: string;
@@ -262,6 +273,7 @@ export interface ImageProps {
 	mediaFilter?: string;
 }
 
+/** Type definition for TextProps. */
 export interface TextProps {
 	/** Displayed text content. */
 	text: string;
@@ -299,6 +311,7 @@ export interface TextProps {
 	fontStyle?: string;
 }
 
+/** Type definition for RectProps. */
 export interface RectProps {
 	/** Fill color. */
 	fill: string;
@@ -314,6 +327,7 @@ export interface RectProps {
 	lineWidth?: number;
 }
 
+/** Type definition for CircleProps. */
 export interface CircleProps {
 	/** Fill color. */
 	fill: string;
@@ -329,6 +343,7 @@ export interface CircleProps {
 	lineWidth?: number;
 }
 
+/** Type definition for IconProps. */
 export interface IconProps {
 	/** Fill color. */
 	fill: string;
@@ -336,11 +351,13 @@ export interface IconProps {
 	size?: number;
 }
 
+/** Type definition for EmojiProps. */
 export interface EmojiProps extends ImageProps {
 	/** Emoji character to render. */
 	emoji: string;
 }
 
+/** Type definition for ArrowProps. */
 export interface ArrowProps {
 	/** Fill color. */
 	fill: string;
@@ -352,6 +369,7 @@ export interface ArrowProps {
 	lineWidth?: number;
 }
 
+/** Type definition for LineProps. */
 export interface LineProps {
 	/** Stroke/fill color for the line body */
 	fill: string;
@@ -377,6 +395,7 @@ export interface TextEffect {
 	name: string;
 }
 
+/** Type definition for FrameEffectProps. */
 export interface FrameEffectProps {
 	/** Size of the frame [width, height] in pixels. */
 	frameSize: [number, number];
@@ -390,6 +409,7 @@ export interface FrameEffectProps {
 	objectFit?: ObjectFit;
 }
 
+/** Type definition for FrameEffect. */
 export interface FrameEffect {
 	/** Start time in seconds. */
 	s: number;
@@ -399,6 +419,7 @@ export interface FrameEffect {
 	props: FrameEffectProps;
 }
 
+/** Type definition for EffectProps. */
 export interface EffectProps {
 	/**
 	 * Unique key identifying the effect in the GL effects catalog.
@@ -432,4 +453,5 @@ export interface Animation {
 
 // Utility Types
 export type ObjectFit = "contain" | "cover" | "fill" | "none" | "scale-down";
+/** Type definition for TextAlign. */
 export type TextAlign = "left" | "center" | "right" | "justify";

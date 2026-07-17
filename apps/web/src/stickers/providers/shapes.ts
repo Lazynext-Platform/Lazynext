@@ -89,6 +89,7 @@ function getShapeParams({
 	};
 }
 
+/** Utility representing parseShapeStickerId. */
 export function parseShapeStickerId({
 	stickerId,
 }: {
@@ -174,6 +175,7 @@ function paginateShapes({
 	};
 }
 
+/** Utility representing shapesProvider. */
 export const shapesProvider: StickerProvider = {
 	id: SHAPES_PROVIDER_ID,
 	async search({

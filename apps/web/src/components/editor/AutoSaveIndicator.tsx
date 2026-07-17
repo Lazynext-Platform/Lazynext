@@ -18,6 +18,7 @@ interface AutoSaveIndicatorProps {
 	className?: string;
 }
 
+/** React component rendering AutoSaveIndicator. */
 export function AutoSaveIndicator({ className }: AutoSaveIndicatorProps) {
 	const [status, setStatus] = useState<SaveStatus>("saved");
 

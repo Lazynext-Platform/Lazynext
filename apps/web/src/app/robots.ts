@@ -8,6 +8,7 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/site/brand";
 
+/** Utility representing robots. */
 export default function robots(): MetadataRoute.Robots {
 	return {
 		rules: {

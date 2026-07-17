@@ -13,6 +13,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { TProjectSortKey } from "@/project/types";
 
+/** Type definition for ProjectsViewMode. */
 export type ProjectsViewMode = "grid" | "list";
 
 interface ProjectsState {
@@ -106,6 +107,7 @@ const getNextSelectedProjectIds = ({
 	return Array.from(selectedProjectIdSet);
 };
 
+/** Custom hook providing useProjectsStore functionality. */
 export const useProjectsStore = create<ProjectsState>()(
 	persist(
 		(set) => ({

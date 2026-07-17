@@ -47,6 +47,7 @@ function pointInRotatedRect({
 	);
 }
 
+/** Utility representing getHitElements. */
 export function getHitElements({
 	canvasX,
 	canvasY,
@@ -78,6 +79,7 @@ export function getHitElements({
 	return hits;
 }
 
+/** Utility representing hitTest. */
 export function hitTest({
 	canvasX,
 	canvasY,
@@ -96,6 +98,7 @@ export function hitTest({
 	);
 }
 
+/** Utility representing resolvePreferredHit. */
 export function resolvePreferredHit({
 	hits,
 	preferredElements,

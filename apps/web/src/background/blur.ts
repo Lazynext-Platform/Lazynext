@@ -12,4 +12,5 @@ export const BACKGROUND_BLUR_INTENSITY_PRESETS: Array<{
 	{ label: "Heavy", value: 500 },
 ] as const;
 
+/** Utility representing DEFAULT_BACKGROUND_BLUR_INTENSITY. */
 export const DEFAULT_BACKGROUND_BLUR_INTENSITY = 10;

@@ -56,6 +56,7 @@ function normalizeWheelDelta({
 	return delta;
 }
 
+/** React component rendering PreviewPanel. */
 export function PreviewPanel({
 	overlayControls,
 	overlayInstances,

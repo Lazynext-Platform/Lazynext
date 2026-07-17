@@ -105,6 +105,7 @@ function withUpdatedMaskParams<TMask extends Mask>({
 	};
 }
 
+/** Custom hook providing useMaskHandles functionality. */
 export function useMaskHandles({
 	onSnapLinesChange,
 }: {

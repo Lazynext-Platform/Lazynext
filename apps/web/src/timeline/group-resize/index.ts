@@ -7,6 +7,7 @@
 
 export { computeGroupResize } from "./compute-resize";
 
+/** Documentation for this export. */
 export type {
 	ComputeGroupResizeArgs,
 	GroupResizeMember,

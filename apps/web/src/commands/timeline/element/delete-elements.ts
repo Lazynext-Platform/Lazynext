@@ -22,6 +22,7 @@ function _removeTrackElements<TTrack extends TimelineTrack>({
 	return { ...track, elements: nextElements } as TTrack;
 }
 
+/** Class representing DeleteElementsCommand. */
 export class DeleteElementsCommand extends Command {
 	private savedState: SceneTracks | null = null;
 	private readonly elements: { trackId: string; elementId: string }[];

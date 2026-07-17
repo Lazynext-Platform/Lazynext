@@ -80,6 +80,7 @@ export function SEOHeadTags() {
 	);
 }
 
+/** React component rendering PreloadHeroImage. */
 export function PreloadHeroImage() {
 	return (
 		<>

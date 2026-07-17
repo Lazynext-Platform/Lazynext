@@ -6,6 +6,7 @@
 
 import { FastForward } from "lucide-react";
 
+/** React component rendering SpeedRamping. */
 export function SpeedRamping({
 	updateSelectedClip: _updateSelectedClip,
 	selectedClip,

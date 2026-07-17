@@ -11,6 +11,7 @@ export const v0Project = {
 	bookmarks: [1.5, 3.0],
 };
 
+/** Utility representing v0ProjectWithMetadata. */
 export const v0ProjectWithMetadata = {
 	id: "project-v0-456",
 	metadata: {
@@ -25,6 +26,7 @@ export const v0ProjectWithMetadata = {
 	blurIntensity: 20,
 };
 
+/** Utility representing v0ProjectEmpty. */
 export const v0ProjectEmpty = {
 	id: "project-empty",
 	name: "Empty Project",
@@ -39,6 +41,7 @@ export const projectWithNoId = {
 	scenes: [],
 };
 
+/** Utility representing projectWithNullValues. */
 export const projectWithNullValues = {
 	id: "project-nulls",
 	version: 1,
@@ -48,6 +51,7 @@ export const projectWithNullValues = {
 	settings: null,
 };
 
+/** Utility representing projectMalformed. */
 export const projectMalformed = {
 	id: "project-malformed",
 	// Missing almost everything

@@ -57,6 +57,7 @@ const MOCK_PLATFORM_DATA = [
 
 const PIE_COLORS = ["#a855f7", "#3b82f6"];
 
+/** React component rendering AnalyticsDashboard. */
 export default function AnalyticsDashboard() {
 	return (
 		<div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)]">

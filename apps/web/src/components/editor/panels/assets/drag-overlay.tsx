@@ -13,6 +13,7 @@ interface MediaDragOverlayProps {
 	onClick?: () => void;
 }
 
+/** React component rendering MediaDragOverlay. */
 export function MediaDragOverlay({
 	isVisible,
 	isProcessing = false,

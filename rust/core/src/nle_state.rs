@@ -36,7 +36,12 @@ pub enum NLEError {
 
     /// A clip's start frame was not strictly less than its end frame.
     #[error("Clip start ({start}) must be less than end ({end})")]
-    ClipRangeInvalid { start: u32, end: u32 },
+    ClipRangeInvalid {
+        /// The invalid start frame.
+        start: u32,
+        /// The invalid end frame.
+        end: u32,
+    },
 
     /// No clip exists with the given id.
     #[error("Clip with id '{0}' not found")]
@@ -70,7 +75,12 @@ pub enum NLEError {
 
     /// Canvas width or height was zero.
     #[error("Canvas dimensions must be > 0 ({width}x{height})")]
-    InvalidDimensions { width: u32, height: u32 },
+    InvalidDimensions {
+        /// The invalid width.
+        width: u32,
+        /// The invalid height.
+        height: u32,
+    },
 
     /// The project framerate was zero or negative.
     #[error("Framerate must be > 0")]

@@ -9,8 +9,10 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { Appearance } from "react-native";
 
+/** Type definition for ThemeMode. */
 export type ThemeMode = "dark" | "light" | "system";
 
+/** Type definition for Theme. */
 export interface Theme {
 	/** Main background color. */
 	bgMain: string;
@@ -92,6 +94,7 @@ try {
 	// Available only in React Native runtime — gracefully absent in SSR/tests
 }
 
+/** React component rendering ThemeProvider. */
 export function ThemeProvider({ children }: { children: ReactNode }) {
 	const [mode, setModeState] = useState<ThemeMode>("system");
 	const systemScheme = Appearance.getColorScheme();
@@ -129,6 +132,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 	);
 }
 
+/** Custom hook providing useTheme functionality. */
 export function useTheme(): ThemeContextValue {
 	return useContext(ThemeContext);
 }

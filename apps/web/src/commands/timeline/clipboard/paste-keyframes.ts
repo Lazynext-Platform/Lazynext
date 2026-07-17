@@ -85,6 +85,7 @@ function pasteKeyframesIntoElement({
 	return nextElement;
 }
 
+/** Class representing PasteKeyframesCommand. */
 export class PasteKeyframesCommand extends Command {
 	private savedState: SceneTracks | null = null;
 	private readonly trackId: string;

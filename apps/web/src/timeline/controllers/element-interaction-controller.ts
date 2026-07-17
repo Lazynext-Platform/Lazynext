@@ -54,11 +54,13 @@ export interface ViewportAdapter {
 	getHeaderEl: () => HTMLElement | null;
 }
 
+/** Type definition for InputAdapter. */
 export interface InputAdapter {
 	/** Whether the shift key is currently held. */
 	isShiftHeld: () => boolean;
 }
 
+/** Type definition for SceneReader. */
 export interface SceneReader {
 	/** Returns the current scene tracks. */
 	getTracks: () => SceneTracks;
@@ -66,6 +68,7 @@ export interface SceneReader {
 	getActiveFps: () => FrameRate | null;
 }
 
+/** Type definition for ElementSelectionApi. */
 export interface ElementSelectionApi {
 	/** Returns the currently selected element references. */
 	getSelected: () => readonly ElementRef[];
@@ -79,16 +82,19 @@ export interface ElementSelectionApi {
 	clearKeyframeSelection: () => void;
 }
 
+/** Type definition for PlaybackReader. */
 export interface PlaybackReader {
 	/** Returns the current playhead time. */
 	getCurrentTime: () => MediaTime;
 }
 
+/** Type definition for TimelineOps. */
 export interface TimelineOps {
 	/** Commits a group move of elements to the timeline. */
 	moveElements: (args: Pick<GroupMoveResult, "moves" | "createTracks">) => void;
 }
 
+/** Type definition for SnapConfig. */
 export interface SnapConfig {
 	/** Whether snapping is currently enabled. */
 	isEnabled: () => boolean;

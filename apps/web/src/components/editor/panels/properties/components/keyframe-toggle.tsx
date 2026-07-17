@@ -4,6 +4,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { KeyframeIcon } from "@hugeicons/core-free-icons";
 import { cn } from "@/utils/ui";
 
+/** React component rendering KeyframeToggle. */
 export function KeyframeToggle({
 	isActive,
 	isDisabled = false,

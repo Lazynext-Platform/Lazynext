@@ -2,6 +2,7 @@
 import type { RetimeConfig } from "@/timeline";
 import { clampRetimeRate } from "@/retime/rate";
 
+/** Utility representing buildConstantRetime. */
 export function buildConstantRetime({
 	rate,
 	maintainPitch = false,

@@ -5,7 +5,6 @@ All generation is routed through Modal GPU endpoints — no local model loading.
 Requires MODAL_INPAINT_ENDPOINT env var pointing to the deployed Modal app.
 """
 
-import asyncio
 import os
 import httpx
 from fastapi import HTTPException

@@ -9,6 +9,7 @@ import {
 	getPlatformSpecialKey,
 } from "@/utils/platform";
 
+/** Type definition for KeyboardShortcut. */
 export interface KeyboardShortcut {
 	/** Unique action identifier. */
 	id: string;
@@ -42,6 +43,7 @@ function formatKey({ key }: { key: string }): string {
 		.replace("-", "+");
 }
 
+/** Custom hook providing useKeyboardShortcutsHelp functionality. */
 export function useKeyboardShortcutsHelp() {
 	const { keybindings } = useKeybindingsStore();
 

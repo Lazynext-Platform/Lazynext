@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { User, Mail, Shield, HardDrive } from "lucide-react";
 import { useState, useEffect } from "react";
 
+/** React component rendering ProfilePage. */
 export default function ProfilePage() {
 	const containerVariants = {
 		hidden: { opacity: 0 },

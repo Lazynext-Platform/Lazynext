@@ -16,6 +16,7 @@ import {
 	KEYFRAME_DIAMOND_SIZE_PX,
 } from "@/timeline/components/layout";
 
+/** Custom hook providing useKeyframeBoxSelect functionality. */
 export function useKeyframeBoxSelect({
 	trackId,
 	elementId,

@@ -22,6 +22,7 @@ interface CanvasProps {
 	onZoomChange?: (zoom: number) => void;
 }
 
+/** React component rendering Canvas. */
 export const Canvas: React.FC<CanvasProps> = ({
 	project,
 	frame,

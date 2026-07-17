@@ -53,6 +53,7 @@ export function resolveAnimationPathValueAtTime({
 	localTime: number;
 	fallbackValue: number;
 }): number;
+/** Utility representing resolveAnimationPathValueAtTime. */
 export function resolveAnimationPathValueAtTime({
 	animations,
 	propertyPath,
@@ -64,6 +65,7 @@ export function resolveAnimationPathValueAtTime({
 	localTime: number;
 	fallbackValue: string;
 }): string;
+/** Utility representing resolveAnimationPathValueAtTime. */
 export function resolveAnimationPathValueAtTime({
 	animations,
 	propertyPath,
@@ -75,6 +77,7 @@ export function resolveAnimationPathValueAtTime({
 	localTime: number;
 	fallbackValue: boolean;
 }): boolean;
+/** Utility representing resolveAnimationPathValueAtTime. */
 export function resolveAnimationPathValueAtTime({
 	animations,
 	propertyPath,
@@ -86,6 +89,7 @@ export function resolveAnimationPathValueAtTime({
 	localTime: number;
 	fallbackValue: ParamValue;
 }): ParamValue;
+/** Utility representing resolveAnimationPathValueAtTime. */
 export function resolveAnimationPathValueAtTime({
 	animations,
 	propertyPath,

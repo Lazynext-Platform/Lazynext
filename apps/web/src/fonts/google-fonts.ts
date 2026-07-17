@@ -15,16 +15,19 @@ function encodeGoogleFontsFamily(family: string): string {
 	return family.replace(/ /g, "+");
 }
 
+/** Utility representing getCachedFontAtlas. */
 export function getCachedFontAtlas(): FontAtlas | null {
 	return cachedAtlas;
 }
 
+/** Utility representing clearFontAtlasCache. */
 export function clearFontAtlasCache(): void {
 	cachedAtlas = null;
 	atlasFetchPromise = null;
 	fullLoaded.clear();
 }
 
+/** Utility representing loadFontAtlas. */
 export function loadFontAtlas(): Promise<FontAtlas | null> {
 	if (cachedAtlas) return Promise.resolve(cachedAtlas);
 	if (atlasFetchPromise) return atlasFetchPromise;

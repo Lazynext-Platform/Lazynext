@@ -96,15 +96,20 @@ async def upscale_video_service(req: UpscaleRequest):
 
 
 async def extract_nerf_service(req: NeRFRequest):
+	"""Extract NeRF representations from a video."""
 	return JSONResponse(status_code=410, content={"success": False, "error": "Use /nerf-extract on pre-processing service (port 8000).", "video_id": req.video_id}, headers={"Deprecation": "true", "Sunset": "Sat, 01 Aug 2026 00:00:00 GMT"})
 
 
 async def style_transfer_service(req: StyleTransferRequest):
+	"""Apply neural style transfer to a video clip."""
 	safe_video_id = safe_slug(req.video_id, "video")
 	video_path = safe_tmp_path(f"{safe_video_id}.mp4"); output_path = safe_tmp_path(f"{safe_video_id}_styled.mp4")
 	if not os.path.exists(video_path): raise HTTPException(status_code=500, detail="Video not found")
 	try:
-		import cv2, numpy as np, subprocess, tempfile
+		import cv2
+		import numpy as np
+		import subprocess
+		import tempfile
 		cap = cv2.VideoCapture(video_path)
 		if not cap.isOpened(): raise HTTPException(status_code=400, detail="Cannot open video")
 		fps = cap.get(cv2.CAP_PROP_FPS) or 24.0; total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)); step = max(1, total // 30)
@@ -137,11 +142,15 @@ async def style_transfer_service(req: StyleTransferRequest):
 
 
 async def generative_fill_service(req: GenerativeFillRequest):
+	"""Perform generative fill (inpainting) on a video region."""
 	safe_video_id = safe_slug(req.video_id, "video")
 	video_path = safe_tmp_path(f"{safe_video_id}.mp4"); mask_path = safe_tmp_path(f"{safe_video_id}_mask.png"); output_path = safe_tmp_path(f"{safe_video_id}_filled.mp4")
 	if not os.path.exists(video_path): raise HTTPException(status_code=503, detail="Video not found")
 	try:
-		import cv2, numpy as np, subprocess, tempfile
+		import cv2
+		import numpy as np
+		import subprocess
+		import tempfile
 		cap = cv2.VideoCapture(video_path)
 		if not cap.isOpened(): raise HTTPException(status_code=400, detail="Cannot open video")
 		fps = cap.get(cv2.CAP_PROP_FPS) or 24.0; w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)); h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -170,6 +179,7 @@ async def generative_fill_service(req: GenerativeFillRequest):
 
 
 async def generate_avatar_service(req: AvatarRequest):
+	"""Generate an AI avatar speaking a script."""
 	try:
 		from src.services.audio_gen import _edge_tts
 		audio_bytes = await _edge_tts(req.script, "en-US")

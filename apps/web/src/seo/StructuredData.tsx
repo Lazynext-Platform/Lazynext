@@ -16,6 +16,7 @@ interface OrganizationSchemaProps {
 	url?: string;
 }
 
+/** React component rendering OrganizationSchema. */
 export function OrganizationSchema({
 	url = "https://lazynext.com",
 }: OrganizationSchemaProps) {
@@ -53,6 +54,7 @@ interface SoftwareAppSchemaProps {
 	url?: string;
 }
 
+/** React component rendering SoftwareAppSchema. */
 export function SoftwareAppSchema({
 	url = "https://lazynext.com",
 }: SoftwareAppSchemaProps) {
@@ -91,6 +93,7 @@ interface BreadcrumbSchemaProps {
 	url?: string;
 }
 
+/** React component rendering BreadcrumbSchema. */
 export function BreadcrumbSchema({
 	items,
 	url = "https://lazynext.com",
@@ -119,6 +122,7 @@ interface FAQSchemaProps {
 	questions: Array<{ q: string; a: string }>;
 }
 
+/** React component rendering FAQSchema. */
 export function FAQSchema({ questions }: FAQSchemaProps) {
 	const schema = {
 		"@context": "https://schema.org",
@@ -157,6 +161,7 @@ interface SEOHeadProps {
 	breadcrumbs?: Array<{ name: string; path: string }>;
 }
 
+/** React component rendering SEOHead. */
 export function SEOHead({ breadcrumbs }: SEOHeadProps) {
 	return (
 		<>

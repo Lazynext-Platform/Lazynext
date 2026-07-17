@@ -10,6 +10,7 @@ import type { ElementVisitor } from "../visitor/element-visitor";
 import { CircleProps } from "../../types";
 import { TIMELINE_ELEMENT_TYPE } from "../../utils/constants";
 
+/** Class representing CircleElement. */
 export class CircleElement extends TrackElement {
 	declare protected props: CircleProps;
 	constructor(fill: string, radius: number) {

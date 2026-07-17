@@ -16,6 +16,7 @@ function removeEffectFromElement({
 	return { ...element, effects: filtered };
 }
 
+/** Class representing RemoveClipEffectCommand. */
 export class RemoveClipEffectCommand extends Command {
 	private savedState: SceneTracks | null = null;
 	private readonly trackId: string;

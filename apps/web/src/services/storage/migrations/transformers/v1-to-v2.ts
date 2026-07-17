@@ -10,6 +10,7 @@ const DEFAULT_FPS = 30;
 
 type LegacyMediaType = "image" | "video" | "audio";
 
+/** Type definition for V1ToV2Context. */
 export interface V1ToV2Context {
 	/** Legacy tracks keyed by scene ID. */
 	legacyTracksBySceneId: Record<string, unknown[]>;
@@ -207,6 +208,7 @@ interface V2AudioTrack {
 
 type V2TimelineTrack = V2VideoTrack | V2TextTrack | V2AudioTrack;
 
+/** Utility representing transformProjectV1ToV2. */
 export function transformProjectV1ToV2({
 	project,
 	context = EMPTY_V1_TO_V2_CONTEXT,

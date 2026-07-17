@@ -18,6 +18,7 @@ export type BlendMode =
 	| "color"
 	| "luminosity";
 
+/** Utility representing isBlendMode. */
 export function isBlendMode(value: string): value is BlendMode {
 	return (
 		value === "normal" ||

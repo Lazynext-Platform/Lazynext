@@ -16,6 +16,7 @@ import { friendlyAuthError } from "@/components/auth/auth-errors";
 import { CaptchaWidget } from "@/components/auth/CaptchaWidget";
 import { verifyCaptchaToken } from "@/components/auth/captcha-verify";
 
+/** React component rendering ForgotPasswordPage. */
 export default function ForgotPasswordPage() {
 	const [email, setEmail] = useState("");
 	const [sent, setSent] = useState(false);

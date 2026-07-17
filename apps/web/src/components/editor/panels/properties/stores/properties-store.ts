@@ -12,6 +12,7 @@ interface PropertiesState {
 	setTransformScaleLocked: (args: { locked: boolean }) => void;
 }
 
+/** Custom hook providing usePropertiesStore functionality. */
 export const usePropertiesStore = create<PropertiesState>()((set) => ({
 	activeTabPerType: {},
 	setActiveTab: ({ elementType, tabId }) =>

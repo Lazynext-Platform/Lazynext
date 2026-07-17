@@ -45,6 +45,7 @@ const FEED_DATA = [
 	},
 ];
 
+/** React component rendering FeedPage. */
 export default function FeedPage() {
 	const [activeIndex, setActiveIndex] = useState(0);
 	const containerRef = useRef<HTMLDivElement>(null);

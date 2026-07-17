@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { friendlyAuthError } from "@/components/auth/auth-errors";
 import { Shield, Smartphone, Key, Plus, Check, X } from "lucide-react";
 
+/** React component rendering SecuritySettingsClient. */
 export function SecuritySettingsClient({ user }: { user: any }) {
 	const [mfaEnabled, setMfaEnabled] = useState(false);
 	const [mfaLoading, setMfaLoading] = useState(false);

@@ -8,6 +8,7 @@
 import Link from "next/link";
 import { Sparkles, TerminalSquare, Layers, Wand2 } from "lucide-react";
 
+/** React component rendering HeroSection. */
 export function HeroSection() {
 	return (
 		<section className="relative min-h-[90vh] overflow-hidden bg-[var(--bg-main)] flex flex-col justify-center items-center transition-colors duration-300">

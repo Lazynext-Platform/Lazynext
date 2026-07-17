@@ -19,6 +19,7 @@ interface ShareButtonProps {
 	className?: string;
 }
 
+/** React component rendering ShareButton. */
 export function ShareButton({ projectId, className }: ShareButtonProps) {
 	const [isSharing, setIsSharing] = useState(false);
 	const [isCopied, setIsCopied] = useState(false);

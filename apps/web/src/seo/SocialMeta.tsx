@@ -25,6 +25,7 @@ interface SocialMetaProps {
 	author?: string;
 }
 
+/** React component rendering SocialMetaTags. */
 export function SocialMetaTags({
 	title,
 	description,

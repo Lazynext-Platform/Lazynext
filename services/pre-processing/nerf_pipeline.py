@@ -22,8 +22,6 @@ Usage:
 
 import os
 import subprocess
-import json
-import shutil
 from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Optional
@@ -157,7 +155,7 @@ class NerfPipeline:
             "--image_path", frames_dir,
             "--SiftExtraction.use_gpu", "1",
             "--SiftExtraction.max_image_size", "1920",
-            f"--SiftExtraction.quality", self.config.colmap_quality,
+            "--SiftExtraction.quality", self.config.colmap_quality,
         ], check=True, capture_output=True)
         
         # Feature matching

@@ -65,6 +65,7 @@ export function getLineMaskLinePoints({
 	};
 }
 
+/** Utility representing getLineMaskOverlay. */
 export function getLineMaskOverlay({
 	centerX,
 	centerY,
@@ -97,6 +98,7 @@ export function getLineMaskOverlay({
 	};
 }
 
+/** Utility representing getLineMaskHandlePositions. */
 export function getLineMaskHandlePositions({
 	centerX,
 	centerY,
@@ -163,6 +165,7 @@ function rotatePoint({
 	};
 }
 
+/** Utility representing getBoxMaskHandlePositions. */
 export function getBoxMaskHandlePositions({
 	centerX,
 	centerY,
@@ -398,6 +401,7 @@ export function getBoxMaskHandlePositions({
 	return handles;
 }
 
+/** Utility representing getBoxMaskRectOverlay. */
 export function getBoxMaskRectOverlay({
 	centerX,
 	centerY,
@@ -435,6 +439,7 @@ export function getBoxMaskRectOverlay({
 	};
 }
 
+/** Utility representing getBoxMaskShapeOverlay. */
 export function getBoxMaskShapeOverlay({
 	centerX,
 	centerY,
@@ -472,6 +477,7 @@ export function getBoxMaskShapeOverlay({
 	};
 }
 
+/** Utility representing getBoxMaskOverlays. */
 export function getBoxMaskOverlays({
 	params,
 	bounds,

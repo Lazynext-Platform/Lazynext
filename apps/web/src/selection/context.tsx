@@ -42,10 +42,12 @@ interface SelectionContextValue {
 	registerItem: (id: string, element: HTMLElement | null) => void;
 }
 
+/** React component rendering SelectionContext. */
 export const SelectionContext = createContext<SelectionContextValue | null>(
 	null,
 );
 
+/** Custom hook providing useSelectionContext functionality. */
 export function useSelectionContext() {
 	const context = useContext(SelectionContext);
 
@@ -58,6 +60,7 @@ export function useSelectionContext() {
 	return context;
 }
 
+/** Custom hook providing useSelection functionality. */
 export function useSelection() {
 	const { selectedIds, anchorId, highlightedId, isSelected, clearSelection } =
 		useSelectionContext();

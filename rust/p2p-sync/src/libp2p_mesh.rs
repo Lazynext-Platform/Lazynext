@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! Zero-configuration peer discovery over libp2p mDNS.
 //!
 //! This is the production discovery path referenced in the crate docs: instead
@@ -18,6 +19,7 @@ use libp2p::{Multiaddr, PeerId, mdns, noise, ping, tcp, yamux};
 use tracing::{debug, info, warn};
 
 /// Combined network behaviour: mDNS for discovery, ping for liveness.
+#[allow(missing_docs)]
 #[derive(NetworkBehaviour)]
 pub struct MeshBehaviour {
     /// mDNS peer discovery on the local network.

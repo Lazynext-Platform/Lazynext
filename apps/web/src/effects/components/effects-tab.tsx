@@ -28,6 +28,7 @@ import { cn } from "@/utils/ui";
 import { Separator } from "@/components/ui/separator";
 import { useAssetsPanelStore } from "@/components/editor/panels/assets/assets-panel-store";
 
+/** React component rendering StandaloneEffectTab. */
 export function StandaloneEffectTab({
 	element,
 	trackId,
@@ -69,6 +70,7 @@ export function StandaloneEffectTab({
 	);
 }
 
+/** React component rendering ClipEffectsTab. */
 export function ClipEffectsTab({
 	element,
 	trackId,

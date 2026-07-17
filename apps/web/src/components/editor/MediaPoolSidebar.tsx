@@ -88,6 +88,7 @@ interface MediaPoolSidebarProps {
 	splitAudioVideoOnImport: any;
 }
 
+/** React component rendering MediaPoolSidebar. */
 export function MediaPoolSidebar({
 	assets,
 	frame: _frame,

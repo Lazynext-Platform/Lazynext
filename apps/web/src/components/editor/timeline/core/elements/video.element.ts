@@ -13,6 +13,7 @@ import type { ElementVisitor } from "../visitor/element-visitor";
 import { TIMELINE_ELEMENT_TYPE } from "../../utils/constants";
 import { ElementFrameEffect } from "../addOns/frame-effect";
 
+/** Class representing VideoElement. */
 export class VideoElement extends TrackElement {
 	protected baseSize!: Size;
 	protected mediaDuration!: number;

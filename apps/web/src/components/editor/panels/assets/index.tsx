@@ -18,6 +18,7 @@ import { ScriptingView } from "./views/scripting";
 import { TransitionsView } from "./views/transitions";
 import { AdjustmentView } from "./views/adjustment";
 
+/** React component rendering AssetsPanel. */
 export function AssetsPanel() {
 	const { activeTab } = useAssetsPanelStore();
 

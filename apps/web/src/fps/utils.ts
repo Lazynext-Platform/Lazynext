@@ -19,10 +19,12 @@ const STANDARD_FRAME_RATES: Array<{ value: number; rate: FrameRate }> = [
 
 const STANDARD_FRAME_RATE_TOLERANCE = 0.01;
 
+/** Utility representing frameRateToFloat. */
 export function frameRateToFloat(rate: FrameRate): number {
 	return rate.numerator / rate.denominator;
 }
 
+/** Utility representing frameRatesEqual. */
 export function frameRatesEqual({
 	a,
 	b,
@@ -33,6 +35,7 @@ export function frameRatesEqual({
 	return a.numerator === b.numerator && a.denominator === b.denominator;
 }
 
+/** Utility representing floatToFrameRate. */
 export function floatToFrameRate(fps: number): FrameRate {
 	const standard = STANDARD_FRAME_RATES.find(
 		(candidate) =>
@@ -67,6 +70,7 @@ function gcd({ left, right }: { left: number; right: number }): number {
 	return a || 1;
 }
 
+/** Utility representing getHighestImportedVideoFps. */
 export function getHighestImportedVideoFps({
 	mediaAssets,
 }: {
@@ -85,6 +89,7 @@ export function getHighestImportedVideoFps({
 	return highestFps;
 }
 
+/** Utility representing getRaisedProjectFpsForImportedMedia. */
 export function getRaisedProjectFpsForImportedMedia({
 	currentFps,
 	importedAssets,

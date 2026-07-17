@@ -7,6 +7,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 
+/** React component rendering LumetriScopes. */
 export function LumetriScopes({
 	sourceCanvasRef,
 }: {

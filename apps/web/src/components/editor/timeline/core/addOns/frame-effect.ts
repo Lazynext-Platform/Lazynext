@@ -1,6 +1,7 @@
 /** @module Frame effect add-on for applying time-range-based effects on timeline elements */
 import { FrameEffect, FrameEffectProps } from "../../types";
 
+/** Class representing ElementFrameEffect. */
 export class ElementFrameEffect {
 	private s: number;
 	private e: number;

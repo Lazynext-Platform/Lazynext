@@ -7,6 +7,7 @@
 
 import React, { useState } from "react";
 
+/** React component rendering Inspector. */
 export const Inspector: React.FC = () => {
   const [lumaThreshold, setLumaThreshold] = useState<number>(0.2);
   const [lumaTolerance, setLumaTolerance] = useState<number>(0.1);

@@ -42,6 +42,7 @@ export interface SoundEffect {
 	ratingCount: number;
 }
 
+/** Type definition for SavedSound. */
 export interface SavedSound {
 	/** Freesound API sound ID. */
 	id: number; // freesound id
@@ -63,6 +64,7 @@ export interface SavedSound {
 	savedAt: string; // iso date string
 }
 
+/** Type definition for SavedSoundsData. */
 export interface SavedSoundsData {
 	/** Array of saved sounds. */
 	sounds: SavedSound[];

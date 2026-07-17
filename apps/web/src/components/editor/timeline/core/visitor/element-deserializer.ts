@@ -18,6 +18,7 @@ import { ArrowElement } from "../elements/arrow.element";
 import { LineElement } from "../elements/line.element";
 import { EffectElement } from "../elements/effect.element";
 
+/** Class representing ElementDeserializer. */
 export class ElementDeserializer {
 	private static customDeserializers: Record<
 		string,

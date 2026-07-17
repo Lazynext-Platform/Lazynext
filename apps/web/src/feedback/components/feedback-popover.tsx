@@ -101,6 +101,7 @@ function useFeedback() {
 	return { entries, isSubmitting, submit };
 }
 
+/** React component rendering FeedbackPopover. */
 export function FeedbackPopover() {
 	const [open, setOpen] = useState(false);
 

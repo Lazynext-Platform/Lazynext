@@ -7,6 +7,7 @@
 
 import { toast } from "sonner";
 
+/** Type definition for MediaUploadToastResult. */
 export interface MediaUploadToastResult {
 	/** Number of assets successfully uploaded. */
 	uploadedCount: number;

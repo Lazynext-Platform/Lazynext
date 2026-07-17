@@ -20,11 +20,13 @@ interface V1Scene {
 	updatedAt: string;
 }
 
+/** Type definition for TransformV0ToV1Options. */
 export interface TransformV0ToV1Options {
 	/** Timestamp to use for created/updated fields. */
 	now?: Date;
 }
 
+/** Utility representing transformProjectV0ToV1. */
 export function transformProjectV0ToV1({
 	project,
 	options = {},

@@ -34,6 +34,7 @@ const webEnvSchema = z.object({
 	STORAGE_PROVIDER: z.enum(["local"]).optional(),
 });
 
+/** Type definition for WebEnv. */
 export type WebEnv = z.infer<typeof webEnvSchema>;
 
 /**
@@ -72,4 +73,5 @@ function loadWebEnv(): WebEnv {
 	return process.env as unknown as WebEnv;
 }
 
+/** Utility representing webEnv. */
 export const webEnv: WebEnv = loadWebEnv();

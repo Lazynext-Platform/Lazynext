@@ -10,6 +10,7 @@ interface MultiplayerHookArgs {
 	onDeltaReceived: (delta: any) => void;
 }
 
+/** Custom hook providing useMultiplayer functionality. */
 export function useMultiplayer({
 	projectId,
 	clientId,

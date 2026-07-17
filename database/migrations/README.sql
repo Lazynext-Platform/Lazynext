@@ -8,7 +8,7 @@
 -- 002_projects        — projects, timelines, tracks, clips
 -- 003_assets          — media assets, storage references
 -- 004_agents          — AI agent configurations, API keys
--- 005_subscriptions   — Stripe subscriptions
+-- 005_subscriptions   — Dodo Payments subscriptions
 -- 006_feedback        — user feedback, bug reports
 -- 007_analytics       — Kafka-proxied analytics persistence
 

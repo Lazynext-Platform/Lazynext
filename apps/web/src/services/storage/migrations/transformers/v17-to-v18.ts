@@ -6,6 +6,7 @@ import { getProjectId, isRecord } from "./utils";
 const VOLUME_DB_MIN = -60;
 const VOLUME_DB_MAX = 20;
 
+/** Utility representing transformProjectV17ToV18. */
 export function transformProjectV17ToV18({
 	project,
 }: {

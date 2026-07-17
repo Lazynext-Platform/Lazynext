@@ -72,6 +72,7 @@ function getPersistedActiveGuide(
 	return isGuideId(persistedGuide) ? persistedGuide : null;
 }
 
+/** Custom hook providing usePreviewStore functionality. */
 export const usePreviewStore = create<PreviewState>()(
 	persist(
 		(set) => ({

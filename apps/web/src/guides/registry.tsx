@@ -9,8 +9,10 @@ import {
 	spotlightGuide,
 } from "./definitions/platforms";
 
+/** Documentation for this export. */
 export type { GuideDefinition, GuideRenderProps } from "@/guides/types";
 
+/** React component rendering GUIDE_REGISTRY. */
 export const GUIDE_REGISTRY = [
 	gridGuide,
 	tiktokGuide,
@@ -20,8 +22,10 @@ export const GUIDE_REGISTRY = [
 	customGuide,
 ] as const satisfies readonly GuideDefinition[];
 
+/** Type definition for GuideId. */
 export type GuideId = (typeof GUIDE_REGISTRY)[number]["id"];
 
+/** Utility representing isGuideId. */
 export function isGuideId(value: string): value is GuideId {
 	return GUIDE_REGISTRY.some((guide) => guide.id === value);
 }

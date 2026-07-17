@@ -15,6 +15,7 @@ import {
 	type TextLayoutParams,
 } from "./primitives";
 
+/** Type definition for ResolvedTextBackground. */
 export interface ResolvedTextBackground extends TextBackground {
 	/** Horizontal padding in pixels. */
 	paddingX: number;
@@ -28,6 +29,7 @@ export interface ResolvedTextBackground extends TextBackground {
 	cornerRadius: number;
 }
 
+/** Type definition for MeasuredTextElement. */
 export interface MeasuredTextElement extends MeasuredTextLayout {
 	/** Resolved background parameters with animation values applied. */
 	resolvedBackground: ResolvedTextBackground;
@@ -40,6 +42,7 @@ let textMeasurementContext:
 	| OffscreenCanvasRenderingContext2D
 	| null = null;
 
+/** Utility representing getTextMeasurementContext. */
 export function getTextMeasurementContext():
 	| CanvasRenderingContext2D
 	| OffscreenCanvasRenderingContext2D {
@@ -68,6 +71,7 @@ export function getTextMeasurementContext():
 	throw new Error("Failed to create text measurement context");
 }
 
+/** Utility representing measureTextElement. */
 export function measureTextElement({
 	element,
 	canvasHeight,
@@ -135,6 +139,7 @@ export function measureTextElement({
 	};
 }
 
+/** Utility representing buildTextLayoutParamsFromElement. */
 export function buildTextLayoutParamsFromElement({
 	element,
 }: {
@@ -185,6 +190,7 @@ export function buildTextLayoutParamsFromElement({
 	};
 }
 
+/** Utility representing buildTextBackgroundFromElement. */
 export function buildTextBackgroundFromElement({
 	element,
 }: {

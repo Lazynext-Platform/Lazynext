@@ -3,14 +3,20 @@
 import { converter, formatHex, formatHex8, parse } from "culori";
 import { clamp, snapToStep } from "@/utils/math";
 
+/** Type definition for ParamValue. */
 export type ParamValue = number | string | boolean;
+/** Type definition for ParamValues. */
 export type ParamValues = Record<string, ParamValue>;
 
+/** Type definition for ParamGroup. */
 export type ParamGroup = "stroke";
 
+/** Type definition for ChannelValueKind. */
 export type ChannelValueKind = "scalar" | "discrete";
+/** Type definition for ChannelEasingMode. */
 export type ChannelEasingMode = "independent" | "shared";
 
+/** Type definition for LinearRgba. */
 export interface LinearRgba {
 	/** Red channel in linear space [0, 1]. */
 	r: number;
@@ -22,6 +28,7 @@ export interface LinearRgba {
 	a: number;
 }
 
+/** Type definition for ChannelComponentDefinition. */
 export interface ChannelComponentDefinition<TKey extends string = string> {
 	/** Component key (e.g. "value", "r", "g", "b", "a"). */
 	key: TKey;
@@ -31,6 +38,7 @@ export interface ChannelComponentDefinition<TKey extends string = string> {
 	defaultInterpolation: "linear" | "hold";
 }
 
+/** Type definition for LeafChannelLayout. */
 export interface LeafChannelLayout<TValue extends ParamValue = ParamValue> {
 	/** Discriminator for leaf channel layout. */
 	kind: "leaf";
@@ -44,6 +52,7 @@ export interface LeafChannelLayout<TValue extends ParamValue = ParamValue> {
 	compose: (components: { value?: TValue }) => TValue | null;
 }
 
+/** Type definition for CompositeChannelLayout. */
 export interface CompositeChannelLayout<
 	TValue extends ParamValue = ParamValue,
 	TComponents extends object = Record<string, ParamValue>,
@@ -60,11 +69,13 @@ export interface CompositeChannelLayout<
 	compose: (components: Partial<TComponents>) => TValue | null;
 }
 
+/** Type definition for ChannelLayout. */
 export type ChannelLayout<
 	TValue extends ParamValue = ParamValue,
 	TComponents extends object = Record<string, ParamValue>,
 > = LeafChannelLayout<TValue> | CompositeChannelLayout<TValue, TComponents>;
 
+/** Type definition for ParamChannelLayout. */
 export type ParamChannelLayout =
 	| LeafChannelLayout<number>
 	| LeafChannelLayout<boolean>
@@ -86,6 +97,7 @@ function linearToSrgb({ value }: { value: number }): number {
 		: 1.055 * Math.pow(clamped, 1 / 2.4) - 0.055;
 }
 
+/** Utility representing parseColorToLinearRgba. */
 export function parseColorToLinearRgba({
 	color,
 }: {
@@ -105,6 +117,7 @@ export function parseColorToLinearRgba({
 	};
 }
 
+/** Utility representing formatLinearRgba. */
 export function formatLinearRgba({ color }: { color: LinearRgba }): string {
 	const rgb: {
 		mode: "rgb";
@@ -142,18 +155,21 @@ function createLeafChannelLayout<TValue extends ParamValue>({
 	};
 }
 
+/** Utility representing NUMBER_CHANNEL_LAYOUT. */
 export const NUMBER_CHANNEL_LAYOUT: LeafChannelLayout<number> =
 	createLeafChannelLayout<number>({
 		valueKind: "scalar",
 		defaultInterpolation: "linear",
 	});
 
+/** Utility representing BOOLEAN_CHANNEL_LAYOUT. */
 export const BOOLEAN_CHANNEL_LAYOUT: LeafChannelLayout<boolean> =
 	createLeafChannelLayout<boolean>({
 		valueKind: "discrete",
 		defaultInterpolation: "hold",
 	});
 
+/** Utility representing STRING_CHANNEL_LAYOUT. */
 export const STRING_CHANNEL_LAYOUT: LeafChannelLayout<string> =
 	createLeafChannelLayout<string>({
 		valueKind: "discrete",
@@ -168,6 +184,7 @@ const colorComponent = (
 	defaultInterpolation: "linear",
 });
 
+/** Utility representing COLOR_CHANNEL_LAYOUT. */
 export const COLOR_CHANNEL_LAYOUT: CompositeChannelLayout<string, LinearRgba> =
 	{
 		kind: "composite",
@@ -201,6 +218,7 @@ interface BaseParamDefinition<TKey extends string = string> {
 	dependencies?: Array<{ param: string; equals: ParamValue }>;
 }
 
+/** Type definition for NumberParamDefinition. */
 export interface NumberParamDefinition<
 	TKey extends string = string,
 > extends BaseParamDefinition<TKey> {
@@ -221,6 +239,7 @@ export interface NumberParamDefinition<
 	shortLabel?: string;
 }
 
+/** Type definition for BooleanParamDefinition. */
 export interface BooleanParamDefinition<
 	TKey extends string = string,
 > extends BaseParamDefinition<TKey> {
@@ -230,6 +249,7 @@ export interface BooleanParamDefinition<
 	channels?: LeafChannelLayout<boolean>;
 }
 
+/** Type definition for ColorParamDefinition. */
 export interface ColorParamDefinition<
 	TKey extends string = string,
 > extends BaseParamDefinition<TKey> {
@@ -239,6 +259,7 @@ export interface ColorParamDefinition<
 	channels?: ChannelLayout<string, LinearRgba>;
 }
 
+/** Type definition for SelectParamDefinition. */
 export interface SelectParamDefinition<
 	TKey extends string = string,
 > extends BaseParamDefinition<TKey> {
@@ -250,6 +271,7 @@ export interface SelectParamDefinition<
 	options: Array<{ value: string; label: string }>;
 }
 
+/** Type definition for TextParamDefinition. */
 export interface TextParamDefinition<
 	TKey extends string = string,
 > extends BaseParamDefinition<TKey> {
@@ -259,6 +281,7 @@ export interface TextParamDefinition<
 	channels?: LeafChannelLayout<string>;
 }
 
+/** Type definition for FontParamDefinition. */
 export interface FontParamDefinition<
 	TKey extends string = string,
 > extends BaseParamDefinition<TKey> {
@@ -268,6 +291,7 @@ export interface FontParamDefinition<
 	channels?: LeafChannelLayout<string>;
 }
 
+/** Type definition for ParamDefinition. */
 export type ParamDefinition<TKey extends string = string> =
 	| NumberParamDefinition<TKey>
 	| BooleanParamDefinition<TKey>
@@ -276,6 +300,7 @@ export type ParamDefinition<TKey extends string = string> =
 	| TextParamDefinition<TKey>
 	| FontParamDefinition<TKey>;
 
+/** Utility representing getParamChannelLayout. */
 export function getParamChannelLayout({
 	param,
 }: {
@@ -299,6 +324,7 @@ export function getParamChannelLayout({
 	}
 }
 
+/** Utility representing getParamValueKind. */
 export function getParamValueKind({
 	param,
 }: {
@@ -314,6 +340,7 @@ export function getParamValueKind({
 	return "discrete";
 }
 
+/** Utility representing getParamDefaultInterpolation. */
 export function getParamDefaultInterpolation({
 	param,
 }: {
@@ -326,6 +353,7 @@ export function getParamDefaultInterpolation({
 	return layout.components[0]?.defaultInterpolation ?? "linear";
 }
 
+/** Utility representing getParamNumericRange. */
 export function getParamNumericRange({
 	param,
 }: {
@@ -342,6 +370,7 @@ export function getParamNumericRange({
 	};
 }
 
+/** Utility representing coerceParamValue. */
 export function coerceParamValue({
 	param,
 	value,

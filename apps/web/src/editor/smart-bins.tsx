@@ -23,6 +23,7 @@ async function loadWasmNeural() {
 	}
 }
 
+/** React component rendering SmartBinsPanel. */
 export function SmartBinsPanel() {
 	const [smartBins, setSmartBins] = useState<
 		{ label: string; clip_ids: string[] }[]

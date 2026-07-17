@@ -4,6 +4,7 @@ import { useCommittedRef } from "@/hooks/use-committed-ref";
 import { useSelectionContext } from "@/selection/context";
 import { activateScope, type ScopeEntry } from "@/selection/scope";
 
+/** Custom hook providing useSelectionScope functionality. */
 export function useSelectionScope() {
 	const { selectedIds, clearSelection } = useSelectionContext();
 	const hasSelection = selectedIds.length > 0;

@@ -15,8 +15,10 @@ const migrations: Record<number, MigrationFn> = {
 	6: v6ToV7,
 };
 
+/** Utility representing CURRENT_VERSION. */
 export const CURRENT_VERSION = 7;
 
+/** Utility representing runMigrations. */
 export function runMigrations({
 	state,
 	fromVersion,

@@ -8,6 +8,7 @@
 import { getAllProjects } from "@/actions/project";
 import ProjectsClient from "./client";
 
+/** Utility representing dynamic. */
 export const dynamic = "force-dynamic";
 
 export default async function ProjectsPage() {

@@ -1,8 +1,10 @@
 /** @module Graphics type definitions for graphic element rendering and registration */
 import type { ParamDefinition, ParamValues } from "@/params";
 
+/** Utility representing DEFAULT_GRAPHIC_SOURCE_SIZE. */
 export const DEFAULT_GRAPHIC_SOURCE_SIZE = 512;
 
+/** Type definition for GraphicRenderContext. */
 export interface GraphicRenderContext {
 	/** Canvas 2D context to draw the graphic into. */
 	ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
@@ -14,6 +16,7 @@ export interface GraphicRenderContext {
 	height: number;
 }
 
+/** Type definition for GraphicDefinition. */
 export interface GraphicDefinition {
 	/** Unique identifier for the graphic definition. */
 	id: string;
@@ -27,6 +30,7 @@ export interface GraphicDefinition {
 	render(context: GraphicRenderContext): void;
 }
 
+/** Type definition for GraphicInstance. */
 export interface GraphicInstance {
 	/** Identifier of the graphic definition to render. */
 	definitionId: string;

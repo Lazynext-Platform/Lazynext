@@ -79,6 +79,7 @@ function findMatchingRegions({
 	);
 }
 
+/** Utility representing resolveQueryToRegions. */
 export function resolveQueryToRegions({
 	query,
 }: {
@@ -93,6 +94,7 @@ export function resolveQueryToRegions({
 	return matched.length > 0 ? new Set(matched.map((r) => r.id)) : null;
 }
 
+/** Utility representing getRegionLabel. */
 export function getRegionLabel({ query }: { query: string }): string {
 	if (REGION_GROUPS[query]) {
 		return query
@@ -152,6 +154,7 @@ function paginateCountries({
 	};
 }
 
+/** Utility representing flagsProvider. */
 export const flagsProvider: StickerProvider = {
 	id: FLAGS_PROVIDER_ID,
 	async search({

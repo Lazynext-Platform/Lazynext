@@ -2,8 +2,10 @@
 import type { ParamValues } from "@/params";
 import type { Transform } from "@/primitives/transform";
 import { type BlendMode, isBlendMode } from "@/primitives/blend-mode";
+/** Documentation for this export. */
 export type { BlendMode };
 
+/** Utility representing buildTransformFromParams. */
 export function buildTransformFromParams({
 	params,
 }: {
@@ -20,6 +22,7 @@ export function buildTransformFromParams({
 	};
 }
 
+/** Utility representing readOpacityFromParams. */
 export function readOpacityFromParams({
 	params,
 }: {
@@ -28,6 +31,7 @@ export function readOpacityFromParams({
 	return readNumberParam({ params, key: "opacity", fallback: 1 });
 }
 
+/** Utility representing readBlendModeFromParams. */
 export function readBlendModeFromParams({
 	params,
 }: {

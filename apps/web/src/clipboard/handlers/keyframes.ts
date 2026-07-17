@@ -108,6 +108,7 @@ function buildClipboardItem({
 	};
 }
 
+/** Utility representing KeyframesClipboardHandler. */
 export const KeyframesClipboardHandler = {
 	type: "keyframes",
 

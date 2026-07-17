@@ -194,6 +194,7 @@ class WasmCompositor {
 	}
 }
 
+/** Utility representing wasmCompositor. */
 export const wasmCompositor = new WasmCompositor();
 
 function createBackingCanvas({

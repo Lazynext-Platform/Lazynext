@@ -1,6 +1,7 @@
 /** @module Project JSON migration utilities for upgrading legacy project data formats */
 import type { ElementJSON, ProjectJSON } from "../types";
 
+/** Utility representing CURRENT_PROJECT_VERSION. */
 export const CURRENT_PROJECT_VERSION = 2;
 
 type ProjectMigration = (project: ProjectJSON) => ProjectJSON;
@@ -29,6 +30,7 @@ const MIGRATIONS: Record<number, ProjectMigration> = {
 	2: migrateToV2,
 };
 
+/** Utility representing migrateProject. */
 export function migrateProject(
 	project: ProjectJSON,
 	targetVersion: number = CURRENT_PROJECT_VERSION,

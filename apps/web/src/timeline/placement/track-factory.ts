@@ -15,6 +15,7 @@ import type {
 	VideoTrack,
 } from "@/timeline";
 
+/** Utility representing buildEmptyTrack. */
 export function buildEmptyTrack({
 	id,
 	type,
@@ -24,6 +25,7 @@ export function buildEmptyTrack({
 	type: "video";
 	name?: string;
 }): VideoTrack;
+/** Utility representing buildEmptyTrack. */
 export function buildEmptyTrack({
 	id,
 	type,
@@ -33,6 +35,7 @@ export function buildEmptyTrack({
 	type: "text";
 	name?: string;
 }): TextTrack;
+/** Utility representing buildEmptyTrack. */
 export function buildEmptyTrack({
 	id,
 	type,
@@ -42,6 +45,7 @@ export function buildEmptyTrack({
 	type: "audio";
 	name?: string;
 }): AudioTrack;
+/** Utility representing buildEmptyTrack. */
 export function buildEmptyTrack({
 	id,
 	type,
@@ -51,6 +55,7 @@ export function buildEmptyTrack({
 	type: "graphic";
 	name?: string;
 }): GraphicTrack;
+/** Utility representing buildEmptyTrack. */
 export function buildEmptyTrack({
 	id,
 	type,
@@ -61,6 +66,7 @@ export function buildEmptyTrack({
 	name?: string;
 }): EffectTrack;
 
+/** Utility representing buildEmptyTrack. */
 export function buildEmptyTrack({
 	id,
 	type,

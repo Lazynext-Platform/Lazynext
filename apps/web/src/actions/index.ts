@@ -5,6 +5,7 @@ export * from "./registry";
 import { ACTIONS } from "./definitions";
 import type { TActionWithOptionalArgs } from "./types";
 
+/** Utility representing isActionWithOptionalArgs. */
 export function isActionWithOptionalArgs(
 	value: string,
 ): value is TActionWithOptionalArgs {

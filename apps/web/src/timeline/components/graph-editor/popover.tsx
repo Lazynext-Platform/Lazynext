@@ -42,6 +42,7 @@ const THUMB_PADDING_Y = 3;
 const COLLAPSED_GRID_MAX_HEIGHT = 120;
 const EXPANDED_GRID_MAX_HEIGHT = 240;
 
+/** React component rendering GraphEditorPopover. */
 export function GraphEditorPopover({
 	children,
 	side,

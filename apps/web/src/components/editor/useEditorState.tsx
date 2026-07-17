@@ -43,6 +43,7 @@ export type ActiveTool =
 	| "magic-eraser"
 	| "roll";
 
+/** Type definition for Workspace. */
 export type Workspace =
 	| "timeline"
 	| "fusion"
@@ -120,6 +121,7 @@ interface EditorState {
 
 const EditorContext = createContext<EditorState | null>(null);
 
+/** React component rendering EditorStateProvider. */
 export function EditorStateProvider({
 	children,
 	initialProject,
@@ -205,6 +207,7 @@ export function EditorStateProvider({
 	);
 }
 
+/** Custom hook providing useEditorState functionality. */
 export function useEditorState() {
 	const context = useContext(EditorContext);
 	if (!context) {

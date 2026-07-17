@@ -7,6 +7,7 @@
 
 import { generateMetadata } from "@/seo/metadata";
 
+/** Utility representing metadata. */
 export const metadata = generateMetadata({
 	title: "API Documentation",
 	description:
@@ -26,6 +27,7 @@ const ENDPOINTS = [
 	{ m: "POST", p: "/api/auth/reset-password", d: "Reset password" },
 ];
 
+/** React component rendering DocsPage. */
 export default function DocsPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground">

@@ -6,6 +6,7 @@ import type { Transform } from "@/primitives/transform";
 import type { BlendMode } from "@/primitives/blend-mode";
 import type { RetimeConfig, VisualElement } from "@/timeline";
 
+/** Type definition for VisualNodeParams. */
 export interface VisualNodeParams {
 	/** Element duration in media ticks. */
 	duration: number;
@@ -31,6 +32,7 @@ export interface VisualNodeParams {
 	masks?: Mask[];
 }
 
+/** Type definition for ResolvedVisualNodeState. */
 export interface ResolvedVisualNodeState {
 	/** Resolved local time within the element. */
 	localTime: number;
@@ -42,6 +44,7 @@ export interface ResolvedVisualNodeState {
 	effectPasses: EffectPass[][];
 }
 
+/** Type definition for ResolvedVisualSourceNodeState. */
 export interface ResolvedVisualSourceNodeState extends ResolvedVisualNodeState {
 	/** Source canvas image element. */
 	source: CanvasImageSource;

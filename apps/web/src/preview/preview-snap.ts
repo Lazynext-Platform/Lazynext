@@ -9,9 +9,12 @@ export interface SnapLine {
 
 const ROTATION_SNAP_STEP_DEGREES = 90;
 const ROTATION_SNAP_THRESHOLD_DEGREES = 5;
+/** Utility representing MIN_SCALE. */
 export const MIN_SCALE = 0.01;
+/** Utility representing SNAP_THRESHOLD_SCREEN_PIXELS. */
 export const SNAP_THRESHOLD_SCREEN_PIXELS = 8;
 
+/** Type definition for SnapResult. */
 export interface SnapResult {
 	/** Position after snapping was applied. */
 	snappedPosition: { x: number; y: number };
@@ -21,6 +24,7 @@ export interface SnapResult {
 
 type ScaleEdge = "left" | "right" | "top" | "bottom";
 
+/** Type definition for ScaleEdgePreference. */
 export interface ScaleEdgePreference {
 	/** Prefer snapping the left edge. */
 	left?: boolean;
@@ -78,6 +82,7 @@ function pickClosestScaleCandidate<
 	});
 }
 
+/** Utility representing snapPosition. */
 export function snapPosition({
 	proposedPosition,
 	canvasSize,
@@ -193,6 +198,7 @@ export function snapPosition({
 	};
 }
 
+/** Type definition for ScaleSnapResult. */
 export interface ScaleSnapResult {
 	/** Scale value after snapping. */
 	snappedScale: number;
@@ -200,6 +206,7 @@ export interface ScaleSnapResult {
 	activeLines: SnapLine[];
 }
 
+/** Utility representing snapScale. */
 export function snapScale({
 	proposedScale,
 	position,
@@ -378,6 +385,7 @@ export function snapScale({
 	};
 }
 
+/** Type definition for AxisSnapResult. */
 export interface AxisSnapResult {
 	/** Scale value after snapping. */
 	snappedScale: number;
@@ -387,6 +395,7 @@ export interface AxisSnapResult {
 	activeLines: SnapLine[];
 }
 
+/** Utility representing snapScaleAxes. */
 export function snapScaleAxes({
 	proposedScaleX,
 	proposedScaleY,
@@ -568,6 +577,7 @@ export function snapScaleAxes({
 	};
 }
 
+/** Type definition for RotationSnapResult. */
 export interface RotationSnapResult {
 	/** Rotation value after snapping, in degrees. */
 	snappedRotation: number;
@@ -575,6 +585,7 @@ export interface RotationSnapResult {
 	isSnapped: boolean;
 }
 
+/** Utility representing snapRotation. */
 export function snapRotation({
 	proposedRotation,
 }: {

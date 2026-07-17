@@ -12,6 +12,7 @@ const defaultGraphicDefinitions = [
 	starGraphicDefinition,
 ];
 
+/** Utility representing registerDefaultGraphics. */
 export function registerDefaultGraphics(): void {
 	for (const definition of defaultGraphicDefinitions) {
 		if (graphicsRegistry.has(definition.id)) {

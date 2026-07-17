@@ -26,6 +26,7 @@ import { usePropertyDraft } from "../hooks/use-property-draft";
 import { KeyframeToggle } from "./keyframe-toggle";
 import { Textarea } from "@/components/ui/textarea";
 
+/** React component rendering PropertyParamField. */
 export function PropertyParamField({
 	param,
 	value,

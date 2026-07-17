@@ -74,6 +74,7 @@ export interface TimelineOperationContext {
 	setTimelineAction?: (action: string, payload?: unknown) => void;
 }
 
+/** Type definition for TrackUpsertInput. */
 export interface TrackUpsertInput {
 	/** Optional existing track ID to update. */
 	id?: string;
@@ -87,6 +88,7 @@ export interface TrackUpsertInput {
 	props?: Record<string, unknown>;
 }
 
+/** Type definition for TrackOverlapIssue. */
 export interface TrackOverlapIssue {
 	/** ID of the overlapping element. */
 	elementId: string;

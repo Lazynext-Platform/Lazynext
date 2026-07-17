@@ -173,6 +173,7 @@ function traceRoundedPolygonPath({
 	path.closePath();
 }
 
+/** Utility representing polygonGraphicDefinition. */
 export const polygonGraphicDefinition: GraphicDefinition = {
 	id: "polygon",
 	name: "Polygon",

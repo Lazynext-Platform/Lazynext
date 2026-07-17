@@ -5,6 +5,7 @@ const TIMESTAMP_SEPARATOR = /\s*-->\s*/;
 const TIMESTAMP_PATTERN =
 	/^(\d{2}:\d{2}:\d{2}[,.]\d{1,3})\s*-->\s*(\d{2}:\d{2}:\d{2}[,.]\d{1,3})/;
 
+/** Utility representing parseSrt. */
 export function parseSrt({ input }: { input: string }): ParseSubtitleResult {
 	const normalized = input.replace(/\r\n?/g, "\n").trim();
 	if (!normalized) {

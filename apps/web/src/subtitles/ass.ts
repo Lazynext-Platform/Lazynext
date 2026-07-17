@@ -82,6 +82,7 @@ interface AssStyleRecord {
 	marginv?: string;
 }
 
+/** Utility representing parseAss. */
 export function parseAss({ input }: { input: string }): ParseSubtitleResult {
 	const normalized = input.replace(/\r\n?/g, "\n").trim();
 	if (!normalized) {

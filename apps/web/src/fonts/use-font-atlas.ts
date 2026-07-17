@@ -10,6 +10,7 @@ import { SYSTEM_FONTS } from "@/fonts/system-fonts";
 
 type Status = "idle" | "loading" | "error";
 
+/** Custom hook providing useFontAtlas functionality. */
 export function useFontAtlas({ open }: { open: boolean }) {
 	const [atlas, setAtlas] = useState<FontAtlas | null>(() =>
 		getCachedFontAtlas(),

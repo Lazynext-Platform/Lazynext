@@ -163,26 +163,24 @@ const ratelimit = new Ratelimit({
 
 ---
 
-## Stripe Webhook HMAC Verification
+## Dodo Payments Webhook HMAC Verification
 
-Stripe webhooks are verified using HMAC-SHA256 signature validation. The raw request body and the `stripe-signature` header are validated against the webhook signing secret.
+Dodo Payments webhooks are verified using HMAC-SHA256 signature validation. The raw request body and the `dodo-signature` header are validated against the webhook signing secret.
 
 ### Implementation
 
 ```typescript
-// apps/web/src/app/api/stripe/webhook/route.ts
-import Stripe from "stripe";
+// apps/web/src/app/api/dodo/webhook/route.ts
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+const webhookSecret = process.env.DODO_WEBHOOK_SECRET!;
 
 export async function POST(request: Request) {
   const body = await request.text();
-  const signature = request.headers.get("stripe-signature")!;
+  const signature = request.headers.get("dodo-signature")!;
 
-  let event: Stripe.Event;
+  let event;
   try {
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    // Verify HMAC
   } catch (err) {
     return Response.json({ error: "Invalid signature" }, { status: 400 });
   }
@@ -200,7 +198,7 @@ export async function POST(request: Request) {
 
 ### Security Requirements
 
-- The `STRIPE_WEBHOOK_SECRET` must never be exposed to the client.
+- The `DODO_WEBHOOK_SECRET` must never be exposed to the client.
 - The webhook endpoint must accept the raw request body (no body parsing middleware before HMAC verification).
 - Webhook events are processed idempotently using the `event.id` as the idempotency key.
 - Webhook endpoints are excluded from CSRF protection.

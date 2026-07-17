@@ -2,6 +2,7 @@
 import type { ShortcutKey } from "@/actions/keybinding";
 import type { TActionWithOptionalArgs } from "./types";
 
+/** Type definition for TActionCategory. */
 export type TActionCategory =
 	| "playback"
 	| "navigation"
@@ -12,6 +13,7 @@ export type TActionCategory =
 	| "controls"
 	| "assets";
 
+/** Type definition for TActionBaseDefinition. */
 export interface TActionBaseDefinition {
 	/** Human-readable action description. */
 	description: string;
@@ -21,11 +23,13 @@ export interface TActionBaseDefinition {
 	args?: Record<string, unknown>;
 }
 
+/** Type definition for TActionDefinition. */
 export interface TActionDefinition extends TActionBaseDefinition {
 	/** Default keyboard shortcuts. */
 	defaultShortcuts?: readonly ShortcutKey[];
 }
 
+/** Utility representing ACTIONS. */
 export const ACTIONS = {
 	"toggle-play": {
 		description: "Play/Pause",
@@ -150,6 +154,7 @@ export const ACTIONS = {
 	},
 } as const satisfies Record<string, TActionBaseDefinition>;
 
+/** Type definition for TAction. */
 export type TAction = keyof typeof ACTIONS;
 
 const ACTION_DEFAULT_SHORTCUTS = [
@@ -183,6 +188,7 @@ const ACTION_DEFAULT_SHORTCUTS_BY_ACTION = new Map<
 	readonly ShortcutKey[]
 >(ACTION_DEFAULT_SHORTCUTS);
 
+/** Utility representing getActionDefinition. */
 export function getActionDefinition({
 	action,
 }: {
@@ -194,6 +200,7 @@ export function getActionDefinition({
 	};
 }
 
+/** Utility representing getDefaultShortcuts. */
 export function getDefaultShortcuts(): Map<
 	ShortcutKey,
 	TActionWithOptionalArgs

@@ -18,11 +18,13 @@ import { performCaptcha } from "./captcha";
 
 const AUTH_BASE_URL = process.env.EXPO_PUBLIC_AUTH_URL || "http://localhost:3000";
 
+/** Type definition for AuthResponse. */
 export interface AuthResponse {
 	data?: Record<string, unknown>;
 	error?: { message: string; status?: number; captchaRequired?: boolean };
 }
 
+/** Type definition for SessionUser. */
 export interface SessionUser {
 	id: string;
 	name: string;
@@ -31,6 +33,7 @@ export interface SessionUser {
 	image?: string;
 }
 
+/** Type definition for Session. */
 export interface Session {
 	token: string;
 	user: SessionUser;
@@ -38,10 +41,12 @@ export interface Session {
 
 let cachedSession: Session | null = null;
 
+/** Utility representing getStoredToken. */
 export function getStoredToken(): string | null {
 	return cachedSession?.token || null;
 }
 
+/** Utility representing getStoredSession. */
 export function getStoredSession(): Session | null {
 	return cachedSession;
 }

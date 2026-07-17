@@ -585,5 +585,6 @@ class StorageService {
 	}
 }
 
+/** Utility representing storageService. */
 export const storageService = new StorageService();
 export { StorageService };

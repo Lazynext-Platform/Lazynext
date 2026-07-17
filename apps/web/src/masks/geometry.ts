@@ -22,6 +22,7 @@ type SnapGeometryParams = CenterMaskParams & {
 	scale?: number;
 };
 
+/** Utility representing hasCenterParams. */
 export function hasCenterParams(
 	params: Partial<CenterMaskParams>,
 ): params is CenterMaskParams {
@@ -30,6 +31,7 @@ export function hasCenterParams(
 	);
 }
 
+/** Utility representing isRectangleMaskParams. */
 export function isRectangleMaskParams(
 	params: SnapGeometryParams,
 ): params is RectangleMaskParams {
@@ -42,6 +44,7 @@ export function isRectangleMaskParams(
 	);
 }
 
+/** Utility representing getMaskLocalCenter. */
 export function getMaskLocalCenter({
 	params,
 	bounds,
@@ -57,6 +60,7 @@ export function getMaskLocalCenter({
 	};
 }
 
+/** Utility representing setMaskLocalCenter. */
 export function setMaskLocalCenter({
 	center,
 	bounds,
@@ -70,6 +74,7 @@ export function setMaskLocalCenter({
 	};
 }
 
+/** Utility representing getMaskSnapGeometry. */
 export function getMaskSnapGeometry({
 	params,
 	bounds,
@@ -102,6 +107,7 @@ export function getMaskSnapGeometry({
 	};
 }
 
+/** Utility representing toGlobalMaskSnapLines. */
 export function toGlobalMaskSnapLines({
 	lines,
 	bounds,

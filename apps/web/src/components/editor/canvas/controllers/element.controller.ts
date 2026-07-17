@@ -57,10 +57,12 @@ function registerElements() {
 
 registerElements();
 
+/** Utility representing registerCanvasHandler. */
 export function registerCanvasHandler(handler: CanvasElementHandler): void {
 	elementController.register(handler);
 }
 
+/** Utility representing getCanvasHandler. */
 export function getCanvasHandler(
 	name: string,
 ): CanvasElementHandler | undefined {

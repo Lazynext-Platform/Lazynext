@@ -9,6 +9,7 @@ import {
 } from "../helpers/canvas.util";
 import { ELEMENT_TYPES } from "../helpers/constants";
 
+/** Utility representing ImageElement. */
 export const ImageElement: CanvasElementHandler = {
 	name: ELEMENT_TYPES.IMAGE,
 

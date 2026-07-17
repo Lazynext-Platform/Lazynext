@@ -61,6 +61,7 @@ export interface QueryMonitorConfig {
 	logParameters: boolean;
 }
 
+/** Type definition for QueryExecution. */
 export interface QueryExecution {
 	/** Unique label for this query */
 	label: string;
@@ -80,6 +81,7 @@ export interface QueryExecution {
 	error?: string;
 }
 
+/** Type definition for QueryStats. */
 export interface QueryStats {
 	/** Total number of tracked queries. */
 	totalQueries: number;
@@ -122,6 +124,7 @@ export interface QueryStats {
 	nPlusOnePatterns: NPlusOneDetection[];
 }
 
+/** Type definition for NPlusOneDetection. */
 export interface NPlusOneDetection {
 	/** Label of the query pattern flagged. */
 	label: string;
@@ -133,6 +136,7 @@ export interface NPlusOneDetection {
 	detectedAt: number;
 }
 
+/** Type definition for ExplainAnalyzeResult. */
 export interface ExplainAnalyzeResult {
 	/** JSON query plan produced by EXPLAIN ANALYZE. */
 	queryPlan: string;

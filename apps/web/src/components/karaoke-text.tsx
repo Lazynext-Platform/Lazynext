@@ -7,6 +7,7 @@
 
 import { useWasm } from "@/hooks/use-wasm";
 
+/** Type definition for Word. */
 export type Word = {
 	/** The word text. */
 	text: string;
@@ -16,6 +17,7 @@ export type Word = {
 	endFrame: number;
 };
 
+/** Type definition for KaraokeTextProps. */
 export type KaraokeTextProps = {
 	/** Array of timed words to render. */
 	words: Word[];

@@ -111,20 +111,24 @@ export const socialPublishSchema = z.object({
 	hashtags: z.array(z.string().max(100)).max(30).optional(),
 });
 
+/** Utility representing schedulePostSchema. */
 export const schedulePostSchema = socialPublishSchema.extend({
 	scheduled_at: z.string().min(1),
 });
 
+/** Utility representing autoReframeSchema. */
 export const autoReframeSchema = z.object({
 	video_path: z.string().min(1),
 	target_platform: z.enum(["tiktok", "youtube", "instagram", "twitter", "shorts", "reels"]),
 });
 
+/** Utility representing thumbnailGenerateSchema. */
 export const thumbnailGenerateSchema = z.object({
 	video_path: z.string().min(1),
 	count: z.number().int().min(1).max(10).default(5),
 });
 
+/** Utility representing metadataGenerateSchema. */
 export const metadataGenerateSchema = z.object({
 	platform: z.enum(["tiktok", "youtube", "instagram", "twitter"]),
 	title: z.string().max(200).optional(),

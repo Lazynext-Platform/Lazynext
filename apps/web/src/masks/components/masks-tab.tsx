@@ -135,6 +135,7 @@ function withPreviewedMaskParam({
 	}
 }
 
+/** React component rendering MasksTab. */
 export function MasksTab({ element, trackId }: MasksTabProps) {
 	const editor = useEditor();
 	const { renderElement, previewUpdates, commit } =

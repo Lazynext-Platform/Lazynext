@@ -93,6 +93,7 @@ const ASSET_SECTIONS: AssetSection[] = [
 	},
 ];
 
+/** React component rendering BrandPage. */
 export default function BrandPage() {
 	return (
 		<BasePage

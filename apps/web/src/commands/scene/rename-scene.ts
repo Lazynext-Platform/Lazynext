@@ -4,6 +4,7 @@ import { EditorCore } from "@/core";
 import type { TScene } from "@/timeline";
 import { updateSceneInArray } from "@/timeline/scenes";
 
+/** Class representing RenameSceneCommand. */
 export class RenameSceneCommand extends Command {
 	private savedScenes: TScene[] | null = null;
 	private previousName: string | null = null;

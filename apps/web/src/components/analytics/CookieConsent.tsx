@@ -10,6 +10,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
+/** React component rendering CookieConsent. */
 export function CookieConsent() {
 	const [visible, setVisible] = useState(false);
 

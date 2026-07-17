@@ -8,6 +8,7 @@
 
 import { TextEffect } from "../../types";
 
+/** Class representing ElementTextEffect. */
 export class ElementTextEffect {
 	private name: string;
 	private duration?: number;

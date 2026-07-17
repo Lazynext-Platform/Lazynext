@@ -12,6 +12,7 @@ import { ArrowRight } from "lucide-react";
 import { Handlebars } from "./handlebars";
 import Link from "next/link";
 
+/** React component rendering Hero. */
 export function Hero() {
 	return (
 		<div className="relative flex min-h-[calc(100svh-4.5rem)] flex-col items-center justify-between px-4 text-center overflow-hidden bg-background">

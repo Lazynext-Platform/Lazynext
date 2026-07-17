@@ -16,6 +16,7 @@ import {
 import type { TimelineElement } from "@/timeline";
 import type { MediaTime } from "@/wasm";
 
+/** React component rendering ElementParamsTab. */
 export function ElementParamsTab({
 	element,
 	trackId,

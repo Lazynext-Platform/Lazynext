@@ -24,6 +24,7 @@ import { ArrowElement } from "../elements/arrow.element";
 import { LineElement } from "../elements/line.element";
 import { EffectElement } from "../elements/effect.element";
 
+/** Type definition for SplitResult. */
 export interface SplitResult {
 	/** First element resulting from the split. */
 	firstElement: any;
@@ -33,6 +34,7 @@ export interface SplitResult {
 	success: boolean;
 }
 
+/** Class representing ElementSplitter. */
 export class ElementSplitter implements ElementVisitor<SplitResult> {
 	private splitTime: number;
 	private elementCloner: ElementCloner;

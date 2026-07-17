@@ -10,6 +10,7 @@ import { syncTimelineFromEngine } from "@/collaboration/crdt-sync";
 // Global CrdtEngine type (dynamically loaded)
 type CrdtEngineType = import("lazynext-wasm").CrdtEngine;
 
+/** Class representing EngineManager. */
 export class EngineManager {
 	public crdt: CrdtEngineType | null = null;
 	private initialized = false;

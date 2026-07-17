@@ -21,5 +21,6 @@ export const COLOR_FILTERS = {
 	FADED: "faded",
 } as const;
 
+/** Type definition for ColorFilterPreset. */
 export type ColorFilterPreset =
 	(typeof COLOR_FILTERS)[keyof typeof COLOR_FILTERS];

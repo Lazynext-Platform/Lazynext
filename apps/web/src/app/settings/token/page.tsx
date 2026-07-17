@@ -11,6 +11,7 @@ import { headers } from "next/headers";
 import { auth } from "@/auth/server";
 import { TokenPageClient } from "./client";
 
+/** Utility representing metadata. */
 export const metadata: Metadata = {
 	title: "CLI Token — Lazynext",
 	description: "Get your authentication token for the Lazynext CLI.",

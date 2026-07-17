@@ -7,8 +7,10 @@
 
 import type { NormalizedCubicBezier } from "@/animation/types";
 
+/** Utility representing PRESET_MATCH_TOLERANCE. */
 export const PRESET_MATCH_TOLERANCE = 0.02;
 
+/** Type definition for EasingPreset. */
 export interface EasingPreset {
 	/** Unique preset identifier. */
 	id: string;
@@ -20,6 +22,7 @@ export interface EasingPreset {
 	isCustom?: boolean;
 }
 
+/** Utility representing BUILTIN_PRESETS. */
 export const BUILTIN_PRESETS: EasingPreset[] = [
 	{ id: "smooth", label: "Smooth", value: [0.25, 0.1, 0.25, 1] },
 	{ id: "ease-out", label: "Ease out", value: [0, 0, 0.2, 1] },

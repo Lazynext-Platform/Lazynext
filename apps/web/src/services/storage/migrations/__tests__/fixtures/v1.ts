@@ -24,6 +24,7 @@ export const v1Project = {
 	],
 };
 
+/** Utility representing v1ProjectWithMultipleScenes. */
 export const v1ProjectWithMultipleScenes = {
 	id: "project-v1-multi",
 	version: 1,

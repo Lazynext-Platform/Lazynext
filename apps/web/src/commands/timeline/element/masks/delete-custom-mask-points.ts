@@ -65,6 +65,7 @@ function deletePointsFromElementMask({
 	};
 }
 
+/** Class representing DeleteFreeformPathMaskPointsCommand. */
 export class DeleteFreeformPathMaskPointsCommand extends Command {
 	private savedState: SceneTracks | null = null;
 	private readonly trackId: string;

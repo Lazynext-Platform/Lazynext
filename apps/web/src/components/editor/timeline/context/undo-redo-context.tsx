@@ -80,6 +80,7 @@ const loadFromStorage = (key: string): UndoRedoState | null => {
 	}
 };
 
+/** Type definition for UndoRedoProviderProps. */
 export interface UndoRedoProviderProps {
 	/** Child components wrapped by the provider. */
 	children: React.ReactNode;
@@ -89,6 +90,7 @@ export interface UndoRedoProviderProps {
 	maxHistorySize?: number;
 }
 
+/** React component rendering UndoRedoProvider. */
 export const UndoRedoProvider: React.FC<UndoRedoProviderProps> = ({
 	children,
 	persistenceKey,
@@ -245,6 +247,7 @@ export const UndoRedoProvider: React.FC<UndoRedoProviderProps> = ({
 	);
 };
 
+/** Custom hook providing useUndoRedo functionality. */
 export const useUndoRedo = (): UndoRedoContextType => {
 	const context = useContext(UndoRedoContext);
 	if (context === undefined) {

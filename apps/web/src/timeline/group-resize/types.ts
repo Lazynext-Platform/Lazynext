@@ -9,8 +9,10 @@ import type { FrameRate } from "lazynext-wasm";
 import type { ElementRef, RetimeConfig } from "@/timeline/types";
 import type { MediaTime } from "@/wasm";
 
+/** Type definition for ResizeSide. */
 export type ResizeSide = "left" | "right";
 
+/** Type definition for GroupResizeMember. */
 export interface GroupResizeMember extends ElementRef {
 	/** Element start time on the timeline. */
 	startTime: MediaTime;
@@ -30,6 +32,7 @@ export interface GroupResizeMember extends ElementRef {
 	rightNeighborBound: MediaTime | null;
 }
 
+/** Type definition for GroupResizeUpdate. */
 export interface GroupResizeUpdate extends ElementRef {
 	/** Patch with updated trim and timing values. */
 	patch: {
@@ -44,6 +47,7 @@ export interface GroupResizeUpdate extends ElementRef {
 	};
 }
 
+/** Type definition for GroupResizeResult. */
 export interface GroupResizeResult {
 	/** Net time delta applied to the group. */
 	deltaTime: MediaTime;
@@ -51,6 +55,7 @@ export interface GroupResizeResult {
 	updates: GroupResizeUpdate[];
 }
 
+/** Type definition for ComputeGroupResizeArgs. */
 export interface ComputeGroupResizeArgs {
 	/** Group members to resize. */
 	members: GroupResizeMember[];

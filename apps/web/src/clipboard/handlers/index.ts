@@ -10,16 +10,19 @@ import type {
 import { ElementsClipboardHandler } from "./elements";
 import { KeyframesClipboardHandler } from "./keyframes";
 
+/** Utility representing clipboardHandlers. */
 export const clipboardHandlers = {
 	elements: ElementsClipboardHandler,
 	keyframes: KeyframesClipboardHandler,
 } satisfies ClipboardHandlerMap;
 
+/** Utility representing clipboardCopyHandlers. */
 export const clipboardCopyHandlers = [
 	KeyframesClipboardHandler,
 	ElementsClipboardHandler,
 ] as const satisfies readonly ClipboardHandler<ClipboardEntryType>[];
 
+/** Utility representing copyClipboardEntry. */
 export function copyClipboardEntry({
 	context,
 }: {
@@ -36,6 +39,7 @@ export function copyClipboardEntry({
 	return null;
 }
 
+/** Utility representing buildPasteClipboardCommand. */
 export function buildPasteClipboardCommand({
 	entry,
 	context,

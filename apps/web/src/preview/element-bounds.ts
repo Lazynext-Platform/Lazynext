@@ -218,11 +218,15 @@ function getElementBounds({
 	return null;
 }
 
+/** Utility representing ROTATION_HANDLE_OFFSET. */
 export const ROTATION_HANDLE_OFFSET = 24;
 
+/** Type definition for Corner. */
 export type Corner = "top-left" | "top-right" | "bottom-left" | "bottom-right";
+/** Type definition for Edge. */
 export type Edge = "right" | "left" | "bottom";
 
+/** Utility representing getCornerPosition. */
 export function getCornerPosition({
 	bounds,
 	corner,
@@ -245,6 +249,7 @@ export function getCornerPosition({
 	};
 }
 
+/** Utility representing getEdgeHandlePosition. */
 export function getEdgeHandlePosition({
 	bounds,
 	edge,
@@ -266,6 +271,7 @@ export function getEdgeHandlePosition({
 	};
 }
 
+/** Utility representing getVisibleElementsWithBounds. */
 export function getVisibleElementsWithBounds({
 	tracks,
 	currentTime,

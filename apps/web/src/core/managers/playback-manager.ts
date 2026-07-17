@@ -13,6 +13,7 @@ import {
 	ZERO_MEDIA_TIME,
 } from "@/wasm";
 
+/** Class representing PlaybackManager. */
 export class PlaybackManager {
 	private isPlaying = false;
 	private currentTime: MediaTime = ZERO_MEDIA_TIME;

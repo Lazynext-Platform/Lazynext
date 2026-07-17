@@ -86,6 +86,7 @@ function insertPointIntoElementMask({
 	};
 }
 
+/** Class representing InsertFreeformPathMaskPointCommand. */
 export class InsertFreeformPathMaskPointCommand extends Command {
 	private savedState: SceneTracks | null = null;
 	private readonly trackId: string;

@@ -12,6 +12,7 @@ import type { ElementVisitor } from "../visitor/element-visitor";
 import { AudioProps } from "../../types";
 import { TIMELINE_ELEMENT_TYPE } from "../../utils/constants";
 
+/** Class representing AudioElement. */
 export class AudioElement extends TrackElement {
 	protected mediaDuration!: number;
 	declare protected props: AudioProps;

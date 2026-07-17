@@ -2,6 +2,7 @@
 
 import type { IconProps } from "./types";
 
+/** React component rendering OcVercelIcon. */
 export function OcVercelIcon({ className }: IconProps) {
 	return (
 		<svg
@@ -18,6 +19,7 @@ export function OcVercelIcon({ className }: IconProps) {
 	);
 }
 
+/** React component rendering OcMarbleIcon. */
 export function OcMarbleIcon({ className = "", size = 32 }: IconProps) {
 	return (
 		<svg
@@ -38,6 +40,7 @@ export function OcMarbleIcon({ className = "", size = 32 }: IconProps) {
 	);
 }
 
+/** React component rendering OcDataBuddyIcon. */
 export function OcDataBuddyIcon({ className = "", size = 32 }: IconProps) {
 	return (
 		<svg

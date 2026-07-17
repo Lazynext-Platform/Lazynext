@@ -8,6 +8,7 @@ interface SelectionBoxProps {
 	bounds: SelectionBoxBounds | null;
 }
 
+/** React component rendering SelectionBox. */
 export function SelectionBox({ bounds }: SelectionBoxProps) {
 	if (!bounds) return null;
 

@@ -9,6 +9,7 @@ import {
 	getStrokeOffset,
 } from "../box-like";
 
+/** Utility representing ellipseMaskDefinition. */
 export const ellipseMaskDefinition: MaskDefinition<"ellipse"> = {
 	type: "ellipse",
 	name: "Ellipse",

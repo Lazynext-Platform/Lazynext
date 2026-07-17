@@ -8,6 +8,7 @@ import {
 	updateTrackInSceneTracks,
 } from "@/timeline";
 
+/** Class representing ToggleTrackMuteCommand. */
 export class ToggleTrackMuteCommand extends Command {
 	private savedState: SceneTracks | null = null;
 

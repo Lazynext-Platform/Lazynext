@@ -21,6 +21,7 @@ type TimelineStore = {
 	captionProps: Record<string, any>;
 };
 
+/** Type definition for TimelineTrackData. */
 export type TimelineTrackData = {
 	/** Tracks in the timeline. */
 	tracks: Track[];
@@ -34,6 +35,7 @@ export type TimelineTrackData = {
 	metadata?: ProjectMetadata;
 };
 
+/** Class representing TimelineContextStore. */
 export class TimelineContextStore {
 	private static instance: TimelineContextStore;
 	private storeMap: Map<string, TimelineStore>;
@@ -137,4 +139,5 @@ export class TimelineContextStore {
 	}
 }
 
+/** Utility representing timelineContextStore. */
 export const timelineContextStore = TimelineContextStore.getInstance();

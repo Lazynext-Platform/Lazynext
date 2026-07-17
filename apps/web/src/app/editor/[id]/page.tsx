@@ -12,6 +12,7 @@ import { EditorUIClient } from "./editor-ui-client";
 import { getProject } from "@/actions/project";
 import { notFound } from "next/navigation";
 
+/** Utility representing dynamic. */
 export const dynamic = "force-dynamic";
 
 export default async function EditorPage({

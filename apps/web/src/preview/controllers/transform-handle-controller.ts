@@ -144,6 +144,7 @@ interface VisualSelectionContext {
 	readonly resolvedTransform: Transform;
 }
 
+/** Type definition for PreviewViewportAdapter. */
 export interface PreviewViewportAdapter {
 	/** Converts screen coordinates to canvas coordinates. */
 	screenToCanvas: ({
@@ -164,11 +165,13 @@ export interface PreviewViewportAdapter {
 	}) => Point;
 }
 
+/** Type definition for InputAdapter. */
 export interface InputAdapter {
 	/** Returns whether the shift key is currently held. */
 	isShiftHeld: () => boolean;
 }
 
+/** Type definition for SceneReader. */
 export interface SceneReader {
 	/** Returns the currently selected element references. */
 	getSelectedElements: () => readonly ElementRef[];
@@ -182,6 +185,7 @@ export interface SceneReader {
 	getCanvasSize: () => CanvasSize;
 }
 
+/** Type definition for TimelinePreviewUpdate. */
 export interface TimelinePreviewUpdate {
 	/** Track containing the element to update. */
 	readonly trackId: string;
@@ -191,6 +195,7 @@ export interface TimelinePreviewUpdate {
 	readonly updates: Partial<TimelineElement>;
 }
 
+/** Type definition for TimelineOps. */
 export interface TimelineOps {
 	/** Applies preview updates to elements. */
 	previewElements: (updates: readonly TimelinePreviewUpdate[]) => void;
@@ -200,11 +205,13 @@ export interface TimelineOps {
 	discardPreview: () => void;
 }
 
+/** Type definition for PreviewOptions. */
 export interface PreviewOptions {
 	/** Callback invoked when active snap lines change. */
 	onSnapLinesChange?: (lines: SnapLine[]) => void;
 }
 
+/** Type definition for TransformHandleDeps. */
 export interface TransformHandleDeps {
 	/** Viewport coordinate adapter. */
 	viewport: PreviewViewportAdapter;
@@ -218,6 +225,7 @@ export interface TransformHandleDeps {
 	preview: PreviewOptions;
 }
 
+/** Type definition for TransformHandleDepsRef. */
 export interface TransformHandleDepsRef {
 	/** Current dependency values. */
 	readonly current: TransformHandleDeps;
@@ -345,6 +353,7 @@ function buildEdgeScaleAnimationReset({
 	};
 }
 
+/** Class representing TransformHandleController. */
 export class TransformHandleController {
 	private readonly depsRef: TransformHandleDepsRef;
 	private readonly subscribers = new Set<() => void>();

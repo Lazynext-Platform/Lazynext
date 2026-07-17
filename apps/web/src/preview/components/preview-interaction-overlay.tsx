@@ -10,6 +10,7 @@ import { TextEditOverlay } from "./text-edit-overlay";
 import { usePropertiesStore } from "@/components/editor/panels/properties/stores/properties-store";
 import { useEditor } from "@/editor/use-editor";
 
+/** React component rendering PreviewInteractionOverlay. */
 export function PreviewInteractionOverlay() {
 	const [snapLines, setSnapLines] = useState<SnapLine[]>([]);
 	const editor = useEditor();

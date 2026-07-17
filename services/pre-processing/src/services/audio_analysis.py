@@ -5,7 +5,6 @@ Uses TF Serving Whisper for speech-to-text and a local SciPy DSP pipeline
 for noise reduction, compression, and EQ enhancement.
 """
 
-import asyncio
 import base64
 import os
 import httpx

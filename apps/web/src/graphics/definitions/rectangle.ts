@@ -55,6 +55,7 @@ const RECTANGLE_PARAMS: ParamDefinition<keyof RectangleParams & string>[] = [
 	},
 ];
 
+/** Utility representing rectangleGraphicDefinition. */
 export const rectangleGraphicDefinition: GraphicDefinition = {
 	id: "rectangle",
 	name: "Rectangle",

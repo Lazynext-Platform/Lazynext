@@ -31,6 +31,7 @@ interface VideoProps {
 	isActive: boolean;
 }
 
+/** React component rendering VideoPlayer. */
 export function VideoPlayer({
 	id,
 	url,

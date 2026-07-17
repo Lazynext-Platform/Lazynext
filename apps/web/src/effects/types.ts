@@ -1,6 +1,7 @@
 /** @module Effects type definitions for GPU effect registration and parameter passing */
 import type { ParamDefinition, ParamValues } from "@/params";
 
+/** Type definition for Effect. */
 export interface Effect {
 	/** Unique identifier for the effect instance. */
 	id: string;
@@ -12,8 +13,10 @@ export interface Effect {
 	enabled: boolean;
 }
 
+/** Type definition for EffectUniformValue. */
 export type EffectUniformValue = number | number[];
 
+/** Type definition for EffectPass. */
 export interface EffectPass {
 	/** Shader source or identifier for this pass. */
 	shader: string;
@@ -21,6 +24,7 @@ export interface EffectPass {
 	uniforms: Record<string, EffectUniformValue>;
 }
 
+/** Type definition for EffectPassTemplate. */
 export interface EffectPassTemplate {
 	/** Shader source or identifier for this pass. */
 	shader: string;
@@ -35,6 +39,7 @@ export interface EffectPassTemplate {
 	}): Record<string, EffectUniformValue>;
 }
 
+/** Type definition for EffectRendererConfig. */
 export interface EffectRendererConfig {
 	/** Ordered shader pass templates for the effect. */
 	passes: EffectPassTemplate[];
@@ -49,6 +54,7 @@ export interface EffectRendererConfig {
 	}) => EffectPass[];
 }
 
+/** Type definition for EffectDefinition. */
 export interface EffectDefinition {
 	/** Effect type discriminator. */
 	type: string;

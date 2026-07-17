@@ -6,6 +6,7 @@ import { DEFAULTS } from "@/timeline/defaults";
 import { buildTextElement } from "@/timeline/element-utils";
 import type { MediaTime } from "@/wasm";
 
+/** React component rendering TextView. */
 export function TextView() {
 	const editor = useEditor();
 

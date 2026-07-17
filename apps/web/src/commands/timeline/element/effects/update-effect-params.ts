@@ -32,6 +32,7 @@ function updateEffectParamsOnElement({
 	return { ...element, effects: updated };
 }
 
+/** Class representing UpdateClipEffectParamsCommand. */
 export class UpdateClipEffectParamsCommand extends Command {
 	private savedState: SceneTracks | null = null;
 	private readonly trackId: string;

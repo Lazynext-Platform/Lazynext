@@ -12,8 +12,10 @@ import {
 	type PreviewInteractionDepsRef,
 } from "@/preview/controllers/preview-interaction-controller";
 
+/** Type definition for OnSnapLinesChange. */
 export type OnSnapLinesChange = (lines: SnapLine[]) => void;
 
+/** Custom hook providing usePreviewInteraction functionality. */
 export function usePreviewInteraction({
 	onSnapLinesChange,
 	isMaskMode = false,

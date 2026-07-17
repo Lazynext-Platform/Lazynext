@@ -2,11 +2,13 @@
 import type { EditorSelectionPatch } from "@/selection/editor-selection";
 import type { ElementRef } from "@/timeline/types";
 
+/** Type definition for CommandResult. */
 export interface CommandResult {
 	/** Optional selection patch to apply after the command. */
 	selection?: EditorSelectionPatch;
 }
 
+/** Utility representing createElementSelectionResult. */
 export function createElementSelectionResult(
 	selectedElements: ElementRef[],
 ): CommandResult {

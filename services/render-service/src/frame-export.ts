@@ -16,8 +16,10 @@ import { spawn, ChildProcess } from "child_process";
 import fs from "fs";
 import path from "path";
 
+/** Type definition for ExportFormatId. */
 export type ExportFormatId = "mp4" | "prores" | "dcp" | "aaf" | "mov";
 
+/** Type definition for FrameJobConfig. */
 export interface FrameJobConfig {
 	/** Unique job identifier. */
 	jobId: string;
@@ -37,6 +39,7 @@ export interface FrameJobConfig {
 	totalFrames: number;
 }
 
+/** Type definition for FrameJobStatus. */
 export type FrameJobStatus =
 	| "awaiting_frames"
 	| "encoding"
@@ -44,6 +47,7 @@ export type FrameJobStatus =
 	| "failed"
 	| "cancelled";
 
+/** Type definition for FrameJob. */
 export interface FrameJob extends FrameJobConfig {
 	/** Current job status. */
 	status: FrameJobStatus;
@@ -61,6 +65,7 @@ export interface FrameJob extends FrameJobConfig {
 	ffmpeg: ChildProcess | null;
 }
 
+/** Type definition for EncodeArgsResult. */
 export interface EncodeArgsResult {
 	/** ffmpeg video codec name. */
 	codec: string;
@@ -72,6 +77,7 @@ export interface EncodeArgsResult {
 
 const JOBS = new Map<string, FrameJob>();
 
+/** Utility representing OUTPUT_DIR. */
 export const OUTPUT_DIR =
 	process.env.OUTPUT_DIR || path.join(import.meta.dirname, "../outputs");
 
@@ -173,6 +179,7 @@ export function deleteFrameJob(jobId: string): boolean {
 	return true;
 }
 
+/** Type definition for AppendResult. */
 export interface AppendResult {
 	/** Whether the frame was accepted. */
 	ok: boolean;

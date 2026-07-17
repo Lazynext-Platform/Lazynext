@@ -1,0 +1,207 @@
+"""
+OpenTelemetry instrumentation for the Pre-Processing service.
+
+When OTEL_EXPORTER_OTLP_ENDPOINT is set, traces and spans are exported
+to the configured collector (Tempo at http://tempo:4317 by default).
+
+Provider auto-instrumentation for:
+  - FastAPI HTTP requests (request/response spans)
+  - HTTPX outbound calls (Whisper API, etc.)
+  - FFmpeg subprocess execution
+  - Custom spans for ML inference (SAM2, NeRF)
+
+Usage:
+    from telemetry import setup_telemetry, traced
+    setup_telemetry("pre-processing")
+
+    @traced("sam2_inference")
+    async def run_sam2(frame_data, points):
+        ...
+"""
+
+import os
+import time
+import functools
+from contextlib import contextmanager
+
+# ── Configuration ──────────────────────────────────────────────────────
+
+OTEL_ENDPOINT = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://tempo:4317")
+SERVICE_NAME = os.getenv("OTEL_SERVICE_NAME", "lazynext-pre-processing")
+OTEL_ENABLED = os.getenv("OTEL_ENABLED", "false").lower() == "true"
+
+_initialized = False
+_tracer = None
+_meter = None
+
+# ── Metrics ────────────────────────────────────────────────────────────
+
+class Metrics:
+    """In-process metrics counters (always available, even without OTel)."""
+    def __init__(self):
+        self.request_count = 0
+        self.error_count = 0
+        self.inference_count = 0
+        self.inference_total_ms = 0
+        self.ffmpeg_count = 0
+
+    def record_request(self):
+        """Increment the total request counter."""
+        self.request_count += 1
+
+    def record_error(self):
+        """Increment the total error counter."""
+        self.error_count += 1
+
+    def record_inference(self, duration_ms: float):
+        """Record one ML inference and add its duration to the running total."""
+        self.inference_count += 1
+        self.inference_total_ms += duration_ms
+
+    def record_ffmpeg(self):
+        """Increment the FFmpeg-invocation counter."""
+        self.ffmpeg_count += 1
+
+    def snapshot(self) -> dict:
+        """Return a plain-dict snapshot of all counters and the average
+        inference time (in ms) for the `/metrics` endpoint."""
+        return {
+            "requests": self.request_count,
+            "errors": self.error_count,
+            "inferences": self.inference_count,
+            "inference_avg_ms": (
+                self.inference_total_ms / max(self.inference_count, 1)
+            ),
+            "ffmpeg_calls": self.ffmpeg_count,
+        }
+
+metrics = Metrics()
+
+# ── Setup ──────────────────────────────────────────────────────────────
+
+def setup_telemetry(service_name: str = "pre-processing") -> bool:
+    """Initialize OpenTelemetry with OTLP export to Tempo."""
+    global _initialized, OTEL_ENABLED, SERVICE_NAME
+
+    SERVICE_NAME = service_name
+
+    if not OTEL_ENABLED and not os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT"):
+        print("[Telemetry] OpenTelemetry disabled. Set OTEL_ENABLED=true to enable.")
+        return False
+
+    try:
+        from opentelemetry import trace
+        from opentelemetry.sdk.trace import TracerProvider
+        from opentelemetry.sdk.trace.export import BatchSpanProcessor
+        from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+        from opentelemetry.sdk.resources import Resource, SERVICE_NAME as RESOURCE_SERVICE_NAME
+
+        resource = Resource(attributes={
+            RESOURCE_SERVICE_NAME: service_name,
+            "service.version": "1.0.0",
+            "deployment.environment": os.getenv("APP_ENV", "development"),
+        })
+
+        provider = TracerProvider(resource=resource)
+        exporter = OTLPSpanExporter(endpoint=OTEL_ENDPOINT, insecure=True)
+        provider.add_span_processor(BatchSpanProcessor(exporter))
+        trace.set_tracer_provider(provider)
+
+        global _tracer
+        _tracer = trace.get_tracer(service_name)
+        _initialized = True
+
+        print(f"[Telemetry] OTLP tracing enabled → {OTEL_ENDPOINT}")
+        return True
+
+    except ImportError:
+        print("[Telemetry] OpenTelemetry packages not installed. "
+              "Install: pip install opentelemetry-api opentelemetry-sdk "
+              "opentelemetry-exporter-otlp-proto-grpc")
+        return False
+    except Exception as e:
+        print(f"[Telemetry] Failed to initialize: {e}")
+        return False
+
+# ── Decorators ─────────────────────────────────────────────────────────
+
+def traced(span_name: str, attributes: dict = None):
+    """Decorator to trace a function with a named span."""
+    def decorator(func):
+        """Wrap `func` with either an async or sync tracing wrapper."""
+        @functools.wraps(func)
+        async def async_wrapper(*args, **kwargs):
+            """Async span wrapper — traces the call, records duration and
+            errors, and re-raises on failure."""
+            if not _initialized or not _tracer:
+                return await func(*args, **kwargs)
+
+            with _tracer.start_as_current_span(span_name) as span:
+                if attributes:
+                    for k, v in attributes.items():
+                        span.set_attribute(k, str(v))
+                try:
+                    start = time.perf_counter()
+                    result = await func(*args, **kwargs)
+                    duration_ms = (time.perf_counter() - start) * 1000
+                    span.set_attribute("duration_ms", duration_ms)
+                    metrics.record_inference(duration_ms)
+                    return result
+                except Exception as e:
+                    span.set_attribute("error", str(e))
+                    span.set_status(trace.Status(trace.StatusCode.ERROR))
+                    metrics.record_error()
+                    raise
+
+        @functools.wraps(func)
+        def sync_wrapper(*args, **kwargs):
+            """Sync span wrapper — traces the call, records duration and
+            errors, and re-raises on failure."""
+            if not _initialized or not _tracer:
+                return func(*args, **kwargs)
+
+            with _tracer.start_as_current_span(span_name) as span:
+                if attributes:
+                    for k, v in attributes.items():
+                        span.set_attribute(k, str(v))
+                try:
+                    start = time.perf_counter()
+                    result = func(*args, **kwargs)
+                    duration_ms = (time.perf_counter() - start) * 1000
+                    span.set_attribute("duration_ms", duration_ms)
+                    return result
+                except Exception as e:
+                    span.set_attribute("error", str(e))
+                    span.set_status(trace.Status(trace.StatusCode.ERROR))
+                    metrics.record_error()
+                    raise
+
+        import asyncio
+        if asyncio.iscoroutinefunction(func):
+            return async_wrapper
+        return sync_wrapper
+
+    return decorator
+
+
+@contextmanager
+def trace_block(span_name: str, **attributes):
+    """Context manager for tracing a block of code."""
+    if not _initialized or not _tracer:
+        yield
+        return
+
+    with _tracer.start_as_current_span(span_name) as span:
+        for k, v in attributes.items():
+            span.set_attribute(k, str(v))
+        try:
+            yield
+        except Exception as e:
+            span.set_attribute("error", str(e))
+            span.set_status(trace.Status(trace.StatusCode.ERROR))
+            raise
+
+
+def get_metrics() -> dict:
+    """Get the current metrics snapshot."""
+    return metrics.snapshot()

@@ -28,6 +28,7 @@ import { type Sql } from "postgres";
 
 export type HealthStatus = "healthy" | "degraded" | "unhealthy";
 
+/** Type definition for DbHealthResponse. */
 export interface DbHealthResponse {
 	/** Aggregate health status. */
 	status: HealthStatus;
@@ -70,6 +71,7 @@ export interface DbHealthResponse {
 	};
 }
 
+/** Type definition for HealthCheckItem. */
 export interface HealthCheckItem {
 	/** Status for this specific check. */
 	status: HealthStatus;
@@ -81,6 +83,7 @@ export interface HealthCheckItem {
 	error?: string;
 }
 
+/** Type definition for PoolDetails. */
 export interface PoolDetails {
 	/** Number of active connections. */
 	activeConnections: number;
@@ -96,6 +99,7 @@ export interface PoolDetails {
 	utilizationPercent: number;
 }
 
+/** Type definition for ReplicationDetails. */
 export interface ReplicationDetails {
 	/** Whether this database is a replica. */
 	isReplica: boolean;
@@ -107,6 +111,7 @@ export interface ReplicationDetails {
 	replicaCount: number;
 }
 
+/** Type definition for DiskSpaceDetails. */
 export interface DiskSpaceDetails {
 	/** Human-readable database size (e.g. "256 MB"). */
 	databaseSize: string;
@@ -120,6 +125,7 @@ export interface DiskSpaceDetails {
 	tablesWithBloat: number;
 }
 
+/** Type definition for LongRunningQueryDetails. */
 export interface LongRunningQueryDetails {
 	/** Number of long-running queries detected. */
 	count: number;
@@ -138,6 +144,7 @@ export interface LongRunningQueryDetails {
 	}>;
 }
 
+/** Type definition for DeadlockDetails. */
 export interface DeadlockDetails {
 	/** Number of deadlocks in the last 24 hours. */
 	recentDeadlocks24h: number;
@@ -145,6 +152,7 @@ export interface DeadlockDetails {
 	lastDeadlockAt: string | null;
 }
 
+/** Type definition for MigrationDetails. */
 export interface MigrationDetails {
 	/** Number of applied migrations. */
 	appliedMigrations: number;

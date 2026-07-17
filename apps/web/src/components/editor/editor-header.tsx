@@ -36,6 +36,7 @@ import { ShortcutsDialog } from "@/actions/components/shortcuts-dialog";
 import Image from "next/image";
 import { cn } from "@/utils/ui";
 
+/** React component rendering EditorHeader. */
 export function EditorHeader() {
 	const activeProject = useEditor((e) => e.project.getActive());
 

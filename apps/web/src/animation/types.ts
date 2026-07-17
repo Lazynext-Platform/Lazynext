@@ -40,6 +40,7 @@ export const ANIMATION_PROPERTY_GROUPS = {
 	"transform.scale": ["transform.scaleX", "transform.scaleY"],
 } as const satisfies Record<string, ReadonlyArray<AnimationPropertyPath>>;
 
+/** Type definition for AnimationPropertyGroup. */
 export type AnimationPropertyGroup = keyof typeof ANIMATION_PROPERTY_GROUPS;
 
 /** Values animatable via discrete (hold-only) channels. */
@@ -149,7 +150,9 @@ export type Channel<TValue extends ParamValue = ParamValue> =
 			? DiscreteChannel
 			: never;
 
+/** Type definition for ScalarAnimationChannel. */
 export type ScalarAnimationChannel = Channel<number>;
+/** Type definition for DiscreteAnimationChannel. */
 export type DiscreteAnimationChannel = Channel<DiscreteValue>;
 /** Any animation channel (scalar or discrete). */
 export type AnimationChannel = Channel;
@@ -167,6 +170,7 @@ export interface ElementAnimations {
 /** A 4-tuple representing a normalised cubic bezier curve. */
 export type NormalizedCubicBezier = [number, number, number, number];
 
+/** Type definition for ScalarGraphChannelTarget. */
 export interface ScalarGraphChannelTarget {
 	/** Animation property path. */
 	propertyPath: AnimationPath;

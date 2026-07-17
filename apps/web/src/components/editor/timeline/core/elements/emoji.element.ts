@@ -12,6 +12,7 @@ import { EmojiProps, Size } from "../../types";
 
 const DEFAULT_EMOJI_SIZE = 150;
 
+/** Class representing EmojiElement. */
 export class EmojiElement extends ImageElement {
 	declare protected props: EmojiProps;
 

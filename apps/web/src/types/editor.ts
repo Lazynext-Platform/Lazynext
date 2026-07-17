@@ -59,6 +59,7 @@ export interface Project {
 	bypassEffects?: boolean;
 }
 
+/** Type definition for Clip. */
 export interface Clip {
 	/** Unique clip identifier. */
 	id: string;
@@ -125,6 +126,7 @@ export interface Clip {
 	params?: Record<string, any>;
 }
 
+/** Type definition for Keyframe. */
 export interface Keyframe {
 	/** Frame index of the keyframe. */
 	frame: number;
@@ -144,6 +146,7 @@ export interface Keyframe {
 	bezierCurve?: [number, number, number, number];
 }
 
+/** Type definition for Track. */
 export interface Track {
 	/** Unique track identifier. */
 	id: string;
@@ -159,6 +162,7 @@ export interface Track {
 	elements: TimelineElement[];
 }
 
+/** Type definition for TimelineElement. */
 export interface TimelineElement {
 	/** Unique element identifier. */
 	id: string;
@@ -170,6 +174,7 @@ export interface TimelineElement {
 	[key: string]: any;
 }
 
+/** Type definition for Asset. */
 export interface Asset {
 	/** Unique asset identifier. */
 	id: string;
@@ -192,6 +197,7 @@ export interface Asset {
 	audioBuffer?: any;
 }
 
+/** Type definition for AgentEvent. */
 export interface AgentEvent {
 	/** Event type discriminator. */
 	type: string;
@@ -202,6 +208,7 @@ export interface AgentEvent {
 	timestamp?: number;
 }
 
+/** Type definition for TimelineMarker. */
 export interface TimelineMarker {
 	/** Frame position of the marker. */
 	frame: number;
@@ -213,6 +220,7 @@ export interface TimelineMarker {
 	id?: string;
 }
 
+/** Type definition for ClipNote. */
 export interface ClipNote {
 	/** Unique note identifier. */
 	id: string;
@@ -222,6 +230,7 @@ export interface ClipNote {
 	text: string;
 }
 
+/** Type definition for ClipMarker. */
 export interface ClipMarker {
 	/** Frame offset from clip start. */
 	frameOffset: number;

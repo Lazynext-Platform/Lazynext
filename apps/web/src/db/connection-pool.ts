@@ -57,6 +57,7 @@ export interface PoolMetrics {
 	uptimeMs: number;
 }
 
+/** Type definition for CircuitBreakerState. */
 export interface CircuitBreakerState {
 	/** Current circuit state. */
 	state: "closed" | "open" | "half-open";
@@ -70,6 +71,7 @@ export interface CircuitBreakerState {
 	openedAt: number | null;
 }
 
+/** Type definition for RetryOptions. */
 export interface RetryOptions {
 	/** Maximum number of retry attempts. */
 	maxRetries: number;
@@ -81,6 +83,7 @@ export interface RetryOptions {
 	factor: number;
 }
 
+/** Type definition for HealthCheckResult. */
 export interface HealthCheckResult {
 	/** Whether the pool is healthy. */
 	healthy: boolean;
@@ -101,6 +104,7 @@ export interface HealthCheckResult {
 	timestamp: string;
 }
 
+/** Type definition for PoolManagerConfig. */
 export interface PoolManagerConfig {
 	/** Writer pool configuration. */
 	writer: PoolConfig;
@@ -607,4 +611,5 @@ function sleep(ms: number): Promise<void> {
 // ── Re-export for convenience ─────────────────────────────────────────────
 
 export { postgres };
+/** Documentation for this export. */
 export type { Sql, Options };

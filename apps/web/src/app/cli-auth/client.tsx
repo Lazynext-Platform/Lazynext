@@ -15,6 +15,7 @@ interface CliAuthClientProps {
 	user?: { name?: string; email?: string };
 }
 
+/** React component rendering CliAuthClient. */
 export function CliAuthClient({ token, user }: CliAuthClientProps) {
 	const [copied, setCopied] = useState(false);
 

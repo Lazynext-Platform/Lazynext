@@ -8,6 +8,7 @@
 const THUMBNAIL_MAX_WIDTH = 1280;
 const THUMBNAIL_MAX_HEIGHT = 720;
 
+/** Utility representing thumbnailSize. */
 export function thumbnailSize({
 	width,
 	height,
@@ -31,6 +32,7 @@ export function thumbnailSize({
 	return { width: targetWidth, height: targetHeight };
 }
 
+/** Utility representing renderThumbnailDataUrl. */
 export function renderThumbnailDataUrl({
 	width,
 	height,

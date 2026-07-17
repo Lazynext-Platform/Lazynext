@@ -3,6 +3,7 @@ import type { EffectPass } from "@/effects/types";
 import type { RetimeConfig } from "@/timeline";
 import { BaseNode } from "./base-node";
 
+/** Type definition for BlurBackgroundNodeParams. */
 export type BlurBackgroundNodeParams = {
 	/** Source media identifier. */
 	mediaId: string;
@@ -26,6 +27,7 @@ export type BlurBackgroundNodeParams = {
 	blurIntensity: number;
 };
 
+/** Type definition for BackdropSource. */
 export type BackdropSource = {
 	/** Image source used as the backdrop. */
 	source: CanvasImageSource;
@@ -35,6 +37,7 @@ export type BackdropSource = {
 	height: number;
 };
 
+/** Type definition for ResolvedBlurBackgroundNodeState. */
 export interface ResolvedBlurBackgroundNodeState {
 	/** Resolved backdrop source. */
 	backdropSource: BackdropSource;
@@ -42,6 +45,7 @@ export interface ResolvedBlurBackgroundNodeState {
 	passes: EffectPass[];
 }
 
+/** Class representing BlurBackgroundNode. */
 export class BlurBackgroundNode extends BaseNode<
 	BlurBackgroundNodeParams,
 	ResolvedBlurBackgroundNodeState

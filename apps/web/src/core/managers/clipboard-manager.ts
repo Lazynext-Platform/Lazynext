@@ -14,6 +14,7 @@ import {
 } from "@/clipboard";
 import type { MediaTime } from "@/wasm";
 
+/** Class representing ClipboardManager. */
 export class ClipboardManager {
 	private entry: ClipboardEntry | null = null;
 	private listeners = new Set<() => void>();

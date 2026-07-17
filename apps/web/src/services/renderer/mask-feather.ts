@@ -1,6 +1,7 @@
 /** @module Mask feather effect using GPU renderer for soft-edged mask boundaries */
 import { gpuRenderer } from "./gpu-renderer";
 
+/** Utility representing applyMaskFeather. */
 export function applyMaskFeather({
 	maskCanvas,
 	width,

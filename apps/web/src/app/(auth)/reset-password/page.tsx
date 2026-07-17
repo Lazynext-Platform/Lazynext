@@ -154,6 +154,7 @@ function ResetPasswordForm() {
 	);
 }
 
+/** React component rendering ResetPasswordPage. */
 export default function ResetPasswordPage() {
 	return (
 		<Suspense

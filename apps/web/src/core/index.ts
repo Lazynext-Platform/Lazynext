@@ -17,6 +17,7 @@ import { registerDefaultEffects } from "@/effects";
 import { registerDefaultMasks } from "@/masks";
 import { registerTranscriptionDiagnostics } from "@/transcription/diagnostics";
 
+/** Class representing EditorCore. */
 export class EditorCore {
 	private static instance: EditorCore | null = null;
 	public readonly timeline: TimelineManager;

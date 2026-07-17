@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import { ThemeToggle } from "../theme-toggle";
 
+/** React component rendering MarketingNavbar. */
 export function MarketingNavbar() {
 	const [mobileOpen, setMobileOpen] = useState(false);
 

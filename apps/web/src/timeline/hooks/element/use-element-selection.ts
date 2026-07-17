@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { useEditor } from "@/editor/use-editor";
 import type { ElementRef } from "@/timeline/types";
 
+/** Custom hook providing useElementSelection functionality. */
 export function useElementSelection() {
 	const editor = useEditor();
 	const selectedElements = useEditor((e) => e.selection.getSelectedElements());

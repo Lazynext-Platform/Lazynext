@@ -8,6 +8,7 @@
 import { useState, useEffect } from "react";
 import { Volume2, VolumeX, Sliders } from "lucide-react";
 
+/** React component rendering AudioMixer. */
 export function AudioMixer({
 	projectData,
 	setProjectData,

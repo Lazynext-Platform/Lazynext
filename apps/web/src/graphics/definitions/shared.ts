@@ -2,8 +2,10 @@
 
 import type { ParamDefinition } from "@/params";
 
+/** Type definition for GraphicStrokeAlign. */
 export type GraphicStrokeAlign = "inside" | "center" | "outside";
 
+/** Utility representing STROKE_ALIGN_PARAM. */
 export const STROKE_ALIGN_PARAM: ParamDefinition<"strokeAlign"> = {
 	key: "strokeAlign",
 	label: "Stroke align",

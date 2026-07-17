@@ -242,6 +242,7 @@ function getClampedZoom({ zoom }: { zoom: number }): number {
 	});
 }
 
+/** React component rendering PreviewViewportProvider. */
 export function PreviewViewportProvider({
 	children,
 	value,
@@ -253,6 +254,7 @@ export function PreviewViewportProvider({
 	);
 }
 
+/** Custom hook providing usePreviewViewportState functionality. */
 export function usePreviewViewportState({
 	canvasHeight,
 	canvasWidth,
@@ -607,6 +609,7 @@ export function usePreviewViewportState({
 	);
 }
 
+/** Custom hook providing usePreviewViewport functionality. */
 export function usePreviewViewport() {
 	const context = useContext(PreviewViewportContext);
 	if (!context) {

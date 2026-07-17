@@ -10,6 +10,7 @@ import { TrackElement } from "./base.element";
 import { ElementVisitor } from "../visitor/element-visitor";
 import { TIMELINE_ELEMENT_TYPE } from "../../utils/constants";
 
+/** Class representing RectElement. */
 export class RectElement extends TrackElement {
 	declare protected props: RectProps;
 

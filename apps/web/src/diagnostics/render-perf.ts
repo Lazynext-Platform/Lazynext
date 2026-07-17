@@ -41,10 +41,12 @@ declare global {
 	}
 }
 
+/** Utility representing isRenderPerfEnabled. */
 export function isRenderPerfEnabled(): boolean {
 	return typeof window !== "undefined" && window.__renderPerf === true;
 }
 
+/** Utility representing recordSpan. */
 export function recordSpan({
 	name,
 	durationMs,
@@ -77,6 +79,7 @@ export async function measureSpanAsync<T>({
 	}
 }
 
+/** Utility representing measureSpanSync. */
 export function measureSpanSync<T>({
 	name,
 	fn,
@@ -93,6 +96,7 @@ export function measureSpanSync<T>({
 	}
 }
 
+/** Utility representing incrementCounter. */
 export function incrementCounter({
 	name,
 	by = 1,

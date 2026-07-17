@@ -9,6 +9,7 @@
 
 import { useReportWebVitals } from "next/web-vitals";
 
+/** React component rendering WebVitals. */
 export function WebVitals() {
 	useReportWebVitals((metric) => {
 		if (process.env.NODE_ENV !== "production") return;

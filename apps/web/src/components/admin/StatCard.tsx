@@ -13,6 +13,7 @@ interface StatCardProps {
 	icon?: React.ReactNode;
 }
 
+/** React component rendering StatCard. */
 export function StatCard({ title, value, trend, icon }: StatCardProps) {
 	return (
 		<div className="p-6 rounded-xl bg-[--bg-card] border border-[--border-primary] shadow-sm flex flex-col gap-2">

@@ -11,6 +11,7 @@ import {
 	type TransformHandleDeps,
 } from "@/preview/controllers/transform-handle-controller";
 
+/** Custom hook providing useTransformHandles functionality. */
 export function useTransformHandles({
 	onSnapLinesChange,
 }: {

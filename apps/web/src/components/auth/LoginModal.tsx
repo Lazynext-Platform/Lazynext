@@ -19,6 +19,7 @@ import { SocialAuthButtons } from "./SocialAuthButtons";
 import { CaptchaWidget } from "./CaptchaWidget";
 import { verifyCaptchaToken } from "./captcha-verify";
 
+/** React component rendering LoginModal. */
 export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
 	const [isLogin, setIsLogin] = useState(true);
 	const [loginMode, setLoginMode] = useState<"password" | "magicLink">("password");

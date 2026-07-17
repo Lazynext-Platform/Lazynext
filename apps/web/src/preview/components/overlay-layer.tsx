@@ -63,6 +63,7 @@ function getPositionedMountStyle({
 	} as const;
 }
 
+/** React component rendering PreviewOverlayLayer. */
 export function PreviewOverlayLayer({
 	instances,
 	plane,

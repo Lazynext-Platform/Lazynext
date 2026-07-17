@@ -23,6 +23,7 @@ interface TimelineTickProps {
 	showLabel: boolean;
 }
 
+/** React component rendering TimelineTick. */
 export function TimelineTick({
 	time,
 	timeInSeconds,

@@ -61,6 +61,7 @@ function buildCollapsibleMarkdownSection({
 	return `<details>\n<summary>${title}</summary>\n\n${bulletLines}\n\n</details>`;
 }
 
+/** React component rendering CopyMarkdownButton. */
 export function CopyMarkdownButton({
 	description,
 	changes,

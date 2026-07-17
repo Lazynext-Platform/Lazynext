@@ -2,6 +2,7 @@
 import { DefinitionRegistry } from "@/params/registry";
 import type { GraphicDefinition } from "./types";
 
+/** Class representing GraphicsRegistry. */
 export class GraphicsRegistry extends DefinitionRegistry<
 	string,
 	GraphicDefinition
@@ -11,4 +12,5 @@ export class GraphicsRegistry extends DefinitionRegistry<
 	}
 }
 
+/** Utility representing graphicsRegistry. */
 export const graphicsRegistry = new GraphicsRegistry();

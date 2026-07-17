@@ -171,7 +171,7 @@ bun run dev
 | `MODAL_API_KEY` | No | — | Modal GPU compute (SD pipeline video generation, ML inference) |
 | `NEXT_PUBLIC_*_URL` | No | localhost | Microservice URLs |
 | `UPSTASH_REDIS_URL` | No | — | Rate limiting (required in prod) |
-| `STRIPE_SECRET_KEY` | No | — | Payments |
+| `DODO_API_KEY` | No | — | Payments |
 
 ## Scope & Constraints
 

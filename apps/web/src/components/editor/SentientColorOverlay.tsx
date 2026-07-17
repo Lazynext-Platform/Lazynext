@@ -12,6 +12,7 @@ interface SentientColorOverlayProps {
 	isActive: boolean;
 }
 
+/** React component rendering SentientColorOverlay. */
 export function SentientColorOverlay({ isActive }: SentientColorOverlayProps) {
 	if (!isActive) return null;
 

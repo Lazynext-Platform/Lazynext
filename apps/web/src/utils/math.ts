@@ -12,6 +12,7 @@ export function clamp({
 	return Math.max(min, Math.min(max, value));
 }
 
+/** Utility representing clampRound. */
 export function clampRound({
 	value,
 	min,
@@ -24,6 +25,7 @@ export function clampRound({
 	return Math.round(clamp({ value, min, max }));
 }
 
+/** Utility representing getFractionDigitsForStep. */
 export function getFractionDigitsForStep({ step }: { step: number }): number {
 	const normalizedStep = step.toString().toLowerCase();
 	if (normalizedStep.includes("e-")) {
@@ -33,6 +35,7 @@ export function getFractionDigitsForStep({ step }: { step: number }): number {
 	return fractionalPart.length;
 }
 
+/** Utility representing snapToStep. */
 export function snapToStep({
 	value,
 	step,
@@ -45,6 +48,7 @@ export function snapToStep({
 	return Number(snappedValue.toFixed(getFractionDigitsForStep({ step })));
 }
 
+/** Utility representing isNearlyEqual. */
 export function isNearlyEqual({
 	leftValue,
 	rightValue,
@@ -57,6 +61,7 @@ export function isNearlyEqual({
 	return Math.abs(leftValue - rightValue) <= epsilon;
 }
 
+/** Utility representing formatNumberForDisplay. */
 export function formatNumberForDisplay({
 	value,
 	fractionDigits,

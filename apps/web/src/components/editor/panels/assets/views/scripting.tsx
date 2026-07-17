@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
+/** React component rendering ScriptingView. */
 export function ScriptingView() {
 	const [script, setScript] = useState(
 		"console.log('Hello from Lazynext Plugin!');",

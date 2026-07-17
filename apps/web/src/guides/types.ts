@@ -1,6 +1,7 @@
 /** @module Guide type definitions for canvas alignment guides and overlays */
 import type { ReactNode } from "react";
 
+/** Type definition for GridConfig. */
 export interface GridConfig {
 	/** Number of grid rows. */
 	rows: number;
@@ -8,6 +9,7 @@ export interface GridConfig {
 	cols: number;
 }
 
+/** Type definition for GuideRenderProps. */
 export interface GuideRenderProps {
 	/** Canvas width in pixels. */
 	width: number;
@@ -15,6 +17,7 @@ export interface GuideRenderProps {
 	height: number;
 }
 
+/** Type definition for GuideDefinition. */
 export interface GuideDefinition {
 	/** Unique guide identifier. */
 	id: string;

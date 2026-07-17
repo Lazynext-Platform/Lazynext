@@ -60,6 +60,7 @@ function MicrosoftIcon() {
 	);
 }
 
+/** React component rendering SocialAuthButtons. */
 export function SocialAuthButtons({
 	mode,
 	redirectTo = "/dashboard",

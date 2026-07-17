@@ -89,6 +89,7 @@ interface MigratedAnimationChannel {
 	channels: Record<string, ProjectRecord>;
 }
 
+/** Utility representing transformProjectV21ToV22. */
 export function transformProjectV21ToV22({
 	project,
 }: {

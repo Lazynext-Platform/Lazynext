@@ -3,6 +3,7 @@
 import type { BlendMode } from "@/primitives/blend-mode";
 import type { EffectPass } from "@/effects/types";
 
+/** Type definition for FrameDescriptor. */
 export type FrameDescriptor = {
 	/** Frame width in pixels. */
 	width: number;
@@ -17,6 +18,7 @@ export type FrameDescriptor = {
 	items: FrameItemDescriptor[];
 };
 
+/** Type definition for FrameItemDescriptor. */
 export type FrameItemDescriptor =
 	| {
 			type: "layer";
@@ -32,6 +34,7 @@ export type FrameItemDescriptor =
 			effectPassGroups: EffectPass[][];
 	  };
 
+/** Type definition for QuadTransformDescriptor. */
 export type QuadTransformDescriptor = {
 	/** Horizontal center of the quad. */
 	centerX: number;
@@ -49,6 +52,7 @@ export type QuadTransformDescriptor = {
 	flipY: boolean;
 };
 
+/** Type definition for LayerMaskDescriptor. */
 export type LayerMaskDescriptor = {
 	/** Texture ID of the mask. */
 	textureId: string;
@@ -58,6 +62,7 @@ export type LayerMaskDescriptor = {
 	inverted: boolean;
 };
 
+/** Type definition for TextureCanvasDrawFn. */
 export type TextureCanvasDrawFn = (
 	ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
 ) => void;
@@ -101,6 +106,7 @@ export type RenderedTextureDescriptor = {
 	draw: TextureCanvasDrawFn;
 };
 
+/** Type definition for TextureUploadDescriptor. */
 export type TextureUploadDescriptor =
 	| ExternalTextureDescriptor
 	| RenderedTextureDescriptor;

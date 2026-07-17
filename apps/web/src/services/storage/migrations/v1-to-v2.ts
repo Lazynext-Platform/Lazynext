@@ -22,6 +22,7 @@ interface LegacyTimelineData {
 	lastModified: string;
 }
 
+/** Class representing V1toV2Migration. */
 export class V1toV2Migration extends StorageMigration {
 	from = 1;
 	to = 2;

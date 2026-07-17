@@ -22,6 +22,7 @@ import {
 	ZERO_MEDIA_TIME,
 } from "@/wasm";
 
+/** Class representing PasteCommand. */
 export class PasteCommand extends Command {
 	private savedState: SceneTracks | null = null;
 	private pastedElements: { trackId: string; elementId: string }[] = [];

@@ -86,6 +86,7 @@ interface TimelineBookmarksRowProps {
 	handleRulerMouseDown: (event: React.MouseEvent) => void;
 }
 
+/** React component rendering TimelineBookmarksRow. */
 export function TimelineBookmarksRow({
 	zoomLevel,
 	dynamicTimelineWidth,

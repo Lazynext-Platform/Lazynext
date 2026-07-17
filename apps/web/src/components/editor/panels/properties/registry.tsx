@@ -63,11 +63,13 @@ const TEXT_PARAM_KEYS = [
 	"background.offsetY",
 ] as const;
 
+/** Type definition for TabContentProps. */
 export type TabContentProps = {
 	/** ID of the track containing the selected element. */
 	trackId: string;
 };
 
+/** Type definition for PropertiesTabDef. */
 export type PropertiesTabDef = {
 	/** Unique tab identifier. */
 	id: string;
@@ -79,6 +81,7 @@ export type PropertiesTabDef = {
 	content: (props: TabContentProps) => ReactNode;
 };
 
+/** Type definition for ElementPropertiesConfig. */
 export type ElementPropertiesConfig = {
 	/** ID of the default selected tab. */
 	defaultTab: string;
@@ -339,6 +342,7 @@ function getEffectConfig({
 	};
 }
 
+/** Utility representing getPropertiesConfig. */
 export function getPropertiesConfig({
 	element,
 	mediaAssets,

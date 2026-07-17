@@ -82,10 +82,12 @@ function subscribe(listener: () => void): () => void {
 	};
 }
 
+/** Custom hook providing useCustomPresets functionality. */
 export function useCustomPresets(): EasingPreset[] {
 	return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
+/** Utility representing savePreset. */
 export function savePreset({ value }: { value: NormalizedCubicBezier }): void {
 	const current = getSnapshot();
 	writeToStorage({
@@ -102,6 +104,7 @@ export function savePreset({ value }: { value: NormalizedCubicBezier }): void {
 	notify();
 }
 
+/** Utility representing removePreset. */
 export function removePreset({ id }: { id: string }): void {
 	writeToStorage({
 		presets: getSnapshot().filter((preset) => preset.id !== id),

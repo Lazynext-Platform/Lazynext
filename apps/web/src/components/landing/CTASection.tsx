@@ -8,6 +8,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+/** React component rendering CTASection. */
 export function CTASection() {
 	return (
 		<section className="relative overflow-hidden bg-[var(--bg-main)] dark:bg-background px-4 py-32 transition-colors duration-300">

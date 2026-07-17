@@ -8,6 +8,7 @@ interface UseWebRTCOptions {
 	projectId: string;
 }
 
+/** Custom hook providing useWebRTC functionality. */
 export function useWebRTC({ socket, projectId: _projectId }: UseWebRTCOptions) {
 	const [localStream, setLocalStream] = useState<MediaStream | null>(null);
 	const [peers, setPeers] = useState<{ [id: string]: MediaStream }>({});

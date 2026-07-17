@@ -18,6 +18,7 @@ import { SocialAuthButtons } from "./SocialAuthButtons";
 import { CaptchaWidget } from "./CaptchaWidget";
 import { verifyCaptchaToken } from "./captcha-verify";
 
+/** React component rendering SignInForm. */
 export function SignInForm() {
 	const router = useRouter();
 	const searchParams = useSearchParams();

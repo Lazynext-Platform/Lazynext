@@ -16,6 +16,7 @@ import { ArrowElement } from "../elements/arrow.element";
 import { LineElement } from "../elements/line.element";
 import { EffectElement } from "../elements/effect.element";
 
+/** Class representing ElementSerializer. */
 export class ElementSerializer implements ElementVisitor<ElementJSON> {
 	serializeElement(element: TrackElement): ElementJSON {
 		const props = structuredClone(element.getProps());

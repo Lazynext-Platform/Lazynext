@@ -10,6 +10,7 @@ import { useEditor } from "@/editor/use-editor";
 import { buildEffectElement } from "@/timeline/element-utils";
 import type { EffectDefinition } from "@/effects/types";
 
+/** React component rendering EffectsView. */
 export function EffectsView() {
 	const effects = effectsRegistry.getAll();
 

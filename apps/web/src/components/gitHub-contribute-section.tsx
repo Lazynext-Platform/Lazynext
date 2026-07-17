@@ -11,6 +11,7 @@ import { SOCIAL_LINKS } from "@/site/social";
 import { GithubIcon, Link04Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
+/** React component rendering GitHubContributeSection. */
 export function GitHubContributeSection({
 	title,
 	description,

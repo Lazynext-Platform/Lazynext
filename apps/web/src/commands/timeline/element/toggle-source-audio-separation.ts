@@ -15,6 +15,7 @@ import type {
 } from "@/timeline/types";
 import { generateUUID } from "@/utils/id";
 
+/** Class representing ToggleSourceAudioSeparationCommand. */
 export class ToggleSourceAudioSeparationCommand extends Command {
 	private savedState: SceneTracks | null = null;
 

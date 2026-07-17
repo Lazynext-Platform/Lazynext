@@ -53,6 +53,7 @@ export async function proxy(request: NextRequest) {
 	return NextResponse.next();
 }
 
+/** Utility representing config. */
 export const config = {
 	matcher: [
 		"/dashboard/:path*",

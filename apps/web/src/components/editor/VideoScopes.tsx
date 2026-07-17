@@ -17,6 +17,7 @@ interface VideoScopesProps {
 	frame: number;
 }
 
+/** React component rendering VideoScopes. */
 export function VideoScopes({ isPlaying, frame }: VideoScopesProps) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const [scopeType, setScopeType] = useState<ScopeType>("parade");

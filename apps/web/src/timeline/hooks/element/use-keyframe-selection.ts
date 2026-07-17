@@ -6,6 +6,7 @@ import { useCallback, useSyncExternalStore } from "react";
 import { useEditor } from "@/editor/use-editor";
 import type { SelectedKeyframeRef } from "@/animation/types";
 
+/** Utility representing getSelectedKeyframeId. */
 export function getSelectedKeyframeId({
 	keyframe,
 }: {
@@ -26,6 +27,7 @@ function mergeUniqueKeyframes({
 	return [...keyframesById.values()];
 }
 
+/** Custom hook providing useKeyframeSelection functionality. */
 export function useKeyframeSelection() {
 	const editor = useEditor();
 	const selectedKeyframes = useSyncExternalStore(

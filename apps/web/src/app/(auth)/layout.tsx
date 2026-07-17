@@ -6,11 +6,13 @@
 
 import type { Metadata } from "next";
 
+/** Utility representing metadata. */
 export const metadata: Metadata = {
 	title: "Authentication — Lazynext",
 	description: "Sign in or create an account to start editing videos with AI.",
 };
 
+/** React component rendering AuthLayout. */
 export default function AuthLayout({
 	children,
 }: {

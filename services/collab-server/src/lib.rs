@@ -23,6 +23,7 @@ use tracing::{error, info};
 mod db;
 pub use db::DbStore;
 
+#[allow(missing_docs)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ClientMessage {
@@ -51,6 +52,7 @@ pub enum ClientMessage {
     },
 }
 
+#[allow(missing_docs)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ServerMessage {

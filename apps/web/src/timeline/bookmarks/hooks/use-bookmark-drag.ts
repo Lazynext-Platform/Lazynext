@@ -29,6 +29,7 @@ import { getAnimationKeyframeSnapPointsForTimeline } from "@/timeline/animation-
 import type { Bookmark } from "@/timeline";
 import { roundFrameTime, type MediaTime, ZERO_MEDIA_TIME } from "@/wasm";
 
+/** Type definition for BookmarkDragState. */
 export interface BookmarkDragState {
 	/** Whether a bookmark drag is in progress. */
 	isDragging: boolean;
@@ -58,6 +59,7 @@ interface UseBookmarkDragProps {
 	onSnapPointChange?: (snapPoint: SnapPoint | null) => void;
 }
 
+/** Custom hook providing useBookmarkDrag functionality. */
 export function useBookmarkDrag({
 	zoomLevel,
 	scrollRef,

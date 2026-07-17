@@ -38,7 +38,14 @@ pub enum WsMessage {
     /// A CRDT operation to apply and broadcast to the room.
     CrdtOperation(CrdtOperation),
     /// A peer's cursor position update (x, y in normalized coordinates).
-    CursorMove { peer_id: String, x: f32, y: f32 },
+    CursorMove { 
+        /// The unique identifier of the peer moving the cursor.
+        peer_id: String, 
+        /// The normalized x-coordinate of the cursor.
+        x: f32, 
+        /// The normalized y-coordinate of the cursor.
+        y: f32 
+    },
 }
 
 /// Shared WebSocket state holding the Redis client for pub/sub messaging.

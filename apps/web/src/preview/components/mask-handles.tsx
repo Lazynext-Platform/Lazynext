@@ -20,6 +20,7 @@ import {
 const CUSTOM_MASK_ANCHOR_SIZE = 7;
 import { Rotate01Icon, FeatherIcon } from "@hugeicons/core-free-icons";
 
+/** React component rendering MaskHandles. */
 export function MaskHandles({
 	onSnapLinesChange,
 }: {

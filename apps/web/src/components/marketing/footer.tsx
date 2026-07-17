@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Globe, Code, MessageCircle } from "lucide-react";
 import Image from "next/image";
 
+/** React component rendering MarketingFooter. */
 export function MarketingFooter() {
 	return (
 		<footer className="border-t border-border bg-background py-12 mt-24">

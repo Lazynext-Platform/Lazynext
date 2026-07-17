@@ -8,6 +8,7 @@ import {
 	getDefaultInsertIndexForTrack,
 } from "@/timeline/placement";
 
+/** Class representing AddTrackCommand. */
 export class AddTrackCommand extends Command {
 	private trackId: string;
 	private savedState: SceneTracks | null = null;

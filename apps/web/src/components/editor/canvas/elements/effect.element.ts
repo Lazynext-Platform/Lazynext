@@ -2,6 +2,7 @@
 import type { CanvasElementHandler } from "../types";
 import { ELEMENT_TYPES } from "../helpers/constants";
 
+/** Utility representing EffectElement. */
 export const EffectElement: CanvasElementHandler = {
 	name: ELEMENT_TYPES.EFFECT,
 

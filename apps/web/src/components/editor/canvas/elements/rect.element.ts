@@ -8,6 +8,7 @@ import {
 } from "../helpers/canvas.util";
 import { ELEMENT_TYPES } from "../helpers/constants";
 
+/** Utility representing RectElement. */
 export const RectElement: CanvasElementHandler = {
 	name: ELEMENT_TYPES.RECT,
 

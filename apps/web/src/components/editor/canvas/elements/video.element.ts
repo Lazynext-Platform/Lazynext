@@ -9,6 +9,7 @@ import {
 } from "../helpers/canvas.util";
 import { ELEMENT_TYPES } from "../helpers/constants";
 
+/** Utility representing VideoElement. */
 export const VideoElement: CanvasElementHandler = {
 	name: ELEMENT_TYPES.VIDEO,
 

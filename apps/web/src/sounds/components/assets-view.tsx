@@ -36,6 +36,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
+/** React component rendering SoundsView. */
 export function SoundsView() {
 	return (
 		<div className="flex h-full flex-col">

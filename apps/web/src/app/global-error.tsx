@@ -13,6 +13,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 
+/** React component rendering GlobalError. */
 export default function GlobalError({
 	error,
 	reset,

@@ -27,6 +27,7 @@ import {
 	type WrappedAudioBuffer,
 } from "mediabunny";
 
+/** Class representing AudioManager. */
 export class AudioManager {
 	private audioContext: AudioContext | null = null;
 	private masterGain: GainNode | null = null;

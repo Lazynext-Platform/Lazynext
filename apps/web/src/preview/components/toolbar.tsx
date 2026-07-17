@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/tooltip";
 import type { MediaTime } from "@/wasm";
 
+/** React component rendering PreviewToolbar. */
 export function PreviewToolbar({
 	onToggleFullscreen,
 }: {

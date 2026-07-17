@@ -17,6 +17,7 @@ import {
 import type { TimelineElement } from "@/timeline";
 import type { MediaTime } from "@/wasm";
 
+/** Type definition for KeyframedParamPropertyResult. */
 export interface KeyframedParamPropertyResult {
 	/** Whether the property has any keyframes. */
 	hasAnimatedKeyframes: boolean;
@@ -32,6 +33,7 @@ export interface KeyframedParamPropertyResult {
 	toggleKeyframe: () => void;
 }
 
+/** Custom hook providing useKeyframedParamProperty functionality. */
 export function useKeyframedParamProperty({
 	param,
 	trackId,

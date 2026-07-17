@@ -286,6 +286,7 @@ function computeFreeformParamUpdate({
 	};
 }
 
+/** Utility representing freeformMaskDefinition. */
 export const freeformMaskDefinition: MaskDefinition<"freeform"> = {
 	type: "freeform",
 	name: "Pen tool",
@@ -500,6 +501,7 @@ export const freeformMaskDefinition: MaskDefinition<"freeform"> = {
 	},
 };
 
+/** Utility representing appendPointToFreeformPathMask. */
 export function appendPointToFreeformPathMask({
 	params,
 	canvasPoint,
@@ -571,6 +573,7 @@ export function appendPointToFreeformPathMask({
 	};
 }
 
+/** Utility representing insertPointOnFreeformSegment. */
 export function insertPointOnFreeformSegment({
 	params,
 	segmentIndex,

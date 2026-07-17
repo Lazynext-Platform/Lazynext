@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { useSoundsStore } from "@/sounds/sounds-store";
 
+/** Custom hook providing useSoundSearch functionality. */
 export function useSoundSearch({
 	query,
 	commercialOnly,

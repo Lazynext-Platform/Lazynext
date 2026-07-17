@@ -47,6 +47,7 @@ interface SectionProps {
 	showBottomBorder?: boolean;
 }
 
+/** React component rendering Section. */
 export function Section({
 	children,
 	collapsible = false,
@@ -112,6 +113,7 @@ interface SectionHeaderProps {
 	className?: string;
 }
 
+/** React component rendering SectionHeader. */
 export function SectionHeader({
 	children,
 	trailing,
@@ -182,6 +184,7 @@ export function SectionHeader({
 	);
 }
 
+/** React component rendering SectionTitle. */
 export function SectionTitle({
 	children,
 	className,
@@ -216,6 +219,7 @@ export function SectionTitle({
 	return <span className={titleClass}>{children}</span>;
 }
 
+/** React component rendering SectionFields. */
 export function SectionFields({
 	children,
 	className,
@@ -228,6 +232,7 @@ export function SectionFields({
 	);
 }
 
+/** React component rendering SectionField. */
 export function SectionField({
 	label,
 	beforeLabel,
@@ -250,6 +255,7 @@ export function SectionField({
 	);
 }
 
+/** React component rendering SectionContent. */
 export function SectionContent({
 	children,
 	className,

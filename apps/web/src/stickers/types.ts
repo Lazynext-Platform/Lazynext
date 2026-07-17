@@ -5,8 +5,10 @@
 
 import type { STICKER_CATEGORIES } from "@/stickers/categories";
 
+/** Type definition for StickerCategory. */
 export type StickerCategory = keyof typeof STICKER_CATEGORIES;
 
+/** Type definition for StickerItem. */
 export interface StickerItem {
 	/** Unique identifier for the sticker. */
 	id: string;
@@ -20,6 +22,7 @@ export interface StickerItem {
 	metadata: Record<string, unknown>;
 }
 
+/** Type definition for StickerSearchResult. */
 export interface StickerSearchResult {
 	/** Matching sticker items for the query. */
 	items: StickerItem[];
@@ -29,6 +32,7 @@ export interface StickerSearchResult {
 	hasMore: boolean;
 }
 
+/** Type definition for StickerBrowseSection. */
 export interface StickerBrowseSection {
 	/** Unique identifier for the browse section. */
 	id: string;
@@ -51,16 +55,19 @@ export interface StickerBrowseSection {
 	};
 }
 
+/** Type definition for StickerBrowseResult. */
 export interface StickerBrowseResult {
 	/** Browse sections returned by the provider. */
 	sections: StickerBrowseSection[];
 }
 
+/** Type definition for StickerProviderSearchOptions. */
 export interface StickerProviderSearchOptions {
 	/** Maximum number of results to return. */
 	limit?: number;
 }
 
+/** Type definition for StickerProviderBrowseOptions. */
 export interface StickerProviderBrowseOptions {
 	/** Page number to fetch. */
 	page?: number;
@@ -68,6 +75,7 @@ export interface StickerProviderBrowseOptions {
 	limit?: number;
 }
 
+/** Type definition for StickerResolveOptions. */
 export interface StickerResolveOptions {
 	/** Desired width of the resolved sticker. */
 	width?: number;
@@ -75,6 +83,7 @@ export interface StickerResolveOptions {
 	height?: number;
 }
 
+/** Type definition for StickerProvider. */
 export interface StickerProvider {
 	/** Unique identifier for the provider. */
 	id: string;

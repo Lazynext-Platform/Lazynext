@@ -5,6 +5,7 @@ import { isMaskableElement, updateElementInSceneTracks } from "@/timeline";
 import type { Mask } from "@/masks/types";
 import type { SceneTracks, MaskableElement } from "@/timeline";
 
+/** Utility representing toggleMaskInvertedOnElement. */
 export function toggleMaskInvertedOnElement({
 	element,
 	maskId,
@@ -27,6 +28,7 @@ export function toggleMaskInvertedOnElement({
 	return { ...element, masks: updatedMasks };
 }
 
+/** Class representing ToggleMaskInvertedCommand. */
 export class ToggleMaskInvertedCommand extends Command {
 	private savedState: SceneTracks | null = null;
 	private readonly trackId: string;

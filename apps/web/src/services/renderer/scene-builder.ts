@@ -215,6 +215,7 @@ function buildBlurBackgroundNodes({
 	return nodes;
 }
 
+/** Type definition for BuildSceneParams. */
 export type BuildSceneParams = {
 	/** Canvas dimensions. */
 	canvasSize: TCanvasSize;
@@ -230,6 +231,7 @@ export type BuildSceneParams = {
 	isPreview?: boolean;
 };
 
+/** Utility representing buildScene. */
 export function buildScene({
 	canvasSize,
 	tracks,

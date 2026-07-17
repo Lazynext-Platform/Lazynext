@@ -9,6 +9,7 @@
 
 import { CAPTION_STYLE } from "./constants";
 
+/** Type definition for CaptionGeometry. */
 export interface CaptionGeometry {
 	/**
 	 * Stroke line width for caption text.

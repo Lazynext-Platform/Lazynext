@@ -12,6 +12,7 @@ interface DiagnosticRegistration extends DiagnosticDefinition {
 	check: (editor: EditorCore) => boolean;
 }
 
+/** Class representing DiagnosticsManager. */
 export class DiagnosticsManager {
 	private readonly registrations: DiagnosticRegistration[] = [];
 	private readonly listeners = new Set<() => void>();

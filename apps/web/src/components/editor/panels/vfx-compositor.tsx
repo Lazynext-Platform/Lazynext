@@ -7,6 +7,7 @@
 
 import { Crosshair, Sparkles, Film } from "lucide-react";
 
+/** React component rendering VFXCompositor. */
 export function VFXCompositor({
 	updateSelectedClip: _updateSelectedClip,
 	selectedClip,

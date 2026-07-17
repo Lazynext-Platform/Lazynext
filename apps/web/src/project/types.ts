@@ -11,6 +11,7 @@ import type { FrameRate } from "lazynext-wasm";
 import type { TScene } from "@/timeline/types";
 import type { MediaTime } from "@/wasm";
 
+/** Type definition for TBackground. */
 export type TBackground =
 	| {
 			type: "color";
@@ -21,6 +22,7 @@ export type TBackground =
 			blurIntensity: number;
 	  };
 
+/** Type definition for TCanvasSize. */
 export interface TCanvasSize {
 	/** Width in pixels. */
 	width: number;
@@ -28,6 +30,7 @@ export interface TCanvasSize {
 	height: number;
 }
 
+/** Type definition for TProjectMetadata. */
 export interface TProjectMetadata {
 	/** Unique project identifier. */
 	id: string;
@@ -43,6 +46,7 @@ export interface TProjectMetadata {
 	updatedAt: Date;
 }
 
+/** Type definition for TProjectSettings. */
 export interface TProjectSettings {
 	/** Frames per second. */
 	fps: FrameRate;
@@ -58,6 +62,7 @@ export interface TProjectSettings {
 	background: TBackground;
 }
 
+/** Type definition for TTimelineViewState. */
 export interface TTimelineViewState {
 	/** Current zoom level. */
 	zoomLevel: number;
@@ -67,6 +72,7 @@ export interface TTimelineViewState {
 	playheadTime: MediaTime;
 }
 
+/** Type definition for TProject. */
 export interface TProject {
 	/** Project metadata. */
 	metadata: TProjectMetadata;
@@ -82,6 +88,9 @@ export interface TProject {
 	timelineViewState?: TTimelineViewState;
 }
 
+/** Type definition for TProjectSortKey. */
 export type TProjectSortKey = "createdAt" | "updatedAt" | "name" | "duration";
+/** Type definition for TSortOrder. */
 export type TSortOrder = "asc" | "desc";
+/** Type definition for TProjectSortOption. */
 export type TProjectSortOption = `${TProjectSortKey}-${TSortOrder}`;

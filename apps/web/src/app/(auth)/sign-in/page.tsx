@@ -13,6 +13,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth/server";
 import { Suspense } from "react";
 
+/** Utility representing metadata. */
 export const metadata = generateMetadata({
 	title: "Sign In",
 	description:

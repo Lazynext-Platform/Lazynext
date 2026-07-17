@@ -15,5 +15,7 @@ export const LANGUAGES = [
 	{ code: "zh", name: "Chinese" },
 ] as const;
 
+/** Type definition for Language. */
 export type Language = (typeof LANGUAGES)[number];
+/** Type definition for LanguageCode. */
 export type LanguageCode = Language["code"];

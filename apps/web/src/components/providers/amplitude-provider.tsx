@@ -9,6 +9,7 @@
 
 import Script from "next/script";
 
+/** React component rendering AmplitudeProvider. */
 export function AmplitudeProvider() {
 	const apiKey = process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY;
 	if (!apiKey) return null;

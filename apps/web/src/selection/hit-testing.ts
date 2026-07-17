@@ -29,6 +29,7 @@ function createSelectionRect({
 	);
 }
 
+/** Utility representing resolveElementIntersections. */
 export function resolveElementIntersections({
 	startPos,
 	currentPos,

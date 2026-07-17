@@ -14,6 +14,7 @@ import { ArrowElement } from "../elements/arrow.element";
 import { LineElement } from "../elements/line.element";
 import { EffectElement } from "../elements/effect.element";
 
+/** Utility representing VALIDATION_ERROR_CODE. */
 export const VALIDATION_ERROR_CODE = {
 	ELEMENT_NOT_FOUND: "ELEMENT_NOT_FOUND",
 	ELEMENT_NOT_ADDED: "ELEMENT_NOT_ADDED",
@@ -23,6 +24,7 @@ export const VALIDATION_ERROR_CODE = {
 	INVALID_TIMING: "INVALID_TIMING",
 };
 
+/** Class representing ValidationError. */
 export class ValidationError extends Error {
 	constructor(
 		message: string,
@@ -34,6 +36,7 @@ export class ValidationError extends Error {
 	}
 }
 
+/** Class representing ElementValidator. */
 export class ElementValidator implements ElementVisitor<boolean> {
 	private validateBasicProperties(element: any): {
 		errors: string[];

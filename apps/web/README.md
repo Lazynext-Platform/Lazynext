@@ -26,7 +26,7 @@ apps/web/src/
 ├── editor/         # Editor shell (consumes @lazynext/core)
 ├── media/          # Audio pipeline, media-utils, processing
 ├── seo/            # SEO metadata, Schema.org JSON-LD, social cards
-├── services/       # Storage, Stripe, API clients
+├── services/       # Storage, Dodo Payments, API clients
 └── wasm/           # WASM bridge bindings
 ```
 
@@ -47,9 +47,9 @@ apps/web/src/
 ## Environment Variables
 
 - `RUST_API_GATEWAY_URL` — Rust API Gateway base URL (defaults to `http://127.0.0.1:8005`)
-- `NEXT_PUBLIC_STRIPE_PRO_PRICE_ID` — Stripe price ID for Pro plan
-- `NEXT_PUBLIC_STRIPE_STUDIO_PRICE_ID` — Stripe price ID for Studio plan
-- `STRIPE_SECRET_KEY` — Stripe API secret key
+- `NEXT_PUBLIC_DODO_PRO_PRICE_ID` — Dodo Payments price ID for Pro plan
+- `NEXT_PUBLIC_DODO_STUDIO_PRICE_ID` — Dodo Payments price ID for Studio plan
+- `DODO_API_KEY` — Dodo Payments API secret key
 
 ## Tech Stack
 

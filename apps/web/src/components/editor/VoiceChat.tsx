@@ -19,6 +19,7 @@ interface VoiceChatProps {
 	peers: { [id: string]: MediaStream };
 }
 
+/** React component rendering VoiceChat. */
 export function VoiceChat({
 	isVoiceActive,
 	startVoice,

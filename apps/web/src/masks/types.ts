@@ -9,6 +9,7 @@ import type {
 	TextFontWeight,
 } from "@/text/primitives";
 
+/** Type definition for BuiltinMaskType. */
 export type BuiltinMaskType =
 	| "split"
 	| "cinematic-bars"
@@ -19,8 +20,10 @@ export type BuiltinMaskType =
 	| "star"
 	| "text";
 
+/** Type definition for MaskType. */
 export type MaskType = BuiltinMaskType | "freeform";
 
+/** Type definition for BaseMaskParams. */
 export interface BaseMaskParams {
 	/** Feather radius in pixels. */
 	feather: number;
@@ -34,6 +37,7 @@ export interface BaseMaskParams {
 	strokeAlign: "inside" | "center" | "outside";
 }
 
+/** Type definition for SplitMaskParams. */
 export interface SplitMaskParams extends BaseMaskParams {
 	/** Horizontal center of the mask (0-1 normalized). */
 	centerX: number;
@@ -43,6 +47,7 @@ export interface SplitMaskParams extends BaseMaskParams {
 	rotation: number;
 }
 
+/** Type definition for RectangleMaskParams. */
 export interface RectangleMaskParams extends BaseMaskParams {
 	/** Horizontal center of the mask (0-1 normalized). */
 	centerX: number;
@@ -58,6 +63,7 @@ export interface RectangleMaskParams extends BaseMaskParams {
 	scale: number;
 }
 
+/** Type definition for TextMaskParams. */
 export interface TextMaskParams extends BaseMaskParams {
 	/** Text content to render. */
 	content: string;
@@ -85,6 +91,7 @@ export interface TextMaskParams extends BaseMaskParams {
 	scale: number;
 }
 
+/** Type definition for FreeformPathMaskParams. */
 export interface FreeformPathMaskParams extends BaseMaskParams {
 	/** Array of bezier path points. */
 	path: FreeformPathPoint[];
@@ -100,6 +107,7 @@ export interface FreeformPathMaskParams extends BaseMaskParams {
 	scale: number;
 }
 
+/** Type definition for SplitMask. */
 export interface SplitMask {
 	/** Unique identifier for this mask instance. */
 	id: string;
@@ -109,6 +117,7 @@ export interface SplitMask {
 	params: SplitMaskParams;
 }
 
+/** Type definition for CinematicBarsMask. */
 export interface CinematicBarsMask {
 	/** Unique identifier for this mask instance. */
 	id: string;
@@ -118,6 +127,7 @@ export interface CinematicBarsMask {
 	params: RectangleMaskParams;
 }
 
+/** Type definition for RectangleMask. */
 export interface RectangleMask {
 	/** Unique identifier for this mask instance. */
 	id: string;
@@ -127,6 +137,7 @@ export interface RectangleMask {
 	params: RectangleMaskParams;
 }
 
+/** Type definition for EllipseMask. */
 export interface EllipseMask {
 	/** Unique identifier for this mask instance. */
 	id: string;
@@ -136,6 +147,7 @@ export interface EllipseMask {
 	params: RectangleMaskParams;
 }
 
+/** Type definition for HeartMask. */
 export interface HeartMask {
 	/** Unique identifier for this mask instance. */
 	id: string;
@@ -145,6 +157,7 @@ export interface HeartMask {
 	params: RectangleMaskParams;
 }
 
+/** Type definition for DiamondMask. */
 export interface DiamondMask {
 	/** Unique identifier for this mask instance. */
 	id: string;
@@ -154,6 +167,7 @@ export interface DiamondMask {
 	params: RectangleMaskParams;
 }
 
+/** Type definition for StarMask. */
 export interface StarMask {
 	/** Unique identifier for this mask instance. */
 	id: string;
@@ -163,6 +177,7 @@ export interface StarMask {
 	params: RectangleMaskParams;
 }
 
+/** Type definition for TextMask. */
 export interface TextMask {
 	/** Unique identifier for this mask instance. */
 	id: string;
@@ -172,6 +187,7 @@ export interface TextMask {
 	params: TextMaskParams;
 }
 
+/** Type definition for BuiltinShapeMask. */
 export type BuiltinShapeMask =
 	| SplitMask
 	| CinematicBarsMask
@@ -182,6 +198,7 @@ export type BuiltinShapeMask =
 	| StarMask
 	| TextMask;
 
+/** Type definition for FreeformPathMask. */
 export interface FreeformPathMask {
 	/** Unique identifier for this mask instance. */
 	id: string;
@@ -191,9 +208,12 @@ export interface FreeformPathMask {
 	params: FreeformPathMaskParams;
 }
 
+/** Type definition for Mask. */
 export type Mask = BuiltinShapeMask | FreeformPathMask;
 
+/** Type definition for MaskByType. */
 export type MaskByType<TType extends MaskType> = Extract<Mask, { type: TType }>;
+/** Type definition for MaskParamsByType. */
 export type MaskParamsByType<TType extends MaskType> =
 	MaskByType<TType>["params"];
 
@@ -211,6 +231,7 @@ type MaskDrawArgs<TParams extends BaseMaskParams> = MaskPathArgs<TParams> & {
 	ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 };
 
+/** Type definition for MaskBody. */
 export type MaskBody<TParams extends BaseMaskParams = BaseMaskParams> =
 	| {
 			kind: "fillPath";
@@ -228,6 +249,7 @@ export type MaskBody<TParams extends BaseMaskParams = BaseMaskParams> =
 			};
 	  };
 
+/** Type definition for MaskStroke. */
 export type MaskStroke<TParams extends BaseMaskParams = BaseMaskParams> =
 	| {
 			kind: "strokeFromPath";
@@ -238,6 +260,7 @@ export type MaskStroke<TParams extends BaseMaskParams = BaseMaskParams> =
 			renderStroke(args: MaskDrawArgs<TParams>): void;
 	  };
 
+/** Type definition for MaskRenderer. */
 export interface MaskRenderer<TParams extends BaseMaskParams = BaseMaskParams> {
 	/** Body rendering strategy (fill path, draw opaque, or draw with feather). */
 	body: MaskBody<TParams>;
@@ -245,6 +268,7 @@ export interface MaskRenderer<TParams extends BaseMaskParams = BaseMaskParams> {
 	stroke?: MaskStroke<TParams>;
 }
 
+/** Type definition for MaskFeatures. */
 export interface MaskFeatures {
 	/** Whether the mask supports position transforms. */
 	hasPosition: boolean;
@@ -254,13 +278,16 @@ export interface MaskFeatures {
 	sizeMode: "none" | "uniform" | "width-height" | "height-only" | "width-only";
 }
 
+/** Type definition for MaskHandleIcon. */
 export type MaskHandleIcon = "rotate" | "feather";
 
+/** Type definition for MaskHandleKind. */
 export type MaskHandleKind = "corner" | "edge" | "icon" | "point";
 
 type Side = "left" | "right" | "top" | "bottom";
 type CornerXY = { x: "left" | "right"; y: "top" | "bottom" };
 
+/** Type definition for MaskHandleId. */
 export type MaskHandleId =
 	| { kind: "position" }
 	| { kind: "rotation" }
@@ -271,6 +298,7 @@ export type MaskHandleId =
 	| { kind: "anchor"; pointId: string }
 	| { kind: "segment"; index: number };
 
+/** Utility representing maskHandleIdKey. */
 export function maskHandleIdKey({ id }: { id: MaskHandleId }): string {
 	switch (id.kind) {
 		case "position":
@@ -289,6 +317,7 @@ export function maskHandleIdKey({ id }: { id: MaskHandleId }): string {
 	}
 }
 
+/** Type definition for MaskHandlePosition. */
 export interface MaskHandlePosition {
 	/** Unique handle identifier. */
 	id: MaskHandleId;
@@ -310,6 +339,7 @@ export interface MaskHandlePosition {
 	icon?: MaskHandleIcon;
 }
 
+/** Type definition for MaskLineOverlay. */
 export interface MaskLineOverlay {
 	/** Unique overlay identifier. */
 	id: string;
@@ -325,6 +355,7 @@ export interface MaskLineOverlay {
 	handleId?: MaskHandleId;
 }
 
+/** Type definition for MaskRectOverlay. */
 export interface MaskRectOverlay {
 	/** Unique overlay identifier. */
 	id: string;
@@ -346,6 +377,7 @@ export interface MaskRectOverlay {
 	handleId?: MaskHandleId;
 }
 
+/** Type definition for MaskShapeOverlay. */
 export interface MaskShapeOverlay {
 	/** Unique overlay identifier. */
 	id: string;
@@ -367,6 +399,7 @@ export interface MaskShapeOverlay {
 	handleId?: MaskHandleId;
 }
 
+/** Type definition for MaskCanvasPathOverlay. */
 export interface MaskCanvasPathOverlay {
 	/** Unique overlay identifier. */
 	id: string;
@@ -386,17 +419,20 @@ export interface MaskCanvasPathOverlay {
 	strokeOpacity?: number;
 }
 
+/** Type definition for MaskOverlay. */
 export type MaskOverlay =
 	| MaskLineOverlay
 	| MaskRectOverlay
 	| MaskShapeOverlay
 	| MaskCanvasPathOverlay;
 
+/** Type definition for MaskDefaultContext. */
 export interface MaskDefaultContext {
 	/** Optional element canvas size for default layout. */
 	elementSize?: { width: number; height: number };
 }
 
+/** Type definition for MaskParamUpdateArgs. */
 export interface MaskParamUpdateArgs<
 	TParams extends BaseMaskParams = BaseMaskParams,
 > {
@@ -418,6 +454,7 @@ export interface MaskParamUpdateArgs<
 	canvasSize: { width: number; height: number };
 }
 
+/** Type definition for MaskSnapArgs. */
 export interface MaskSnapArgs<TParams extends BaseMaskParams = BaseMaskParams> {
 	/** The handle being snapped. */
 	handleId: MaskHandleId;
@@ -433,6 +470,7 @@ export interface MaskSnapArgs<TParams extends BaseMaskParams = BaseMaskParams> {
 	snapThreshold: { x: number; y: number };
 }
 
+/** Type definition for MaskSnapResult. */
 export interface MaskSnapResult<
 	TParams extends BaseMaskParams = BaseMaskParams,
 > {
@@ -442,6 +480,7 @@ export interface MaskSnapResult<
 	activeLines: SnapLine[];
 }
 
+/** Type definition for MaskInteractionResult. */
 export interface MaskInteractionResult {
 	/** Interactive drag handles. */
 	handles: MaskHandlePosition[];
@@ -449,6 +488,7 @@ export interface MaskInteractionResult {
 	overlays: MaskOverlay[];
 }
 
+/** Type definition for MaskInteractionDefinition. */
 export interface MaskInteractionDefinition<
 	TParams extends BaseMaskParams = BaseMaskParams,
 > {
@@ -469,6 +509,7 @@ export interface MaskInteractionDefinition<
 	snap?(args: MaskSnapArgs<TParams>): MaskSnapResult<TParams>;
 }
 
+/** Type definition for MaskDefinition. */
 export interface MaskDefinition<TType extends MaskType = MaskType> {
 	/** The mask type discriminant. */
 	type: TType;

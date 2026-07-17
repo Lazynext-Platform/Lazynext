@@ -27,6 +27,7 @@ interface ThemeToggleProps {
 	iconClassName?: string;
 }
 
+/** React component rendering ThemeToggle. */
 export function ThemeToggle({ className, iconClassName }: ThemeToggleProps) {
 	const { setTheme, resolvedTheme } = useTheme();
 	const [mounted, setMounted] = useState(false);

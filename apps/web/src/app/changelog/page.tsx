@@ -20,6 +20,7 @@ import {
 	ReleaseChanges,
 } from "@/changelog/components/release";
 
+/** Utility representing metadata. */
 export const metadata: Metadata = {
 	title: "Changelog - Lazynext",
 	description: "What's new in Lazynext",
@@ -44,6 +45,7 @@ export const metadata: Metadata = {
 	},
 };
 
+/** React component rendering ChangelogPage. */
 export default function ChangelogPage() {
 	const releases = getSortedReleases();
 

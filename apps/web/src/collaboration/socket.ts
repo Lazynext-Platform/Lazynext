@@ -12,6 +12,7 @@ import type { CrdtEngine } from "lazynext-wasm";
 type CrdtDeltaHandler = (delta: Uint8Array) => void;
 type PresenceHandler = (presence: PresenceUpdate) => void;
 
+/** Type definition for PresenceUpdate. */
 export interface PresenceUpdate {
 	/** Unique peer connection ID. */
 	peerId: string;
@@ -34,6 +35,7 @@ export interface PresenceUpdate {
 const SYNC_SERVER_URL =
 	process.env.NEXT_PUBLIC_SYNC_SERVER_URL || "ws://localhost:8005/api/v1/ws";
 
+/** Class representing CollaborationSocket. */
 export class CollaborationSocket {
 	private ws: WebSocket | null = null;
 	private roomId: string;

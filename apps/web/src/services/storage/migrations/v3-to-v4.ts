@@ -3,6 +3,7 @@ import { StorageMigration, type StorageMigrationRunArgs } from "./base";
 import type { MigrationResult, ProjectRecord } from "./transformers/types";
 import { transformProjectV3ToV4 } from "./transformers/v3-to-v4";
 
+/** Class representing V3toV4Migration. */
 export class V3toV4Migration extends StorageMigration {
 	from = 3;
 	to = 4;

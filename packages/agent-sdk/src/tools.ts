@@ -21,6 +21,7 @@ export const ToolCategory = {
 	Project: "project",
 } as const;
 
+/** Type definition for ToolCategory. */
 export type ToolCategory = (typeof ToolCategory)[keyof typeof ToolCategory];
 
 // ── Tool Definition ─────────────────────────────────────────────────────────

@@ -7,6 +7,7 @@
 export { buildTimelineSnapPoints } from "./build";
 export { resolveTimelineSnap } from "./resolve";
 export { getTimelineSnapThresholdInTicks } from "./threshold";
+/** Documentation for this export. */
 export type {
 	SnapPoint,
 	SnapPointType,

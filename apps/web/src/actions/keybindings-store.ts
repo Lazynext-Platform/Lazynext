@@ -16,6 +16,7 @@ import type {
 import { isKey } from "@/actions/keybinding";
 import { runMigrations, CURRENT_VERSION } from "./keybindings/migrations";
 
+/** Type definition for KeybindingConflict. */
 export interface KeybindingConflict {
 	/** Shortcut key causing the conflict. */
 	key: ShortcutKey;
@@ -97,6 +98,7 @@ function isPersistedState(value: unknown): value is PersistedState {
 	);
 }
 
+/** Custom hook providing useKeybindingsStore functionality. */
 export const useKeybindingsStore = create<KeybindingsState>()(
 	persist(
 		(set, get) => ({

@@ -4,6 +4,7 @@ import { EditorCore } from "@/core";
 import type { TScene } from "@/timeline";
 import { canDeleteScene, getFallbackSceneAfterDelete } from "@/timeline/scenes";
 
+/** Class representing DeleteSceneCommand. */
 export class DeleteSceneCommand extends Command {
 	private savedScenes: TScene[] | null = null;
 	private savedActiveSceneId: string | null = null;

@@ -11,6 +11,7 @@ import posthog from "posthog-js";
 import { PostHogProvider as PHProvider } from "posthog-js/react";
 import { useEffect } from "react";
 
+/** React component rendering PostHogProvider. */
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
 	useEffect(() => {
 		// Only initialize if we have the key, to avoid breaking local dev if undefined

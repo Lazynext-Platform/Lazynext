@@ -14,6 +14,7 @@ type TextRect = {
 	height: number;
 };
 
+/** Type definition for TextBlockMeasurement. */
 export interface TextBlockMeasurement {
 	/** Vertical offset to the visual center. */
 	visualCenterOffset: number;
@@ -23,6 +24,7 @@ export interface TextBlockMeasurement {
 	maxWidth: number;
 }
 
+/** Type definition for TextCanvasContext. */
 export type TextCanvasContext =
 	| CanvasRenderingContext2D
 	| OffscreenCanvasRenderingContext2D;
@@ -30,6 +32,7 @@ export type TextCanvasContext =
 const TEXT_DECORATION_THICKNESS_RATIO = 0.07;
 const STRIKETHROUGH_VERTICAL_RATIO = 0.35;
 
+/** Utility representing setCanvasLetterSpacing. */
 export function setCanvasLetterSpacing({
 	ctx,
 	letterSpacingPx,
@@ -45,6 +48,7 @@ export function setCanvasLetterSpacing({
 	}
 }
 
+/** Utility representing getMetricAscent. */
 export function getMetricAscent({
 	metrics,
 	fallbackFontSize,
@@ -55,6 +59,7 @@ export function getMetricAscent({
 	return metrics.actualBoundingBoxAscent ?? fallbackFontSize * 0.8;
 }
 
+/** Utility representing getMetricDescent. */
 export function getMetricDescent({
 	metrics,
 	fallbackFontSize,
@@ -65,6 +70,7 @@ export function getMetricDescent({
 	return metrics.actualBoundingBoxDescent ?? fallbackFontSize * 0.2;
 }
 
+/** Utility representing measureTextBlock. */
 export function measureTextBlock({
 	lineMetrics,
 	lineHeightPx,
@@ -119,6 +125,7 @@ function isTextBackgroundVisible({
 	);
 }
 
+/** Utility representing getTextBackgroundRect. */
 export function getTextBackgroundRect({
 	textAlign,
 	block,
@@ -150,6 +157,7 @@ export function getTextBackgroundRect({
 	};
 }
 
+/** Utility representing getTextVisualRect. */
 export function getTextVisualRect({
 	textAlign,
 	block,
@@ -192,6 +200,7 @@ export function getTextVisualRect({
 	};
 }
 
+/** Utility representing drawTextDecoration. */
 export function drawTextDecoration({
 	ctx,
 	textDecoration,

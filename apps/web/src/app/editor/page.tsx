@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+/** React component rendering EditorPage. */
 export default function EditorPage() {
 	const { isReady, time, frame, projectData: _projectData } = useWasm();
 	const canvasRef = useRef<HTMLCanvasElement>(null);

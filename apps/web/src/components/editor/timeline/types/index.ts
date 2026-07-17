@@ -39,6 +39,7 @@ export type Animation = {
 	getSample?: (animation?: Animation) => string;
 };
 
+/** Type definition for Size. */
 export type Size = {
 	/** Width in pixels. */
 	width: number;

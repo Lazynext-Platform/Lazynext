@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS "user" (
     email_verified BOOLEAN DEFAULT FALSE,
     image TEXT,
     role VARCHAR(50) DEFAULT 'user',
-    stripe_customer_id VARCHAR(255),
+    dodo_customer_id VARCHAR(255),
     ai_credits INTEGER DEFAULT 50,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -107,16 +107,16 @@ CREATE INDEX IF NOT EXISTS idx_project_updated ON "project"(updated_at DESC);
 CREATE TABLE IF NOT EXISTS "subscription" (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
-    stripe_subscription_id VARCHAR(255),
-    stripe_price_id VARCHAR(255),
-    stripe_current_period_end TIMESTAMP WITH TIME ZONE,
+    dodo_subscription_id VARCHAR(255),
+    dodo_price_id VARCHAR(255),
+    dodo_current_period_end TIMESTAMP WITH TIME ZONE,
     tier VARCHAR(50) DEFAULT 'free',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_subscription_user_id ON "subscription"(user_id);
-CREATE INDEX IF NOT EXISTS idx_subscription_stripe_id ON "subscription"(stripe_subscription_id);
+CREATE INDEX IF NOT EXISTS idx_subscription_dodo_id ON "subscription"(dodo_subscription_id);
 
 -- ── API Key Table ──────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS "api_key" (

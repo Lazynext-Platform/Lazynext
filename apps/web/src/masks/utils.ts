@@ -1,6 +1,7 @@
 /** @module Mask utility functions for line-edge intersection and geometry calculations */
 const LINE_PARALLEL_EPSILON = 1e-10;
 
+/** Utility representing lineEdgeIntersection. */
 export function lineEdgeIntersection({
 	lineX,
 	lineY,
@@ -46,6 +47,7 @@ export function lineEdgeIntersection({
 	};
 }
 
+/** Utility representing halfPlaneSign. */
 export function halfPlaneSign({
 	lineX,
 	lineY,

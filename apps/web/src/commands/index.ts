@@ -1,5 +1,6 @@
 /** @module Commands module barrel export for undoable editor operations */
 export { Command } from "./base-command";
+/** Documentation for this export. */
 export type { CommandResult } from "./base-command";
 export { BatchCommand } from "./batch-command";
 

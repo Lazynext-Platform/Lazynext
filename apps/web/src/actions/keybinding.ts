@@ -68,24 +68,30 @@ const KEYS = [
 	"end",
 ] as const;
 
+/** Type definition for Key. */
 export type Key = (typeof KEYS)[number];
 
 const KEY_SET: ReadonlySet<string> = new Set(KEYS);
 
+/** Utility representing isKey. */
 export function isKey(value: string): value is Key {
 	return KEY_SET.has(value);
 }
 
+/** Type definition for ModifierBasedShortcutKey. */
 export type ModifierBasedShortcutKey = `${ModifierKeys}+${Key}`;
 // Singular keybindings (these will be disabled when an input-ish area has been focused)
 export type SingleCharacterShortcutKey = `${Key}`;
 
+/** Type definition for ShortcutKey. */
 export type ShortcutKey = ModifierBasedShortcutKey | SingleCharacterShortcutKey;
 
+/** Type definition for KeybindingConfig. */
 export type KeybindingConfig = {
 	[key in ShortcutKey]?: TActionWithOptionalArgs;
 };
 
+/** Utility representing isShortcutKey. */
 export function isShortcutKey(value: string): value is ShortcutKey {
 	if (isKey(value)) return true;
 	const parts = value.split("+");

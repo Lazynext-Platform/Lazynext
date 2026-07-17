@@ -18,6 +18,14 @@
 
 use std::fmt;
 
+#[cfg(feature = "decklink-sdk")]
+#[cxx::bridge]
+mod ffi {
+    unsafe extern "C++" {
+        // dummy bridge to satisfy cxx_build
+    }
+}
+
 /// SDI video mode (resolution + framerate).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SdiVideoMode {
@@ -136,7 +144,6 @@ impl PixelFormat {
 ///
 /// In production (with `decklink-sdk` feature), this wraps a real
 /// `IDeckLinkOutput` instance via the Blackmagic C++ SDK.
-#[cfg(not(feature = "decklink-sdk"))]
 pub struct DecklinkEngine {
     /// Currently configured SDI video mode.
     mode: SdiVideoMode,
@@ -148,7 +155,6 @@ pub struct DecklinkEngine {
     is_connected: bool,
 }
 
-#[cfg(not(feature = "decklink-sdk"))]
 impl DecklinkEngine {
     /// Create a new DeckLink engine in software simulation mode.
     pub fn new() -> Self {
@@ -244,7 +250,6 @@ impl DecklinkEngine {
     }
 }
 
-#[cfg(not(feature = "decklink-sdk"))]
 impl Default for DecklinkEngine {
     // Returns a DeckLink engine in software simulation mode.
     fn default() -> Self {

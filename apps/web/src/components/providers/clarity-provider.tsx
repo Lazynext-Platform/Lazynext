@@ -9,6 +9,7 @@
 
 import Script from "next/script";
 
+/** React component rendering ClarityProvider. */
 export function ClarityProvider() {
 	const projectId = process.env.NEXT_PUBLIC_CLARITY_ID;
 

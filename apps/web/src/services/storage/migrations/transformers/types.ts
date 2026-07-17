@@ -6,6 +6,7 @@
 
 export type ProjectRecord = Record<string, unknown>;
 
+/** Type definition for MigrationResult. */
 export interface MigrationResult<T> {
 	/** The migrated project. */
 	project: T;

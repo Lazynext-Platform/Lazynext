@@ -52,6 +52,7 @@ const SHORTCUTS: ShortcutHint[] = [
 	{ label: "Jump 10s Back", keys: ["Shift", "←"], category: "Navigation" },
 ];
 
+/** React component rendering KeyboardShortcutHints. */
 export function KeyboardShortcutHints() {
 	const [isVisible, setIsVisible] = useState(false);
 

@@ -58,6 +58,7 @@ function buildRetime({
 	return buildConstantRetime({ rate, maintainPitch });
 }
 
+/** React component rendering SpeedTab. */
 export function SpeedTab({
 	element,
 	trackId,

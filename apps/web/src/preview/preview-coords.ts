@@ -39,6 +39,7 @@ function getCanvasOrigin({ geometry }: { geometry: PreviewViewportGeometry }): {
 	};
 }
 
+/** Utility representing screenToCanvas. */
 export function screenToCanvas({
 	clientX,
 	clientY,
@@ -63,6 +64,7 @@ export function screenToCanvas({
 	};
 }
 
+/** Utility representing canvasToOverlay. */
 export function canvasToOverlay({
 	canvasX,
 	canvasY,
@@ -80,6 +82,7 @@ export function canvasToOverlay({
 	};
 }
 
+/** Utility representing positionToOverlay. */
 export function positionToOverlay({
 	positionX,
 	positionY,
@@ -96,6 +99,7 @@ export function positionToOverlay({
 	});
 }
 
+/** Utility representing getDisplayScale. */
 export function getDisplayScale({
 	geometry,
 }: {
@@ -107,6 +111,7 @@ export function getDisplayScale({
 	};
 }
 
+/** Utility representing screenPixelsToLogicalThreshold. */
 export function screenPixelsToLogicalThreshold({
 	geometry,
 	screenPixels,

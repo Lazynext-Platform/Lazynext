@@ -636,15 +636,20 @@ pub enum AgentEvent {
     SuggestionsReady(Vec<AgentSuggestion>),
     /// Result of an individual suggestion execution.
     SuggestionExecuted {
+        /// The unique ID of the suggestion.
         suggestion_id: String,
+        /// Whether the execution was successful.
         success: bool,
+        /// An error message if the execution failed.
         error: Option<String>,
     },
     /// Analysis cycle has started.
     AnalysisStarted,
     /// Analysis cycle has completed.
     AnalysisCompleted {
+        /// The number of suggestions generated.
         suggestions_count: u32,
+        /// The number of suggestions automatically executed.
         auto_executed_count: u32,
     },
     /// Live status snapshot of the agent.

@@ -10,6 +10,7 @@ import { hasMediaId } from "@/timeline/element-utils";
 import { frameRatesEqual, getHighestImportedVideoFps } from "@/fps/utils";
 import { UpdateProjectSettingsCommand } from "@/commands/project";
 
+/** Class representing AddMediaAssetCommand. */
 export class AddMediaAssetCommand extends Command {
 	private assetId: string;
 	private savedAssets: MediaAsset[] | null = null;

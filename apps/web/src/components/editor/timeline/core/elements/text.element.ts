@@ -12,6 +12,7 @@ import type { ElementVisitor } from "../visitor/element-visitor";
 import { TIMELINE_ELEMENT_TYPE } from "../../utils/constants";
 import { ElementTextEffect } from "../addOns/text-effect";
 
+/** Class representing TextElement. */
 export class TextElement extends TrackElement {
 	protected textEffect?: ElementTextEffect;
 	declare protected props: TextProps;

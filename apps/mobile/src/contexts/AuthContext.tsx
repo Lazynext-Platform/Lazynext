@@ -57,6 +57,7 @@ const AuthContext = createContext<AuthContextValue>({
 	resetPassword: async () => ({ error: { message: "Auth not initialized" } }),
 });
 
+/** React component rendering AuthProvider. */
 export function AuthProvider({ children }: { children: ReactNode }) {
 	const [session, setSession] = useState<Session | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
@@ -153,6 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	);
 }
 
+/** Custom hook providing useAuth functionality. */
 export function useAuth(): AuthContextValue {
 	return useContext(AuthContext);
 }

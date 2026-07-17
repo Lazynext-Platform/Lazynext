@@ -34,6 +34,7 @@ const links: CategoryLinks = {
 	company: [{ label: "Brand", href: "/brand" }],
 };
 
+/** React component rendering Footer. */
 export function Footer() {
 	return (
 		<footer className="bg-background border-t">

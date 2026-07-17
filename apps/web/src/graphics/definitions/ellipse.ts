@@ -43,6 +43,7 @@ const ELLIPSE_PARAMS: ParamDefinition<keyof EllipseParams & string>[] = [
 	STROKE_ALIGN_PARAM,
 ];
 
+/** Utility representing ellipseGraphicDefinition. */
 export const ellipseGraphicDefinition: GraphicDefinition = {
 	id: "ellipse",
 	name: "Ellipse",

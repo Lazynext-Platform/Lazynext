@@ -1,12 +1,14 @@
 /** @module Changelog utilities for grouping, sorting, and filtering releases */
 import { allChangelogs } from "content-collections";
 
+/** Type definition for Change. */
 export type Change = {
 	/** Change category type. */
 	type: string;
 	/** Human-readable change description. */
 	text: string;
 };
+/** Type definition for Release. */
 export type Release = (typeof allChangelogs)[number];
 
 type ChangeSectionConfig = {
@@ -39,14 +41,17 @@ function getSectionConfig({ type }: { type: string }): ChangeSectionConfig {
 	);
 }
 
+/** Type definition for getSectionTitle. */
 export function getSectionTitle({ type }: { type: string }): string {
 	return getSectionConfig({ type }).title;
 }
 
+/** Type definition for isSectionCollapsible. */
 export function isSectionCollapsible({ type }: { type: string }): boolean {
 	return getSectionConfig({ type }).collapsible ?? false;
 }
 
+/** Utility representing groupAndOrderChanges. */
 export function groupAndOrderChanges({ changes }: { changes: Change[] }) {
 	const typeEncounterOrder = new Map<string, number>();
 	const grouped = changes.reduce<Record<string, Change[]>>((acc, change) => {
@@ -78,6 +83,7 @@ function isPublishedRelease({ published }: Release) {
 	return published !== false;
 }
 
+/** Utility representing getSortedReleases. */
 export function getSortedReleases() {
 	return allChangelogs
 		.filter(isPublishedRelease)
@@ -86,6 +92,7 @@ export function getSortedReleases() {
 		);
 }
 
+/** Utility representing getReleaseByVersion. */
 export function getReleaseByVersion({ version }: { version: string }) {
 	return getSortedReleases().find(
 		(release: Release) => release.version === version,

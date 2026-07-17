@@ -20,6 +20,7 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 
+/** React component rendering ShortcutsDialog. */
 export function ShortcutsDialog({
 	isOpen,
 	onOpenChange,

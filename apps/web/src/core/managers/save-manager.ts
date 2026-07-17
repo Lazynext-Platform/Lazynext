@@ -11,6 +11,7 @@ type SaveManagerOptions = {
 	debounceMs?: number;
 };
 
+/** Class representing SaveManager. */
 export class SaveManager {
 	private debounceMs: number;
 	private isPaused = false;

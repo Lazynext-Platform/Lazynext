@@ -19,6 +19,8 @@ Usage:
         ...
 """
 
+from opentelemetry import trace
+
 import os
 import time
 import functools
@@ -86,7 +88,7 @@ def setup_telemetry(service_name: str = "pre-processing") -> bool:
     SERVICE_NAME = service_name
 
     if not OTEL_ENABLED and not os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT"):
-        print(f"[Telemetry] OpenTelemetry disabled. Set OTEL_ENABLED=true to enable.")
+        print("[Telemetry] OpenTelemetry disabled. Set OTEL_ENABLED=true to enable.")
         return False
 
     try:

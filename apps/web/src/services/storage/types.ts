@@ -7,6 +7,7 @@ import type {
 } from "@/project/types";
 import type { TScene } from "@/timeline";
 
+/** Type definition for StorageAdapter. */
 export interface StorageAdapter<T> {
 	/** Retrieves a value by key. */
 	get(key: string): Promise<T | null>;
@@ -20,6 +21,7 @@ export interface StorageAdapter<T> {
 	clear(): Promise<void>;
 }
 
+/** Type definition for MediaAssetData. */
 export interface MediaAssetData {
 	/** Unique asset identifier. */
 	id: string;
@@ -47,6 +49,7 @@ export interface MediaAssetData {
 	thumbnailUrl?: string;
 }
 
+/** Type definition for SerializedScene. */
 export type SerializedScene = Omit<TScene, "createdAt" | "updatedAt"> & {
 	/** ISO-8601 creation timestamp. */
 	createdAt: string;
@@ -54,6 +57,7 @@ export type SerializedScene = Omit<TScene, "createdAt" | "updatedAt"> & {
 	updatedAt: string;
 };
 
+/** Type definition for SerializedProjectMetadata. */
 export type SerializedProjectMetadata = Omit<
 	TProjectMetadata,
 	"createdAt" | "updatedAt"
@@ -64,6 +68,7 @@ export type SerializedProjectMetadata = Omit<
 	updatedAt: string;
 };
 
+/** Type definition for SerializedProject. */
 export type SerializedProject = Omit<TProject, "metadata" | "scenes"> & {
 	/** Serialized project metadata. */
 	metadata: SerializedProjectMetadata;
@@ -73,6 +78,7 @@ export type SerializedProject = Omit<TProject, "metadata" | "scenes"> & {
 	timelineViewState?: TTimelineViewState;
 };
 
+/** Type definition for StorageConfig. */
 export interface StorageConfig {
 	/** IndexedDB database name for projects. */
 	projectsDb: string;

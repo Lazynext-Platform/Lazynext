@@ -6,6 +6,7 @@ import {
 	type VisualNodeParams,
 } from "./visual-node";
 
+/** Type definition for StickerNodeParams. */
 export interface StickerNodeParams extends VisualNodeParams {
 	/** Identifier for the sticker in the sticker registry. */
 	stickerId: string;
@@ -26,6 +27,7 @@ interface CachedStickerSource {
 
 const stickerSourceCache = new Map<string, Promise<CachedStickerSource>>();
 
+/** Utility representing loadStickerSource. */
 export function loadStickerSource({
 	stickerId,
 }: {
@@ -60,6 +62,7 @@ export function loadStickerSource({
 	return promise;
 }
 
+/** Class representing StickerNode. */
 export class StickerNode extends VisualNode<
 	StickerNodeParams,
 	ResolvedVisualSourceNodeState

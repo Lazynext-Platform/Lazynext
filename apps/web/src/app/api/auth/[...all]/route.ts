@@ -16,6 +16,7 @@ import { checkAuthRateLimit } from "@/auth/rate-limit";
 
 const handlers = toNextJsHandler(auth);
 
+/** Utility representing GET. */
 export const GET = handlers.GET;
 
 const API_GATEWAY_URL =

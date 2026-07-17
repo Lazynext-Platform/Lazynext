@@ -14,6 +14,7 @@ import {
 	Zap,
 } from "lucide-react";
 
+/** React component rendering FeaturesGrid. */
 export function FeaturesGrid() {
 	return (
 		<section className="relative overflow-hidden bg-[var(--bg-main)] dark:bg-background px-4 py-24 transition-colors duration-300">

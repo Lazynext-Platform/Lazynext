@@ -18,6 +18,7 @@ interface AuthCardProps {
 	children: React.ReactNode;
 }
 
+/** React component rendering AuthCard. */
 export function AuthCard({ title, subtitle, children }: AuthCardProps) {
 	return (
 		<div className="rounded-2xl border border-border bg-background/80 p-8 shadow-2xl backdrop-blur-sm">

@@ -5,6 +5,7 @@ import {
 	type VisualNodeParams,
 } from "./visual-node";
 
+/** Type definition for ImageNodeParams. */
 export interface ImageNodeParams extends VisualNodeParams {
 	/** Source image URL. */
 	url: string;
@@ -12,6 +13,7 @@ export interface ImageNodeParams extends VisualNodeParams {
 	maxSourceSize?: number;
 }
 
+/** Type definition for CachedImageSource. */
 export interface CachedImageSource {
 	/** Decoded image source. */
 	source: HTMLImageElement | OffscreenCanvas;
@@ -23,6 +25,7 @@ export interface CachedImageSource {
 
 const imageSourceCache = new Map<string, Promise<CachedImageSource>>();
 
+/** Utility representing loadImageSource. */
 export function loadImageSource({
 	url,
 	maxSourceSize,
@@ -74,6 +77,7 @@ export function loadImageSource({
 	return promise;
 }
 
+/** Class representing ImageNode. */
 export class ImageNode extends VisualNode<
 	ImageNodeParams,
 	ResolvedVisualSourceNodeState

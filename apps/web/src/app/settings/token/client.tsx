@@ -15,6 +15,7 @@ interface TokenPageClientProps {
 	user: { name?: string; email?: string };
 }
 
+/** React component rendering TokenPageClient. */
 export function TokenPageClient({ token, user: _user }: TokenPageClientProps) {
 	const [copied, setCopied] = useState(false);
 	const [revealed, setRevealed] = useState(false);

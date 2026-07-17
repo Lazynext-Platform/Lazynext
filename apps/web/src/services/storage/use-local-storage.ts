@@ -1,6 +1,7 @@
 /** @module Hook for syncing state with localStorage with JSON serialization */
 import { useState, useEffect, useCallback, useRef } from "react";
 
+/** Custom hook providing useLocalStorage functionality. */
 export function useLocalStorage<T>({
 	key,
 	defaultValue,

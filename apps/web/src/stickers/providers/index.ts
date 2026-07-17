@@ -16,6 +16,7 @@ const defaultProviders: StickerProvider[] = [
 	shapesProvider,
 ];
 
+/** Utility representing registerDefaultStickerProviders. */
 export function registerDefaultStickerProviders({
 	providersToRegister = defaultProviders,
 }: {

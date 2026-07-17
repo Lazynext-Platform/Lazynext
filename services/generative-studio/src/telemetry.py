@@ -11,7 +11,7 @@ def init_telemetry(app: FastAPI):
     otel_enabled = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
 
     if not otel_enabled:
-        print(f"[Telemetry] OpenTelemetry disabled. Set OTEL_EXPORTER_OTLP_ENDPOINT to enable.")
+        print("[Telemetry] OpenTelemetry disabled. Set OTEL_EXPORTER_OTLP_ENDPOINT to enable.")
         return
 
     try:

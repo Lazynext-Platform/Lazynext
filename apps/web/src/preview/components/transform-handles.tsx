@@ -29,6 +29,7 @@ const CORNERS: Corner[] = [
 ];
 const EDGES: Edge[] = ["right", "left", "bottom"];
 
+/** React component rendering TransformHandles. */
 export function TransformHandles({
 	onSnapLinesChange,
 }: {

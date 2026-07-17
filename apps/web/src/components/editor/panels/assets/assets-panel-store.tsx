@@ -15,6 +15,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 
+/** Type definition for Tab. */
 export type Tab =
 	| "media"
 	| "sounds"
@@ -27,6 +28,7 @@ export type Tab =
 	| "settings"
 	| "scripting";
 
+/** React component rendering ALL_TABS. */
 export const ALL_TABS: {
 	id: Tab;
 	label: string;
@@ -52,6 +54,7 @@ const createHugeiconsIcon =
 		<HugeiconsIcon icon={icon} className={className} />
 	);
 
+/** Utility representing tabs. */
 export const tabs = {
 	media: {
 		icon: createHugeiconsIcon({ icon: Folder03Icon }),
@@ -98,8 +101,11 @@ export const tabs = {
 	{ icon: ElementType<{ className?: string }>; label: string }
 >;
 
+/** Type definition for MediaViewMode. */
 export type MediaViewMode = "grid" | "list";
+/** Type definition for MediaSortKey. */
 export type MediaSortKey = "name" | "type" | "duration" | "size";
+/** Type definition for MediaSortOrder. */
 export type MediaSortOrder = "asc" | "desc";
 
 interface AssetsPanelStore {
@@ -125,6 +131,7 @@ interface AssetsPanelStore {
 	setMediaSort: (args: { key: MediaSortKey; order: MediaSortOrder }) => void;
 }
 
+/** Custom hook providing useAssetsPanelStore functionality. */
 export const useAssetsPanelStore = create<AssetsPanelStore>()(
 	persist(
 		(set) => ({

@@ -61,8 +61,8 @@
 | Property | Value |
 |---|---|
 | **Category** | Happy Path |
-| **Precondition** | `STRIPE_WEBHOOK_SECRET` configured |
-| **Steps** | 1. Construct Dodo Payments event JSON → 2. Sign with `STRIPE_WEBHOOK_SECRET` → 3. POST to `/api/stripe/webhook` with valid `stripe-signature` header |
+| **Precondition** | `DODO_WEBHOOK_SECRET` configured |
+| **Steps** | 1. Construct Dodo Payments event JSON → 2. Sign with `DODO_WEBHOOK_SECRET` → 3. POST to `/api/dodo/webhook` with valid `dodo-signature` header |
 | **Expected Result** | 200 OK, event processed |
 | **Status** | ⬜ Not Run |
 | **Notes** | — |
@@ -72,8 +72,8 @@
 | Property | Value |
 |---|---|
 | **Category** | Error |
-| **Precondition** | `STRIPE_WEBHOOK_SECRET` configured |
-| **Steps** | 1. POST to `/api/stripe/webhook` with random signature |
+| **Precondition** | `DODO_WEBHOOK_SECRET` configured |
+| **Steps** | 1. POST to `/api/dodo/webhook` with random signature |
 | **Expected Result** | 400 Bad Request, signature mismatch |
 | **Status** | ⬜ Not Run |
 | **Notes** | — |

@@ -8,6 +8,7 @@ import {
 import { buildSubtitleTextElement } from "./build-subtitle-text-element";
 import type { SubtitleCue } from "./types";
 
+/** Utility representing insertCaptionChunksAsTextTrack. */
 export function insertCaptionChunksAsTextTrack({
 	editor,
 	captions,

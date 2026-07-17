@@ -42,6 +42,7 @@ function extractMediaFilesFromClipboard({
 	return files;
 }
 
+/** Custom hook providing usePasteMedia functionality. */
 export function usePasteMedia() {
 	const editor = useEditor();
 

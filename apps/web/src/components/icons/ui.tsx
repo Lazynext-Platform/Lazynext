@@ -1,6 +1,7 @@
 /** @module Custom UI SVG icon components */
 import type { IconProps } from "./types";
 
+/** React component rendering OcVideoIcon. */
 export function OcVideoIcon({ className = "", size = 32 }: IconProps) {
 	return (
 		<svg
@@ -28,6 +29,7 @@ export function OcVideoIcon({ className = "", size = 32 }: IconProps) {
 	);
 }
 
+/** React component rendering OcCheckerboardIcon. */
 export function OcCheckerboardIcon({ className = "", size = 32 }: IconProps) {
 	return (
 		<svg
@@ -56,6 +58,7 @@ export function OcCheckerboardIcon({ className = "", size = 32 }: IconProps) {
 	);
 }
 
+/** React component rendering OcSlidersVerticalIcon. */
 export function OcSlidersVerticalIcon({
 	className = "",
 	size = 32,
@@ -98,6 +101,7 @@ export function OcSlidersVerticalIcon({
 	);
 }
 
+/** React component rendering OcSocialIcon. */
 export function OcSocialIcon({ className = "", size = 32 }: IconProps) {
 	return (
 		<svg
@@ -141,6 +145,7 @@ export function OcSocialIcon({ className = "", size = 32 }: IconProps) {
 	);
 }
 
+/** React component rendering OcTextWidthIcon. */
 export function OcTextWidthIcon({ className = "", size = 32 }: IconProps) {
 	return (
 		<svg
@@ -163,6 +168,7 @@ export function OcTextWidthIcon({ className = "", size = 32 }: IconProps) {
 	);
 }
 
+/** React component rendering OcTextHeightIcon. */
 export function OcTextHeightIcon({ className = "", size = 32 }: IconProps) {
 	return (
 		<svg
@@ -185,6 +191,7 @@ export function OcTextHeightIcon({ className = "", size = 32 }: IconProps) {
 	);
 }
 
+/** React component rendering OcFontIcon. */
 export function OcFontIcon({ className = "", size = 32 }: IconProps) {
 	return (
 		<svg
@@ -204,6 +211,7 @@ export function OcFontIcon({ className = "", size = 32 }: IconProps) {
 	);
 }
 
+/** React component rendering OcShapesIcon. */
 export function OcShapesIcon({
 	className = "",
 	size = 32,
@@ -245,6 +253,7 @@ export function OcShapesIcon({
 	);
 }
 
+/** React component rendering OcMirrorIcon. */
 export function OcMirrorIcon({ className = "", size = 32 }: IconProps) {
 	return (
 		<svg
@@ -279,6 +288,7 @@ export function OcMirrorIcon({ className = "", size = 32 }: IconProps) {
 	);
 }
 
+/** React component rendering OcSquarePlusIcon. */
 export function OcSquarePlusIcon({
 	className = "",
 	size = 32,
@@ -340,6 +350,7 @@ export function OcSquarePlusIcon({
 	);
 }
 
+/** React component rendering OcRippleIcon. */
 export function OcRippleIcon({
 	className = "",
 	size = 24,

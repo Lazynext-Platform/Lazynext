@@ -754,6 +754,7 @@ export const addRectElement = ({
 	return rect;
 };
 
+/** Utility representing addCircleElement. */
 export const addCircleElement = ({
 	element,
 	index,

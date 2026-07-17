@@ -19,6 +19,7 @@ function reorderEffectsOnElement({
 	return { ...element, effects };
 }
 
+/** Class representing ReorderClipEffectsCommand. */
 export class ReorderClipEffectsCommand extends Command {
 	private savedState: SceneTracks | null = null;
 	private readonly trackId: string;

@@ -1,10 +1,12 @@
 /** @module Migration transformer utility functions for type checking and record extraction */
 import type { ProjectRecord } from "./types";
 
+/** Utility representing isRecord. */
 export function isRecord(value: unknown): value is ProjectRecord {
 	return typeof value === "object" && value !== null;
 }
 
+/** Utility representing getProjectId. */
 export function getProjectId({
 	project,
 }: {

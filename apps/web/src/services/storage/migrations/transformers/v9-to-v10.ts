@@ -2,6 +2,7 @@
 import type { MigrationResult, ProjectRecord } from "./types";
 import { getProjectId } from "./utils";
 
+/** Utility representing transformProjectV9ToV10. */
 export function transformProjectV9ToV10({
 	project,
 }: {

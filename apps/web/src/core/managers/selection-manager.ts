@@ -13,6 +13,7 @@ import type {
 } from "@/selection/editor-selection";
 import type { ElementRef } from "@/timeline/types";
 
+/** Class representing SelectionManager. */
 export class SelectionManager {
 	private selectedElements: ElementRef[] = [];
 	private selectedKeyframes: SelectedKeyframeRef[] = [];

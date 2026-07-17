@@ -10,11 +10,13 @@ import type { StorageMigration } from "./base";
 import type { ProjectRecord } from "./transformers/types";
 import { getProjectId, isRecord } from "./transformers/utils";
 
+/** Type definition for StorageMigrationResult. */
 export interface StorageMigrationResult {
 	/** Number of projects that were migrated. */
 	migratedCount: number;
 }
 
+/** Type definition for MigrationProgress. */
 export interface MigrationProgress {
 	/** Whether a migration is currently in progress. */
 	isMigrating: boolean;

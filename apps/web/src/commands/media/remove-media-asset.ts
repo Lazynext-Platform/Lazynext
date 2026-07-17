@@ -9,6 +9,7 @@ import { waveformCache } from "@/services/waveform-cache/service";
 import { hasMediaId } from "@/timeline/element-utils";
 import type { SceneTracks } from "@/timeline";
 
+/** Class representing RemoveMediaAssetCommand. */
 export class RemoveMediaAssetCommand extends Command {
 	private savedAssets: MediaAsset[] | null = null;
 	private savedTracks: SceneTracks | null = null;

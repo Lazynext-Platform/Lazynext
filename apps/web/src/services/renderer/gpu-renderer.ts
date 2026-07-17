@@ -10,6 +10,7 @@ import { ensureWasmInitialized } from "@/wasm/init";
 let gpuAvailable = false;
 let initPromise: Promise<void> | null = null;
 
+/** Utility representing initializeGpuRenderer. */
 export function initializeGpuRenderer(): Promise<void> {
 	if (!initPromise) {
 		initPromise = ensureWasmInitialized()
@@ -25,10 +26,12 @@ export function initializeGpuRenderer(): Promise<void> {
 	return initPromise;
 }
 
+/** Utility representing isGpuAvailable. */
 export function isGpuAvailable(): boolean {
 	return gpuAvailable;
 }
 
+/** Utility representing gpuRenderer. */
 export const gpuRenderer = {
 	applyEffect({
 		source,

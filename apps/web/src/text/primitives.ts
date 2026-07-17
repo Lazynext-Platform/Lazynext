@@ -11,11 +11,16 @@ import {
 } from "./layout";
 import { FONT_SIZE_SCALE_REFERENCE } from "./typography";
 
+/** Type definition for TextAlign. */
 export type TextAlign = "left" | "center" | "right";
+/** Type definition for TextFontWeight. */
 export type TextFontWeight = "normal" | "bold";
+/** Type definition for TextFontStyle. */
 export type TextFontStyle = "normal" | "italic";
+/** Type definition for TextDecoration. */
 export type TextDecoration = "none" | "underline" | "line-through";
 
+/** Type definition for TextLayoutParams. */
 export interface TextLayoutParams {
 	/** Raw text content to render. */
 	content: string;
@@ -37,6 +42,7 @@ export interface TextLayoutParams {
 	lineHeight?: number;
 }
 
+/** Type definition for ResolvedTextLayout. */
 export interface ResolvedTextLayout {
 	/** Font size scaled to canvas height. */
 	scaledFontSize: number;
@@ -54,6 +60,7 @@ export interface ResolvedTextLayout {
 	textDecoration: TextDecoration;
 }
 
+/** Type definition for MeasuredTextLayout. */
 export interface MeasuredTextLayout extends ResolvedTextLayout {
 	/** Lines of text after word-wrapping. */
 	lines: string[];
@@ -63,6 +70,7 @@ export interface MeasuredTextLayout extends ResolvedTextLayout {
 	block: TextBlockMeasurement;
 }
 
+/** Type definition for ResolvedTextBackgroundLike. */
 export interface ResolvedTextBackgroundLike {
 	/** Whether the background box is enabled. */
 	enabled: boolean;
@@ -80,6 +88,7 @@ export interface ResolvedTextBackgroundLike {
 	cornerRadius: number;
 }
 
+/** Utility representing quoteFontFamily. */
 export function quoteFontFamily({
 	fontFamily,
 }: {
@@ -88,6 +97,7 @@ export function quoteFontFamily({
 	return `"${fontFamily.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 }
 
+/** Utility representing buildTextFontString. */
 export function buildTextFontString({
 	fontFamily,
 	fontWeight,
@@ -102,6 +112,7 @@ export function buildTextFontString({
 	return `${fontStyle} ${fontWeight} ${scaledFontSize}px ${quoteFontFamily({ fontFamily })}, sans-serif`;
 }
 
+/** Utility representing resolveTextLayout. */
 export function resolveTextLayout({
 	text,
 	canvasHeight,
@@ -134,6 +145,7 @@ export function resolveTextLayout({
 	};
 }
 
+/** Utility representing measureTextLayout. */
 export function measureTextLayout({
 	text,
 	canvasHeight,
@@ -169,6 +181,7 @@ export function measureTextLayout({
 	};
 }
 
+/** Utility representing drawMeasuredTextLayout. */
 export function drawMeasuredTextLayout({
 	ctx,
 	layout,
@@ -243,6 +256,7 @@ export function drawMeasuredTextLayout({
 	}
 }
 
+/** Utility representing strokeMeasuredTextLayout. */
 export function strokeMeasuredTextLayout({
 	ctx,
 	layout,

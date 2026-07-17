@@ -186,6 +186,7 @@ export function setupSyncServer(httpServer: HttpServer) {
 	console.log("[Sync] WebSocket CRDT Server initialized (auth required).");
 }
 
+/** Utility representing broadcastCrdtPatch. */
 export function broadcastCrdtPatch(projectId: string, patch: any) {
 	if (ioInstance) {
 		console.log(

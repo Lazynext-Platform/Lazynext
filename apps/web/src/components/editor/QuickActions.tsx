@@ -48,6 +48,7 @@ interface QuickActionsProps {
 	className?: string;
 }
 
+/** React component rendering QuickActions. */
 export function QuickActions({
 	onAiEdit,
 	onExport,

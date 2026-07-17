@@ -64,6 +64,7 @@ import { MediaPoolSidebar } from "./MediaPoolSidebar";
 
 import { INITIAL_ASSETS } from "./editor-defaults";
 
+/** React component rendering EditorClient. */
 export default function EditorClient({ project }: { project: Project }) {
 	const lastSavedProject = useRef<string>("");
 	const mediaRecorderRef = useRef<any>(null);

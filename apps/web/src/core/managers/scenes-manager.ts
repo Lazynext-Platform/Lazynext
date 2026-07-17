@@ -24,6 +24,7 @@ import {
 import { buildEntityInsertOp, buildEntityDeleteOp, buildPropertyUpdateOp } from "@/collaboration/crdt-builders";
 import type { MediaTime } from "@/wasm";
 
+/** Class representing ScenesManager. */
 export class ScenesManager {
 	private active: TScene | null = null;
 	private list: TScene[] = [];

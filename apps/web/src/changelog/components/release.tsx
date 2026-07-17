@@ -13,6 +13,7 @@ import {
 import { ArrowRightIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
+/** React component rendering ReleaseArticle. */
 export function ReleaseArticle({
 	variant,
 	isLatest,
@@ -43,6 +44,7 @@ export function ReleaseArticle({
 	return <article className="flex flex-col gap-8">{children}</article>;
 }
 
+/** React component rendering ReleaseMeta. */
 export function ReleaseMeta({ release }: { release: Release }) {
 	return (
 		<span className="text-sm font-medium tracking-widest text-muted-foreground">
@@ -56,6 +58,7 @@ const titleSizes: Record<"h1" | "h2", string> = {
 	h2: "text-2xl",
 };
 
+/** React component rendering ReleaseTitle. */
 export function ReleaseTitle({
 	as: As,
 	href,
@@ -78,6 +81,7 @@ export function ReleaseTitle({
 	);
 }
 
+/** React component rendering ReleaseDescription. */
 export function ReleaseDescription({ children }: { children: ReactNode }) {
 	return (
 		<p className="text-base text-foreground leading-relaxed max-w-xl">
@@ -86,6 +90,7 @@ export function ReleaseDescription({ children }: { children: ReactNode }) {
 	);
 }
 
+/** React component rendering ReleaseChanges. */
 export function ReleaseChanges({ release }: { release: Release }) {
 	const { grouped, orderedTypes } = groupAndOrderChanges({
 		changes: release.changes,

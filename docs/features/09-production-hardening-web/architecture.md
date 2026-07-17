@@ -19,7 +19,7 @@ Eight-phase hardening of the web app from ~55% production-ready to ~90%+. Each p
 # Phase A — Security & Auth
 rust/api-gateway/
 ├── src/auth.rs                  # MODIFY — replace hardcoded tokens with real JWT validation
-├── src/routes/stripe.rs         # MODIFY — implement HMAC signature verification
+├── src/routes/dodo.rs         # MODIFY — implement HMAC signature verification
 ├── src/routes/projects.rs       # MODIFY — decode JWT sub instead of "mock_user_id"
 ├── src/routes/timeline.rs       # MODIFY — add CSRF protection to state-changing endpoints
 └── Cargo.toml                   # MODIFY — add jsonwebtoken dep if not present
@@ -103,7 +103,7 @@ export const user = pgTable("user", {
   emailVerified: boolean("email_verified").notNull(),
   image: text("image"),
   role: text("role").notNull().default("user"),
-  stripeCustomerId: text("stripe_customer_id"),
+  dodoCustomerId: text("dodo_customer_id"),
   aiCredits: integer("ai_credits").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

@@ -13,6 +13,7 @@ import { ArrowElement } from "../elements/arrow.element";
 import { LineElement } from "../elements/line.element";
 import { EffectElement } from "../elements/effect.element";
 
+/** Type definition for ElementVisitor. */
 export interface ElementVisitor<T> {
 	visitVideoElement(element: VideoElement): T;
 	visitAudioElement(element: AudioElement): T;

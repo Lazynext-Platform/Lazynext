@@ -81,6 +81,7 @@ function getModKey(): string {
 	return navigator.platform.toLowerCase().includes("mac") ? "Cmd" : "Ctrl";
 }
 
+/** React component rendering CommandPalette. */
 export function CommandPalette() {
 	const {
 		currentTime,

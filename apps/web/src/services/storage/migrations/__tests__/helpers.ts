@@ -20,6 +20,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+/** Utility representing asRecord. */
 export function asRecord(value: unknown): Record<string, unknown> {
 	if (!isRecord(value)) {
 		throw new Error(`Expected record, got ${describe(value)}`);
@@ -27,6 +28,7 @@ export function asRecord(value: unknown): Record<string, unknown> {
 	return value;
 }
 
+/** Utility representing asArray. */
 export function asArray(value: unknown): unknown[] {
 	if (!Array.isArray(value)) {
 		throw new Error(`Expected array, got ${describe(value)}`);
@@ -34,6 +36,7 @@ export function asArray(value: unknown): unknown[] {
 	return value;
 }
 
+/** Utility representing asRecordArray. */
 export function asRecordArray(value: unknown): Record<string, unknown>[] {
 	return asArray(value).map(asRecord);
 }

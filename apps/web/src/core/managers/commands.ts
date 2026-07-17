@@ -18,6 +18,7 @@ interface CommandHistoryEntry {
 	selectionOverride?: EditorSelectionSnapshot;
 }
 
+/** Class representing CommandManager. */
 export class CommandManager {
 	public isRippleEnabled = false;
 	private history: CommandHistoryEntry[] = [];

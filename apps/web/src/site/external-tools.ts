@@ -1,6 +1,7 @@
 /** @module External tools data for the marketing site featuring partner integrations */
 import { OcDataBuddyIcon, OcMarbleIcon } from "@/components/icons";
 
+/** Type definition for ExternalTool. */
 export type ExternalTool = {
 	/** Tool display name. */
 	name: string;
@@ -12,6 +13,7 @@ export type ExternalTool = {
 	icon: React.ElementType;
 };
 
+/** Utility representing EXTERNAL_TOOLS. */
 export const EXTERNAL_TOOLS: ExternalTool[] = [
 	{
 		name: "Marble",

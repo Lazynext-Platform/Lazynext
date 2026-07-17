@@ -97,6 +97,7 @@ function useCanvasDimensionDraft({
 	});
 }
 
+/** React component rendering SettingsView. */
 export function SettingsView() {
 	const [view, setView] = useState<SettingsView>("project-info");
 	const editor = useEditor();

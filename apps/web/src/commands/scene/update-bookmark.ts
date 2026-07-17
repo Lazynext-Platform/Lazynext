@@ -9,6 +9,7 @@ import {
 } from "@/timeline/bookmarks/index";
 import type { MediaTime } from "@/wasm";
 
+/** Class representing UpdateBookmarkCommand. */
 export class UpdateBookmarkCommand extends Command {
 	private savedScenes: TScene[] | null = null;
 

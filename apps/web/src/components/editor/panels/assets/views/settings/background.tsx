@@ -202,6 +202,7 @@ const COLOR_SECTIONS = [
 	},
 ] as const;
 
+/** React component rendering BackgroundContent. */
 export function BackgroundContent() {
 	const editor = useEditor();
 	const activeProject = useEditor((e) => e.project.getActive());

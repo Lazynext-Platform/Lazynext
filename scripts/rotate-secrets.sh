@@ -82,8 +82,8 @@ rotate_api_key() {
 rotate_all_api_keys() {
   echo "🔑 Rotating all API keys..."
   rotate_api_key "gemini--api--key" "AIza"
-  rotate_api_key "stripe--secret--key" "sk_test"
-  rotate_api_key "stripe--webhook--secret" "whsec"
+  rotate_api_key "dodo--api--key" "sk_test"
+  rotate_api_key "dodo--webhook--secret" "whsec"
   rotate_api_key "resend--api--key" "re"
   echo "✅ All API keys rotated."
 }

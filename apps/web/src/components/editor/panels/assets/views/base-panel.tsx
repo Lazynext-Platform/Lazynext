@@ -22,6 +22,7 @@ interface PanelViewProps extends React.HTMLAttributes<HTMLDivElement> {
 	scrollRef?: React.Ref<HTMLDivElement>;
 }
 
+/** React component rendering PanelView. */
 export function PanelView({
 	title,
 	actions,

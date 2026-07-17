@@ -6,6 +6,7 @@
  * @module types/soundtouchjs
  */
 declare module "soundtouchjs" {
+	/** Class representing PitchShifter. */
 	export class PitchShifter {
 		constructor(
 			context: BaseAudioContext,

@@ -32,6 +32,7 @@ interface WasmPlayerProps {
 	renderQuality?: "full" | "half" | "quarter";
 }
 
+/** React component rendering WasmPlayer. */
 export default function WasmPlayer({
 	project,
 	frame,

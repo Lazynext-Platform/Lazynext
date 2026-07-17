@@ -73,4 +73,5 @@ export {
 
 export { isAnimationPath, isAnimationPropertyPath } from "./path";
 
+/** Documentation for this export. */
 export type { NumericSpec } from "./types";

@@ -68,6 +68,7 @@ export interface PlatformMetadata {
 	privacyStatus?: "public" | "private" | "unlisted";
 }
 
+/** Type definition for PublishResult. */
 export interface PublishResult {
 	platform: string;
 	success: boolean;
@@ -76,6 +77,7 @@ export interface PublishResult {
 	error?: string;
 }
 
+/** Type definition for OAuthTokens. */
 export interface OAuthTokens {
 	accessToken: string;
 	refreshToken?: string;

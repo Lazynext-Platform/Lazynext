@@ -7,6 +7,7 @@ import type { BlendMode } from "@/primitives/blend-mode";
 import { drawMeasuredTextLayout } from "@/text/primitives";
 import type { MeasuredTextElement } from "@/text/measure-element";
 
+/** Type definition for TextNodeParams. */
 export type TextNodeParams = TextElement & {
 	/** Resolved transform for the text node. */
 	transform: Transform;
@@ -22,6 +23,7 @@ export type TextNodeParams = TextElement & {
 	textBaseline?: CanvasTextBaseline;
 };
 
+/** Type definition for ResolvedTextNodeState. */
 export interface ResolvedTextNodeState {
 	/** Resolved transform for rendering. */
 	transform: Transform;
@@ -37,8 +39,10 @@ export interface ResolvedTextNodeState {
 	measuredText: MeasuredTextElement;
 }
 
+/** Class representing TextNode. */
 export class TextNode extends BaseNode<TextNodeParams, ResolvedTextNodeState> {}
 
+/** Utility representing renderTextToContext. */
 export function renderTextToContext({
 	node,
 	ctx,

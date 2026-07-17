@@ -8,6 +8,7 @@
 
 import Link from "next/link";
 
+/** React component rendering NotFound. */
 export default function NotFound() {
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-background px-4">

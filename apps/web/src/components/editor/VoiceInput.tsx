@@ -21,6 +21,7 @@ interface VoiceInputProps {
 	language?: string;
 }
 
+/** React component rendering VoiceInput. */
 export function VoiceInput({
 	onTranscription,
 	language = "en",

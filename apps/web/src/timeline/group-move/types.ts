@@ -8,8 +8,10 @@
 import type { ElementRef, ElementType, TrackType } from "@/timeline";
 import type { MediaTime } from "@/wasm";
 
+/** Type definition for GroupTrackSection. */
 export type GroupTrackSection = "overlay" | "main" | "audio";
 
+/** Type definition for GroupMember. */
 export interface GroupMember extends ElementRef {
 	/** Element type discriminator. */
 	elementType: ElementType;
@@ -25,6 +27,7 @@ export interface GroupMember extends ElementRef {
 	displayIndex: number;
 }
 
+/** Type definition for MoveGroup. */
 export interface MoveGroup {
 	/** Anchor member used for position calculations. */
 	anchor: GroupMember;
@@ -32,6 +35,7 @@ export interface MoveGroup {
 	members: GroupMember[];
 }
 
+/** Type definition for PlannedTrackCreation. */
 export interface PlannedTrackCreation {
 	/** ID for the new track. */
 	id: string;
@@ -41,6 +45,7 @@ export interface PlannedTrackCreation {
 	index: number;
 }
 
+/** Type definition for PlannedElementMove. */
 export interface PlannedElementMove {
 	/** ID of the source track. */
 	sourceTrackId: string;
@@ -52,6 +57,7 @@ export interface PlannedElementMove {
 	newStartTime: MediaTime;
 }
 
+/** Type definition for GroupMoveResult. */
 export interface GroupMoveResult {
 	/** Resolved element moves. */
 	moves: PlannedElementMove[];

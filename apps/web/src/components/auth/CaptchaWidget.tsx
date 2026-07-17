@@ -23,6 +23,7 @@ interface CaptchaWidgetProps {
 	disabled?: boolean;
 }
 
+/** React component rendering CaptchaWidget. */
 export function CaptchaWidget({
 	onVerify,
 	onError,

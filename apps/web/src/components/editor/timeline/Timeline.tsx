@@ -10,4 +10,5 @@
  */
 
 export { default as Timeline } from "../timeline";
+/** Documentation for this export. */
 export type { default as TimelineDefault } from "../timeline";

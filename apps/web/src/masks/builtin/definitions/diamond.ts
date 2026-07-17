@@ -46,6 +46,7 @@ function buildDiamondPath({
 	return path;
 }
 
+/** Utility representing diamondMaskDefinition. */
 export const diamondMaskDefinition: MaskDefinition<"diamond"> = {
 	type: "diamond",
 	name: "Diamond",

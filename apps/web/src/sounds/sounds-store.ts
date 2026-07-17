@@ -109,6 +109,7 @@ interface SoundsStore {
 	clearSavedSounds: () => Promise<void>;
 }
 
+/** Custom hook providing useSoundsStore functionality. */
 export const useSoundsStore = create<SoundsStore>((set, get) => ({
 	topSoundEffects: [],
 	isLoading: false,

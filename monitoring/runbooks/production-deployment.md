@@ -10,7 +10,7 @@
 - [ ] Docker images built and pushed to GHCR (`ghcr.io/lazynext-platform`)
 - [ ] `DATABASE_URL` points to production PostgreSQL
 - [ ] `BETTER_AUTH_SECRET` is a 64-char random hex string (not dev fallback)
-- [ ] Stripe webhook secret configured for production Stripe account
+- [ ] Dodo Payments webhook secret configured for production Dodo Payments account
 - [ ] SSL certificates valid (Let's Encrypt via Traefik)
 - [ ] Redis cache flushed if schema changed
 - [ ] Database migrations tested against staging

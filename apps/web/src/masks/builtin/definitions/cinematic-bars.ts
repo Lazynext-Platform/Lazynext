@@ -71,6 +71,7 @@ function buildBandPath({
 	return path;
 }
 
+/** Utility representing cinematicBarsMaskDefinition. */
 export const cinematicBarsMaskDefinition: MaskDefinition<"cinematic-bars"> = {
 	type: "cinematic-bars",
 	name: "Cinematic Bars",

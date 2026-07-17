@@ -3,6 +3,7 @@
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/utils/ui";
 
+/** React component rendering ReactMarkdownWrapper. */
 export function ReactMarkdownWrapper({
 	children,
 	inline = false,

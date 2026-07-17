@@ -11,8 +11,8 @@ import os
 import cv2
 import numpy as np
 from rembg import remove, new_session
-from dataclasses import dataclass, field
-from typing import Optional, List, Tuple
+from dataclasses import dataclass
+from typing import Optional
 
 @dataclass
 class Sam2Config:
@@ -59,7 +59,7 @@ class Sam2Pipeline:
 
         # Initialize rembg as fallback
         self._rembg_session = new_session("u2net")
-        print(f"[SAM2] rembg u2net session ready (fallback)")
+        print("[SAM2] rembg u2net session ready (fallback)")
 
     def _rotoscope_onnx(self, video_path: str, out_dir: str, frame_count: int) -> Sam2Result:
         """Rotoscope using the real SAM2 ONNX model."""

@@ -9,6 +9,7 @@ function isFirefox(): boolean {
 	return navigator.userAgent.toLowerCase().includes("firefox");
 }
 
+/** Custom hook providing useStoragePersistence functionality. */
 export function useStoragePersistence() {
 	const [showDialog, setShowDialog] = useState(false);
 

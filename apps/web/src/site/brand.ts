@@ -2,6 +2,7 @@
 
 export const SITE_URL = "https://lazynext.com";
 
+/** Utility representing SITE_INFO. */
 export const SITE_INFO = {
 	title: "Lazynext",
 	description:
@@ -12,4 +13,5 @@ export const SITE_INFO = {
 	favicon: "/favicon.ico",
 };
 
+/** Utility representing DEFAULT_LOGO_URL. */
 export const DEFAULT_LOGO_URL = "/logo.png";

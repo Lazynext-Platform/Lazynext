@@ -88,6 +88,7 @@ type RadialOrientation = Shape | ExtentKeyword | DefaultRadial;
 const gradientLayerPattern =
 	/^(?:-(webkit|o|ms|moz)-)?(linear-gradient|repeating-linear-gradient|radial-gradient|repeating-radial-gradient)/i;
 
+/** Utility representing drawCssBackground. */
 export function drawCssBackground({
 	ctx,
 	width,

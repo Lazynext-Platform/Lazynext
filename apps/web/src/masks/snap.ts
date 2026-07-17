@@ -314,6 +314,7 @@ function snapBoxMaskSize({
 	return { params: proposedParams, activeLines: [] };
 }
 
+/** Utility representing snapBoxMaskInteraction. */
 export function snapBoxMaskInteraction({
 	handleId,
 	startParams,
@@ -352,6 +353,7 @@ export function snapBoxMaskInteraction({
 	});
 }
 
+/** Utility representing snapSplitMaskInteraction. */
 export function snapSplitMaskInteraction({
 	handleId,
 	proposedParams,

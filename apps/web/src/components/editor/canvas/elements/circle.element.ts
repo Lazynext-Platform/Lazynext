@@ -8,6 +8,7 @@ import {
 } from "../helpers/canvas.util";
 import { ELEMENT_TYPES } from "../helpers/constants";
 
+/** Utility representing CircleElement. */
 export const CircleElement: CanvasElementHandler = {
 	name: ELEMENT_TYPES.CIRCLE,
 

@@ -29,6 +29,7 @@ const GRAPH_LINEAR_CURVE: NormalizedCubicBezier = [0, 0, 1, 1];
 const FLAT_VALUE_EPSILON = 1e-6;
 const LINEAR_CURVE_EPSILON = 1e-6;
 
+/** Type definition for GraphEditorUnavailableReason. */
 export type GraphEditorUnavailableReason =
 	| "no-keyframe-selected"
 	| "multiple-keyframes-selected"
@@ -43,6 +44,7 @@ export type GraphEditorUnavailableReason =
 	| "selected-segment-is-hold"
 	| "selected-segment-is-flat";
 
+/** Type definition for GraphEditorComponentOption. */
 export interface GraphEditorComponentOption {
 	/** Component identifier key. */
 	key: string;
@@ -61,6 +63,7 @@ interface GraphEditorPropertyOption {
 	allContexts: ScalarGraphKeyframeContext[];
 }
 
+/** Type definition for GraphEditorResolvedSegment. */
 export interface GraphEditorResolvedSegment {
 	/** Animation property path of the segment. */
 	propertyPath: SelectedKeyframeRef["propertyPath"];
@@ -85,6 +88,7 @@ interface GraphEditorBaseSelectionState {
 	message: string;
 }
 
+/** Type definition for GraphEditorUnavailableState. */
 export interface GraphEditorUnavailableState extends GraphEditorBaseSelectionState {
 	/** Discriminant marking an unavailable state. */
 	status: "unavailable";
@@ -92,6 +96,7 @@ export interface GraphEditorUnavailableState extends GraphEditorBaseSelectionSta
 	reason: GraphEditorUnavailableReason;
 }
 
+/** Type definition for GraphEditorReadyState. */
 export interface GraphEditorReadyState extends GraphEditorBaseSelectionState {
 	/** Discriminant marking a ready state. */
 	status: "ready";
@@ -107,10 +112,12 @@ export interface GraphEditorReadyState extends GraphEditorBaseSelectionState {
 	cubicBezier: NormalizedCubicBezier;
 }
 
+/** Type definition for GraphEditorSelectionState. */
 export type GraphEditorSelectionState =
 	| GraphEditorUnavailableState
 	| GraphEditorReadyState;
 
+/** Type definition for GraphEditorCurvePatch. */
 export interface GraphEditorCurvePatch {
 	/** Identifier of the keyframe to patch. */
 	keyframeId: string;
@@ -482,6 +489,7 @@ function resolveSegmentForOption({
 	};
 }
 
+/** Utility representing resolveGraphEditorSelectionState. */
 export function resolveGraphEditorSelectionState({
 	tracks,
 	selectedKeyframes,
@@ -645,6 +653,7 @@ export function resolveGraphEditorSelectionState({
 	};
 }
 
+/** Utility representing buildGraphEditorCurvePatches. */
 export function buildGraphEditorCurvePatches({
 	context,
 	cubicBezier,
@@ -703,6 +712,7 @@ export function buildGraphEditorCurvePatches({
 	];
 }
 
+/** Utility representing applyGraphEditorCurvePreview. */
 export function applyGraphEditorCurvePreview({
 	animations,
 	context,

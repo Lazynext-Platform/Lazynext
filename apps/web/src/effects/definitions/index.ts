@@ -4,6 +4,7 @@ import { blurEffectDefinition } from "./blur";
 
 const defaultEffects = [blurEffectDefinition];
 
+/** Utility representing registerDefaultEffects. */
 export function registerDefaultEffects(): void {
 	for (const definition of defaultEffects) {
 		if (effectsRegistry.has(definition.type)) {

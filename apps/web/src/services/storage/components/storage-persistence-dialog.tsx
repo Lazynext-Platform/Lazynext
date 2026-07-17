@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { useStoragePersistence } from "@/services/storage/use-storage-persistence";
 
+/** React component rendering StoragePersistenceDialog. */
 export function StoragePersistenceDialog() {
 	const { showDialog, onConfirm, onDismiss } = useStoragePersistence();
 

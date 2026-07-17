@@ -24,3 +24,4 @@ onnx = ["dep:ort"]
 [dependencies.ort]
 version = "2.0.0-rc.12"
 optional = true
+features = ["ndarray"]

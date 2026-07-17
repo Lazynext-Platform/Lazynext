@@ -10,6 +10,7 @@ import type {
 } from "@/animation/types";
 import type { SceneTracks } from "@/timeline";
 
+/** Class representing UpdateScalarKeyframeCurveCommand. */
 export class UpdateScalarKeyframeCurveCommand extends Command {
 	private savedState: SceneTracks | null = null;
 	private readonly trackId: string;

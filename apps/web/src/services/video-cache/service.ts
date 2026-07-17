@@ -26,6 +26,7 @@ interface VideoSinkData {
 	prefetchPromise: Promise<void> | null;
 }
 
+/** Class representing VideoCache. */
 export class VideoCache {
 	private sinks = new Map<string, VideoSinkData>();
 	private initPromises = new Map<string, Promise<void>>();
@@ -343,4 +344,5 @@ export class VideoCache {
 	}
 }
 
+/** Utility representing videoCache. */
 export const videoCache = new VideoCache();

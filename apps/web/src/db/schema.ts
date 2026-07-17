@@ -25,6 +25,7 @@ export const user = pgTable("user", {
   updatedAt: timestamp("updated_at").notNull(),
 });
 
+/** Utility representing account. */
 export const account = pgTable("account", {
   id: text("id").primaryKey(),
   accountId: text("account_id").notNull(),
@@ -45,6 +46,7 @@ export const account = pgTable("account", {
   index("account_user_id_idx").on(table.userId),
 ]);
 
+/** Utility representing session. */
 export const session = pgTable("session", {
   id: text("id").primaryKey(),
   expiresAt: timestamp("expires_at").notNull(),
@@ -60,6 +62,7 @@ export const session = pgTable("session", {
   index("session_user_id_idx").on(table.userId),
 ]);
 
+/** Utility representing verification. */
 export const verification = pgTable("verification", {
   id: text("id").primaryKey(),
   identifier: text("identifier").notNull(),
@@ -88,6 +91,7 @@ export const subscriptions = pgTable("subscriptions", {
   index("subscriptions_user_id_idx").on(table.userId),
 ]);
 
+/** Utility representing projects. */
 export const projects = pgTable("projects", {
   id: text("id").primaryKey(),
   userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
@@ -106,6 +110,7 @@ export const projects = pgTable("projects", {
   index("projects_user_id_idx").on(table.userId),
 ]);
 
+/** Utility representing timelines. */
 export const timelines = pgTable("timelines", {
   id: text("id").primaryKey(),
   projectId: text("project_id").references(() => projects.id, {
@@ -118,6 +123,7 @@ export const timelines = pgTable("timelines", {
   index("timelines_project_id_idx").on(table.projectId),
 ]);
 
+/** Utility representing tracks. */
 export const tracks = pgTable("tracks", {
   id: text("id").primaryKey(),
   projectId: text("project_id").references(() => projects.id, {
@@ -135,6 +141,7 @@ export const tracks = pgTable("tracks", {
   index("tracks_timeline_id_idx").on(table.timelineId),
 ]);
 
+/** Utility representing clips. */
 export const clips = pgTable("clips", {
   id: text("id").primaryKey(),
   trackId: text("track_id").references(() => tracks.id, {
@@ -149,6 +156,7 @@ export const clips = pgTable("clips", {
   index("clips_track_id_idx").on(table.trackId),
 ]);
 
+/** Utility representing agents. */
 export const agents = pgTable("agents", {
   id: text("id").primaryKey(),
   projectId: text("project_id").references(() => projects.id, {
@@ -162,12 +170,14 @@ export const agents = pgTable("agents", {
   index("agents_project_id_idx").on(table.projectId),
 ]);
 
+/** Utility representing feedback. */
 export const feedback = pgTable("feedback", {
   id: text("id").primaryKey(),
   message: text("message").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+/** Utility representing assets. */
 export const assets = pgTable("assets", {
   id: text("id").primaryKey(),
   projectId: text("project_id")

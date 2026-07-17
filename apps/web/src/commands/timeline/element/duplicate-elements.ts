@@ -16,6 +16,7 @@ interface DuplicateElementsParams {
 	elements: { trackId: string; elementId: string }[];
 }
 
+/** Class representing DuplicateElementsCommand. */
 export class DuplicateElementsCommand extends Command {
 	private duplicatedElements: { trackId: string; elementId: string }[] = [];
 	private savedState: SceneTracks | null = null;

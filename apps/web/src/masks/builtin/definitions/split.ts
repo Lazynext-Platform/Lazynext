@@ -67,6 +67,7 @@ function pointsEqual({
 	);
 }
 
+/** Utility representing getSplitMaskStrokeSegment. */
 export function getSplitMaskStrokeSegment({
 	resolvedParams,
 	width,
@@ -184,6 +185,7 @@ function computeSplitMaskParamUpdate({
 	return {};
 }
 
+/** Utility representing splitMaskDefinition. */
 export const splitMaskDefinition: MaskDefinition<"split"> = {
 	type: "split",
 	name: "Split",

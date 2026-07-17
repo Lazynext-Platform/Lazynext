@@ -253,6 +253,7 @@ function resolvePositionY({
 	);
 }
 
+/** Utility representing buildSubtitleTextElement. */
 export function buildSubtitleTextElement({
 	index,
 	caption,

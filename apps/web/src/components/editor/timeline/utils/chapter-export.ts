@@ -12,11 +12,13 @@ const formatSeconds = (value: number): string => {
 	return `${m}:${String(s).padStart(2, "0")}`;
 };
 
+/** Utility representing getChapterMarkers. */
 export const getChapterMarkers = (project: ProjectJSON): ChapterMarker[] => {
 	const chapters = project.metadata?.chapters ?? [];
 	return [...chapters].sort((a, b) => a.time - b.time);
 };
 
+/** Utility representing exportChaptersAsYouTube. */
 export const exportChaptersAsYouTube = (project: ProjectJSON): string => {
 	const chapters = getChapterMarkers(project);
 	return chapters
@@ -24,6 +26,7 @@ export const exportChaptersAsYouTube = (project: ProjectJSON): string => {
 		.join("\n");
 };
 
+/** Utility representing exportChaptersAsJSON. */
 export const exportChaptersAsJSON = (project: ProjectJSON): string => {
 	return JSON.stringify(getChapterMarkers(project), null, 2);
 };

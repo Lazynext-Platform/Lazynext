@@ -13,6 +13,7 @@ import { videoCache } from "@/services/video-cache/service";
 import { waveformCache } from "@/services/waveform-cache/service";
 import { BatchCommand, RemoveMediaAssetCommand } from "@/commands";
 
+/** Class representing MediaManager. */
 export class MediaManager {
 	private assets: MediaAsset[] = [];
 	private isLoading = false;

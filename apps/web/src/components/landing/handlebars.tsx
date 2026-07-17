@@ -22,6 +22,7 @@ const MASK_GRADIENT_EDGE_PADDING_PX = 10;
 const HANDLEBARS_ROTATE_DEG = 2.76;
 const RIGHT_HANDLE_LEFT_OFFSET_PX = -30;
 
+/** React component rendering Handlebars. */
 export function Handlebars({ children }: HandlebarsProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const leftHandleRef = useRef<HTMLDivElement>(null);

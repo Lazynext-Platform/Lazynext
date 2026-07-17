@@ -1,6 +1,7 @@
 /** @module Persisted keybindings state type definitions for localStorage persistence */
 export type PersistedKeybindingConfig = Record<string, string | undefined>;
 
+/** Type definition for PersistedKeybindingsState. */
 export interface PersistedKeybindingsState {
 	/** Map of key combination to action ID. */
 	keybindings: PersistedKeybindingConfig;
@@ -12,6 +13,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+/** Utility representing getPersistedKeybindingsState. */
 export function getPersistedKeybindingsState({
 	state,
 }: {

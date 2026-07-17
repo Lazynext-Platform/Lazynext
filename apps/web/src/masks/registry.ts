@@ -13,6 +13,7 @@ import type {
 import type { HugeiconsIconProps } from "@hugeicons/react";
 import { DefinitionRegistry } from "@/params/registry";
 
+/** Type definition for MaskIconProps. */
 export type MaskIconProps = {
 	/** Hugeicons icon reference. */
 	icon: HugeiconsIconProps["icon"];
@@ -26,10 +27,12 @@ type RegisteredMaskWithoutId = Mask extends infer TMask
 		: never
 	: never;
 
+/** Type definition for MaskDefinitionForRegistration. */
 export type MaskDefinitionForRegistration = {
 	[TType in MaskType]: MaskDefinition<TType>;
 }[MaskType];
 
+/** Utility representing BASE_MASK_PARAM_DEFINITIONS. */
 export const BASE_MASK_PARAM_DEFINITIONS: ParamDefinition<
 	keyof BaseMaskParams & string
 >[] = [
@@ -60,6 +63,7 @@ export const BASE_MASK_PARAM_DEFINITIONS: ParamDefinition<
 	},
 ];
 
+/** Type definition for RegisteredMaskDefinition. */
 export interface RegisteredMaskDefinition {
 	/** Mask type discriminator. */
 	type: MaskType;
@@ -87,6 +91,7 @@ export interface RegisteredMaskDefinition {
 	icon: MaskIconProps;
 }
 
+/** Class representing MasksRegistry. */
 export class MasksRegistry extends DefinitionRegistry<
 	MaskType,
 	RegisteredMaskDefinition
@@ -123,4 +128,5 @@ export class MasksRegistry extends DefinitionRegistry<
 	}
 }
 
+/** Utility representing masksRegistry. */
 export const masksRegistry = new MasksRegistry();

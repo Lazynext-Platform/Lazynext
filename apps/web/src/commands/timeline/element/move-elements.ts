@@ -16,6 +16,7 @@ import type {
 } from "@/timeline/group-move";
 import { findTrackInSceneTracks } from "@/timeline/track-element-update";
 
+/** Class representing MoveElementCommand. */
 export class MoveElementCommand extends Command {
 	private savedState: SceneTracks | null = null;
 

@@ -35,16 +35,19 @@ export function normalizeChannel({
 }: {
 	channel: ScalarAnimationChannel;
 }): ScalarAnimationChannel;
+/** Utility representing normalizeChannel. */
 export function normalizeChannel({
 	channel,
 }: {
 	channel: DiscreteAnimationChannel;
 }): DiscreteAnimationChannel;
+/** Utility representing normalizeChannel. */
 export function normalizeChannel({
 	channel,
 }: {
 	channel: AnimationChannel;
 }): AnimationChannel;
+/** Utility representing normalizeChannel. */
 export function normalizeChannel({
 	channel,
 }: {
@@ -124,6 +127,7 @@ export function getChannelValueAtTime({
 	time: number;
 	fallbackValue: number;
 }): number;
+/** Utility representing getChannelValueAtTime. */
 export function getChannelValueAtTime<TValue extends DiscreteValue>({
 	channel,
 	time,
@@ -133,6 +137,7 @@ export function getChannelValueAtTime<TValue extends DiscreteValue>({
 	time: number;
 	fallbackValue: TValue;
 }): TValue;
+/** Utility representing getChannelValueAtTime. */
 export function getChannelValueAtTime({
 	channel,
 	time,

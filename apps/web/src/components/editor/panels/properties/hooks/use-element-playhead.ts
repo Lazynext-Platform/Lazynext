@@ -4,6 +4,7 @@ import { useEditor } from "@/editor/use-editor";
 import { getElementLocalTime } from "@/animation";
 import { addMediaTime, mediaTime, type MediaTime } from "@/wasm";
 
+/** Custom hook providing useElementPlayhead functionality. */
 export function useElementPlayhead({
 	startTime,
 	duration,

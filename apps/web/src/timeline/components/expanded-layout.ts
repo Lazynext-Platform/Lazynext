@@ -11,6 +11,7 @@ import type { TimelineTrack } from "@/timeline";
 import { getElementKeyframes } from "@/animation";
 import { KEYFRAME_LANE_HEIGHT_PX } from "./layout";
 
+/** Type definition for ExpandedRow. */
 export interface ExpandedRow {
 	/** Animation property path. */
 	propertyPath: AnimationPath;
@@ -50,6 +51,7 @@ const PROPERTY_LABELS: Partial<Record<string, string>> = {
 	"background.cornerRadius": "Corner Radius",
 };
 
+/** Utility representing getPropertyLabel. */
 export function getPropertyLabel(path: AnimationPath): string {
 	if (PROPERTY_LABELS[path]) return PROPERTY_LABELS[path];
 	if (path.startsWith("params.")) return path.slice("params.".length);
@@ -60,6 +62,7 @@ export function getPropertyLabel(path: AnimationPath): string {
 	return path;
 }
 
+/** Utility representing getExpandedRows. */
 export function getExpandedRows({
 	animations,
 }: {
@@ -81,10 +84,12 @@ export function getExpandedRows({
 	return rows;
 }
 
+/** Utility representing getExpansionHeight. */
 export function getExpansionHeight({ rows }: { rows: ExpandedRow[] }): number {
 	return rows.length * KEYFRAME_LANE_HEIGHT_PX;
 }
 
+/** Utility representing computeTrackExpansionHeight. */
 export function computeTrackExpansionHeight({
 	track,
 	expandedElementIds,
@@ -101,6 +106,7 @@ export function computeTrackExpansionHeight({
 	return maxHeight;
 }
 
+/** Utility representing getTrackExpandedRows. */
 export function getTrackExpandedRows({
 	track,
 	expandedElementIds,

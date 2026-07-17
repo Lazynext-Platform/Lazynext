@@ -22,6 +22,7 @@ export const SITE_CONFIG = {
 	backgroundColor: "#09090b",
 };
 
+/** Utility representing generateMetadata. */
 export function generateMetadata({
 	title,
 	description,

@@ -24,6 +24,7 @@ function setForwardedRef<T>({
 	}
 }
 
+/** React component rendering SelectableItem. */
 export const SelectableItem = forwardRef<HTMLDivElement, SelectableItemProps>(
 	function SelectableItem(
 		{

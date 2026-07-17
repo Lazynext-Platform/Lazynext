@@ -97,6 +97,7 @@ interface StickersStore {
 	clearRecentStickers: () => void;
 }
 
+/** Custom hook providing useStickersStore functionality. */
 export const useStickersStore = create<StickersStore>()(
 	persist(
 		(set, get) => ({

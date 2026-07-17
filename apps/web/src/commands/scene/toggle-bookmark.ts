@@ -9,6 +9,7 @@ import {
 } from "@/timeline/bookmarks/index";
 import { type MediaTime, ZERO_MEDIA_TIME } from "@/wasm";
 
+/** Class representing ToggleBookmarkCommand. */
 export class ToggleBookmarkCommand extends Command {
 	private savedScenes: TScene[] | null = null;
 	private frameTime: MediaTime = ZERO_MEDIA_TIME;

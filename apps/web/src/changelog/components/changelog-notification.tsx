@@ -11,6 +11,7 @@ import type { Release } from "../utils";
 
 const STORAGE_KEY = "last-seen-version";
 
+/** React component rendering ChangelogNotification. */
 export function ChangelogNotification() {
 	const [release, setRelease] = useState<Release | null>(null);
 

@@ -67,6 +67,7 @@ const STAR_PARAMS: ParamDefinition<keyof StarParams & string>[] = [
 	},
 ];
 
+/** Utility representing starGraphicDefinition. */
 export const starGraphicDefinition: GraphicDefinition = {
 	id: "star",
 	name: "Star",

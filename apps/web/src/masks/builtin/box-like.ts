@@ -27,6 +27,7 @@ const PERCENTAGE_DISPLAY: Pick<
 	step: 1,
 };
 
+/** Utility representing BOX_LIKE_MASK_PARAMS. */
 export const BOX_LIKE_MASK_PARAMS: ParamDefinition<
 	keyof RectangleMaskParams & string
 >[] = [
@@ -95,6 +96,7 @@ export const BOX_LIKE_MASK_PARAMS: ParamDefinition<
 	},
 ];
 
+/** Utility representing getDefaultBaseMaskParams. */
 export function getDefaultBaseMaskParams(): BaseMaskParams {
 	return {
 		feather: 0,
@@ -105,6 +107,7 @@ export function getDefaultBaseMaskParams(): BaseMaskParams {
 	};
 }
 
+/** Utility representing getStrokeOffset. */
 export function getStrokeOffset({
 	strokeAlign,
 	strokeWidth,
@@ -120,6 +123,7 @@ export function getStrokeOffset({
 	return 0;
 }
 
+/** Utility representing getDefaultSquareMaskParams. */
 export function getDefaultSquareMaskParams({
 	elementSize,
 }: MaskDefaultContext): RectangleMaskParams {
@@ -146,6 +150,7 @@ export function getDefaultSquareMaskParams({
 	};
 }
 
+/** Utility representing getBoxLikeGeometry. */
 export function getBoxLikeGeometry({
 	params,
 	width,
@@ -164,6 +169,7 @@ export function getBoxLikeGeometry({
 	};
 }
 
+/** Utility representing buildBoxMaskInteraction. */
 export function buildBoxMaskInteraction({
 	sizeMode,
 	buildOverlayPath,
@@ -204,6 +210,7 @@ export function buildBoxMaskInteraction({
 	};
 }
 
+/** Utility representing computeBoxMaskParamUpdate. */
 export function computeBoxMaskParamUpdate({
 	handleId,
 	startParams,
@@ -290,6 +297,7 @@ export function computeBoxMaskParamUpdate({
 	return {};
 }
 
+/** Utility representing rotatePoint. */
 export function rotatePoint({
 	x,
 	y,

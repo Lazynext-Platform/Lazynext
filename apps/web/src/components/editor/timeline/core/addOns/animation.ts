@@ -8,6 +8,7 @@
 
 import { Animation } from "../../types";
 
+/** Class representing ElementAnimation. */
 export class ElementAnimation {
 	private name: string;
 	private interval?: number;

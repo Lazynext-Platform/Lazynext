@@ -3,6 +3,7 @@ import { Command, type CommandResult } from "@/commands/base-command";
 import type { SceneTracks } from "@/timeline";
 import { EditorCore } from "@/core";
 
+/** Class representing TracksSnapshotCommand. */
 export class TracksSnapshotCommand extends Command {
 	constructor({ before, after }: { before: SceneTracks; after: SceneTracks }) {
 		super();

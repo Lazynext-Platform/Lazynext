@@ -14,6 +14,7 @@ import {
 import { getBookmarksActiveAtTime } from "./utils";
 import type { MediaTime } from "@/wasm";
 
+/** Utility representing bookmarkNotesPreviewOverlay. */
 export const bookmarkNotesPreviewOverlay: PreviewOverlayDefinition = {
 	id: "bookmark-notes",
 	label: "Show bookmark notes",
@@ -45,6 +46,7 @@ function BookmarkNotesOverlay({
 	);
 }
 
+/** Utility representing getBookmarkPreviewOverlaySource. */
 export function getBookmarkPreviewOverlaySource({
 	bookmarks,
 	time,

@@ -69,7 +69,7 @@ All items identified in the deep audit (2026-06-30):
 
 9. **API Gateway Fake Integration Tests**: 19 "integration tests" in `rust/api-gateway/tests/` are `sleep + assert!(true)` no-ops.
 
-10. **Dodo Payments Webhook Not Verified**: `handle_stripe_webhook` prints event type without signature verification.
+10. **Dodo Payments Webhook Not Verified**: `handle_dodo_webhook` prints event type without signature verification.
 
 ## Proposed Approach
 

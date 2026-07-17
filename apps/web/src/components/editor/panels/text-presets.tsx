@@ -7,6 +7,7 @@
 
 import { Play } from "lucide-react";
 
+/** React component rendering TextPresets. */
 export function TextPresets({
 	onAddPreset,
 }: {

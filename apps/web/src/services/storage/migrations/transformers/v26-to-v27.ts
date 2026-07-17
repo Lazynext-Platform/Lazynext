@@ -48,6 +48,7 @@ function parseFreeformPath({ path }: { path: string }): FreeformPathPoint[] {
 	}
 }
 
+/** Utility representing transformProjectV26ToV27. */
 export function transformProjectV26ToV27({
 	project,
 }: {

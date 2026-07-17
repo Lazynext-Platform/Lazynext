@@ -76,5 +76,5 @@ All notable changes to the Lazynext project are documented in this file.
 
 - **PostgreSQL**: Primary database with Drizzle ORM migrations and better-auth authentication.
 - **IndexedDB/OPFS**: Client-side project storage with 31+ versioned sequential migrations.
-- **Stripe**: Payment processing for premium features.
+- **Dodo Payments**: Payment processing for premium features.
 - **Resend**: Transactional email delivery.

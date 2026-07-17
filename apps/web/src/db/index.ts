@@ -23,6 +23,7 @@ const client = databaseUrl
 		})
 	: null;
 
+/** Utility representing db. */
 export const db = client
 	? drizzle(client, { schema })
 	: new Proxy({} as ReturnType<typeof drizzle>, {

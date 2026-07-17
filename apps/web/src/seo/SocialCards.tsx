@@ -28,6 +28,7 @@ interface SocialCardProps {
 	tags?: string[];
 }
 
+/** React component rendering UniversalSocialMeta. */
 export function UniversalSocialMeta({
 	title,
 	description,

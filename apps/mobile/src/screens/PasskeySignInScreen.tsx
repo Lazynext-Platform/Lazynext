@@ -16,6 +16,7 @@ import {
 import { authenticateWithPasskey } from "../services/auth";
 import { useAuth } from "../contexts/AuthContext";
 
+/** React component rendering PasskeySignInScreen. */
 export function PasskeySignInScreen({ navigation }: { navigation: any }) {
 	const { session } = useAuth();
 	const [loading, setLoading] = useState(false);

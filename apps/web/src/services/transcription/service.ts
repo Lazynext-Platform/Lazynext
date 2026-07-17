@@ -184,4 +184,5 @@ class TranscriptionService {
 	}
 }
 
+/** Utility representing transcriptionService. */
 export const transcriptionService = new TranscriptionService();

@@ -15,6 +15,7 @@ import {
 	buildTextLayoutParamsFromElement,
 } from "@/text/measure-element";
 
+/** React component rendering TextEditOverlay. */
 export function TextEditOverlay({
 	trackId,
 	elementId,

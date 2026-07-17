@@ -32,6 +32,7 @@ import { canDeleteScene, getMainScene } from "@/timeline/scenes";
 import { toast } from "sonner";
 import { useEditor } from "@/editor/use-editor";
 
+/** React component rendering ScenesView. */
 export function ScenesView({ children }: { children: React.ReactNode }) {
 	const editor = useEditor();
 	const scenes = editor.scenes.getScenes();

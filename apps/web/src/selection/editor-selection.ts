@@ -2,6 +2,7 @@
 import type { SelectedKeyframeRef } from "@/animation/types";
 import type { ElementRef } from "@/timeline/types";
 
+/** Type definition for SelectedMaskPointSelection. */
 export interface SelectedMaskPointSelection {
 	/** Track identifier of the mask element. */
 	trackId: string;
@@ -13,6 +14,7 @@ export interface SelectedMaskPointSelection {
 	pointIds: string[];
 }
 
+/** Type definition for EditorSelectionSnapshot. */
 export interface EditorSelectionSnapshot {
 	/** Currently selected elements. */
 	selectedElements: ElementRef[];
@@ -24,6 +26,7 @@ export interface EditorSelectionSnapshot {
 	selectedMaskPoints: SelectedMaskPointSelection | null;
 }
 
+/** Type definition for EditorSelectionPatch. */
 export interface EditorSelectionPatch {
 	/** Updated element selection. */
 	selectedElements?: ElementRef[];
@@ -35,4 +38,5 @@ export interface EditorSelectionPatch {
 	selectedMaskPoints?: SelectedMaskPointSelection | null;
 }
 
+/** Type definition for EditorSelectionKind. */
 export type EditorSelectionKind = "mask-points" | "keyframes" | "elements";

@@ -33,6 +33,7 @@ interface EditableTimecodeProps {
 	disabled?: boolean;
 }
 
+/** React component rendering EditableTimecode. */
 export function EditableTimecode({
 	time,
 	duration,

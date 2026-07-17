@@ -11,6 +11,7 @@
 import type { FrameRate } from "lazynext-wasm";
 import { EXPORT_MIME_TYPES } from "./mime-types";
 
+/** Utility representing EXPORT_QUALITY_VALUES. */
 export const EXPORT_QUALITY_VALUES = [
 	"low",
 	"medium",
@@ -18,11 +19,15 @@ export const EXPORT_QUALITY_VALUES = [
 	"very_high",
 ] as const;
 
+/** Utility representing EXPORT_FORMAT_VALUES. */
 export const EXPORT_FORMAT_VALUES = ["mp4", "webm"] as const;
 
+/** Type definition for ExportFormat. */
 export type ExportFormat = (typeof EXPORT_FORMAT_VALUES)[number];
+/** Type definition for ExportQuality. */
 export type ExportQuality = (typeof EXPORT_QUALITY_VALUES)[number];
 
+/** Type definition for ExportOptions. */
 export interface ExportOptions {
 	/** Export container format (mp4 or webm). */
 	format: ExportFormat;
@@ -34,6 +39,7 @@ export interface ExportOptions {
 	includeAudio?: boolean;
 }
 
+/** Type definition for ExportResult. */
 export interface ExportResult {
 	/** Whether the export completed successfully. */
 	success: boolean;
@@ -45,6 +51,7 @@ export interface ExportResult {
 	cancelled?: boolean;
 }
 
+/** Type definition for ExportState. */
 export interface ExportState {
 	/** Whether an export is currently in progress. */
 	isExporting: boolean;
@@ -54,6 +61,7 @@ export interface ExportState {
 	result: ExportResult | null;
 }
 
+/** Utility representing getExportMimeType. */
 export function getExportMimeType({
 	format,
 }: {
@@ -62,6 +70,7 @@ export function getExportMimeType({
 	return EXPORT_MIME_TYPES[format];
 }
 
+/** Utility representing getExportFileExtension. */
 export function getExportFileExtension({
 	format,
 }: {
@@ -70,6 +79,7 @@ export function getExportFileExtension({
 	return `.${format}`;
 }
 
+/** Utility representing downloadBuffer. */
 export function downloadBuffer({
 	buffer,
 	filename,

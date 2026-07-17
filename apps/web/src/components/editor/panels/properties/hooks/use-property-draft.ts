@@ -10,6 +10,7 @@ function looksLikeExpression({ input }: { input: string }): boolean {
 	return minusIndex > 0;
 }
 
+/** Custom hook providing usePropertyDraft functionality. */
 export function usePropertyDraft<T>({
 	displayValue: sourceDisplay,
 	parse,

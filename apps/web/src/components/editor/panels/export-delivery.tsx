@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { usePostHog } from "posthog-js/react";
 import { dispatchExport } from "../../../export/dispatch";
 
+/** React component rendering ExportDelivery. */
 export function ExportDelivery({
 	projectData,
 	onQueueRender,

@@ -18,6 +18,7 @@ interface GetSourceWaveformSummaryArgs {
 	audioUrl?: string;
 }
 
+/** Class representing WaveformCache. */
 export class WaveformCache {
 	private summaries = new Map<string, Promise<SourceWaveformSummary>>();
 
@@ -89,4 +90,5 @@ export class WaveformCache {
 	}
 }
 
+/** Utility representing waveformCache. */
 export const waveformCache = new WaveformCache();

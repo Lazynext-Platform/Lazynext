@@ -18,6 +18,7 @@ import type { MediaAsset } from "@/media/types";
 import { TICKS_PER_SECOND } from "@/wasm";
 import { renderThumbnailDataUrl } from "./thumbnail";
 
+/** Type definition for VideoFileData. */
 export type VideoFileData = {
 	/** Duration of the video in seconds. */
 	duration: number;
@@ -98,6 +99,7 @@ const NUM_CHANNELS = 2;
 const EMPTY_TIMELINE_SILENT_DURATION_SECONDS = 0.1;
 const MIN_SILENT_DURATION_SECONDS = 0.001;
 
+/** Utility representing extractTimelineAudio. */
 export const extractTimelineAudio = async ({
 	tracks,
 	mediaAssets,

@@ -26,6 +26,7 @@ type InsertElementPlacement =
 	| { mode: "explicit"; trackId: string }
 	| { mode: "auto"; trackType?: TrackType; insertIndex?: number };
 
+/** Type definition for InsertElementParams. */
 export interface InsertElementParams {
 	/** The element to create and insert. */
 	element: CreateTimelineElement;
@@ -33,6 +34,7 @@ export interface InsertElementParams {
 	placement: InsertElementPlacement;
 }
 
+/** Class representing InsertElementCommand. */
 export class InsertElementCommand extends Command {
 	private elementId: string;
 	private savedState: SceneTracks | null = null;

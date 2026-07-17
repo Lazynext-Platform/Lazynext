@@ -44,6 +44,7 @@ function getSelectionBoxBounds({
 	};
 }
 
+/** Custom hook providing useBoxSelect functionality. */
 export function useBoxSelect<TId>({
 	containerRef,
 	resolveIntersections,

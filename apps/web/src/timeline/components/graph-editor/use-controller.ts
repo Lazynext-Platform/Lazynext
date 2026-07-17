@@ -19,6 +19,7 @@ import {
 	type GraphEditorSelectionState,
 } from "./session";
 
+/** Custom hook providing useGraphEditorController functionality. */
 export function useGraphEditorController() {
 	const editor = useEditor();
 	const renderTracks = useEditor(

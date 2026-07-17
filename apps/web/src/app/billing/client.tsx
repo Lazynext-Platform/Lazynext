@@ -79,6 +79,7 @@ const PLANS = [
 	},
 ];
 
+/** React component rendering BillingPageClient. */
 export function BillingPageClient() {
 	const { data: _session, isPending } = useSession();
 	const _router = useRouter();

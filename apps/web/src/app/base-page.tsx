@@ -28,6 +28,7 @@ interface BasePageProps {
 	action?: React.ReactNode;
 }
 
+/** React component rendering BasePage. */
 export function BasePage({
 	children,
 	className = "",

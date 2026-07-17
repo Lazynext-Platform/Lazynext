@@ -3,6 +3,7 @@
 import type { MigrationResult, ProjectRecord } from "./types";
 import { getProjectId, isRecord } from "./utils";
 
+/** Utility representing transformProjectV13ToV14. */
 export function transformProjectV13ToV14({
 	project,
 }: {

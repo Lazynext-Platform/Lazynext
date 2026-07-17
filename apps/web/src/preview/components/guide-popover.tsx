@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/utils/ui";
 
+/** React component rendering GridPopover. */
 export function GridPopover({ children }: { children: React.ReactNode }) {
 	const activeGuide = usePreviewStore((state) => state.activeGuide);
 	const toggleGuide = usePreviewStore((state) => state.toggleGuide);

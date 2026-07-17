@@ -5,6 +5,7 @@ import type { SceneTracks, TimelineElement } from "@/timeline";
 import { findTrackInSceneTracks, updateElementInSceneTracks } from "@/timeline";
 import { applyElementUpdate } from "@/timeline/update-pipeline";
 
+/** Class representing UpdateElementsCommand. */
 export class UpdateElementsCommand extends Command {
 	private savedState: SceneTracks | null = null;
 	private readonly updates: Array<{

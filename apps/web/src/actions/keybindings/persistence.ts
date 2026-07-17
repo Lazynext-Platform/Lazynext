@@ -10,6 +10,7 @@ import {
 	type PersistedKeybindingsState,
 } from "./persisted-state";
 
+/** Type definition for DecodedKeybindingsState. */
 export interface DecodedKeybindingsState {
 	/** Map of shortcut keys to their bound actions. */
 	keybindings: Map<ShortcutKey, TActionWithOptionalArgs>;
@@ -17,6 +18,7 @@ export interface DecodedKeybindingsState {
 	isCustomized: boolean;
 }
 
+/** Utility representing serializeKeybindingsState. */
 export function serializeKeybindingsState({
 	keybindings,
 	isCustomized,
@@ -27,6 +29,7 @@ export function serializeKeybindingsState({
 	};
 }
 
+/** Utility representing migratePersistedKeybindingsState. */
 export function migratePersistedKeybindingsState({
 	state,
 	fromVersion,

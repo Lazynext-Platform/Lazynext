@@ -86,6 +86,7 @@ function buildOverlayStarPath({
 	return `${segments.join(" ")} Z`;
 }
 
+/** Utility representing starMaskDefinition. */
 export const starMaskDefinition: MaskDefinition<"star"> = {
 	type: "star",
 	name: "Star",

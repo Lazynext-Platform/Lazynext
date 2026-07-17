@@ -73,6 +73,7 @@ function CustomGuideOptions() {
 	);
 }
 
+/** Utility representing customGuide. */
 export const customGuide = {
 	id: "custom",
 	label: "Custom",

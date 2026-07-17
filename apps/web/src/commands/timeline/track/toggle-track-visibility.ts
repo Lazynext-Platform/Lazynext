@@ -8,6 +8,7 @@ import {
 	updateTrackInSceneTracks,
 } from "@/timeline";
 
+/** Class representing ToggleTrackVisibilityCommand. */
 export class ToggleTrackVisibilityCommand extends Command {
 	private savedState: SceneTracks | null = null;
 

@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
 
+/** React component rendering SettingsPageClient. */
 export function SettingsPageClient() {
 	const { data: session, isPending } = useSession();
 	const router = useRouter();

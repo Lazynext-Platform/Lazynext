@@ -16,6 +16,7 @@ const baseURL =
 		? window.location.origin
 		: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
+/** Utility representing authClient. */
 export const authClient = createAuthClient({
 	baseURL,
 	plugins: [
@@ -24,6 +25,7 @@ export const authClient = createAuthClient({
 	],
 });
 
+/** Documentation for this export. */
 export const {
 	signIn,
 	signUp,
@@ -31,6 +33,8 @@ export const {
 	useSession,
 } = authClient;
 
+/** Utility representing requestPasswordReset. */
 export const requestPasswordReset = authClient.requestPasswordReset;
 
+/** Utility representing resetPassword. */
 export const resetPassword = authClient.resetPassword;

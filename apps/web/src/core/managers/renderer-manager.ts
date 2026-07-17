@@ -18,6 +18,7 @@ type SnapshotResult =
 	| { success: true; blob: Blob; filename: string }
 	| { success: false; error: string };
 
+/** Class representing RendererManager. */
 export class RendererManager {
 	private renderTree: RootNode | null = null;
 	private _isDegraded = false;

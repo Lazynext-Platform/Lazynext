@@ -39,6 +39,7 @@ function registerDefaultMask({
 	masksRegistry.registerMask({ definition, icon });
 }
 
+/** Utility representing registerDefaultMasks. */
 export function registerDefaultMasks(): void {
 	registerDefaultMask({
 		definition: splitMaskDefinition,

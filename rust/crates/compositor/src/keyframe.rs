@@ -9,6 +9,7 @@
 //! linear) and an `Interpolator` that computes property values at any
 //! point in time between sorted keyframes.
 
+/// Represents a cubic Bezier curve used for easing interpolation.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BezierCurve {
     /// Start control point value.

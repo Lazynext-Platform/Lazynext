@@ -9,6 +9,7 @@ const KNOWN_STICKER_PROVIDER_IDS = new Set([
 	"shapes",
 ]);
 
+/** Utility representing transformProjectV4ToV5. */
 export function transformProjectV4ToV5({
 	project,
 }: {

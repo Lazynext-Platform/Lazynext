@@ -30,6 +30,7 @@ interface UseElementInteractionProps {
 	onSnapPointChange?: (snapPoint: SnapPoint | null) => void;
 }
 
+/** Custom hook providing useElementInteraction functionality. */
 export function useElementInteraction({
 	zoomLevel,
 	tracksContainerRef,

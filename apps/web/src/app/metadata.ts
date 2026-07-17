@@ -11,6 +11,7 @@
 import type { Metadata } from "next";
 import { SITE_INFO, SITE_URL } from "@/site/brand";
 
+/** Utility representing baseMetaData. */
 export const baseMetaData: Metadata = {
 	metadataBase: new URL(SITE_URL),
 	title: SITE_INFO.title,

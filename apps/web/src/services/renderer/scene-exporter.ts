@@ -45,6 +45,7 @@ const qualityMap = {
 	very_high: QUALITY_VERY_HIGH,
 };
 
+/** Type definition for SceneExporterEvents. */
 export type SceneExporterEvents = {
 	/** Emitted with export progress (0–1). */
 	progress: [progress: number];
@@ -56,6 +57,7 @@ export type SceneExporterEvents = {
 	cancelled: [];
 };
 
+/** Class representing SceneExporter. */
 export class SceneExporter extends EventEmitter<SceneExporterEvents> {
 	private renderer: CanvasRenderer;
 	private format: ExportFormat;

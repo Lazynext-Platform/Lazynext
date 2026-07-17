@@ -22,6 +22,7 @@ import { WebVitals } from "@/components/analytics/WebVitals";
 
 const siteFont = Inter({ subsets: ["latin"] });
 
+/** Utility representing metadata. */
 export const metadata = generateMetadata({});
 
 // Analytics providers — each conditional on its env var

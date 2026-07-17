@@ -9,6 +9,7 @@ import {
 } from "../helpers/canvas.util";
 import { ELEMENT_TYPES } from "../helpers/constants";
 
+/** Utility representing ArrowElement. */
 export const ArrowElement: CanvasElementHandler = {
 	name: ELEMENT_TYPES.ARROW,
 

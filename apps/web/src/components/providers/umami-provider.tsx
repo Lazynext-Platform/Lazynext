@@ -9,6 +9,7 @@
 
 import Script from "next/script";
 
+/** React component rendering UmamiProvider. */
 export function UmamiProvider() {
 	const websiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
 	const scriptUrl = process.env.NEXT_PUBLIC_UMAMI_URL;

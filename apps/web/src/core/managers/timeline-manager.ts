@@ -69,6 +69,7 @@ import type {
 	PlannedTrackCreation,
 } from "@/timeline/group-move";
 
+/** Class representing TimelineManager. */
 export class TimelineManager {
 	private listeners = new Set<() => void>();
 	private previewOverlay = new Map<string, Partial<TimelineElement>>();

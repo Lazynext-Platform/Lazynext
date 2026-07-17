@@ -1,12 +1,14 @@
 /** @module Preview overlay types and rendering logic for HUD elements on the canvas */
 import type { ReactNode } from "react";
 
+/** Type definition for PreviewOverlayHudAnchor. */
 export type PreviewOverlayHudAnchor =
 	| "top-left"
 	| "top-right"
 	| "bottom-left"
 	| "bottom-right";
 
+/** Type definition for PreviewOverlayMount. */
 export type PreviewOverlayMount =
 	| {
 			kind: "hud";
@@ -28,8 +30,10 @@ export type PreviewOverlayMount =
 			height?: number;
 	  };
 
+/** Type definition for PreviewOverlayPlane. */
 export type PreviewOverlayPlane = "under-interaction" | "over-interaction";
 
+/** Type definition for PreviewOverlayRenderContext. */
 export interface PreviewOverlayRenderContext {
 	/** Scene height in pixels. */
 	sceneHeight: number;
@@ -37,6 +41,7 @@ export interface PreviewOverlayRenderContext {
 	sceneWidth: number;
 }
 
+/** Type definition for PreviewOverlayInstance. */
 export interface PreviewOverlayInstance {
 	/** Unique instance identifier. */
 	id: string;
@@ -52,6 +57,7 @@ export interface PreviewOverlayInstance {
 	render: (context: PreviewOverlayRenderContext) => ReactNode;
 }
 
+/** Type definition for PreviewOverlayDefinition. */
 export interface PreviewOverlayDefinition {
 	/** Unique definition identifier. */
 	id: string;
@@ -61,11 +67,13 @@ export interface PreviewOverlayDefinition {
 	defaultVisible?: boolean;
 }
 
+/** Type definition for PreviewOverlayControl. */
 export interface PreviewOverlayControl extends PreviewOverlayDefinition {
 	/** Current visibility state. */
 	isVisible: boolean;
 }
 
+/** Type definition for PreviewOverlaySourceResult. */
 export interface PreviewOverlaySourceResult {
 	/** Overlay definitions contributed by this source. */
 	definitions: PreviewOverlayDefinition[];
@@ -73,11 +81,13 @@ export interface PreviewOverlaySourceResult {
 	instances: PreviewOverlayInstance[];
 }
 
+/** Utility representing EMPTY_PREVIEW_OVERLAY_SOURCE_RESULT. */
 export const EMPTY_PREVIEW_OVERLAY_SOURCE_RESULT: PreviewOverlaySourceResult = {
 	definitions: [],
 	instances: [],
 };
 
+/** Utility representing isPreviewOverlayVisible. */
 export function isPreviewOverlayVisible({
 	overlay,
 	overlays,
@@ -88,6 +98,7 @@ export function isPreviewOverlayVisible({
 	return overlays[overlay.id] ?? overlay.defaultVisible ?? true;
 }
 
+/** Utility representing createPreviewOverlayControl. */
 export function createPreviewOverlayControl({
 	overlay,
 	overlays,
@@ -101,6 +112,7 @@ export function createPreviewOverlayControl({
 	};
 }
 
+/** Utility representing mergePreviewOverlaySources. */
 export function mergePreviewOverlaySources({
 	sources,
 }: {

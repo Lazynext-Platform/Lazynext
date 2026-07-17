@@ -45,20 +45,24 @@ function platformGuide({
 	};
 }
 
+/** Utility representing tiktokGuide. */
 export const tiktokGuide: GuideDefinition = {
 	...platformGuide({ id: "tiktok", label: "TikTok", domain: "tiktok.com" }),
 	renderOverlay: () => <TikTokLayout />,
 };
+/** Utility representing igReelsGuide. */
 export const igReelsGuide = platformGuide({
 	id: "ig-reels",
 	label: "Reels",
 	domain: "instagram.com",
 });
+/** Utility representing ytShortsGuide. */
 export const ytShortsGuide = platformGuide({
 	id: "yt-shorts",
 	label: "Shorts",
 	domain: "youtube.com",
 });
+/** Utility representing spotlightGuide. */
 export const spotlightGuide = platformGuide({
 	id: "spotlight",
 	label: "Spotlight",

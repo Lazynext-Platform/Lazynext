@@ -60,6 +60,7 @@ export const v2Project = {
 	],
 };
 
+/** Utility representing v2ProjectWithBlurBackground. */
 export const v2ProjectWithBlurBackground = {
 	id: "project-v2-blur",
 	version: 2,
@@ -103,6 +104,7 @@ export const v2ProjectWithBlurBackground = {
 	],
 };
 
+/** Utility representing v2ProjectEmptyScenes. */
 export const v2ProjectEmptyScenes = {
 	id: "project-v2-empty",
 	version: 2,
@@ -121,6 +123,7 @@ export const v2ProjectEmptyScenes = {
 	scenes: [],
 };
 
+/** Utility representing v2ProjectSceneWithoutTracks. */
 export const v2ProjectSceneWithoutTracks = {
 	id: "project-v2-no-tracks",
 	version: 2,

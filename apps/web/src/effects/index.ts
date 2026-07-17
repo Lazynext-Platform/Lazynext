@@ -9,6 +9,7 @@ import { VISUAL_ELEMENT_TYPES } from "@/timeline";
 export { effectsRegistry } from "./registry";
 export { registerDefaultEffects } from "./definitions";
 
+/** Utility representing resolveEffectPasses. */
 export function resolveEffectPasses({
 	definition,
 	effectParams,
@@ -29,8 +30,10 @@ export function resolveEffectPasses({
 	}));
 }
 
+/** Utility representing EFFECT_TARGET_ELEMENT_TYPES. */
 export const EFFECT_TARGET_ELEMENT_TYPES = VISUAL_ELEMENT_TYPES;
 
+/** Utility representing buildDefaultEffectInstance. */
 export function buildDefaultEffectInstance({
 	effectType,
 }: {

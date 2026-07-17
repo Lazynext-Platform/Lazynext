@@ -12,6 +12,7 @@ import {
 	type VisualNodeParams,
 } from "./visual-node";
 
+/** Type definition for GraphicNodeParams. */
 export interface GraphicNodeParams extends VisualNodeParams {
 	/** Graphic definition identifier. */
 	definitionId: string;
@@ -19,11 +20,13 @@ export interface GraphicNodeParams extends VisualNodeParams {
 	params: ParamValues;
 }
 
+/** Type definition for ResolvedGraphicNodeState. */
 export interface ResolvedGraphicNodeState extends ResolvedVisualNodeState {
 	/** Parameter values resolved at the current time. */
 	resolvedParams: ParamValues;
 }
 
+/** Class representing GraphicNode. */
 export class GraphicNode extends VisualNode<
 	GraphicNodeParams,
 	ResolvedGraphicNodeState

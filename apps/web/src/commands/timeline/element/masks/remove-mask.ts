@@ -16,6 +16,7 @@ function removeMaskFromElement({
 	return { ...element, masks: filteredMasks };
 }
 
+/** Class representing RemoveMaskCommand. */
 export class RemoveMaskCommand extends Command {
 	private savedState: SceneTracks | null = null;
 	private readonly trackId: string;

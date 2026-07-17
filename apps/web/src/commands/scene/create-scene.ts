@@ -4,6 +4,7 @@ import { EditorCore } from "@/core";
 import type { TScene } from "@/timeline";
 import { buildDefaultScene } from "@/timeline/scenes";
 
+/** Class representing CreateSceneCommand. */
 export class CreateSceneCommand extends Command {
 	private savedScenes: TScene[] | null = null;
 	private createdScene: TScene | null = null;

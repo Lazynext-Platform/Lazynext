@@ -26,6 +26,7 @@ interface EditorErrorBoundaryState {
 	error: Error | null;
 }
 
+/** React component rendering EditorErrorBoundary. */
 export class EditorErrorBoundary extends Component<
 	EditorErrorBoundaryProps,
 	EditorErrorBoundaryState

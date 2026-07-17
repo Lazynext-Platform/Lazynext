@@ -303,7 +303,7 @@ See `.env.example` for the full list. Key variables:
 | `MODAL_API_KEY` | No | Modal GPU compute (SD Pipeline video generation, ML inference) |
 | `NEXT_PUBLIC_*_URL` | No | Microservice URLs (defaults to localhost) |
 | `UPSTASH_REDIS_URL` | No | Rate limiting (required in production) |
-| `STRIPE_SECRET_KEY` | No | Payments |
+| `DODO_API_KEY` | No | Payments |
 
 ---
 

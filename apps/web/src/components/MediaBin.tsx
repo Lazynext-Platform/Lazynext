@@ -18,6 +18,7 @@ interface MediaAsset {
   thumbnailUrl: string;
 }
 
+/** React component rendering MediaBin. */
 export const MediaBin: React.FC = () => {
   const [assets, setAssets] = useState<MediaAsset[]>([
     { id: '1', name: 'drone_footage_4k.mp4', type: 'video', thumbnailUrl: '' },

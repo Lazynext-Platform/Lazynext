@@ -1,6 +1,7 @@
 /** @module Batch command — executes multiple commands in sequence and collects the latest selection result for the undo/redo system. */
 import { Command, type CommandResult } from "./base-command";
 
+/** Class representing BatchCommand. */
 export class BatchCommand extends Command {
 	constructor(private commands: Command[]) {
 		super();

@@ -38,6 +38,7 @@ function applyStroke({
 	ctx.stroke(path);
 }
 
+/** Utility representing applyAlignedStroke. */
 export function applyAlignedStroke({
 	ctx,
 	path,

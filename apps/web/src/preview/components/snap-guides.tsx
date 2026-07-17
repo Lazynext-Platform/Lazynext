@@ -4,6 +4,7 @@
 import { usePreviewViewport } from "@/preview/components/preview-viewport";
 import type { SnapLine } from "@/preview/preview-snap";
 
+/** React component rendering SnapGuides. */
 export function SnapGuides({ lines }: { lines: SnapLine[] }) {
 	const viewport = usePreviewViewport();
 

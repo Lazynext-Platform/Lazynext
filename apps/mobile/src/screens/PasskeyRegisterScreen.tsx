@@ -16,6 +16,7 @@ import {
 } from "react-native";
 import { registerPasskey } from "../services/auth";
 
+/** React component rendering PasskeyRegisterScreen. */
 export function PasskeyRegisterScreen({ navigation }: { navigation: any }) {
 	const [name, setName] = useState("");
 	const [loading, setLoading] = useState(false);

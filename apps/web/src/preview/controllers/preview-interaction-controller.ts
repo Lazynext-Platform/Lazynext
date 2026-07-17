@@ -93,6 +93,7 @@ type GestureSession =
 
 const IDLE_GESTURE: GestureSession = { kind: "idle" };
 
+/** Type definition for EditingTextState. */
 export interface EditingTextState {
 	/** Track containing the text element being edited. */
 	readonly trackId: string;
@@ -102,6 +103,7 @@ export interface EditingTextState {
 	readonly element: TextElement;
 }
 
+/** Type definition for PreviewViewportAdapter. */
 export interface PreviewViewportAdapter {
 	/** Converts screen coordinates to canvas coordinates. */
 	screenToCanvas: ({
@@ -122,11 +124,13 @@ export interface PreviewViewportAdapter {
 	}) => Point;
 }
 
+/** Type definition for InputAdapter. */
 export interface InputAdapter {
 	/** Returns whether the shift key is currently held. */
 	isShiftHeld: () => boolean;
 }
 
+/** Type definition for SceneReader. */
 export interface SceneReader {
 	/** Returns the scene's tracks. */
 	getTracks: () => SceneTracks;
@@ -138,6 +142,7 @@ export interface SceneReader {
 	getCanvasSize: () => TCanvasSize;
 }
 
+/** Type definition for SelectionApi. */
 export interface SelectionApi {
 	/** Returns the currently selected element references. */
 	getSelected: () => readonly ElementRef[];
@@ -147,6 +152,7 @@ export interface SelectionApi {
 	clearSelection: () => void;
 }
 
+/** Type definition for TimelinePreviewUpdate. */
 export interface TimelinePreviewUpdate {
 	/** Track containing the element to update. */
 	readonly trackId: string;
@@ -156,6 +162,7 @@ export interface TimelinePreviewUpdate {
 	readonly updates: Partial<TimelineElement>;
 }
 
+/** Type definition for TimelineOps. */
 export interface TimelineOps {
 	/** Resolves elements together with their owning tracks. */
 	getElementsWithTracks: ({
@@ -172,6 +179,7 @@ export interface TimelineOps {
 	discardPreview: () => void;
 }
 
+/** Type definition for PlaybackApi. */
 export interface PlaybackApi {
 	/** Returns whether playback is currently active. */
 	getIsPlaying: () => boolean;
@@ -179,6 +187,7 @@ export interface PlaybackApi {
 	subscribe: (listener: () => void) => () => void;
 }
 
+/** Type definition for PreviewOptions. */
 export interface PreviewOptions {
 	/** Returns whether mask editing mode is active. */
 	isMaskMode: () => boolean;
@@ -186,6 +195,7 @@ export interface PreviewOptions {
 	onSnapLinesChange?: (lines: SnapLine[]) => void;
 }
 
+/** Type definition for PreviewInteractionDeps. */
 export interface PreviewInteractionDeps {
 	/** Viewport coordinate adapter. */
 	viewport: PreviewViewportAdapter;
@@ -203,6 +213,7 @@ export interface PreviewInteractionDeps {
 	preview: PreviewOptions;
 }
 
+/** Type definition for PreviewInteractionDepsRef. */
 export interface PreviewInteractionDepsRef {
 	/** Current dependency values. */
 	readonly current: PreviewInteractionDeps;
@@ -281,6 +292,7 @@ function toDragElementSnapshots({
 		}));
 }
 
+/** Class representing PreviewInteractionController. */
 export class PreviewInteractionController {
 	private readonly depsRef: PreviewInteractionDepsRef;
 	private readonly subscribers = new Set<() => void>();

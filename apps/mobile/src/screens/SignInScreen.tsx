@@ -20,6 +20,7 @@ import {
 } from "react-native";
 import { useAuth } from "../contexts/AuthContext";
 
+/** React component rendering SignInScreen. */
 export function SignInScreen({ navigation }: { navigation: any }) {
 	const { signIn, signInWithMagicLink, signInWithOAuth } = useAuth();
 	const [mode, setMode] = useState<"password" | "magicLink">("password");

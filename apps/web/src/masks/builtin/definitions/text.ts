@@ -204,6 +204,7 @@ function computeTextMaskParamUpdate({
 	return {};
 }
 
+/** Utility representing textMaskDefinition. */
 export const textMaskDefinition: MaskDefinition<"text"> = {
 	type: "text",
 	name: "Text",

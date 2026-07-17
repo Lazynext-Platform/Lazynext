@@ -6,6 +6,7 @@ import { StorageMigration, type StorageMigrationRunArgs } from "./base";
 import type { MigrationResult, ProjectRecord } from "./transformers/types";
 import { transformProjectV26ToV27 } from "./transformers/v26-to-v27";
 
+/** Class representing V26toV27Migration. */
 export class V26toV27Migration extends StorageMigration {
 	from = 26;
 	to = 27;

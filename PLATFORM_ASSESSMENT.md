@@ -37,7 +37,7 @@ Supporting these are **7 microservices** (pre-processing ~75%, generative-studio
 
 The platform has progressed significantly since the original assessment (2026-06-28). Major corrections:
 - Desktop app is a **real GPUI application** with Dashboard, Editor, NLEState, CoreEngine, and DeckLink — not a 25-line stub.
-- API Gateway uses **real JWT auth** (HS256, BETTER_AUTH_SECRET), PostgreSQL (DATABASE_URL), RBAC/CSRF/rate-limiting, Stripe HMAC verification, and OpenAPI — not hardcoded tokens or SQLite.
+- API Gateway uses **real JWT auth** (HS256, BETTER_AUTH_SECRET), PostgreSQL (DATABASE_URL), RBAC/CSRF/rate-limiting, Dodo Payments HMAC verification, and OpenAPI — not hardcoded tokens or SQLite.
 - CoreEngine `render_frame()` is a **real GPU compositor pipeline** building FrameDescriptor from timeline state, evaluating animated properties, and rendering via wgpu — not a mock red pixel.
 - ACES color pipeline has **real IDT/ODT matrices**, Not mock.
 - Optical flow (effects crate) is a **real implementation** with pyramid block matching, GPU compute shader, and 5 tests.
@@ -69,7 +69,7 @@ The platform has progressed significantly since the original assessment (2026-06
 ### FORMAT 1: Web App (`apps/web`) — 85% → 100%
 
 **What's Already Working:**
-- Full Next.js 16 app with 37 pages, auth (better-auth), Stripe payments, Resend email
+- Full Next.js 16 app with 37 pages, auth (better-auth), Dodo payments, Resend email
 - 45+ shadcn/ui glassmorphism components
 - Full timeline engine with track system, placement, snapping, zoom, effects, masks
 - 40+ undo/redo commands with batch/preview
@@ -175,7 +175,7 @@ The platform has progressed significantly since the original assessment (2026-06
 
 ### FORMAT 6: API Gateway (`rust/api-gateway`) — 80% → 100%
 
-**Current State:** *(Updated 2026-06-30)* Axum server with 14 routes, **real JWT auth (HS256, BETTER_AUTH_SECRET)**, **PostgreSQL (DATABASE_URL)**, RBAC/CSRF/rate-limiting, Stripe HMAC signature verification, and OpenAPI — the SQLite-in-memory / hardcoded-token / `"mock_user_id"` claims from the original audit no longer apply. Remaining: deeper integration tests + API docs.
+**Current State:** *(Updated 2026-06-30)* Axum server with 14 routes, **real JWT auth (HS256, BETTER_AUTH_SECRET)**, **PostgreSQL (DATABASE_URL)**, RBAC/CSRF/rate-limiting, Dodo Payments HMAC signature verification, and OpenAPI — the SQLite-in-memory / hardcoded-token / `"mock_user_id"` claims from the original audit no longer apply. Remaining: deeper integration tests + API docs.
 
 **What Must Be Done:**
 
@@ -183,7 +183,7 @@ The platform has progressed significantly since the original assessment (2026-06
 |---|------|----------|--------|
 | 6.1 | **Replace hardcoded auth tokens with real JWT** — Three literal tokens (`admin-token-123`, `editor-token-456`, `viewer-token-789`) must be replaced with proper better-auth JWT HS256 validation. | Critical | Medium |
 | 6.2 | **Replace SQLite with PostgreSQL** — `DbStore` uses in-memory SQLite as fallback. Must connect to PostgreSQL / DATABASE_URL. | Critical | Medium |
-| 6.3 | **Implement Stripe webhook verification** — `handle_stripe_webhook` only prints event type. Must verify Stripe signatures with `STRIPE_WEBHOOK_SECRET`. | Critical | Medium |
+| 6.3 | **Implement Dodo Payments webhook verification** — `handle_dodo_webhook` only prints event type. Must verify Dodo signatures with `DODO_WEBHOOK_SECRET`. | Critical | Medium |
 | 6.4 | **Fix hardcoded user ID** — `handle_get_projects` uses literal `"mock_user_id"` instead of decoded JWT subject. | Critical | Small |
 | 6.5 | **Add rate limiting middleware** — No rate limiter exists on any route. | High | Medium |
 | 6.6 | **Add CSRF protection** — No CSRF tokens on state-changing endpoints. | High | Small |
@@ -259,7 +259,7 @@ These underpin all 7 formats:
 | # | Task | Priority | Effort |
 |---|------|----------|--------|
 | I1 | **Remove sensitive files from repo** — `env.yaml`, `web.json`, `db.json` contain real config data. `cloud-sql-proxy` binary removed. | Critical | Small |
-| I2 | **Fix docker-compose env var gaps** — Stripe, Resend, Freesound, Marble vars missing from docker-compose.yml. | High | Small |
+| I2 | **Fix docker-compose env var gaps** — Dodo Payments, Resend, Freesound, Marble vars missing from docker-compose.yml. | High | Small |
 | I3 | **Consolidate CI/CD** — 4 overlapping systems (GitHub Actions, GitLab CI, Jenkins). Keep GitHub Actions. | Medium | Medium |
 | I4 | **Consolidate docker-compose files** — 7 files, many redundant. Reduce to 2 (main + dev). | Low | Small |
 | I5 | **Standardize env var naming** — `RENDER_SERVICE_URL` vs `NEXT_PUBLIC_RENDER_SERVICE_URL` inconsistency. | Low | Small |
@@ -283,7 +283,7 @@ These underpin all 7 formats:
 5. Wire real CRDT sync end-to-end (React state ← WASM engine)
 6. Implement real render-service composition (CRDT → ffmpeg filtergraph)
 7. Wire real export pipeline (compositor frames → ffmpeg encoding)
-8. Fix API Gateway auth + PostgreSQL + Stripe webhooks
+8. Fix API Gateway auth + PostgreSQL + Dodo Payments webhooks
 
 ### Phase 2: Make Backend Services Real
 **Effort: ~2-3 months**

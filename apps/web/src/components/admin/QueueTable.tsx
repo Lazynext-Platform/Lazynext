@@ -11,6 +11,7 @@ interface QueueItem {
 	progress: number;
 }
 
+/** React component rendering QueueTable. */
 export function QueueTable({ items }: { items: QueueItem[] }) {
 	return (
 		<div className="w-full bg-[--bg-card] rounded-xl border border-[--border-primary] overflow-hidden">

@@ -34,6 +34,7 @@ registerDefaultGraphics();
 
 const DEFAULT_STROKE_WIDTH = 2;
 
+/** React component rendering GraphicTab. */
 export function GraphicTab({
 	element,
 	trackId,

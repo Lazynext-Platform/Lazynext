@@ -9,6 +9,7 @@ import type {
 } from "@/text/primitives";
 import type { CaptionChunk } from "@/transcription/types";
 
+/** Type definition for SubtitlePlacementStyle. */
 export interface SubtitlePlacementStyle {
 	/** Vertical alignment relative to the canvas. */
 	verticalAlign?: "top" | "middle" | "bottom";
@@ -20,6 +21,7 @@ export interface SubtitlePlacementStyle {
 	marginVerticalRatio?: number;
 }
 
+/** Type definition for SubtitleStyleOverrides. */
 export interface SubtitleStyleOverrides {
 	/**
 	 * Font size in app units (same coordinate space as TextElement.fontSize).
@@ -57,11 +59,13 @@ export interface SubtitleStyleOverrides {
 	placement?: SubtitlePlacementStyle;
 }
 
+/** Type definition for SubtitleCue. */
 export interface SubtitleCue extends CaptionChunk {
 	/** Optional style overrides for this cue. */
 	style?: SubtitleStyleOverrides;
 }
 
+/** Type definition for ParseSubtitleResult. */
 export interface ParseSubtitleResult {
 	/** Parsed subtitle cues. */
 	captions: SubtitleCue[];

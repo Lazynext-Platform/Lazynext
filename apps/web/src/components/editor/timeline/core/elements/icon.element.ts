@@ -4,6 +4,7 @@ import type { ElementVisitor } from "../visitor/element-visitor";
 import { TIMELINE_ELEMENT_TYPE } from "../../utils/constants";
 import { Size } from "../../types";
 
+/** Class representing IconElement. */
 export class IconElement extends TrackElement {
 	constructor(src: string, size: Size, fill: string = "#866bbf") {
 		super(TIMELINE_ELEMENT_TYPE.ICON);

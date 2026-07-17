@@ -21,6 +21,7 @@ import type { ResizeSide } from "@/timeline/group-resize";
 import type { SnapPoint } from "@/timeline/snapping";
 import type { TimelineElement } from "@/timeline";
 
+/** Documentation for this export. */
 export type { ResizeSide };
 
 interface UseTimelineResizeProps {

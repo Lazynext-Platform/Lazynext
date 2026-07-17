@@ -1,7 +1,9 @@
 /** @module Base render node abstract class for the compositor node tree */
 export type BaseNodeParams = object | undefined;
+/** Type definition for AnyBaseNode. */
 export type AnyBaseNode = BaseNode<BaseNodeParams, unknown>;
 
+/** Class representing BaseNode. */
 export class BaseNode<
 	Params extends BaseNodeParams = BaseNodeParams,
 	Resolved = unknown,

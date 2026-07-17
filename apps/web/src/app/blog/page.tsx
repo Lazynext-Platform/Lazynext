@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { getPosts } from "@/blog/query";
 import type { Post } from "@/blog/types";
 
+/** Utility representing metadata. */
 export const metadata: Metadata = {
 	title: "Blog - Lazynext",
 	description:

@@ -12,6 +12,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth/server";
 
+/** Utility representing metadata. */
 export const metadata = generateMetadata({
 	title: "Sign Up — Start Free",
 	description:

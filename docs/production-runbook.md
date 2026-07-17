@@ -436,7 +436,7 @@ curl -f http://localhost:3000/api/health
 | `lazynext_postgres_password` | postgres | PostgreSQL password |
 | `lazynext_better_auth_secret` | api-gateway, web, collab-server | Auth signing key |
 | `lazynext_dodo_secret_key` | web | Dodo Payments secret key |
-| `lazynext_stripe_webhook_secret` | api-gateway, web | Dodo Payments webhook key |
+| `lazynext_dodo_webhook_secret` | api-gateway, web | Dodo Payments webhook key |
 | `lazynext_resend_api_key` | web | Email API key |
 | `lazynext_gemini_api_key` | ai-agents, pre-processing | Gemini API key |
 | `lazynext_modal_key` | pre-processing, generative-studio | Modal API key |
@@ -459,7 +459,7 @@ curl -f http://localhost:3000/api/health
 echo "${DB_PASSWORD}" | docker secret create lazynext_postgres_password -
 echo "${BETTER_AUTH_SECRET}" | docker secret create lazynext_better_auth_secret -
 echo "${DODO_SECRET_KEY}" | docker secret create lazynext_dodo_secret_key -
-echo "${DODO_WEBHOOK_SECRET}" | docker secret create lazynext_stripe_webhook_secret -
+echo "${DODO_WEBHOOK_SECRET}" | docker secret create lazynext_dodo_webhook_secret -
 echo "${RESEND_API_KEY}" | docker secret create lazynext_resend_api_key -
 echo "${GEMINI_API_KEY}" | docker secret create lazynext_gemini_api_key -
 echo "${MODAL_API_KEY}" | docker secret create lazynext_modal_key -

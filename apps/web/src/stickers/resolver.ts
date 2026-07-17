@@ -8,6 +8,7 @@ import { parseStickerId } from "./sticker-id";
 import { registerDefaultStickerProviders } from "./providers";
 import type { StickerResolveOptions } from "@/stickers/types";
 
+/** Utility representing resolveStickerId. */
 export function resolveStickerId({
 	stickerId,
 	options,

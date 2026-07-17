@@ -8,6 +8,7 @@
 
 import { useState } from "react";
 
+/** React component rendering ExportButton. */
 export default function ExportButton({ projectId }: { projectId: string }) {
 	const [isExporting, setIsExporting] = useState(false);
 	const [status, setStatus] = useState("");

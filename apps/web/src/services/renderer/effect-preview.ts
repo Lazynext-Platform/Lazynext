@@ -149,4 +149,5 @@ class EffectPreviewService {
 	}
 }
 
+/** Utility representing effectPreviewService. */
 export const effectPreviewService = new EffectPreviewService();

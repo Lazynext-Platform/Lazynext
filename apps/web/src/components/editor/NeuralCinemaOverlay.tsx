@@ -12,6 +12,7 @@ interface NeuralCinemaOverlayProps {
 	isActive: boolean;
 }
 
+/** React component rendering NeuralCinemaOverlay. */
 export function NeuralCinemaOverlay({ isActive }: NeuralCinemaOverlayProps) {
 	if (!isActive) return null;
 

@@ -18,6 +18,7 @@ import { SocialAuthButtons } from "./SocialAuthButtons";
 import { CaptchaWidget } from "./CaptchaWidget";
 import { verifyCaptchaToken } from "./captcha-verify";
 
+/** React component rendering SignUpForm. */
 export function SignUpForm() {
 	const router = useRouter();
 	const [name, setName] = useState("");

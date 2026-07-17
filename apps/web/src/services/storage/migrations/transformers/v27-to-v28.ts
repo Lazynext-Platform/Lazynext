@@ -3,6 +3,7 @@ import { roundMediaTime } from "@/wasm";
 import type { MigrationResult, ProjectRecord } from "./types";
 import { getProjectId, isRecord } from "./utils";
 
+/** Utility representing transformProjectV27ToV28. */
 export function transformProjectV27ToV28({
 	project,
 }: {

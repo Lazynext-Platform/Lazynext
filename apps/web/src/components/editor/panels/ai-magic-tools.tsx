@@ -11,6 +11,7 @@ import { useEditorState } from "../useEditorState";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
+/** React component rendering AIMagicTools. */
 export function AIMagicTools() {
 	const { setAssets } = useEditorState();
 	const [activeTab, setActiveTab] = useState<"video" | "audio" | "music">("video");

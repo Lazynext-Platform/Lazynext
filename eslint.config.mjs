@@ -10,6 +10,8 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 import preferObjectParams from "./eslint/rules/prefer-object-params.mjs";
 
+import jsdoc from "eslint-plugin-jsdoc";
+
 const webFiles = ["apps/web/src/**/*.{ts,tsx}"];
 
 const lazynextEslintPlugin = {
@@ -66,6 +68,7 @@ export default [
 	scopeToWebFiles(reactHooks.configs.flat["recommended-latest"]),
 	scopeToWebFiles(jsxA11y.flatConfigs.recommended),
 	scopeToWebFiles(next.configs["core-web-vitals"]),
+	jsdoc.configs["flat/recommended"],
 	{
 		files: webFiles,
 		plugins: {
@@ -123,6 +126,19 @@ export default [
 			"jsx-a11y/html-has-lang": "warn",
 			"@next/next/no-html-link-for-pages": "warn",
 			"jsx-a11y/anchor-is-valid": "warn",
+			"jsdoc/require-jsdoc": ["warn", { 
+				"require": {
+					"FunctionDeclaration": true,
+					"MethodDefinition": true,
+					"ClassDeclaration": true,
+					"ArrowFunctionExpression": true,
+					"FunctionExpression": true
+				}
+			}],
+			"jsdoc/require-description": "warn",
+			"jsdoc/require-returns": "off",
+			"jsdoc/require-param": "off",
+			"jsdoc/require-param-type": "off"
 		},
 	},
 	scopeToWebFiles(eslintConfigPrettier),

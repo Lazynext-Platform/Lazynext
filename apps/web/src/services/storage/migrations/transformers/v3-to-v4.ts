@@ -19,6 +19,7 @@ const VALID_NUMERIC_FONT_WEIGHTS = new Set([
 	"900",
 ]);
 
+/** Utility representing transformProjectV3ToV4. */
 export function transformProjectV3ToV4({
 	project,
 }: {

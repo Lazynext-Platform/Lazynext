@@ -46,6 +46,7 @@ function buildRectanglePath({
 	return path;
 }
 
+/** Utility representing rectangleMaskDefinition. */
 export const rectangleMaskDefinition: MaskDefinition<"rectangle"> = {
 	type: "rectangle",
 	name: "Rectangle",

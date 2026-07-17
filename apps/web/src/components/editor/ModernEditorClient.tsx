@@ -31,6 +31,7 @@ import WasmPlayer from "./wasm-player";
 import Timeline from "./timeline";
 import { toast } from "sonner";
 
+/** React component rendering ModernEditorClient. */
 export default function ModernEditorClient({ project }: { project: any }) {
 	const {
 		projectData: ctxProject,

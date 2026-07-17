@@ -74,8 +74,10 @@ type RadialOrientation =
 	| (ExtentKeyword & { at?: Position })
 	| DefaultRadial;
 
+/** Type definition for GradientOrientation. */
 export type GradientOrientation = LinearOrientation | Array<RadialOrientation>;
 
+/** Type definition for Color. */
 export type Color =
 	| { type: "hex"; value: string }
 	| { type: "literal"; value: string }
@@ -85,8 +87,10 @@ export type Color =
 	| { type: "hsla"; value: [string, string, string, string] }
 	| { type: "var"; value: string };
 
+/** Type definition for ColorStop. */
 export type ColorStop = Color & { length?: Distance };
 
+/** Type definition for GradientAst. */
 export type GradientAst = {
 	/** Gradient kind: linear, radial, or repeating variants. */
 	type: GradientType;
@@ -700,6 +704,7 @@ const consume = ({ size }: { size: number }): void => {
 	input = input.slice(size);
 };
 
+/** Utility representing parseGradient. */
 export const parseGradient = ({
 	code,
 }: {
@@ -712,6 +717,7 @@ export const parseGradient = ({
 	return getAst();
 };
 
+/** Utility representing GradientParser. */
 export const GradientParser = {
 	parse: parseGradient,
 };

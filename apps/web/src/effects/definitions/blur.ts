@@ -1,6 +1,7 @@
 /** @module Gaussian blur effect definition with adjustable blur strength and quality */
 import type { EffectDefinition, EffectPass } from "@/effects/types";
 
+/** Utility representing GAUSSIAN_BLUR_SHADER. */
 export const GAUSSIAN_BLUR_SHADER = "gaussian-blur";
 
 const MAX_SINGLE_PASS_SIGMA = 10;
@@ -8,6 +9,7 @@ const MAX_STEP = 4;
 const MAX_EFFECTIVE_SIGMA = MAX_SINGLE_PASS_SIGMA * MAX_STEP;
 const MAX_ITERATIONS = 8;
 
+/** Utility representing buildGaussianBlurPasses. */
 export function buildGaussianBlurPasses({
 	sigmaX,
 	sigmaY,
@@ -54,8 +56,10 @@ export function buildGaussianBlurPasses({
 	return passes;
 }
 
+/** Utility representing INTENSITY_TO_SIGMA_DIVISOR. */
 export const INTENSITY_TO_SIGMA_DIVISOR = 5;
 
+/** Utility representing intensityToSigma. */
 export function intensityToSigma({
 	intensity,
 	resolution,
@@ -73,6 +77,7 @@ function parseIntensity(effectParams: Record<string, unknown>): number {
 	return typeof raw === "number" ? raw : Number.parseFloat(String(raw));
 }
 
+/** Utility representing blurEffectDefinition. */
 export const blurEffectDefinition: EffectDefinition = {
 	type: "blur",
 	name: "Blur",

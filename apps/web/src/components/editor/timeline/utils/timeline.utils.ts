@@ -133,6 +133,7 @@ export const getCurrentElements = (
 /** Disallow split when playhead is too close to element edges. */
 export const SPLIT_EDGE_BUFFER_SEC = 0.1;
 
+/** Utility representing canSplitElement. */
 export const canSplitElement = (element: TrackElement, currentTime: number) => {
 	return (
 		currentTime > element.getStart() + SPLIT_EDGE_BUFFER_SEC &&

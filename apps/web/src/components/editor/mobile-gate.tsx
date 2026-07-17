@@ -21,6 +21,7 @@ interface MobileGateProps {
 	children: React.ReactNode;
 }
 
+/** React component rendering MobileGate. */
 export function MobileGate({ children }: MobileGateProps) {
 	const router = useRouter();
 	const [show, setShow] = useState<boolean | null>(null);

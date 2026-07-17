@@ -23,6 +23,7 @@ interface RenderFarmModalProps {
 	farmProgress: FarmNode[];
 }
 
+/** React component rendering RenderFarmModal. */
 export function RenderFarmModal({
 	isOpen,
 	farmProgress,

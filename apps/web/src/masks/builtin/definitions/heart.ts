@@ -73,6 +73,7 @@ function buildHeartPath({
 	return path;
 }
 
+/** Utility representing heartMaskDefinition. */
 export const heartMaskDefinition: MaskDefinition<"heart"> = {
 	type: "heart",
 	name: "Heart",

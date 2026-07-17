@@ -2,8 +2,10 @@
 import { parseAss } from "./ass";
 import { parseSrt } from "./srt";
 import type { ParseSubtitleResult } from "./types";
+/** Documentation for this export. */
 export type { ParseSubtitleResult, SubtitleCue } from "./types";
 
+/** Utility representing parseSubtitleFile. */
 export function parseSubtitleFile({
 	fileName,
 	input,

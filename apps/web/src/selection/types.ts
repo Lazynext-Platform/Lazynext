@@ -6,6 +6,7 @@ export interface SelectionState {
 	anchorId: string | null;
 }
 
+/** Type definition for BoxSelectionSnapshot. */
 export interface BoxSelectionSnapshot<TId = string> {
 	/** Selected IDs at the start of the drag. */
 	initialSelectedIds: TId[];
@@ -13,6 +14,7 @@ export interface BoxSelectionSnapshot<TId = string> {
 	initialAnchorId: TId | null;
 }
 
+/** Type definition for SelectionBoxBounds. */
 export interface SelectionBoxBounds {
 	/** Left edge offset. */
 	left: number;
@@ -24,6 +26,7 @@ export interface SelectionBoxBounds {
 	height: number;
 }
 
+/** Type definition for BoxSelectionChange. */
 export interface BoxSelectionChange<
 	TId = string,
 > extends BoxSelectionSnapshot<TId> {
@@ -33,6 +36,7 @@ export interface BoxSelectionChange<
 	isAdditive: boolean;
 }
 
+/** Type definition for ResolveIntersections. */
 export type ResolveIntersections<TId = string> = ({
 	startPos,
 	currentPos,
@@ -41,6 +45,7 @@ export type ResolveIntersections<TId = string> = ({
 	currentPos: { x: number; y: number };
 }) => TId[];
 
+/** Type definition for SelectableSurfaceProps. */
 export interface SelectableSurfaceProps {
 	/** Ordered list of selectable item IDs. */
 	orderedIds: string[];
@@ -58,6 +63,7 @@ export interface SelectableSurfaceProps {
 	onSelectionChange?: (state: SelectionState) => void;
 }
 
+/** Type definition for SelectableItemProps. */
 export interface SelectableItemProps extends React.HTMLAttributes<HTMLDivElement> {
 	/** Unique item identifier. */
 	id: string;

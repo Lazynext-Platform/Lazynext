@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useId, useRef } from "react";
 import { useKeybindingsStore } from "@/actions/keybindings-store";
 
+/** Custom hook providing useOverlayOpenChange functionality. */
 export function useOverlayOpenChange({
 	open,
 	onOpenChange,

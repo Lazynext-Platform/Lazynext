@@ -35,10 +35,12 @@ export async function activateGpuCompositor(): Promise<boolean> {
   return gpuInitPromise;
 }
 
+/** Utility representing isGpuCompositorActive. */
 export function isGpuCompositorActive(): boolean {
   return gpuCompositorActive;
 }
 
+/** Utility representing getGpuOutputCanvas. */
 export function getGpuOutputCanvas(): HTMLCanvasElement | null {
     // The new WasmEngine renders directly to the target canvas, so there is no
     // persistent output canvas to return here. CanvasRenderer returns a dummy canvas.

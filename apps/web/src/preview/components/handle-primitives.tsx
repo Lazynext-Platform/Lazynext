@@ -5,13 +5,20 @@ import { cn } from "@/utils/ui";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { IconSvgElement } from "@hugeicons/react";
 
+/** React component rendering HANDLE_SIZE. */
 export const HANDLE_SIZE = 10;
+/** React component rendering HANDLE_HIT_AREA_SIZE. */
 export const HANDLE_HIT_AREA_SIZE = 18;
+/** React component rendering ICON_HANDLE_RADIUS. */
 export const ICON_HANDLE_RADIUS = 10;
+/** React component rendering EDGE_HANDLE_THIN_SIZE. */
 export const EDGE_HANDLE_THIN_SIZE = 6;
+/** React component rendering EDGE_HANDLE_THICK_SIZE. */
 export const EDGE_HANDLE_THICK_SIZE = 14;
+/** React component rendering LINE_HIT_AREA_SIZE. */
 export const LINE_HIT_AREA_SIZE = 48;
 
+/** Utility representing getResizeCursor. */
 export function getResizeCursor({ angleDeg }: { angleDeg: number }): string {
 	const normalized = ((angleDeg % 180) + 180) % 180;
 	if (normalized < 22.5 || normalized >= 157.5) return "ew-resize";
@@ -20,6 +27,7 @@ export function getResizeCursor({ angleDeg }: { angleDeg: number }): string {
 	return "nesw-resize";
 }
 
+/** React component rendering HandleButton. */
 export function HandleButton({
 	screen,
 	cursor,
@@ -66,6 +74,7 @@ export function HandleButton({
 	);
 }
 
+/** React component rendering CornerHandle. */
 export function CornerHandle({
 	cursor,
 	screen,
@@ -96,6 +105,7 @@ export function CornerHandle({
 	);
 }
 
+/** React component rendering CircleHandle. */
 export function CircleHandle({
 	cursor,
 	screen,
@@ -130,6 +140,7 @@ export function CircleHandle({
 	);
 }
 
+/** React component rendering EdgeHandle. */
 export function EdgeHandle({
 	edge,
 	screen,
@@ -173,6 +184,7 @@ export function EdgeHandle({
 	);
 }
 
+/** React component rendering IconHandle. */
 export function IconHandle({
 	icon,
 	screen,
@@ -200,6 +212,7 @@ export function IconHandle({
 	);
 }
 
+/** React component rendering BoundingBoxOutline. */
 export function BoundingBoxOutline({
 	center,
 	outlineWidth,
@@ -257,6 +270,7 @@ export function BoundingBoxOutline({
 	);
 }
 
+/** React component rendering ShapeOutline. */
 export function ShapeOutline({
 	center,
 	outlineWidth,
@@ -310,6 +324,7 @@ export function ShapeOutline({
 	);
 }
 
+/** React component rendering CanvasPathOutline. */
 export function CanvasPathOutline({
 	pathData,
 	translateX = 0,
@@ -366,6 +381,7 @@ export function CanvasPathOutline({
 	);
 }
 
+/** React component rendering LineOverlay. */
 export function LineOverlay({
 	start,
 	end,

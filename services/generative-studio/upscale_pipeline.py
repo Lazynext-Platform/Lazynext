@@ -22,11 +22,9 @@ Requirements:
 import os
 import subprocess
 import tempfile
-import shutil
 from pathlib import Path
-from dataclasses import dataclass, field
-from typing import Optional, List
-import json
+from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
@@ -163,7 +161,6 @@ class UpscalePipeline:
     
     def _upscale_onnx(self, video_path: str, output_path: str) -> str:
         """RealESRGAN ONNX runtime inference (fastest)."""
-        import numpy as np
         import onnxruntime as ort
         import cv2
         
@@ -254,7 +251,7 @@ class UpscalePipeline:
         model_path = os.path.join(self.models_dir, model_file)
         
         if not os.path.exists(model_path):
-            print(f"[Upscale] Downloading EDSR model...")
+            print("[Upscale] Downloading EDSR model...")
             self._download_edsr_model(model_file)
         
         sr.readModel(model_path)
@@ -400,8 +397,6 @@ class UpscalePipeline:
     
     def _convert_to_onnx(self, pth_path: str, onnx_path: str):
         """Convert PyTorch model to ONNX."""
-        import torch
-        import torch.onnx
         # RealESRGAN model conversion
         # In production: load the specific model architecture
         print(f"[Upscale] ONNX conversion not yet implemented for {pth_path}")

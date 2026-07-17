@@ -15,8 +15,10 @@ import {
 import type { TimelineElement } from "@/timeline";
 import type { MediaTime } from "@/wasm";
 
+/** Documentation for this export. */
 export type { KeyframeDragState };
 
+/** Custom hook providing useKeyframeDrag functionality. */
 export function useKeyframeDrag({
 	zoomLevel,
 	element,

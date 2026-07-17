@@ -17,6 +17,7 @@
 
 const MAX_FRAME_BYTES_DEFAULT = 1920 * 1080 * 4;
 
+/** Type definition for StreamProgress. */
 export interface StreamProgress {
 	/** 0..1 fraction of frames streamed. */
 	fraction: number;
@@ -24,6 +25,7 @@ export interface StreamProgress {
 	frame: number;
 }
 
+/** Type definition for StreamFramesOptions. */
 export interface StreamFramesOptions {
 	/** Endpoint for uploading individual frames. */
 	frameEndpoint: string;

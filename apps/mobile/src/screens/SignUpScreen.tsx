@@ -19,6 +19,7 @@ import {
 } from "react-native";
 import { useAuth } from "../contexts/AuthContext";
 
+/** React component rendering SignUpScreen. */
 export function SignUpScreen({ navigation }: { navigation: any }) {
 	const { signUp, signInWithOAuth } = useAuth();
 	const [name, setName] = useState("");

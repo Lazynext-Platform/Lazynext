@@ -24,6 +24,7 @@ import {
  */
 export type MediaTime = number & { readonly __mediaTime: unique symbol };
 
+/** Utility representing TICKS_PER_SECOND. */
 export const TICKS_PER_SECOND = 120_000; // Mirrors rust/crates/time/src/media_time.rs
 
 function isMediaTime(value: number): value is MediaTime {
@@ -43,6 +44,7 @@ function requireMediaTime({
 	return value;
 }
 
+/** Utility representing ZERO_MEDIA_TIME. */
 export const ZERO_MEDIA_TIME = requireMediaTime({
 	value: 0,
 	context: "ZERO_MEDIA_TIME",
@@ -77,6 +79,7 @@ export function roundMediaTime({ time }: { time: number }): MediaTime {
 	});
 }
 
+/** Utility representing mediaTimeFromSeconds. */
 export function mediaTimeFromSeconds({
 	seconds,
 }: {
@@ -94,6 +97,7 @@ export function mediaTimeFromSeconds({
 	});
 }
 
+/** Utility representing mediaTimeToSeconds. */
 export function mediaTimeToSeconds({ time }: { time: MediaTime }): number {
 	return _mediaTimeToSeconds({ time });
 }
@@ -114,6 +118,7 @@ export function addMediaTime({
 	});
 }
 
+/** Utility representing subMediaTime. */
 export function subMediaTime({
 	a,
 	b,
@@ -127,6 +132,7 @@ export function subMediaTime({
 	});
 }
 
+/** Utility representing maxMediaTime. */
 export function maxMediaTime({
 	a,
 	b,
@@ -137,6 +143,7 @@ export function maxMediaTime({
 	return a > b ? a : b;
 }
 
+/** Utility representing minMediaTime. */
 export function minMediaTime({
 	a,
 	b,
@@ -147,6 +154,7 @@ export function minMediaTime({
 	return a < b ? a : b;
 }
 
+/** Utility representing clampMediaTime. */
 export function clampMediaTime({
 	time,
 	min,
@@ -161,6 +169,7 @@ export function clampMediaTime({
 	return time;
 }
 
+/** Utility representing roundFrameTime. */
 export function roundFrameTime({
 	time,
 	fps,
@@ -174,6 +183,7 @@ export function roundFrameTime({
 	});
 }
 
+/** Utility representing roundFrameTicks. */
 export function roundFrameTicks({
 	ticks,
 	fps,
@@ -184,6 +194,7 @@ export function roundFrameTicks({
 	return _roundToFrame({ time: ticks, rate: fps }) ?? ticks;
 }
 
+/** Utility representing snapSeekMediaTime. */
 export function snapSeekMediaTime({
 	time,
 	duration,
@@ -199,6 +210,7 @@ export function snapSeekMediaTime({
 	});
 }
 
+/** Utility representing lastFrameMediaTime. */
 export function lastFrameMediaTime({
 	duration,
 	fps,
@@ -212,6 +224,7 @@ export function lastFrameMediaTime({
 	});
 }
 
+/** Utility representing parseMediaTimecode. */
 export function parseMediaTimecode({
 	timeCode,
 	format,

@@ -13,6 +13,7 @@ function clamp01({ value }: { value: number }): number {
 	return Math.max(0, Math.min(1, value));
 }
 
+/** Utility representing getDefaultRightHandle. */
 export function getDefaultRightHandle({
 	leftKey,
 	rightKey,
@@ -28,6 +29,7 @@ export function getDefaultRightHandle({
 	};
 }
 
+/** Utility representing getDefaultLeftHandle. */
 export function getDefaultLeftHandle({
 	leftKey,
 	rightKey,
@@ -43,6 +45,7 @@ export function getDefaultLeftHandle({
 	};
 }
 
+/** Utility representing getNormalizedCubicBezierForScalarSegment. */
 export function getNormalizedCubicBezierForScalarSegment({
 	leftKey,
 	rightKey,
@@ -80,6 +83,7 @@ export function getNormalizedCubicBezierForScalarSegment({
 	];
 }
 
+/** Utility representing getCurveHandlesForNormalizedCubicBezier. */
 export function getCurveHandlesForNormalizedCubicBezier({
 	leftKey,
 	rightKey,
@@ -127,6 +131,7 @@ export function getCurveHandlesForNormalizedCubicBezier({
 
 const BEZIER_SOLVE_ITERATIONS = 20;
 
+/** Utility representing getBezierPoint. */
 export function getBezierPoint({
 	progress,
 	p0,
@@ -149,6 +154,7 @@ export function getBezierPoint({
 	);
 }
 
+/** Utility representing solveBezierProgressForTime. */
 export function solveBezierProgressForTime({
 	time,
 	leftKey,

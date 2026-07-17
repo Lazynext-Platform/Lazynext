@@ -2,6 +2,7 @@
 import { DefinitionRegistry } from "@/params/registry";
 import type { EffectDefinition } from "@/effects/types";
 
+/** Class representing EffectsRegistry. */
 export class EffectsRegistry extends DefinitionRegistry<
 	string,
 	EffectDefinition
@@ -11,4 +12,5 @@ export class EffectsRegistry extends DefinitionRegistry<
 	}
 }
 
+/** Utility representing effectsRegistry. */
 export const effectsRegistry = new EffectsRegistry();

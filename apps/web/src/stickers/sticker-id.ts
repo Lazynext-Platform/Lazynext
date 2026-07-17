@@ -24,6 +24,7 @@ export function parseStickerId({ stickerId }: { stickerId: string }): {
 	return { providerId, providerValue };
 }
 
+/** Utility representing buildStickerId. */
 export function buildStickerId({
 	providerId,
 	providerValue,

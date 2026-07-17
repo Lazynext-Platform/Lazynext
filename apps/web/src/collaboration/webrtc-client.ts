@@ -302,4 +302,5 @@ class WebRTCClient {
 }
 
 export { WebRTCClient };
+/** Documentation for this export. */
 export type { WebRTCConfig, PeerConnection };

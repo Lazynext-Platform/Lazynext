@@ -7,6 +7,7 @@ import { DEFAULTS } from "@/timeline/defaults";
 import { VOLUME_DB_MAX, VOLUME_DB_MIN } from "@/timeline/audio-constants";
 import { CORNER_RADIUS_MAX, CORNER_RADIUS_MIN } from "@/text/background";
 
+/** Type definition for ElementParamDefinition. */
 export type ElementParamDefinition<TKey extends string = string> =
 	ParamDefinition<TKey> & {
 		read?: ({ element }: { element: TimelineElement }) => ParamValue | null;
@@ -19,6 +20,7 @@ export type ElementParamDefinition<TKey extends string = string> =
 		}) => TimelineElement;
 	};
 
+/** Utility representing buildDefaultParamValues. */
 export function buildDefaultParamValues(
 	params: readonly ParamDefinition[],
 ): ParamValues {
@@ -29,6 +31,7 @@ export function buildDefaultParamValues(
 	return values;
 }
 
+/** Class representing DefinitionRegistry. */
 export class DefinitionRegistry<TKey extends string, TDefinition> {
 	private definitions = new Map<TKey, TDefinition>();
 	private entityName: string;
@@ -311,6 +314,7 @@ const textElementParams: ElementParamDefinition[] = [
 	},
 ];
 
+/** Utility representing elementParamRegistry. */
 export const elementParamRegistry = new DefinitionRegistry<
 	ElementType,
 	readonly ElementParamDefinition[]
@@ -339,6 +343,7 @@ elementParamRegistry.register({
 elementParamRegistry.register({ key: "audio", definition: audioElementParams });
 elementParamRegistry.register({ key: "effect", definition: [] });
 
+/** Utility representing getElementParams. */
 export function getElementParams({
 	element,
 }: {
@@ -349,6 +354,7 @@ export function getElementParams({
 		: [];
 }
 
+/** Utility representing getBuiltInElementParams. */
 export function getBuiltInElementParams({
 	type,
 }: {
@@ -357,6 +363,7 @@ export function getBuiltInElementParams({
 	return elementParamRegistry.has(type) ? elementParamRegistry.get(type) : [];
 }
 
+/** Utility representing getElementParam. */
 export function getElementParam({
 	element,
 	key,
@@ -369,6 +376,7 @@ export function getElementParam({
 	);
 }
 
+/** Utility representing readElementParamValue. */
 export function readElementParamValue({
 	element,
 	param,
@@ -385,6 +393,7 @@ export function readElementParamValue({
 	return null;
 }
 
+/** Utility representing writeElementParamValue. */
 export function writeElementParamValue({
 	element,
 	param,
@@ -409,6 +418,7 @@ export function writeElementParamValue({
 	return element;
 }
 
+/** Utility representing buildElementParamValues. */
 export function buildElementParamValues({
 	element,
 }: {

@@ -5,6 +5,7 @@ import {
 	type VisualNodeParams,
 } from "./visual-node";
 
+/** Type definition for VideoNodeParams. */
 export interface VideoNodeParams extends VisualNodeParams {
 	/** Source URL for the video asset. */
 	url: string;
@@ -14,6 +15,7 @@ export interface VideoNodeParams extends VisualNodeParams {
 	mediaId: string;
 }
 
+/** Class representing VideoNode. */
 export class VideoNode extends VisualNode<
 	VideoNodeParams,
 	ResolvedVisualSourceNodeState

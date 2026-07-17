@@ -5,6 +5,7 @@ import {
 	type PreviewOverlaySourceResult,
 } from "@/preview/overlays";
 
+/** Utility representing getGuidePreviewOverlaySource. */
 export function getGuidePreviewOverlaySource({
 	guideId,
 }: {

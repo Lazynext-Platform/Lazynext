@@ -14,6 +14,7 @@ import {
 	ZERO_MEDIA_TIME,
 } from "@/wasm";
 
+/** Class representing UpsertEffectParamKeyframeCommand. */
 export class UpsertEffectParamKeyframeCommand extends Command {
 	private savedState: SceneTracks | null = null;
 	private readonly trackId: string;

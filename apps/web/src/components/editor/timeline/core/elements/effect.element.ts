@@ -10,6 +10,7 @@ import type { ElementVisitor } from "../visitor/element-visitor";
 import { TIMELINE_ELEMENT_TYPE } from "../../utils/constants";
 import type { EffectProps } from "../../types";
 
+/** Class representing EffectElement. */
 export class EffectElement extends TrackElement {
 	declare protected props: EffectProps;
 
