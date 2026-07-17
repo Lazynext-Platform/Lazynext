@@ -29,7 +29,7 @@ export default function IntegrationsPage() {
 		{ name: "YouTube", icon: <Film className="w-8 h-8 text-[#FF0000]" />, desc: "Directly publish rendered videos to your channel.", connected: true, loading: false },
 		{ name: "TikTok", icon: <MonitorPlay className="w-8 h-8 text-[#00f2fe]" />, desc: "Sync vertical shorts seamlessly.", connected: false, loading: false },
 		{ name: "Google Drive", icon: <Cloud className="w-8 h-8 text-[#00e5ff]" />, desc: "Import raw 4K footage straight into your timeline.", connected: false, loading: false },
-		{ name: "Browser Extension", icon: <LinkIcon className="w-8 h-8 text-white" />, desc: "The Lazynext Chrome Extension.", connected: true, loading: false },
+		{ name: "Browser Extension", icon: <LinkIcon className="w-8 h-8 text-foreground" />, desc: "The Lazynext Chrome Extension.", connected: true, loading: false },
 	]);
 
 	const handleConnect = async (name: string) => {

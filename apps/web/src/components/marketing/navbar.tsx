@@ -76,7 +76,7 @@ export function MarketingNavbar() {
 			{mobileOpen && (
 				<div className="fixed inset-0 z-50 md:hidden">
 				<div
-					className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+					className="absolute inset-0 bg-glass backdrop-blur-sm"
 					onClick={() => setMobileOpen(false)}
 					onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
 					role="button"

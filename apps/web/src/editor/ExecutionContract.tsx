@@ -28,9 +28,9 @@ export const ExecutionContract: React.FC = () => {
 	const { operations } = useEditor(); // Assuming useEditor provides the operation log
 
 	return (
-		<div className="flex flex-col bg-black/90 border border-white/10 rounded-lg p-4 font-mono text-sm overflow-y-auto max-h-96">
+		<div className="flex flex-col bg-glass border border-white/10 rounded-lg p-4 font-mono text-sm overflow-y-auto max-h-96">
 			<div className="flex items-center justify-between mb-4">
-				<h3 className="text-white font-semibold text-xs uppercase tracking-wider">
+				<h3 className="text-foreground font-semibold text-xs uppercase tracking-wider">
 					Semantic Execution Contract
 				</h3>
 				<span className="text-gray-500 text-xs">

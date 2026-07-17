@@ -71,8 +71,8 @@ export function AIMagicTools() {
 	] as const;
 
 	return (
-		<div className="w-80 h-full bg-neutral-900/80 backdrop-blur-2xl border-l border-white/5 flex flex-col font-sans">
-			<div className="p-4 border-b border-white/5 bg-neutral-950/40">
+		<div className="w-80 h-full bg-neutral-900/80 backdrop-blur-2xl border-l border-border flex flex-col font-sans">
+			<div className="p-4 border-b border-border bg-neutral-950/40">
 				<div className="flex items-center gap-2 mb-4">
 					<Wand2 className="w-5 h-5 text-cyan-400" />
 					<h2 className="font-semibold text-foreground tracking-wide">Generative Studio</h2>
@@ -94,7 +94,7 @@ export function AIMagicTools() {
 								{isActive && (
 									<motion.div
 										layoutId="magic-tab-indicator"
-										className="absolute inset-0 bg-white/10 rounded-md shadow-sm border border-border"
+										className="absolute inset-0 bg-glass rounded-md shadow-sm border border-border"
 										initial={false}
 										transition={{ type: "spring", stiffness: 400, damping: 30 }}
 									/>

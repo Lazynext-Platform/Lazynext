@@ -138,7 +138,7 @@ function SuggestionCard({
 			animate={{ opacity: 1, y: 0 }}
 			exit={{ opacity: 0, y: -8, height: 0 }}
 			transition={{ duration: 0.2 }}
-			className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-3.5 space-y-2.5 hover:border-white/10 transition-colors"
+			className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-3.5 space-y-2.5 hover:border-border transition-colors"
 		>
 			{/* Category badge */}
 			<div className="flex items-center justify-between gap-2">
@@ -146,7 +146,7 @@ function SuggestionCard({
 					<CategoryIcon
 						className={`w-3.5 h-3.5 ${categoryCfg.color}`}
 					/>
-					<span className="text-[10px] font-medium text-white/40 uppercase tracking-wider">
+					<span className="text-[10px] font-medium text-muted uppercase tracking-wider">
 						{categoryCfg.label}
 					</span>
 				</div>
@@ -158,10 +158,10 @@ function SuggestionCard({
 			</div>
 
 			{/* Title & description */}
-			<p className="text-sm font-semibold text-white/90 leading-snug">
+			<p className="text-sm font-semibold text-foreground/90 leading-snug">
 				{suggestion.title}
 			</p>
-			<p className="text-xs text-white/50 leading-relaxed">
+			<p className="text-xs text-muted leading-relaxed">
 				{suggestion.description}
 			</p>
 
@@ -184,7 +184,7 @@ function SuggestionCard({
 				<button
 					onClick={handleDismiss}
 					disabled={isDismissing}
-					className={`${showExecuteButton ? "flex-1" : "flex-1"} flex items-center justify-center gap-1.5 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white/90 text-xs font-medium py-1.5 rounded-lg border border-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+					className={`${showExecuteButton ? "flex-1" : "flex-1"} flex items-center justify-center gap-1.5 bg-glass hover:bg-hover text-muted hover:text-foreground/90 text-xs font-medium py-1.5 rounded-lg border border-border transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
 				>
 					{isDismissing ? (
 						<Loader2 className="w-3 h-3 animate-spin" />
@@ -233,15 +233,15 @@ export function AgentSuggestions() {
 	};
 
 	return (
-		<div className="w-80 h-full bg-neutral-900/80 backdrop-blur-2xl border-l border-white/5 flex flex-col font-sans">
+		<div className="w-80 h-full bg-neutral-900/80 backdrop-blur-2xl border-l border-border flex flex-col font-sans">
 			{/* Header */}
 			<button
 				onClick={() => setIsCollapsed((p) => !p)}
-				className="flex items-center justify-between p-4 border-b border-white/5 bg-neutral-950/40 cursor-pointer hover:bg-neutral-950/60 transition-colors"
+				className="flex items-center justify-between p-4 border-b border-border bg-neutral-950/40 cursor-pointer hover:bg-neutral-950/60 transition-colors"
 			>
 				<div className="flex items-center gap-2">
 					<Bot className="w-5 h-5 text-cyan-400" />
-					<h2 className="font-semibold text-white/90 tracking-wide">
+					<h2 className="font-semibold text-foreground/90 tracking-wide">
 						AI Suggestions
 					</h2>
 					{!isLoading && suggestions.length > 0 && (
@@ -251,9 +251,9 @@ export function AgentSuggestions() {
 					)}
 				</div>
 				{isCollapsed ? (
-					<ChevronDown className="w-4 h-4 text-white/40" />
+					<ChevronDown className="w-4 h-4 text-muted" />
 				) : (
-					<ChevronUp className="w-4 h-4 text-white/40" />
+					<ChevronUp className="w-4 h-4 text-muted" />
 				)}
 			</button>
 
@@ -267,23 +267,23 @@ export function AgentSuggestions() {
 						className="flex-1 flex flex-col overflow-hidden"
 					>
 						{/* Agent status bar */}
-						<div className="p-4 border-b border-white/5 bg-black/20">
+						<div className="p-4 border-b border-border bg-glass">
 							<div className="flex items-center justify-between gap-3">
 								<div className="flex items-center gap-2">
 									<div
 										className={`w-2 h-2 rounded-full ${
 											isAgentRunning
 												? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]"
-												: "bg-white/20"
+												: "bg-glass"
 										}`}
 									/>
-									<span className="text-xs text-white/60">
+									<span className="text-xs text-muted">
 										Agent:{" "}
 										<span
 											className={
 												isAgentRunning
 													? "text-emerald-400 font-medium"
-													: "text-white/40"
+													: "text-muted"
 											}
 										>
 											{isAgentRunning
@@ -342,11 +342,11 @@ export function AgentSuggestions() {
 							{/* Empty state */}
 							{!isLoading && !error && suggestions.length === 0 && (
 								<div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-									<Activity className="w-8 h-8 text-white/10 mb-3" />
-									<p className="text-sm text-white/40 font-medium leading-relaxed">
+									<Activity className="w-8 h-8 text-muted/30 mb-3" />
+									<p className="text-sm text-muted font-medium leading-relaxed">
 										No suggestions right now
 									</p>
-									<p className="text-xs text-white/30 mt-1 leading-relaxed">
+									<p className="text-xs text-muted/50 mt-1 leading-relaxed">
 										The AI is watching your timeline
 									</p>
 								</div>

@@ -451,7 +451,7 @@ export function CommandPalette() {
 		<>
 			{/* Backdrop */}
 			<div
-				className="fixed inset-0 z-200 bg-black/60 backdrop-blur-sm"
+				className="fixed inset-0 z-200 bg-glass backdrop-blur-sm"
 				onClick={() => setShowCommandPalette(false)}
 				onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
 				role="button"
