@@ -145,6 +145,9 @@ deploy() {
 	info "Copying systemd service files..."
 	scp "$SCRIPT_DIR/systemd/"*.service "$SSH_USER@$LINODE_HOST:/etc/systemd/system/"
 
+	info "Configuring environment variables..."
+	ssh "$SSH_USER@$LINODE_HOST" "mkdir -p /opt/lazynext/infra/linode && if [ ! -f /opt/lazynext/infra/linode/.env.linode ]; then echo \"BETTER_AUTH_SECRET=\$(openssl rand -hex 32)\" > /opt/lazynext/infra/linode/.env.linode; fi"
+
 	info "Copying infrastructure files..."
 	scp "$SCRIPT_DIR/docker-compose.yml" "$SSH_USER@$LINODE_HOST:/opt/lazynext/infra/linode/docker-compose.yml"
 	scp "$SCRIPT_DIR/Caddyfile" "$SSH_USER@$LINODE_HOST:/opt/caddy/Caddyfile"
