@@ -38,7 +38,7 @@ interface MaskPoint {
 
 /** Full editor screen with timeline, mask drawing, and voice control. */
 export const EditorScreen = () => {
-  const { theme } = useTheme();
+  const { theme, mode, setMode } = useTheme();
   const styles = React.useMemo(() => getStyles(theme), [theme]);
 	const [clips, setClips] = useState<Clip[]>([]);
 	const [currentFrame, setCurrentFrame] = useState(0);
@@ -237,7 +237,18 @@ export const EditorScreen = () => {
 					<Text style={styles.headerTitle}>
 						{projectName || "TIMELINE"}
 					</Text>
-					<Text style={styles.headerFrame}>Frame: {currentFrame}</Text>
+					<View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+						<TouchableOpacity 
+							onPress={() => {
+								const next = mode === 'system' ? 'dark' : mode === 'dark' ? 'light' : 'system';
+								setMode(next);
+							}}
+							style={styles.themeToggle}
+						>
+							<Text style={styles.themeToggleText}>Theme: {mode}</Text>
+						</TouchableOpacity>
+						<Text style={styles.headerFrame}>Frame: {currentFrame}</Text>
+					</View>
 				</View>
 
 				<TouchableOpacity
@@ -431,6 +442,20 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		color: theme.textPrimary,
 		fontSize: 11,
 		fontFamily: "Menlo",
+	},
+	themeToggle: {
+		paddingHorizontal: 8,
+		paddingVertical: 4,
+		backgroundColor: theme.bgHover,
+		borderRadius: 4,
+		borderWidth: 1,
+		borderColor: theme.borderGlass,
+	},
+	themeToggleText: {
+		color: theme.textPrimary,
+		fontSize: 10,
+		fontWeight: "600",
+		textTransform: "capitalize",
 	},
 	timelineScroll: {
 		flex: 1,

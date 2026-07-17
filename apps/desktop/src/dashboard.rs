@@ -118,6 +118,15 @@ impl Render for Dashboard {
             .items_center()
             .child(
                 div()
+                    .absolute()
+                    .top_4()
+                    .right_4()
+                    .text_xs()
+                    .text_color(theme.text_muted)
+                    .child(format!("Mode: {:?}", theme.mode)),
+            )
+            .child(
+                div()
                     .text_xl()
                     .font_weight(FontWeight::BOLD)
                     .text_color(theme.text_primary)
