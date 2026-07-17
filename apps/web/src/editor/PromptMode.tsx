@@ -46,10 +46,10 @@ export const PromptMode: React.FC = () => {
 			>
 				{/* Glow effect behind the modal */}
 				<div
-					className={`absolute -inset-1 rounded-2xl blur-xl opacity-30 transition-all duration-1000 ${isAgentThinking ? "bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 animate-pulse" : "bg-white/10"}`}
+					className={`absolute -inset-1 rounded-2xl blur-xl opacity-30 transition-all duration-1000 ${isAgentThinking ? "bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 animate-pulse" : "bg-foreground/10"}`}
 				></div>
 
-				<div className="relative bg-glass backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden">
+				<div className="relative bg-glass backdrop-blur-3xl border border-border rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden">
 					{/* Live Background Render Canvas (WGPU WebGL context) */}
 					<canvas
 						id="prompt-preview-canvas"
@@ -57,7 +57,7 @@ export const PromptMode: React.FC = () => {
 					/>
 
 					{/* Top Header */}
-					<div className="relative z-10 px-6 py-4 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
+					<div className="relative z-10 px-6 py-4 border-b border-border flex items-center justify-between bg-foreground/10[0.02]">
 						<div className="flex items-center gap-3">
 							<div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(0,212,223,0.4)]">
 								<Bot className="w-4 h-4 text-foreground" />
@@ -86,7 +86,7 @@ export const PromptMode: React.FC = () => {
 						</div>
 
 						{/* The laser scanning effect when thinking */}
-						<div className="absolute bottom-0 left-0 h-[2px] w-full bg-white/5 overflow-hidden">
+						<div className="absolute bottom-0 left-0 h-[2px] w-full bg-foreground/10 overflow-hidden">
 							{isAgentThinking && (
 								<div className="h-full w-1/3 bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-[slide_1.5s_ease-in-out_infinite]"></div>
 							)}
@@ -94,7 +94,7 @@ export const PromptMode: React.FC = () => {
 					</form>
 
 					{/* Suggestions Footer */}
-					<div className="relative z-10 px-6 py-4 bg-glass border-t border-white/5">
+					<div className="relative z-10 px-6 py-4 bg-glass border-t border-border">
 						<div className="flex items-center gap-3 overflow-x-auto no-scrollbar">
 							<span className="text-xs text-muted uppercase tracking-wider font-semibold shrink-0">
 								Try
@@ -120,7 +120,7 @@ export const PromptMode: React.FC = () => {
 									key={i}
 									type="button"
 									onClick={() => setPrompt(s.action)}
-									className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-sm text-foreground/70 transition-all shrink-0 group"
+									className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-foreground/10 border border-border hover:bg-foreground/10 hover:border-border text-sm text-foreground/70 transition-all shrink-0 group"
 									disabled={isAgentThinking}
 								>
 									<span className="opacity-70 group-hover:opacity-100">

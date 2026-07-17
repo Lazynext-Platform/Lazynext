@@ -39,7 +39,7 @@ export function ScriptEditor() {
 	};
 
 	return (
-		<div className="p-6 bg-white border border-gray-300 rounded shadow-lg max-w-lg font-serif text-black">
+		<div className="p-6 bg-background border border-gray-300 rounded shadow-lg max-w-lg font-serif text-foreground">
 			<h2 className="font-bold text-xl mb-4 border-b pb-2">
 				Screenplay Editor
 			</h2>
