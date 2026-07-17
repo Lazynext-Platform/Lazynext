@@ -1,5 +1,6 @@
 /** @module screens/EditorScreen Editor screen component for mobile */
 import React, { useState, useEffect, useRef } from "react";
+import { useTheme, Theme } from "../theme";
 import {
 	View,
 	Text,
@@ -37,6 +38,8 @@ interface MaskPoint {
 
 /** Full editor screen with timeline, mask drawing, and voice control. */
 export const EditorScreen = () => {
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => getStyles(theme), [theme]);
 	const [clips, setClips] = useState<Clip[]>([]);
 	const [currentFrame, setCurrentFrame] = useState(0);
 	const [projectName, setProjectName] = useState("");
@@ -275,18 +278,18 @@ export const EditorScreen = () => {
 	);
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: Theme) => StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "#0a0a0c",
+		backgroundColor: theme.bgMain,
 	},
 	// ── Offline Banner ──
 	offlineBanner: {
 		flexDirection: "row",
 		alignItems: "center",
-		backgroundColor: "rgba(245, 158, 11, 0.15)",
+		backgroundColor: theme.bgHover,
 		borderBottomWidth: 1,
-		borderBottomColor: "rgba(245, 158, 11, 0.3)",
+		borderBottomColor: theme.borderGlass,
 		paddingVertical: 8,
 		paddingHorizontal: 16,
 		gap: 8,
@@ -295,17 +298,17 @@ const styles = StyleSheet.create({
 		width: 8,
 		height: 8,
 		borderRadius: 4,
-		backgroundColor: "#f59e0b",
+		backgroundColor: theme.accentSecondary,
 	},
 	offlineText: {
-		color: "#f59e0b",
+		color: theme.accentSecondary,
 		fontSize: 12,
 		fontWeight: "600",
 	},
 	// ── Preview ──
 	previewContainer: {
 		flex: 0.3,
-		backgroundColor: "#000",
+		backgroundColor: theme.bgMain,
 		justifyContent: "center",
 		alignItems: "center",
 		padding: 16,
@@ -314,33 +317,33 @@ const styles = StyleSheet.create({
 		width: "100%",
 		aspectRatio: 16 / 9,
 		maxHeight: 200,
-		backgroundColor: "#0d0d1a",
+		backgroundColor: theme.bgMain,
 		borderRadius: 12,
 		borderWidth: 1,
-		borderColor: "rgba(99, 102, 241, 0.3)",
+		borderColor: theme.borderGlass,
 		justifyContent: "center",
 		alignItems: "center",
 		padding: 20,
 	},
 	previewProjectName: {
-		color: "#e0e0ff",
+		color: theme.textPrimary,
 		fontSize: 18,
 		fontWeight: "700",
 		marginBottom: 8,
 		textAlign: "center",
 	},
 	previewMeta: {
-		color: "rgba(160, 160, 200, 0.7)",
+		color: theme.textSecondary,
 		fontSize: 13,
 		fontWeight: "500",
 	},
 	// ── Mask Drawing Area ──
 	maskArea: {
 		flex: 0.25,
-		backgroundColor: "rgba(20, 20, 30, 0.95)",
+		backgroundColor: theme.bgMain,
 		borderTopWidth: 1,
 		borderBottomWidth: 1,
-		borderColor: "rgba(255, 255, 255, 0.1)",
+		borderColor: theme.borderGlass,
 		padding: 12,
 	},
 	maskAreaHeader: {
@@ -350,68 +353,68 @@ const styles = StyleSheet.create({
 		marginBottom: 8,
 	},
 	maskAreaLabel: {
-		color: "#a0a0b0",
+		color: theme.textMuted,
 		fontSize: 12,
 		fontWeight: "600",
 		letterSpacing: 1,
 	},
 	pencilHint: {
-		color: "rgba(0, 229, 255, 0.7)",
+		color: theme.accentPrimary,
 		fontSize: 11,
 		fontWeight: "400",
 	},
 	pencilActiveBadge: {
-		backgroundColor: "rgba(0, 229, 255, 0.15)",
+		backgroundColor: theme.bgHover,
 		paddingHorizontal: 10,
 		paddingVertical: 3,
 		borderRadius: 8,
 		borderWidth: 1,
-		borderColor: "rgba(0, 229, 255, 0.3)",
+		borderColor: theme.borderGlass,
 	},
 	pencilActiveText: {
-		color: "#00e5ff",
+		color: theme.accentPrimary,
 		fontSize: 10,
 		fontWeight: "700",
 	},
 	pressureBar: {
 		height: 4,
-		backgroundColor: "rgba(255,255,255,0.1)",
+		backgroundColor: theme.borderGlass,
 		borderRadius: 2,
 		marginBottom: 8,
 		overflow: "hidden",
 	},
 	pressureFill: {
 		height: "100%",
-		backgroundColor: "#00e5ff",
+		backgroundColor: theme.accentPrimary,
 		borderRadius: 2,
 	},
 	maskCanvas: {
 		flex: 1,
-		backgroundColor: "rgba(0,0,0,0.2)",
+		backgroundColor: theme.bgHover,
 		borderRadius: 8,
 		borderWidth: 1,
-		borderColor: "rgba(255,255,255,0.06)",
+		borderColor: theme.borderGlass,
 		justifyContent: "center",
 		alignItems: "center",
 		overflow: "hidden",
 	},
 	maskHint: {
-		color: "rgba(255,255,255,0.25)",
+		color: theme.textMuted,
 		fontSize: 13,
 	},
 	maskPoint: {
 		position: "absolute",
-		backgroundColor: "#00e5ff",
+		backgroundColor: theme.accentPrimary,
 	},
 	// ── Editor Timeline ──
 	editorContainer: {
 		flex: 0.2,
-		backgroundColor: "rgba(25, 25, 30, 0.95)",
+		backgroundColor: theme.bgMain,
 		borderTopLeftRadius: 16,
 		borderTopRightRadius: 16,
 		padding: 12,
 		borderTopWidth: 1,
-		borderColor: "rgba(255, 255, 255, 0.1)",
+		borderColor: theme.borderGlass,
 	},
 	header: {
 		flexDirection: "row",
@@ -419,19 +422,19 @@ const styles = StyleSheet.create({
 		marginBottom: 8,
 	},
 	headerTitle: {
-		color: "#a0a0b0",
+		color: theme.textMuted,
 		fontSize: 11,
 		fontWeight: "600",
 		letterSpacing: 1,
 	},
 	headerFrame: {
-		color: "#fff",
+		color: theme.textPrimary,
 		fontSize: 11,
 		fontFamily: "Menlo",
 	},
 	timelineScroll: {
 		flex: 1,
-		backgroundColor: "rgba(0,0,0,0.3)",
+		backgroundColor: theme.bgHover,
 		borderRadius: 8,
 	},
 	timelineTrack: {
@@ -444,9 +447,9 @@ const styles = StyleSheet.create({
 		top: 0,
 		bottom: 0,
 		width: 2,
-		backgroundColor: "#ec4899",
+		backgroundColor: theme.accentSecondary,
 		zIndex: 10,
-		shadowColor: "#ec4899",
+		shadowColor: theme.accentSecondary,
 		shadowOffset: { width: 0, height: 0 },
 		shadowOpacity: 0.8,
 		shadowRadius: 4,
@@ -455,29 +458,29 @@ const styles = StyleSheet.create({
 		position: "absolute",
 		height: 32,
 		top: 9,
-		backgroundColor: "rgba(99, 102, 241, 0.4)",
-		borderColor: "rgba(99, 102, 241, 0.8)",
+		backgroundColor: theme.bgHover,
+		borderColor: theme.borderGlass,
 		borderWidth: 1,
 		borderRadius: 6,
 		justifyContent: "center",
 		paddingHorizontal: 8,
 	},
 	clipText: {
-		color: "#fff",
+		color: theme.textPrimary,
 		fontSize: 10,
 		fontWeight: "500",
 	},
 	importButton: {
-		backgroundColor: "rgba(99, 102, 241, 0.15)",
+		backgroundColor: theme.bgHover,
 		borderWidth: 1,
-		borderColor: "rgba(99, 102, 241, 0.4)",
+		borderColor: theme.bgHover,
 		borderRadius: 8,
 		paddingVertical: 8,
 		alignItems: "center",
 		marginBottom: 8,
 	},
 	importButtonText: {
-		color: "#818cf8",
+		color: theme.accentSecondary,
 		fontSize: 12,
 		fontWeight: "600",
 	},

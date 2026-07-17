@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from "react";
+import { useTheme, Theme } from "../theme";
 import {
 	View,
 	Text,
@@ -18,6 +19,8 @@ import { registerPasskey } from "../services/auth";
 
 /** React component rendering PasskeyRegisterScreen. */
 export function PasskeyRegisterScreen({ navigation }: { navigation: any }) {
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => getStyles(theme), [theme]);
 	const [name, setName] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
@@ -58,7 +61,7 @@ export function PasskeyRegisterScreen({ navigation }: { navigation: any }) {
 					value={name}
 					onChangeText={setName}
 					placeholder="e.g. iPhone 15 Pro"
-					placeholderTextColor="#52525b"
+					placeholderTextColor={theme.textMuted}
 				/>
 
 				<TouchableOpacity
@@ -67,7 +70,7 @@ export function PasskeyRegisterScreen({ navigation }: { navigation: any }) {
 					disabled={loading}
 				>
 					{loading ? (
-						<ActivityIndicator color="#050505" />
+						<ActivityIndicator color={theme.textOnAccent} />
 					) : (
 						<Text style={styles.buttonText}>Create Passkey</Text>
 					)}
@@ -81,47 +84,47 @@ export function PasskeyRegisterScreen({ navigation }: { navigation: any }) {
 	);
 }
 
-const styles = StyleSheet.create({
-	container: { flex: 1, backgroundColor: "#050505", padding: 24, justifyContent: "center" },
+const getStyles = (theme: Theme) => StyleSheet.create({
+	container: { flex: 1, backgroundColor: theme.bgMain, padding: 24, justifyContent: "center" },
 	card: {
-		backgroundColor: "rgba(24,24,27,0.5)",
+		backgroundColor: theme.bgPanel,
 		borderRadius: 24,
 		padding: 24,
 		borderWidth: 1,
-		borderColor: "rgba(255,255,255,0.08)",
+		borderColor: theme.borderGlass,
 	},
-	title: { fontSize: 20, fontWeight: "700", color: "#fff", marginBottom: 8 },
+	title: { fontSize: 20, fontWeight: "700", color: theme.textPrimary, marginBottom: 8 },
 	subtitle: {
-		color: "rgba(255,255,255,0.5)",
+		color: theme.textMuted,
 		fontSize: 14,
 		marginBottom: 20,
 		lineHeight: 20,
 	},
-	errorText: { color: "#ef4444", fontSize: 13, marginBottom: 12 },
+	errorText: { color: theme.accentSecondary, fontSize: 13, marginBottom: 12 },
 	label: {
-		color: "rgba(255,255,255,0.5)",
+		color: theme.textMuted,
 		fontSize: 12,
 		fontWeight: "600",
 		marginBottom: 6,
 	},
 	input: {
-		backgroundColor: "rgba(255,255,255,0.05)",
-		color: "#fff",
+		backgroundColor: theme.bgHover,
+		color: theme.textPrimary,
 		paddingHorizontal: 16,
 		paddingVertical: 12,
 		borderRadius: 12,
 		borderWidth: 1,
-		borderColor: "rgba(255,255,255,0.08)",
+		borderColor: theme.borderGlass,
 		fontSize: 15,
 		marginBottom: 20,
 	},
 	button: {
-		backgroundColor: "#00e5ff",
+		backgroundColor: theme.accentPrimary,
 		paddingVertical: 14,
 		borderRadius: 12,
 		alignItems: "center",
 	},
 	buttonDisabled: { opacity: 0.4 },
-	buttonText: { color: "#050505", fontWeight: "bold", fontSize: 16 },
-	cancelLink: { color: "rgba(255,255,255,0.4)", fontSize: 14, textAlign: "center", marginTop: 16 },
+	buttonText: { color: theme.textOnAccent, fontWeight: "bold", fontSize: 16 },
+	cancelLink: { color: theme.textMuted, fontSize: 14, textAlign: "center", marginTop: 16 },
 });

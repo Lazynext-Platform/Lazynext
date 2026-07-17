@@ -1,5 +1,6 @@
 /** @module Timeline Timeline component for mobile */
 import React, { useEffect, useState } from "react";
+import { useTheme, Theme } from "./theme";
 import {
   StyleSheet,
   Text,
@@ -16,6 +17,8 @@ import { NativeBridge } from "./NativeBridge";
 
 /** Draggable clip component with spring-based pan gesture and animated style. */
 const DraggableClip = ({ clip, track, onMoveClip }: { clip: any, track: any, onMoveClip: (id: string, newStart: number) => void }) => {
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => getStyles(theme), [theme]);
   const isVideo = track.trackType === "video";
   const startX = (clip.start / 30) * 10;
   const width = (clip.duration / 30) * 10;
@@ -65,6 +68,8 @@ const DraggableClip = ({ clip, track, onMoveClip }: { clip: any, track: any, onM
 
 /** Interactive timeline with draggable clips, mask gestures, and integration with NativeBridge. */
 export function TimelineScreen() {
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => getStyles(theme), [theme]);
   const [projectName, setProjectName] = useState("Loading...");
   const [tracks, setTracks] = useState<Array<{ id: string; name: string; trackType: string; clips: Array<{ id: string; name: string; start: number; duration: number }> }>>([]);
   const [loading, setLoading] = useState(true);
@@ -111,7 +116,7 @@ export function TimelineScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#050505" />
+      <StatusBar barStyle={theme.statusBarStyle as "light-content" | "dark-content"} backgroundColor={theme.bgMain} />
 
       <View style={styles.timelineHeader}>
         <Text style={styles.timelineHeaderTitle}>Timeline</Text>
@@ -120,7 +125,7 @@ export function TimelineScreen() {
 
       {loading ? (
         <View style={styles.timelineLoading}>
-          <ActivityIndicator color="#00e5ff" size="large" />
+          <ActivityIndicator color={theme.accentPrimary} size="large" />
           <Text style={styles.timelineLoadingText}>Loading tracks...</Text>
         </View>
       ) : tracks.length === 0 ? (
@@ -168,34 +173,34 @@ export function TimelineScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#050505" },
-  timelineHeader: { padding: 24, paddingTop: 48, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.08)" },
-  timelineHeaderTitle: { color: "#ffffff", fontSize: 28, fontWeight: "900", letterSpacing: -0.5 },
-  timelineHeaderSub: { color: "rgba(255,255,255,0.5)", fontSize: 14, marginTop: 4 },
+const getStyles = (theme: Theme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: theme.bgMain },
+  timelineHeader: { padding: 24, paddingTop: 48, borderBottomWidth: 1, borderBottomColor: theme.borderGlass },
+  timelineHeaderTitle: { color: theme.textPrimary, fontSize: 28, fontWeight: "900", letterSpacing: -0.5 },
+  timelineHeaderSub: { color: theme.textMuted, fontSize: 14, marginTop: 4 },
   timelineLoading: { flex: 1, justifyContent: "center", alignItems: "center", gap: 12 },
-  timelineLoadingText: { color: "rgba(255,255,255,0.5)", fontSize: 14 },
+  timelineLoadingText: { color: theme.textMuted, fontSize: 14 },
   timelineEmpty: { flex: 1, justifyContent: "center", alignItems: "center", padding: 32 },
-  timelineEmptyText: { color: "rgba(255,255,255,0.6)", fontSize: 18, fontWeight: "600", marginBottom: 8 },
-  timelineEmptySub: { color: "rgba(255,255,255,0.3)", fontSize: 14, textAlign: "center" },
+  timelineEmptyText: { color: theme.textSecondary, fontSize: 18, fontWeight: "600", marginBottom: 8 },
+  timelineEmptySub: { color: theme.textMuted, fontSize: 14, textAlign: "center" },
   timelineContainer: { minWidth: 800, paddingBottom: 32, position: "relative", paddingTop: 16 },
-  playhead: { position: "absolute", top: 0, bottom: 0, left: 150, width: 2, backgroundColor: "#ff0044", zIndex: 10 },
+  playhead: { position: "absolute", top: 0, bottom: 0, left: 150, width: 2, backgroundColor: theme.accentSecondary, zIndex: 10 },
   trackRow: {
     flexDirection: "row", alignItems: "center", height: 60,
-    backgroundColor: "rgba(24,24,27,0.5)", borderColor: "rgba(255,255,255,0.08)",
+    backgroundColor: theme.bgPanel, borderColor: theme.borderGlass,
     borderBottomWidth: 1, marginBottom: 8, borderRadius: 8, overflow: "hidden",
   },
   trackHeader: {
     width: 64, height: "100%", justifyContent: "center", alignItems: "center",
-    backgroundColor: "rgba(24,24,27,0.9)", borderRightWidth: 1, borderRightColor: "rgba(255,255,255,0.08)", zIndex: 5,
+    backgroundColor: theme.bgMain, borderRightWidth: 1, borderRightColor: theme.borderGlass, zIndex: 5,
   },
-  trackHeaderText: { color: "rgba(255,255,255,0.7)", fontSize: 14, fontWeight: "bold" },
+  trackHeaderText: { color: theme.textSecondary, fontSize: 14, fontWeight: "bold" },
   trackContent: { flex: 1, height: "100%", position: "relative" },
   clip: {
     position: "absolute", height: "80%", top: "10%", borderRadius: 6,
     justifyContent: "center", paddingHorizontal: 8, borderWidth: 1,
   },
-  clipVideo: { backgroundColor: "rgba(0,195,255,0.2)", borderColor: "#00c3ff" },
-  clipAudio: { backgroundColor: "rgba(0,255,170,0.2)", borderColor: "#00ffaa" },
-  clipText: { color: "#ffffff", fontSize: 10, fontWeight: "600" },
+  clipVideo: { backgroundColor: theme.bgHover, borderColor: theme.accentPrimary },
+  clipAudio: { backgroundColor: theme.bgHover, borderColor: theme.accentSecondary },
+  clipText: { color: theme.textPrimary, fontSize: 10, fontWeight: "600" },
 });

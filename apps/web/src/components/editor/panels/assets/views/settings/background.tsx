@@ -166,7 +166,7 @@ function CustomColorPreview({
 						style={{ background: CUSTOM_COLOR_SWATCH_BACKGROUND }}
 					/>
 					<span
-						className="absolute right-1 bottom-1 size-5 rounded-sm border border-white/70 shadow-sm"
+						className="absolute right-1 bottom-1 size-5 rounded-sm border border-border shadow-sm"
 						style={{ backgroundColor: currentBackgroundColor }}
 					/>
 				</button>

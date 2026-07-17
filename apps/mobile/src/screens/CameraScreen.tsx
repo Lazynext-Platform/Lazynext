@@ -1,5 +1,6 @@
 /** @module screens/CameraScreen Full camera recording with grid overlay */
 import React, { useRef, useState, useCallback, useEffect } from "react";
+import { useTheme, Theme } from "../theme";
 import {
 	StyleSheet,
 	Text,
@@ -22,6 +23,8 @@ const RECORDING_MAX_MS = 300000;
 
 /** Camera capture screen with grid overlay, recording controls, and media library integration. */
 export function CameraScreen() {
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => getStyles(theme), [theme]);
 	const [cameraPermission, requestCameraPermission] = useCameraPermissions();
 	const [micPermission, requestMicPermission] = useMicrophonePermissions();
 	const [mediaPermission, requestMediaPermission] = MediaLibrary.usePermissions();
@@ -241,30 +244,30 @@ export function CameraScreen() {
 	);
 }
 
-const styles = StyleSheet.create({
-	container: { flex: 1, backgroundColor: "#000000" },
+const getStyles = (theme: Theme) => StyleSheet.create({
+	container: { flex: 1, backgroundColor: theme.bgMain },
 	camera: { flex: 1 },
 	permissionContainer: {
 		flex: 1,
-		backgroundColor: "#050505",
+		backgroundColor: theme.bgMain,
 		justifyContent: "center",
 		alignItems: "center",
 		padding: 32,
 	},
 	permissionText: {
-		color: "#ffffff",
+		color: theme.textPrimary,
 		fontSize: 16,
 		textAlign: "center",
 		marginBottom: 24,
 	},
 	permissionButton: {
-		backgroundColor: "#00e5ff",
+		backgroundColor: theme.accentPrimary,
 		paddingHorizontal: 32,
 		paddingVertical: 14,
 		borderRadius: 12,
 	},
 	permissionButtonText: {
-		color: "#050505",
+		color: theme.textOnAccent,
 		fontWeight: "bold",
 		fontSize: 16,
 	},
@@ -282,11 +285,11 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	gridCellBorder: {
-		borderColor: "rgba(255,255,255,0.25)",
+		borderColor: theme.textMuted,
 		borderWidth: 0.5,
 	},
 	gridCellBorderH: {
-		borderColor: "rgba(255,255,255,0.25)",
+		borderColor: theme.textMuted,
 		borderTopWidth: 0.5,
 		borderBottomWidth: 0.5,
 	},
@@ -308,7 +311,7 @@ const styles = StyleSheet.create({
 		width: 44,
 		height: 44,
 		borderRadius: 22,
-		backgroundColor: "rgba(0,0,0,0.5)",
+		backgroundColor: theme.bgPanel,
 		justifyContent: "center",
 		alignItems: "center",
 	},
@@ -316,7 +319,7 @@ const styles = StyleSheet.create({
 	recordingIndicator: {
 		flexDirection: "row",
 		alignItems: "center",
-		backgroundColor: "rgba(255,0,68,0.3)",
+		backgroundColor: theme.bgHover,
 		paddingHorizontal: 14,
 		paddingVertical: 6,
 		borderRadius: 16,
@@ -326,10 +329,10 @@ const styles = StyleSheet.create({
 		width: 10,
 		height: 10,
 		borderRadius: 5,
-		backgroundColor: "#ff0044",
+		backgroundColor: theme.accentSecondary,
 	},
 	timerText: {
-		color: "#ffffff",
+		color: theme.textPrimary,
 		fontSize: 16,
 		fontWeight: "700",
 		fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
@@ -348,19 +351,19 @@ const styles = StyleSheet.create({
 		height: 80,
 		borderRadius: 40,
 		borderWidth: 4,
-		borderColor: "#ffffff",
+		borderColor: theme.textPrimary,
 		justifyContent: "center",
 		alignItems: "center",
 	},
 	recordBtnActive: {
-		borderColor: "#ff0044",
+		borderColor: theme.accentSecondary,
 		transform: [{ scale: 1.2 }],
 	},
 	recordBtnInner: {
 		width: 60,
 		height: 60,
 		borderRadius: 30,
-		backgroundColor: "#ff0044",
+		backgroundColor: theme.accentSecondary,
 	},
 	recordBtnInnerRecording: {
 		width: 28,

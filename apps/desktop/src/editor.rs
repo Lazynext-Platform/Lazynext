@@ -166,10 +166,11 @@ impl Render for EditorShell {
             self.prompt_focused.set(true);
         }
 
-        let bg_color = rgb(0x121212); // Deep dark gray/black background
-        let panel_bg = rgb(0x1e1e1e);
-        let border_color = rgb(0x2a2a2a);
-        let accent_color = rgb(0x00d4df); // Cyan
+        let theme = crate::theme::Theme::from_appearance(_window.appearance());
+        let bg_color = theme.bg_main;
+        let panel_bg = theme.bg_panel;
+        let border_color = theme.border;
+        let accent_color = theme.accent_primary;
 
         // Fetch dynamic project data from NLE state and render frame
         let (pd, frame_data) = self.rt_handle.block_on(async {
@@ -231,7 +232,7 @@ impl Render for EditorShell {
                 .justify_center()
                 .items_center()
                 .rounded_lg()
-                .hover(|s| s.bg(rgb(0x2a2a2a)))
+                .hover(|s| s.bg(theme.border))
                 .child(label.to_string())
         };
 
@@ -242,9 +243,9 @@ impl Render for EditorShell {
         let prompt_placeholder =
             SharedString::from("Click to focus and type a command (e.g. 'cut silences')");
         let prompt_text_color = if self.ai_prompt_text.is_empty() {
-            rgb(0x666666)
+            theme.text_muted
         } else {
-            rgb(0xcccccc)
+            theme.text_secondary
         };
         let actual_text = if self.ai_prompt_text.is_empty() {
             prompt_placeholder
@@ -257,7 +258,7 @@ impl Render for EditorShell {
             .w_full()
             .h_full()
             .bg(bg_color)
-            .text_color(rgb(0xffffff))
+            .text_color(theme.text_primary)
             .child(
                 // Left Toolbar
                 div()
@@ -308,11 +309,11 @@ impl Render for EditorShell {
                                                     .px_2()
                                                     .py_1()
                                                     .bg(accent_color)
-                                                    .text_color(rgb(0x000000))
+                                                    .text_color(theme.bg_main)
                                                     .rounded_sm()
                                                     .cursor_pointer()
                                                     .text_sm()
-                                                    .hover(|s| s.bg(rgb(0x00b4bf)))
+                                                    .hover(|s| s.bg(theme.accent_secondary))
                                                     .child("+ Import")
                                                     .on_mouse_down(gpui::MouseButton::Left, {
                                                         let nle = self.nle.clone();
@@ -374,14 +375,14 @@ impl Render for EditorShell {
                                     .flex()
                                     .justify_center()
                                     .items_center()
-                                    .bg(rgb(0x0a0a0a))
+                                    .bg(theme.timeline_bg)
                                     .child(
                                         div()
                                             .w_full()
                                             .h_full()
-                                            .bg(rgb(0x000000))
+                                            .bg(theme.bg_main)
                                             .border_1()
-                                            .border_color(rgb(0x333333))
+                                            .border_color(theme.bg_panel)
                                             .shadow_md()
                                             .map(|el| {
                                                 if let Some(img_source) = &self.last_frame_data {
@@ -411,7 +412,7 @@ impl Render for EditorShell {
                             .items_center()
                             .gap_1()
                             .px_3()
-                            .bg(rgb(0x1a1a1a))
+                            .bg(theme.bg_panel)
                             .border_b_1()
                             .border_color(border_color)
                             .child(
@@ -422,9 +423,9 @@ impl Render for EditorShell {
                                     .justify_center()
                                     .items_center()
                                     .rounded_sm()
-                                    .bg(rgb(0x333333))
+                                    .bg(theme.bg_panel)
                                     .cursor_pointer()
-                                    .hover(|s| s.bg(rgb(0x444444)))
+                                    .hover(|s| s.bg(theme.bg_hover))
                                     .child("⏮")
                                     .on_mouse_down(gpui::MouseButton::Left, {
                                         let c = self.frame_step_back5_clicked.clone();
@@ -439,9 +440,9 @@ impl Render for EditorShell {
                                     .justify_center()
                                     .items_center()
                                     .rounded_sm()
-                                    .bg(rgb(0x333333))
+                                    .bg(theme.bg_panel)
                                     .cursor_pointer()
-                                    .hover(|s| s.bg(rgb(0x444444)))
+                                    .hover(|s| s.bg(theme.bg_hover))
                                     .child("◀")
                                     .on_mouse_down(gpui::MouseButton::Left, {
                                         let c = self.frame_step_back1_clicked.clone();
@@ -456,9 +457,9 @@ impl Render for EditorShell {
                                     .justify_center()
                                     .items_center()
                                     .rounded_sm()
-                                    .bg(if self.is_playing { accent_color } else { rgb(0x333333) })
+                                    .bg(if self.is_playing { accent_color } else { theme.bg_panel })
                                     .cursor_pointer()
-                                    .hover(|s| s.bg(if self.is_playing { rgb(0x00b4bf) } else { rgb(0x444444) }))
+                                    .hover(|s| s.bg(if self.is_playing { theme.accent_secondary } else { theme.bg_hover }))
                                     .child(if self.is_playing { "⏸" } else { "▶" })
                                     .on_mouse_down(gpui::MouseButton::Left, {
                                         let play_clicked = play_clicked.clone();
@@ -475,9 +476,9 @@ impl Render for EditorShell {
                                     .justify_center()
                                     .items_center()
                                     .rounded_sm()
-                                    .bg(rgb(0x333333))
+                                    .bg(theme.bg_panel)
                                     .cursor_pointer()
-                                    .hover(|s| s.bg(rgb(0x444444)))
+                                    .hover(|s| s.bg(theme.bg_hover))
                                     .child("▶")
                                     .on_mouse_down(gpui::MouseButton::Left, {
                                         let c = self.frame_step_fwd1_clicked.clone();
@@ -492,9 +493,9 @@ impl Render for EditorShell {
                                     .justify_center()
                                     .items_center()
                                     .rounded_sm()
-                                    .bg(rgb(0x333333))
+                                    .bg(theme.bg_panel)
                                     .cursor_pointer()
-                                    .hover(|s| s.bg(rgb(0x444444)))
+                                    .hover(|s| s.bg(theme.bg_hover))
                                     .child("⏭")
                                     .on_mouse_down(gpui::MouseButton::Left, {
                                         let c = self.frame_step_fwd5_clicked.clone();
@@ -504,14 +505,14 @@ impl Render for EditorShell {
                             .child(
                                 div()
                                     .text_sm()
-                                    .text_color(rgb(0x888888))
+                                    .text_color(theme.text_muted)
                                     .child(format!("Frame {}", self.current_frame)),
                             )
                             .child(div().flex_1())
                             .child(
                                 div()
                                     .text_xs()
-                                    .text_color(rgb(0x555555))
+                                    .text_color(theme.text_muted)
                                     .child("Space:Play/Pause  ←→:Step ±1  ⇧←→:Step ±5"),
                             )
                             .child(div().flex_1())
@@ -520,11 +521,11 @@ impl Render for EditorShell {
                                     .px_3()
                                     .py_1()
                                     .bg(accent_color)
-                                    .text_color(rgb(0x000000))
+                                    .text_color(theme.bg_main)
                                     .rounded_md()
                                     .cursor_pointer()
                                     .text_sm()
-                                    .hover(|s| s.bg(rgb(0x00b4bf)))
+                                    .hover(|s| s.bg(theme.accent_secondary))
                                     .child("Export MP4")
                                     .on_mouse_down(gpui::MouseButton::Left, {
                                         let engine = self.engine.clone();
@@ -604,7 +605,7 @@ impl Render for EditorShell {
                                             .child(
                                                 div()
                                                     .flex_1()
-                                                    .bg(rgb(0x2a2a2a))
+                                                    .bg(theme.border)
                                                     .rounded_md()
                                                     .relative()
                                                     .children(
@@ -626,7 +627,7 @@ impl Render for EditorShell {
                                                                 .flex()
                                                                 .items_center()
                                                                 .justify_center()
-                                                                .text_color(rgb(0x000000))
+                                                                .text_color(theme.bg_main)
                                                                 .text_sm()
                                                                 .child(clip.name.clone())
                                                         }),
@@ -639,7 +640,7 @@ impl Render for EditorShell {
                                             .top_0()
                                             .bottom_0()
                                             .w(px(2.0))
-                                            .bg(rgb(0xff0044))
+                                            .bg(theme.playhead)
                                             .left(px(self.current_frame as f32 * Self::TIMELINE_PX_PER_FRAME))
                                             // Playhead triangle
                                             .child(
@@ -649,7 +650,7 @@ impl Render for EditorShell {
                                                     .left(px(-4.0))
                                                     .w(px(10.0))
                                                     .h(px(8.0))
-                                                    .bg(rgb(0xff0044))
+                                                    .bg(theme.playhead)
                                                     .rounded_sm(),
                                             ),
                                     ),
@@ -686,24 +687,24 @@ impl Render for EditorShell {
                                     .child(
                                         div()
                                             .text_sm()
-                                            .text_color(rgb(0x888888))
+                                            .text_color(theme.text_muted)
                                             .child("Transform"),
                                     )
                                     .child(
                                         div()
                                             .p_2()
-                                            .bg(rgb(0x1a1a1a))
+                                            .bg(theme.bg_panel)
                                             .border_1()
-                                            .border_color(rgb(0x333333))
+                                            .border_color(theme.bg_panel)
                                             .rounded_md()
                                             .child("Scale: 100%"),
                                     )
                                     .child(
                                         div()
                                             .p_2()
-                                            .bg(rgb(0x1a1a1a))
+                                            .bg(theme.bg_panel)
                                             .border_1()
-                                            .border_color(rgb(0x333333))
+                                            .border_color(theme.bg_panel)
                                             .rounded_md()
                                             .child("Position: X:0 Y:0"),
                                     ),
@@ -714,14 +715,14 @@ impl Render for EditorShell {
                                     .flex_col()
                                     .gap_1()
                                     .child(
-                                        div().text_sm().text_color(rgb(0x888888)).child("Opacity"),
+                                        div().text_sm().text_color(theme.text_muted).child("Opacity"),
                                     )
                                     .child(
                                         div()
                                             .p_2()
-                                            .bg(rgb(0x1a1a1a))
+                                            .bg(theme.bg_panel)
                                             .border_1()
-                                            .border_color(rgb(0x333333))
+                                            .border_color(theme.bg_panel)
                                             .rounded_md()
                                             .child("100%"),
                                     ),
@@ -744,9 +745,9 @@ impl Render for EditorShell {
                                         // Clickable prompt display area — shows current prompt text
                                         div()
                                             .p_3()
-                                            .bg(rgb(0x0a0a0a))
+                                            .bg(theme.timeline_bg)
                                             .border_1()
-                                            .border_color(if is_prompt_focused { rgb(0x00ff88) } else { accent_color })
+                                            .border_color(if is_prompt_focused { theme.accent_primary } else { accent_color })
                                             .rounded_md()
                                             .cursor_pointer()
                                             .child(
@@ -766,12 +767,12 @@ impl Render for EditorShell {
                                         div()
                                             .p_2()
                                             .bg(accent_color)
-                                            .text_color(rgb(0x000000))
+                                            .text_color(theme.bg_main)
                                             .rounded_md()
                                             .cursor_pointer()
                                             .flex()
                                             .justify_center()
-                                            .hover(|s| s.bg(rgb(0x00b4bf)))
+                                            .hover(|s| s.bg(theme.accent_secondary))
                                             .child("Run Command")
                                             .on_mouse_down(gpui::MouseButton::Left, {
                                                 let text = self.ai_prompt_text.clone();
@@ -845,7 +846,7 @@ impl Render for EditorShell {
                                                 div()
                                                     .text_sm()
                                                     .font_weight(FontWeight::BOLD)
-                                                    .text_color(if self.agent_active.get() { rgb(0x00ff88) } else { rgb(0xff4444) })
+                                                    .text_color(if self.agent_active.get() { theme.accent_primary } else { theme.playhead })
                                                     .child(if self.agent_active.get() { "Agent: Active" } else { "Agent: Stopped" }),
                                             )
                                             .child(
@@ -855,8 +856,8 @@ impl Render for EditorShell {
                                                     .rounded_sm()
                                                     .text_sm()
                                                     .cursor_pointer()
-                                                    .bg(if self.agent_active.get() { rgb(0xff4444) } else { rgb(0x00ff88) })
-                                                    .text_color(rgb(0x000000))
+                                                    .bg(if self.agent_active.get() { theme.playhead } else { theme.accent_primary })
+                                                    .text_color(theme.bg_main)
                                                     .hover(|s| s.opacity(0.8))
                                                     .child(if self.agent_active.get() { "Stop" } else { "Start" })
                                                     .on_mouse_down(gpui::MouseButton::Left, {
@@ -905,19 +906,19 @@ impl Render for EditorShell {
                                             .child(
                                                 div()
                                                     .text_sm()
-                                                    .text_color(rgb(0x888888))
+                                                    .text_color(theme.text_muted)
                                                     .child("Suggestions ▼"),
                                             )
                                             .child(
                                                 div()
                                                     .px_2()
                                                     .py_1()
-                                                    .bg(rgb(0x2a2a2a))
+                                                    .bg(theme.border)
                                                     .rounded_sm()
                                                     .text_xs()
-                                                    .text_color(rgb(0x888888))
+                                                    .text_color(theme.text_muted)
                                                     .cursor_pointer()
-                                                    .hover(|s| s.bg(rgb(0x3a3a3a)))
+                                                    .hover(|s| s.bg(theme.bg_hover))
                                                     .child("↻ Fetch")
                                                     .on_mouse_down(gpui::MouseButton::Left, {
                                                         let agent_suggestions = self.agent_suggestions.clone();
@@ -975,9 +976,9 @@ impl Render for EditorShell {
                                                         .flex()
                                                         .flex_col()
                                                         .p_2()
-                                                        .bg(if is_sel { rgb(0x2a2a2a) } else { rgb(0x1a1a1a) })
+                                                        .bg(if is_sel { theme.border } else { theme.bg_panel })
                                                         .border_1()
-                                                        .border_color(if is_sel { accent_color } else { rgb(0x333333) })
+                                                        .border_color(if is_sel { accent_color } else { theme.bg_panel })
                                                         .rounded_md()
                                                         .cursor_pointer()
                                                         .on_mouse_down(gpui::MouseButton::Left, {
@@ -987,7 +988,7 @@ impl Render for EditorShell {
                                                         .child(
                                                             div()
                                                                 .text_sm()
-                                                                .text_color(rgb(0xcccccc))
+                                                                .text_color(theme.text_secondary)
                                                                 .child(title),
                                                         )
                                                         .when(is_sel, |el| {
@@ -995,7 +996,7 @@ impl Render for EditorShell {
                                                                 div()
                                                                     .mt_1()
                                                                     .text_xs()
-                                                                    .text_color(rgb(0x888888))
+                                                                    .text_color(theme.text_muted)
                                                                     .child(desc),
                                                             )
                                                             .child(
@@ -1007,12 +1008,12 @@ impl Render for EditorShell {
                                                                         div()
                                                                             .px_2()
                                                                             .py_1()
-                                                                            .bg(rgb(0xff4444))
-                                                                            .text_color(rgb(0xffffff))
+                                                                            .bg(theme.playhead)
+                                                                            .text_color(theme.text_primary)
                                                                             .rounded_sm()
                                                                             .text_xs()
                                                                             .cursor_pointer()
-                                                                            .hover(|s| s.bg(rgb(0xcc3333)))
+                                                                            .hover(|s| s.bg(theme.bg_hover))
                                                                             .child("Dismiss")
                                                                             .on_mouse_down(gpui::MouseButton::Left, {
                                                                                 let sg = sugs.clone();
@@ -1052,13 +1053,13 @@ impl Render for EditorShell {
                         .flex()
                         .items_center()
                         .px_3()
-                        .bg(rgb(0x1a3a1a))
+                        .bg(theme.bg_hover)
                         .border_t_1()
-                        .border_color(rgb(0x00ff88))
+                        .border_color(theme.accent_primary)
                         .child(
                             div()
                                 .text_sm()
-                                .text_color(rgb(0x00ff88))
+                                .text_color(theme.accent_primary)
                                 .child(eta_text),
                         ),
                 )
@@ -1073,9 +1074,9 @@ impl Render for EditorShell {
                         .items_center()
                         .justify_between()
                         .px_4()
-                        .bg(rgb(0x3a1a1a))
+                        .bg(theme.bg_hover)
                         .border_t_1()
-                        .border_color(rgb(0xff4444))
+                        .border_color(theme.playhead)
                         .child(
                             div()
                                 .flex()
@@ -1084,22 +1085,22 @@ impl Render for EditorShell {
                                 .child(
                                     div()
                                         .text_sm()
-                                        .text_color(rgb(0xff8888))
+                                        .text_color(theme.text_primary)
                                         .child("⚠")
                                 )
                                 .child(
                                     div()
                                         .text_sm()
-                                        .text_color(rgb(0xff8888))
+                                        .text_color(theme.text_primary)
                                         .child(error_text)
                                 ),
                         )
                         .child(
                             div()
                                 .text_sm()
-                                .text_color(rgb(0x888888))
+                                .text_color(theme.text_muted)
                                 .cursor_pointer()
-                                .hover(|s| s.text_color(rgb(0xffffff)))
+                                .hover(|s| s.text_color(theme.text_primary))
                                 .child("Dismiss")
                                 .on_mouse_down(gpui::MouseButton::Left, move |_, _, _| {})
                         ),

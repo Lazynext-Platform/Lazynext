@@ -1,5 +1,6 @@
 /** @module components/ARPreview AR face filter preview and background replacement */
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useTheme, Theme } from "../theme";
 import {
 	StyleSheet,
 	Text,
@@ -52,6 +53,8 @@ const PRESET_FILTERS: FilterItem[] = [
 
 /** AR face filter preview with real-time background replacement and filter carousel. */
 export function ARPreview() {
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => getStyles(theme), [theme]);
 	const [activeFilter, setActiveFilter] = useState<string>("none");
 	const [faces, setFaces] = useState<FaceBounds[]>([]);
 	const [saving, setSaving] = useState(false);
@@ -255,8 +258,8 @@ export function ARPreview() {
 	);
 }
 
-const styles = StyleSheet.create({
-	container: { flex: 1, backgroundColor: "#000000" },
+const getStyles = (theme: Theme) => StyleSheet.create({
+	container: { flex: 1, backgroundColor: theme.bgMain },
 	camera: { flex: 1 },
 
 	// Face filter overlays
@@ -265,7 +268,7 @@ const styles = StyleSheet.create({
 		borderRadius: 8,
 		opacity: 0.85,
 		borderWidth: 2,
-		borderColor: "rgba(255,255,255,0.3)",
+		borderColor: theme.textMuted,
 	},
 	hatOverlay: {
 		position: "absolute",
@@ -276,13 +279,13 @@ const styles = StyleSheet.create({
 	},
 	beautyOverlay: {
 		position: "absolute",
-		backgroundColor: "rgba(255,200,180,0.08)",
+		backgroundColor: theme.bgHover,
 		borderRadius: 60,
 	},
 	beautyGlow: {
-		backgroundColor: "rgba(255,220,180,0.12)",
+		backgroundColor: theme.bgHover,
 		borderWidth: 1,
-		borderColor: "rgba(255,200,150,0.2)",
+		borderColor: theme.borderGlass,
 	},
 
 	// Background effects
@@ -290,15 +293,15 @@ const styles = StyleSheet.create({
 		...StyleSheet.absoluteFill,
 	},
 	bgBlur: {
-		backgroundColor: "rgba(255,255,255,0.1)",
+		backgroundColor: theme.borderGlass,
 	},
 	bgBW: {
-		backgroundColor: "rgba(0,0,0,0.4)",
+		backgroundColor: theme.bgPanel,
 	},
 	bgNeon: {
-		backgroundColor: "rgba(128, 0, 255, 0.15)",
+		backgroundColor: theme.bgHover,
 		borderWidth: 1,
-		borderColor: "rgba(200, 50, 255, 0.2)",
+		borderColor: theme.borderGlass,
 	},
 
 	// Filter chips
@@ -313,26 +316,26 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 14,
 		paddingVertical: 8,
 		borderRadius: 16,
-		backgroundColor: "rgba(255,255,255,0.1)",
+		backgroundColor: theme.borderGlass,
 		borderWidth: 1,
-		borderColor: "rgba(255,255,255,0.2)",
+		borderColor: theme.borderGlass,
 	},
 	filterChipActive: {
-		backgroundColor: "#00e5ff",
-		borderColor: "#00e5ff",
+		backgroundColor: theme.accentPrimary,
+		borderColor: theme.accentPrimary,
 	},
 	filterChipText: {
-		color: "rgba(255,255,255,0.7)",
+		color: theme.textSecondary,
 		fontSize: 12,
 		fontWeight: "600",
 	},
 	filterChipTextActive: {
-		color: "#050505",
+		color: theme.textOnAccent,
 	},
 
 	// Save button
 	saveBtn: {
-		backgroundColor: "#00e5ff",
+		backgroundColor: theme.accentPrimary,
 		marginHorizontal: 24,
 		marginBottom: Platform.OS === "ios" ? 40 : 24,
 		marginTop: 8,
@@ -342,7 +345,7 @@ const styles = StyleSheet.create({
 	},
 	saveBtnDisabled: { opacity: 0.5 },
 	saveBtnText: {
-		color: "#050505",
+		color: theme.textOnAccent,
 		fontWeight: "bold",
 		fontSize: 16,
 	},

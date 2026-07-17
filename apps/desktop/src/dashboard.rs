@@ -102,8 +102,9 @@ impl Dashboard {
 impl Render for Dashboard {
     // Builds the dashboard view: project list, recent files, and create/open actions.
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
-        let bg = rgb(0x1a1a1a);
-        let accent = rgb(0x00d4df);
+        let theme = crate::theme::Theme::from_appearance(_window.appearance());
+        let bg = theme.bg_main;
+        let accent = theme.accent_primary;
 
         // Process recent project addition
         if self.recent_add_clicked.get() {
@@ -125,14 +126,14 @@ impl Render for Dashboard {
                 div()
                     .text_xl()
                     .font_weight(FontWeight::BOLD)
-                    .text_color(rgb(0xffffff))
+                    .text_color(theme.text_primary)
                     .child("Lazynext Dashboard"),
             )
             .child(
                 div()
                     .mt_4()
                     .text_sm()
-                    .text_color(rgb(0xaaaaaa))
+                    .text_color(theme.text_secondary)
                     .child(format!("Version {}", self.version)),
             )
             .child(
@@ -144,10 +145,10 @@ impl Render for Dashboard {
                         div()
                             .p_3()
                             .bg(accent)
-                            .text_color(rgb(0x000000))
+                            .text_color(theme.bg_main)
                             .rounded_md()
                             .cursor_pointer()
-                            .hover(|s| s.bg(rgb(0x00b4bf)))
+                            .hover(|s| s.bg(theme.accent_secondary))
                             .child("New Project")
                             .on_mouse_down(gpui::MouseButton::Left, {
                                 let nle = self.nle.clone();
@@ -211,11 +212,11 @@ impl Render for Dashboard {
                     .child(
                         div()
                             .p_3()
-                            .bg(rgb(0x333333))
-                            .text_color(rgb(0xffffff))
+                            .bg(theme.bg_panel)
+                            .text_color(theme.text_primary)
                             .rounded_md()
                             .cursor_pointer()
-                            .hover(|s| s.bg(rgb(0x444444)))
+                            .hover(|s| s.bg(theme.bg_hover))
                             .child("Open Project")
                             .on_mouse_down(gpui::MouseButton::Left, {
                                 let nle = self.nle.clone();
@@ -310,7 +311,7 @@ impl Render for Dashboard {
                             div()
                                 .text_sm()
                                 .font_weight(FontWeight::BOLD)
-                                .text_color(rgb(0x888888))
+                                .text_color(theme.text_muted)
                                 .child("Recent Projects"),
                         )
                         .children(self.recent_projects.iter().map(|p| {
@@ -318,14 +319,14 @@ impl Render for Dashboard {
                             div()
                                 .px_4()
                                 .py_2()
-                                .bg(rgb(0x252525))
+                                .bg(theme.bg_panel)
                                 .border_1()
-                                .border_color(rgb(0x333333))
+                                .border_color(theme.bg_panel)
                                 .rounded_md()
                                 .cursor_pointer()
-                                .hover(|s| s.bg(rgb(0x2a2a2a)))
+                                .hover(|s| s.bg(theme.bg_hover))
                                 .child(
-                                    div().text_sm().text_color(rgb(0xcccccc)).child(
+                                    div().text_sm().text_color(theme.text_secondary).child(
                                         std::path::Path::new(&path)
                                             .file_name()
                                             .map(|n| n.to_string_lossy().to_string())

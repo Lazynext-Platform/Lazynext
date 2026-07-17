@@ -202,7 +202,7 @@ export default function EditorPage() {
 				
 				{/* Left Side: Video Preview */}
 				<div className="flex-1 flex flex-col gap-4 min-w-0 h-full">
-					<div className="flex-1 glass-panel relative overflow-hidden flex items-center justify-center bg-black/40 shadow-2xl group border border-border/50 rounded-3xl">
+					<div className="flex-1 glass-panel relative overflow-hidden flex items-center justify-center bg-glass shadow-2xl group border border-border/50 rounded-3xl">
 						{/* Placeholder text if no video yet */}
 						{!isReady && (
 							<div className="absolute inset-0 flex items-center justify-center text-foreground/30 flex-col gap-4">
@@ -270,7 +270,7 @@ export default function EditorPage() {
 									<div
 										className={`max-w-[85%] rounded-2xl p-4 text-sm leading-relaxed shadow-lg ${
 											msg.role === "user"
-												? "bg-gradient-to-br from-cyan-500 to-blue-600 text-white rounded-tr-sm"
+												? "bg-gradient-to-br from-cyan-500 to-blue-600 text-foreground rounded-tr-sm"
 												: "bg-glass border border-border/50 text-foreground rounded-tl-sm"
 										}`}
 									>
@@ -308,7 +308,7 @@ export default function EditorPage() {
 									onChange={(e) => setPrompt(e.target.value)}
 									onKeyDown={(e) => e.key === "Enter" && handleSend()}
 									placeholder="e.g. Turn this into 3 viral TikTok clips..."
-									className="w-full bg-black/40 border border-border/50 rounded-full py-4 pl-6 pr-14 text-sm text-foreground focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all shadow-inner placeholder:text-foreground/30"
+									className="w-full bg-glass border border-border/50 rounded-full py-4 pl-6 pr-14 text-sm text-foreground focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all shadow-inner placeholder:text-foreground/30"
 								/>
 								<button
 									onClick={handleSend}

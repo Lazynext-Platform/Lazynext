@@ -99,7 +99,7 @@ export function KeyboardShortcutHints() {
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
-						className="fixed inset-0 z-200 bg-black/40 backdrop-blur-sm"
+						className="fixed inset-0 z-200 bg-glass backdrop-blur-sm"
 						onClick={() => setIsVisible(false)}
 					/>
 

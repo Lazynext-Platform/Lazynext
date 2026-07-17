@@ -119,6 +119,18 @@ impl Theme {
             ThemeMode::Light => Theme::light(),
         }
     }
+
+    /// Build a theme from GPUI's WindowAppearance, respecting LAZYNEXT_THEME override.
+    pub fn from_appearance(appearance: gpui::WindowAppearance) -> Self {
+        match env::var("LAZYNEXT_THEME").as_deref() {
+            Ok("light") => Theme::light(),
+            Ok("dark") => Theme::dark(),
+            _ => match appearance {
+                gpui::WindowAppearance::Dark | gpui::WindowAppearance::VibrantDark => Theme::dark(),
+                gpui::WindowAppearance::Light | gpui::WindowAppearance::VibrantLight => Theme::light(),
+            }
+        }
+    }
 }
 
 // Construct an opaque GPUI colour from 8-bit RGB components.

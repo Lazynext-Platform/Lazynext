@@ -7,7 +7,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { Appearance } from "react-native";
+import { Appearance, useColorScheme } from "react-native";
 
 /** Type definition for ThemeMode. */
 export type ThemeMode = "dark" | "light" | "system";
@@ -97,7 +97,7 @@ try {
 /** React component rendering ThemeProvider. */
 export function ThemeProvider({ children }: { children: ReactNode }) {
 	const [mode, setModeState] = useState<ThemeMode>("system");
-	const systemScheme = Appearance.getColorScheme();
+	const systemScheme = useColorScheme() || "dark";
 	const resolvedScheme: "dark" | "light" =
 		mode === "system"
 			? systemScheme === "light"

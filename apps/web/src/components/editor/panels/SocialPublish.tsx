@@ -520,7 +520,7 @@ export function SocialPublish({
 											{thumb.timestamp.toFixed(1)}s
 										</div>
 										{thumb.appeal_score !== undefined && (
-											<div className="absolute bottom-0 left-0 right-0 bg-black/70 text-[8px] text-emerald-400 text-center py-0.5">
+											<div className="absolute bottom-0 left-0 right-0 bg-glass text-[8px] text-emerald-400 text-center py-0.5">
 												{thumb.appeal_score}%
 											</div>
 										)}
@@ -634,7 +634,7 @@ export function SocialPublish({
 				{/* Platform safe zone overlay */}
 				<div className="absolute inset-0 flex items-center justify-center z-10">
 					<div
-						className="relative border border-pink-500/30 bg-black/40 rounded-lg overflow-hidden"
+						className="relative border border-pink-500/30 bg-glass rounded-lg overflow-hidden"
 						style={{
 							aspectRatio: selectedPlatform.aspect.replace(":", "/"),
 							maxWidth: "90%",
@@ -666,7 +666,7 @@ export function SocialPublish({
 							</div>
 
 							{/* Dimensions label */}
-							<div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/60 rounded text-[9px] text-muted">
+							<div className="absolute bottom-2 right-2 px-2 py-0.5 bg-glass rounded text-[9px] text-muted">
 								{selectedPlatform.width}x{selectedPlatform.height} ({selectedPlatform.aspect})
 							</div>
 

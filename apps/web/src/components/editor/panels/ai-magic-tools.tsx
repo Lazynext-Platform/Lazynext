@@ -71,15 +71,15 @@ export function AIMagicTools() {
 	] as const;
 
 	return (
-		<div className="w-80 h-full bg-neutral-900/80 backdrop-blur-2xl border-l border-white/5 flex flex-col font-sans">
-			<div className="p-4 border-b border-white/5 bg-neutral-950/40">
+		<div className="w-80 h-full bg-neutral-900/80 backdrop-blur-2xl border-l border-border flex flex-col font-sans">
+			<div className="p-4 border-b border-border bg-neutral-950/40">
 				<div className="flex items-center gap-2 mb-4">
 					<Wand2 className="w-5 h-5 text-cyan-400" />
-					<h2 className="font-semibold text-white/90 tracking-wide">Generative Studio</h2>
+					<h2 className="font-semibold text-foreground tracking-wide">Generative Studio</h2>
 				</div>
 
 				{/* Animated Tabs */}
-				<div className="flex gap-1 p-1 bg-black/40 rounded-lg relative overflow-hidden">
+				<div className="flex gap-1 p-1 bg-glass rounded-lg relative overflow-hidden">
 					{tabOptions.map((tab) => {
 						const isActive = activeTab === tab.id;
 						const Icon = tab.icon;
@@ -88,13 +88,13 @@ export function AIMagicTools() {
 								key={tab.id}
 								onClick={() => setActiveTab(tab.id as any)}
 								className={`relative z-10 flex-1 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center justify-center gap-2 ${
-									isActive ? "text-white" : "text-white/50 hover:text-white/80"
+									isActive ? "text-foreground" : "text-muted hover:text-foreground"
 								}`}
 							>
 								{isActive && (
 									<motion.div
 										layoutId="magic-tab-indicator"
-										className="absolute inset-0 bg-white/10 rounded-md shadow-sm border border-white/10"
+										className="absolute inset-0 bg-glass rounded-md shadow-sm border border-border"
 										initial={false}
 										transition={{ type: "spring", stiffness: 400, damping: 30 }}
 									/>
@@ -116,7 +116,7 @@ export function AIMagicTools() {
 						exit={{ opacity: 0, y: -10 }}
 						transition={{ duration: 0.2 }}
 					>
-						<label className="block text-xs font-medium text-white/60 mb-2">
+						<label className="block text-xs font-medium text-muted mb-2">
 							{activeTab === "video"
 								? "Text-to-Video Prompt"
 								: activeTab === "audio"
@@ -134,7 +134,7 @@ export function AIMagicTools() {
 									? "Welcome to the future of editing..."
 									: "Upbeat synthwave for a high-energy coding montage..."
 							}
-							className="w-full h-32 bg-black/40 border border-white/10 rounded-xl p-3 text-sm text-white/90 placeholder-white/30 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 resize-none transition-all shadow-inner"
+							className="w-full h-32 bg-glass border border-border rounded-xl p-3 text-sm text-foreground placeholder-white/30 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 resize-none transition-all shadow-inner"
 						/>
 					</motion.div>
 				</AnimatePresence>
@@ -142,7 +142,7 @@ export function AIMagicTools() {
 				<button
 					onClick={handleGenerate}
 					disabled={isGenerating || !prompt.trim()}
-					className="w-full relative group overflow-hidden bg-white/5 hover:bg-white/10 text-white/90 font-medium py-3 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-white/10 flex items-center justify-center gap-2 shadow-lg hover:shadow-cyan-500/20"
+					className="w-full relative group overflow-hidden bg-glass hover:bg-hover text-foreground font-medium py-3 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-border flex items-center justify-center gap-2 shadow-lg hover:shadow-cyan-500/20"
 				>
 					{isGenerating ? (
 						<>
