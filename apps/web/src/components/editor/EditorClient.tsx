@@ -4142,7 +4142,7 @@ export default function EditorClient({ project }: { project: Project }) {
 								tabIndex={0}
 								title="Sentient AGI Co-Editor"
 							>
-								<div className="w-2 h-2 bg-white rounded-full"></div>
+								<div className="w-2 h-2 bg-background rounded-full"></div>
 							</div>
 
 							<WasmPlayer
@@ -4254,8 +4254,8 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Title Safe (80%) */}
 									<div className="absolute w-[80%] h-[80%] border border-red-500/40 border-dashed" />
 									{/* Center Crosshair */}
-									<div className="absolute w-full h-px bg-white/20" />
-									<div className="absolute w-px h-full bg-white/20" />
+									<div className="absolute w-full h-px bg-glass" />
+									<div className="absolute w-px h-full bg-glass" />
 								</div>
 							)}
 
@@ -4570,7 +4570,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												<div className="w-4 h-1 bg-zinc-600 rounded-full mt-4" />
 											</div>
 											<div
-												className="absolute right-[-30px] w-7 h-8 bg-zinc-200 border-y-4 border-zinc-400 rounded shadow-[0_4px_6px_rgba(0,0,0,0.5)] cursor-ns-resize hover:bg-white transition-colors z-10 flex items-center justify-center"
+												className="absolute right-[-30px] w-7 h-8 bg-zinc-200 border-y-4 border-zinc-400 rounded shadow-[0_4px_6px_rgba(0,0,0,0.5)] cursor-ns-resize hover:bg-background transition-colors z-10 flex items-center justify-center"
 												style={{ bottom: "80%", transform: "translateY(50%)" }}
 											>
 												<div className="w-full h-0.5 bg-red-500/50" />
@@ -6172,7 +6172,7 @@ export default function EditorClient({ project }: { project: Project }) {
 														className="sr-only peer"
 														defaultChecked
 													/>
-													<div className="w-7 h-4 bg-glass peer-focus:outline-none focus-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-500"></div>
+													<div className="w-7 h-4 bg-glass peer-focus:outline-none focus-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-background after:border-zinc-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-500"></div>
 												</label>
 											</div>
 										</div>
@@ -6905,7 +6905,7 @@ export default function EditorClient({ project }: { project: Project }) {
 																className={`w-6 h-3 rounded-full relative transition-colors ${selectedClip.filters?.faceRefinement ? "bg-pink-500" : "bg-glass"}`}
 															>
 																<div
-																	className={`absolute top-0.5 left-0.5 bg-white w-2 h-2 rounded-full transition-transform ${selectedClip.filters?.faceRefinement ? "translate-x-3" : "translate-x-0"}`}
+																	className={`absolute top-0.5 left-0.5 bg-background w-2 h-2 rounded-full transition-transform ${selectedClip.filters?.faceRefinement ? "translate-x-3" : "translate-x-0"}`}
 																/>
 															</div>
 														</label>
@@ -9113,7 +9113,7 @@ export default function EditorClient({ project }: { project: Project }) {
 															className={`w-6 h-3 rounded-full relative transition-colors ${selectedClip.transform?.dynamicZoom ? "bg-emerald-500" : "bg-glass"}`}
 														>
 															<div
-																className={`absolute top-0.5 left-0.5 bg-white w-2 h-2 rounded-full transition-transform ${selectedClip.transform?.dynamicZoom ? "translate-x-3" : "translate-x-0"}`}
+																className={`absolute top-0.5 left-0.5 bg-background w-2 h-2 rounded-full transition-transform ${selectedClip.transform?.dynamicZoom ? "translate-x-3" : "translate-x-0"}`}
 															/>
 														</div>
 													</label>
@@ -9349,7 +9349,7 @@ export default function EditorClient({ project }: { project: Project }) {
 
 										<label aria-label="VR 360 Workspace" className="relative inline-flex items-center cursor-pointer">
 											<input type="checkbox" className="sr-only peer" />
-											<div className="w-7 h-4 bg-glass peer-focus:outline-none focus-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-fuchsia-500"></div>
+											<div className="w-7 h-4 bg-glass peer-focus:outline-none focus-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-background after:border-zinc-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-fuchsia-500"></div>
 										</label>
 									</div>
 
@@ -10978,7 +10978,7 @@ export default function EditorClient({ project }: { project: Project }) {
 
 							<div className="flex-1 w-full flex justify-center relative px-2">
 								<div className="w-2 h-full bg-background rounded-full border border-zinc-900 relative">
-									<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-zinc-300 border-b-4 border-zinc-500 rounded cursor-ns-resize hover:bg-white shadow-lg flex items-center justify-center">
+									<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-zinc-300 border-b-4 border-zinc-500 rounded cursor-ns-resize hover:bg-background shadow-lg flex items-center justify-center">
 										<div className="w-4 h-0.5 bg-panel"></div>
 									</div>
 								</div>
@@ -11466,7 +11466,7 @@ export default function EditorClient({ project }: { project: Project }) {
 
 								<label aria-label="Distributed Render Farm" className="relative inline-flex items-center cursor-pointer">
 									<input type="checkbox" className="sr-only peer" />
-									<div className="w-7 h-4 bg-glass peer-focus:outline-none focus-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-emerald-500"></div>
+									<div className="w-7 h-4 bg-glass peer-focus:outline-none focus-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-background after:border-zinc-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-emerald-500"></div>
 								</label>
 							</div>
 
@@ -12032,7 +12032,7 @@ export default function EditorClient({ project }: { project: Project }) {
 					</div>
 
 					<button
-						className="absolute bottom-12 z-50 px-8 py-3 bg-white text-black font-bold rounded-full hover:scale-105 transition-transform hover:shadow-[0_0_30px_rgba(255,255,255,0.8)]"
+						className="absolute bottom-12 z-50 px-8 py-3 bg-background text-background font-bold rounded-full hover:scale-105 transition-transform hover:shadow-[0_0_30px_rgba(255,255,255,0.8)]"
 						onClick={() => setIsSingularity(false)}
 					>
 						COLLAPSE WAVEFUNCTION (Return to Timeline)

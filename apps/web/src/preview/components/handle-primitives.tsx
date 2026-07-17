@@ -202,7 +202,7 @@ export function IconHandle({
 		<HandleButton
 			screen={screen}
 			hitAreaSize={ICON_HANDLE_RADIUS * 2}
-			className="rounded-full bg-white text-black shadow-sm"
+			className="rounded-full bg-white text-background shadow-sm"
 			onPointerDown={onPointerDown}
 			onPointerMove={onPointerMove}
 			onPointerUp={onPointerUp}

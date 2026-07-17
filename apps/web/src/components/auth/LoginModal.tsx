@@ -255,7 +255,7 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 							<button
 								type="submit"
 								disabled={isLoading}
-								className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-black rounded-lg font-bold font-medium transition-all transform active:scale-[0.98] flex items-center justify-center gap-2"
+								className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-background rounded-lg font-bold font-medium transition-all transform active:scale-[0.98] flex items-center justify-center gap-2"
 							>
 								{isLoading ? (
 									<div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

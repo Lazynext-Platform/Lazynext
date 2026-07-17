@@ -221,7 +221,7 @@ export default function Home() {
 							<div className="relative aspect-video bg-glass border border-border rounded-2xl overflow-hidden flex items-center justify-center">
 								<div className="flex flex-col items-center gap-4">
 									<div className="w-20 h-20 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-500 flex items-center justify-center shadow-[0_0_40px_rgba(0,229,255,0.3)] animate-pulse">
-										<PlayCircle className="w-10 h-10 text-black" />
+										<PlayCircle className="w-10 h-10 text-background" />
 									</div>
 									<span className="text-muted/50 text-sm font-medium">
 										Lazynext Logo Animation

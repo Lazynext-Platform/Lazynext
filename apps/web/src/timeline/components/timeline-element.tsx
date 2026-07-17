@@ -765,7 +765,7 @@ function KeyframeIndicators({
 				<HugeiconsIcon
 					icon={KeyframeIcon}
 					className={cn(
-						"size-3.5 text-black",
+						"size-3.5 text-background",
 						isIndicatorSelected ? "fill-primary" : "fill-foreground",
 					)}
 					strokeWidth={1.5}
@@ -918,7 +918,7 @@ function ExpandedKeyframeLanes({
 									<HugeiconsIcon
 										icon={KeyframeIcon}
 										className={cn(
-											"size-3.5 text-black mr-1",
+											"size-3.5 text-background mr-1",
 											isSelected ? "fill-primary" : "fill-foreground",
 										)}
 										strokeWidth={1.5}

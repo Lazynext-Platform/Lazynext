@@ -166,7 +166,7 @@ export function QuickActions({
 					"w-12 h-12 rounded-full flex items-center justify-center shadow-lg border transition-colors",
 					isOpen
 						? "bg-foreground text-background border-foreground"
-						: "bg-cyan-500 text-black border-cyan-400 shadow-[0_0_20px_rgba(0,229,255,0.3)] hover:bg-cyan-400",
+						: "bg-cyan-500 text-background border-cyan-400 shadow-[0_0_20px_rgba(0,229,255,0.3)] hover:bg-cyan-400",
 				)}
 			>
 				{isOpen ? (

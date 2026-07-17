@@ -80,7 +80,7 @@ export function MulticamGrid() {
 						{idx + 1}
 					</div>
 					{activeAngle === idx && (
-						<div className="absolute top-2 right-2 bg-[#00e5ff] px-2 py-1 rounded text-xs text-black font-bold animate-pulse z-10">
+						<div className="absolute top-2 right-2 bg-[#00e5ff] px-2 py-1 rounded text-xs text-background font-bold animate-pulse z-10">
 							REC
 						</div>
 					)}

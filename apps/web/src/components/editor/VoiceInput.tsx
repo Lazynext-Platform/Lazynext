@@ -213,7 +213,7 @@ export function VoiceInput({
 				className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
 					isRecording
 						? "bg-red-500 text-foreground shadow-[0_0_15px_rgba(239,68,68,0.5)] animate-pulse"
-						: "bg-cyan-400/10 text-cyan-400 hover:bg-cyan-400 hover:text-black border border-cyan-400/20"
+						: "bg-cyan-400/10 text-cyan-400 hover:bg-cyan-400 hover:text-background border border-cyan-400/20"
 				} disabled:opacity-50`}
 				title={
 					isRecording

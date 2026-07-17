@@ -178,7 +178,7 @@ export default function EditorPage() {
 			<header className="px-6 py-4 glass-panel border-b-0 rounded-none border-b border-border flex items-center justify-between sticky top-0 z-50">
 				<div className="flex items-center gap-3">
 					<div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-400 to-blue-500 flex items-center justify-center shadow-[0_0_20px_rgba(0,212,223,0.3)]">
-						<Video className="w-5 h-5 text-black" />
+						<Video className="w-5 h-5 text-background" />
 					</div>
 					<span className="font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
 						Lazynext Agent
@@ -227,7 +227,7 @@ export default function EditorPage() {
 							</button>
 							<button
 								onClick={togglePlayback}
-								className="w-14 h-14 rounded-full bg-cyan-400 text-black flex items-center justify-center hover:bg-cyan-300 transition-colors shadow-[0_0_20px_rgba(0,229,255,0.4)]"
+								className="w-14 h-14 rounded-full bg-cyan-400 text-background flex items-center justify-center hover:bg-cyan-300 transition-colors shadow-[0_0_20px_rgba(0,229,255,0.4)]"
 							>
 								{time?.isPlaying ? (
 									<Pause className="w-6 h-6 fill-current" />
@@ -313,7 +313,7 @@ export default function EditorPage() {
 								<button
 									onClick={handleSend}
 									disabled={!prompt.trim() || isProcessing}
-									className="absolute right-2 w-10 h-10 bg-cyan-400 text-black rounded-full flex items-center justify-center hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100 shadow-[0_0_15px_rgba(0,212,223,0.4)] group-focus-within:shadow-[0_0_20px_rgba(0,212,223,0.6)]"
+									className="absolute right-2 w-10 h-10 bg-cyan-400 text-background rounded-full flex items-center justify-center hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100 shadow-[0_0_15px_rgba(0,212,223,0.4)] group-focus-within:shadow-[0_0_20px_rgba(0,212,223,0.6)]"
 								>
 									<Sparkles className="w-5 h-5" />
 								</button>
