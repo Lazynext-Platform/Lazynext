@@ -115,7 +115,7 @@ export default function Home() {
 	return (
 		<div
 			ref={containerRef}
-			className="min-h-screen bg-[#050505] text-foreground font-sans selection:bg-[#00e5ff]/30 selection:text-[#00e5ff] overflow-x-hidden"
+			className="min-h-screen bg-background text-foreground font-sans selection:bg-[#00e5ff]/30 selection:text-[#00e5ff] overflow-x-hidden"
 		>
 			<MarketingNavbar />
 
@@ -146,7 +146,7 @@ export default function Home() {
 						>
 							<div className="relative group cursor-pointer">
 								<div className="absolute -inset-0.5 bg-gradient-to-r from-[#00e5ff] to-[#0033ff] rounded-full blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200 animate-tilt" />
-								<div className="relative inline-flex items-center gap-2 px-5 py-2 rounded-full bg-glass backdrop-blur-xl border border-white/10 text-[#00e5ff] font-medium text-sm">
+								<div className="relative inline-flex items-center gap-2 px-5 py-2 rounded-full bg-glass backdrop-blur-xl border border-border text-[#00e5ff] font-medium text-sm">
 									<Sparkles className="w-4 h-4 animate-pulse" />
 									<span>Visionary Engine v2.0 — Now Live</span>
 								</div>
@@ -171,7 +171,7 @@ export default function Home() {
 							variants={itemVariants}
 							className="flex items-center justify-center gap-3 mb-8"
 						>
-							<span className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#00e5ff] to-white/80">
+							<span className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#00e5ff] to-foreground/80">
 								Type. Speak. Edit.
 							</span>
 						</motion.div>
@@ -196,7 +196,7 @@ export default function Home() {
 								className="w-full sm:w-auto relative group overflow-hidden rounded-full p-[1px]"
 							>
 								<span className="absolute inset-0 bg-gradient-to-r from-[#00e5ff] to-[#0033ff] opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
-								<div className="relative px-8 py-4 bg-black rounded-full flex items-center justify-center gap-2 group-hover:bg-opacity-0 transition duration-300">
+								<div className="relative px-8 py-4 bg-background rounded-full flex items-center justify-center gap-2 group-hover:bg-opacity-0 transition duration-300">
 									<span className="font-semibold text-foreground tracking-wide">
 										Start Editing Free
 									</span>
@@ -205,7 +205,7 @@ export default function Home() {
 							</Link>
 							<button
 								type="button"
-								className="w-full sm:w-auto px-8 py-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 font-semibold transition-all duration-300 backdrop-blur-md flex items-center justify-center gap-2 cursor-pointer"
+								className="w-full sm:w-auto px-8 py-4 rounded-full bg-glass hover:bg-hover border border-border font-semibold transition-all duration-300 backdrop-blur-md flex items-center justify-center gap-2 cursor-pointer"
 							>
 								<PlayCircle className="w-5 h-5 text-[#00e5ff]" />
 								Watch Demo
@@ -218,7 +218,7 @@ export default function Home() {
 							className="relative max-w-4xl mx-auto"
 						>
 							<div className="absolute -inset-1 bg-gradient-to-r from-[#00e5ff]/30 via-blue-500/30 to-[#0033ff]/30 rounded-2xl blur-xl" />
-							<div className="relative aspect-video bg-glass border border-white/10 rounded-2xl overflow-hidden flex items-center justify-center">
+							<div className="relative aspect-video bg-glass border border-border rounded-2xl overflow-hidden flex items-center justify-center">
 								<div className="flex flex-col items-center gap-4">
 									<div className="w-20 h-20 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-500 flex items-center justify-center shadow-[0_0_40px_rgba(0,229,255,0.3)] animate-pulse">
 										<PlayCircle className="w-10 h-10 text-black" />
@@ -228,7 +228,7 @@ export default function Home() {
 									</span>
 								</div>
 								{/* Corner tag */}
-								<div className="absolute top-4 right-4 bg-glass backdrop-blur-md border border-white/10 rounded-full px-4 py-1.5 text-xs text-muted flex items-center gap-1.5">
+								<div className="absolute top-4 right-4 bg-glass backdrop-blur-md border border-border rounded-full px-4 py-1.5 text-xs text-muted flex items-center gap-1.5">
 									<div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
 									4K Demo
 								</div>
@@ -238,8 +238,8 @@ export default function Home() {
 				</section>
 
 				{/* ──────────────── Competitor Feature Comparison ──────────────── */}
-				<section className="py-32 px-6 relative z-10 bg-black">
-					<div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+				<section className="py-32 px-6 relative z-10 bg-background">
+					<div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
 					<motion.div
 						className="max-w-7xl mx-auto"
@@ -274,7 +274,7 @@ export default function Home() {
 										key={comp.competitor}
 										variants={itemVariants}
 										whileHover={{ y: -6 }}
-										className="relative bg-[#0a0a0c] border border-white/5 rounded-2xl p-6 overflow-hidden group"
+										className="relative bg-panel border border-border rounded-2xl p-6 overflow-hidden group"
 									>
 										<div
 											className={`absolute inset-0 bg-gradient-to-b ${comp.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}
@@ -317,8 +317,8 @@ export default function Home() {
 				</section>
 
 				{/* ──────────────── How It Works ──────────────── */}
-				<section className="py-32 px-6 relative z-10 bg-black">
-					<div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+				<section className="py-32 px-6 relative z-10 bg-background">
+					<div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
 					<motion.div
 						className="max-w-5xl mx-auto"
@@ -370,7 +370,7 @@ export default function Home() {
 									key={step.step}
 									variants={itemVariants}
 									whileHover={{ y: -6 }}
-									className="relative bg-[#0a0a0c] border border-white/5 rounded-2xl p-8 overflow-hidden group text-center"
+									className="relative bg-panel border border-border rounded-2xl p-8 overflow-hidden group text-center"
 								>
 									<div className="relative z-10">
 										<div
@@ -397,9 +397,9 @@ export default function Home() {
 				{/* ──────────────── Features Grid ──────────────── */}
 				<section
 					id="features"
-					className="py-32 px-6 relative z-10 bg-black"
+					className="py-32 px-6 relative z-10 bg-background"
 				>
-					<div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+					<div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
 					<motion.div
 						className="max-w-7xl mx-auto"
@@ -426,7 +426,7 @@ export default function Home() {
 							<motion.div
 								variants={itemVariants}
 								whileHover={{ y: -10 }}
-								className="relative bg-[#0a0a0c] p-10 border border-white/5 rounded-3xl overflow-hidden group"
+								className="relative bg-panel p-10 border border-border rounded-3xl overflow-hidden group"
 							>
 								<div className="absolute inset-0 bg-gradient-to-b from-[#00e5ff]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 								<div className="relative z-10">
@@ -450,7 +450,7 @@ export default function Home() {
 							<motion.div
 								variants={itemVariants}
 								whileHover={{ y: -10 }}
-								className="relative bg-[#0a0a0c] p-10 border border-white/5 rounded-3xl overflow-hidden group"
+								className="relative bg-panel p-10 border border-border rounded-3xl overflow-hidden group"
 							>
 								<div className="absolute inset-0 bg-gradient-to-b from-[#0033ff]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 								<div className="relative z-10">
@@ -472,7 +472,7 @@ export default function Home() {
 							<motion.div
 								variants={itemVariants}
 								whileHover={{ y: -10 }}
-								className="relative bg-[#0a0a0c] p-10 border border-white/5 rounded-3xl overflow-hidden group"
+								className="relative bg-panel p-10 border border-border rounded-3xl overflow-hidden group"
 							>
 								<div className="absolute inset-0 bg-gradient-to-b from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 								<div className="relative z-10">
@@ -496,8 +496,8 @@ export default function Home() {
 				</section>
 
 				{/* ──────────────── Social Proof ──────────────── */}
-				<section className="py-24 px-6 relative z-10 bg-black">
-					<div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+				<section className="py-24 px-6 relative z-10 bg-background">
+					<div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
 					<motion.div
 						className="max-w-5xl mx-auto"
@@ -540,7 +540,7 @@ export default function Home() {
 								<motion.div
 									key={t.name}
 									variants={itemVariants}
-									className="bg-[#0a0a0c] border border-white/5 rounded-2xl p-6"
+									className="bg-panel border border-border rounded-2xl p-6"
 								>
 									<div className="flex gap-1 mb-4">
 										{[...Array(5)].map((_, s) => (
@@ -599,8 +599,8 @@ export default function Home() {
 				</section>
 
 				{/* ──────────────── CTA ──────────────── */}
-				<section className="py-32 px-6 relative z-10 bg-black overflow-hidden">
-					<div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+				<section className="py-32 px-6 relative z-10 bg-background overflow-hidden">
+					<div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
 					{/* Dramatic Center Gradient Burst */}
 					<div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-400/20 via-indigo-400/10 to-transparent blur-[80px] pointer-events-none" />
@@ -641,7 +641,7 @@ export default function Home() {
 								className="group relative overflow-hidden rounded-full p-[1px]"
 							>
 								<span className="absolute inset-0 bg-gradient-to-r from-[#00e5ff] to-[#0033ff] opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
-								<div className="relative px-10 py-4 bg-black rounded-full flex items-center justify-center gap-2">
+								<div className="relative px-10 py-4 bg-background rounded-full flex items-center justify-center gap-2">
 									<Sparkles className="w-5 h-5 text-[#00e5ff]" />
 									<span className="font-bold text-foreground">
 										Start Editing Free

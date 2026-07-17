@@ -281,7 +281,7 @@ export const EditorScreen = () => {
 const getStyles = (theme: Theme) => StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "#0a0a0c",
+		backgroundColor: theme.bgMain,
 	},
 	// ── Offline Banner ──
 	offlineBanner: {
@@ -308,7 +308,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 	// ── Preview ──
 	previewContainer: {
 		flex: 0.3,
-		backgroundColor: "#000",
+		backgroundColor: theme.bgMain,
 		justifyContent: "center",
 		alignItems: "center",
 		padding: 16,
@@ -317,7 +317,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		width: "100%",
 		aspectRatio: 16 / 9,
 		maxHeight: 200,
-		backgroundColor: "#0d0d1a",
+		backgroundColor: theme.bgMain,
 		borderRadius: 12,
 		borderWidth: 1,
 		borderColor: "rgba(99, 102, 241, 0.3)",
@@ -326,7 +326,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		padding: 20,
 	},
 	previewProjectName: {
-		color: "#e0e0ff",
+		color: theme.textPrimary,
 		fontSize: 18,
 		fontWeight: "700",
 		marginBottom: 8,
@@ -353,7 +353,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		marginBottom: 8,
 	},
 	maskAreaLabel: {
-		color: "#a0a0b0",
+		color: theme.textMuted,
 		fontSize: 12,
 		fontWeight: "600",
 		letterSpacing: 1,
@@ -422,7 +422,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		marginBottom: 8,
 	},
 	headerTitle: {
-		color: "#a0a0b0",
+		color: theme.textMuted,
 		fontSize: 11,
 		fontWeight: "600",
 		letterSpacing: 1,

@@ -116,7 +116,7 @@ export function TimelineScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#050505" />
+      <StatusBar barStyle={theme.statusBarStyle as "light-content" | "dark-content"} backgroundColor={theme.bgMain} />
 
       <View style={styles.timelineHeader}>
         <Text style={styles.timelineHeaderTitle}>Timeline</Text>
