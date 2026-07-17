@@ -14,6 +14,8 @@ pub enum ThemeMode {
     Dark,
     /// Light colour scheme.
     Light,
+    /// System colour scheme.
+    System,
 }
 
 impl ThemeMode {
@@ -22,23 +24,8 @@ impl ThemeMode {
         match env::var("LAZYNEXT_THEME").as_deref() {
             Ok("light") => ThemeMode::Light,
             Ok("dark") => ThemeMode::Dark,
-            _ => {
-                // Fallback: detect OS appearance (macOS only for now)
-                #[cfg(target_os = "macos")]
-                {
-                    let output = std::process::Command::new("defaults")
-                        .args(["read", "-g", "AppleInterfaceStyle"])
-                        .output();
-                    match output {
-                        Ok(o) if String::from_utf8_lossy(&o.stdout).trim() == "Dark" => {
-                            ThemeMode::Dark
-                        }
-                        _ => ThemeMode::Light,
-                    }
-                }
-                #[cfg(not(target_os = "macos"))]
-                ThemeMode::Dark
-            }
+            Ok("system") => ThemeMode::System,
+            _ => ThemeMode::System,
         }
     }
 }
@@ -114,22 +101,32 @@ impl Theme {
 
     /// Build a theme by resolving the mode from the environment/OS.
     pub fn auto() -> Self {
+        // As we don't have appearance here, we default system to Dark.
+        // It's better to use from_appearance.
         match ThemeMode::from_env() {
             ThemeMode::Dark => Theme::dark(),
             ThemeMode::Light => Theme::light(),
+            ThemeMode::System => Theme::dark(),
         }
     }
 
     /// Build a theme from GPUI's WindowAppearance, respecting LAZYNEXT_THEME override.
     pub fn from_appearance(appearance: gpui::WindowAppearance) -> Self {
-        match env::var("LAZYNEXT_THEME").as_deref() {
+        let mut theme = match env::var("LAZYNEXT_THEME").as_deref() {
             Ok("light") => Theme::light(),
             Ok("dark") => Theme::dark(),
             _ => match appearance {
                 gpui::WindowAppearance::Dark | gpui::WindowAppearance::VibrantDark => Theme::dark(),
                 gpui::WindowAppearance::Light | gpui::WindowAppearance::VibrantLight => Theme::light(),
             }
+        };
+
+        // Explicitly override the mode string if it's set to "system" (so the UI prints "System")
+        if let Ok("system") | Err(_) = env::var("LAZYNEXT_THEME").as_deref() {
+            theme.mode = ThemeMode::System;
         }
+
+        theme
     }
 }
 

@@ -169,7 +169,11 @@ impl Render for EditorShell {
         let theme = crate::theme::Theme::from_appearance(_window.appearance());
         let current_override = std::env::var("LAZYNEXT_THEME").unwrap_or_else(|_| "system".to_string());
         let mode_label = if current_override == "system" {
-            format!("Theme: System ({:?})", theme.mode)
+            let actual_os = match _window.appearance() {
+                gpui::WindowAppearance::Dark | gpui::WindowAppearance::VibrantDark => "Dark",
+                _ => "Light",
+            };
+            format!("Theme: System ({})", actual_os)
         } else {
             format!("Theme: {}", current_override)
         };
