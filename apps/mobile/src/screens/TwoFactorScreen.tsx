@@ -62,7 +62,7 @@ export function TwoFactorScreen({ navigation, route }: { navigation: any; route:
 						value={code}
 						onChangeText={(t) => setCode(t.replace(/\D/g, "").slice(0, 6))}
 						placeholder="000000"
-						placeholderTextColor="#52525b"
+						placeholderTextColor={theme.textMuted}
 						keyboardType="number-pad"
 						maxLength={6}
 						autoFocus
@@ -75,7 +75,7 @@ export function TwoFactorScreen({ navigation, route }: { navigation: any; route:
 						disabled={loading || code.length !== 6}
 					>
 						{loading ? (
-							<ActivityIndicator color="#050505" />
+							<ActivityIndicator color={theme.textOnAccent} />
 						) : (
 							<Text style={styles.buttonText}>Verify & Sign In</Text>
 						)}
@@ -108,7 +108,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		textAlign: "center",
 		marginBottom: 20,
 	},
-	errorText: { color: "#ef4444", fontSize: 13, marginBottom: 12 },
+	errorText: { color: theme.accentSecondary, fontSize: 13, marginBottom: 12 },
 	codeInput: {
 		backgroundColor: theme.bgHover,
 		color: theme.textPrimary,

@@ -61,7 +61,7 @@ export function PasskeyRegisterScreen({ navigation }: { navigation: any }) {
 					value={name}
 					onChangeText={setName}
 					placeholder="e.g. iPhone 15 Pro"
-					placeholderTextColor="#52525b"
+					placeholderTextColor={theme.textMuted}
 				/>
 
 				<TouchableOpacity
@@ -70,7 +70,7 @@ export function PasskeyRegisterScreen({ navigation }: { navigation: any }) {
 					disabled={loading}
 				>
 					{loading ? (
-						<ActivityIndicator color="#050505" />
+						<ActivityIndicator color={theme.textOnAccent} />
 					) : (
 						<Text style={styles.buttonText}>Create Passkey</Text>
 					)}
@@ -100,7 +100,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		marginBottom: 20,
 		lineHeight: 20,
 	},
-	errorText: { color: "#ef4444", fontSize: 13, marginBottom: 12 },
+	errorText: { color: theme.accentSecondary, fontSize: 13, marginBottom: 12 },
 	label: {
 		color: theme.textMuted,
 		fontSize: 12,

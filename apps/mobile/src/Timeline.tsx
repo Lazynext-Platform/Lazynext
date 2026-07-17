@@ -125,7 +125,7 @@ export function TimelineScreen() {
 
       {loading ? (
         <View style={styles.timelineLoading}>
-          <ActivityIndicator color="#00e5ff" size="large" />
+          <ActivityIndicator color={theme.accentPrimary} size="large" />
           <Text style={styles.timelineLoadingText}>Loading tracks...</Text>
         </View>
       ) : tracks.length === 0 ? (
@@ -184,7 +184,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
   timelineEmptyText: { color: theme.textSecondary, fontSize: 18, fontWeight: "600", marginBottom: 8 },
   timelineEmptySub: { color: theme.textMuted, fontSize: 14, textAlign: "center" },
   timelineContainer: { minWidth: 800, paddingBottom: 32, position: "relative", paddingTop: 16 },
-  playhead: { position: "absolute", top: 0, bottom: 0, left: 150, width: 2, backgroundColor: "#ff0044", zIndex: 10 },
+  playhead: { position: "absolute", top: 0, bottom: 0, left: 150, width: 2, backgroundColor: theme.accentSecondary, zIndex: 10 },
   trackRow: {
     flexDirection: "row", alignItems: "center", height: 60,
     backgroundColor: theme.bgPanel, borderColor: theme.borderGlass,
@@ -200,7 +200,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
     position: "absolute", height: "80%", top: "10%", borderRadius: 6,
     justifyContent: "center", paddingHorizontal: 8, borderWidth: 1,
   },
-  clipVideo: { backgroundColor: "rgba(0,195,255,0.2)", borderColor: "#00c3ff" },
-  clipAudio: { backgroundColor: "rgba(0,255,170,0.2)", borderColor: "#00ffaa" },
+  clipVideo: { backgroundColor: theme.bgHover, borderColor: theme.accentPrimary },
+  clipAudio: { backgroundColor: theme.bgHover, borderColor: theme.accentSecondary },
   clipText: { color: theme.textPrimary, fontSize: 10, fontWeight: "600" },
 });

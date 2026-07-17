@@ -94,7 +94,7 @@ export function ForgotPasswordScreen({ navigation }: { navigation: any }) {
 						value={email}
 						onChangeText={setEmail}
 						placeholder="you@example.com"
-						placeholderTextColor="#52525b"
+						placeholderTextColor={theme.textMuted}
 						keyboardType="email-address"
 						autoCapitalize="none"
 						autoComplete="email"
@@ -106,7 +106,7 @@ export function ForgotPasswordScreen({ navigation }: { navigation: any }) {
 						disabled={loading}
 					>
 						{loading ? (
-							<ActivityIndicator color="#050505" />
+							<ActivityIndicator color={theme.textOnAccent} />
 						) : (
 							<Text style={styles.buttonText}>Send Reset Link</Text>
 						)}
@@ -142,7 +142,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		textAlign: "center",
 	},
 	errorText: {
-		color: "#ef4444",
+		color: theme.accentSecondary,
 		fontSize: 13,
 		marginBottom: 12,
 		textAlign: "center",

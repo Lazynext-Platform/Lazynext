@@ -259,7 +259,7 @@ export function ARPreview() {
 }
 
 const getStyles = (theme: Theme) => StyleSheet.create({
-	container: { flex: 1, backgroundColor: "#000000" },
+	container: { flex: 1, backgroundColor: theme.bgMain },
 	camera: { flex: 1 },
 
 	// Face filter overlays
@@ -279,13 +279,13 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 	},
 	beautyOverlay: {
 		position: "absolute",
-		backgroundColor: "rgba(255,200,180,0.08)",
+		backgroundColor: theme.bgHover,
 		borderRadius: 60,
 	},
 	beautyGlow: {
-		backgroundColor: "rgba(255,220,180,0.12)",
+		backgroundColor: theme.bgHover,
 		borderWidth: 1,
-		borderColor: "rgba(255,200,150,0.2)",
+		borderColor: theme.borderGlass,
 	},
 
 	// Background effects
@@ -296,12 +296,12 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		backgroundColor: theme.borderGlass,
 	},
 	bgBW: {
-		backgroundColor: "rgba(0,0,0,0.4)",
+		backgroundColor: theme.bgPanel,
 	},
 	bgNeon: {
-		backgroundColor: "rgba(128, 0, 255, 0.15)",
+		backgroundColor: theme.bgHover,
 		borderWidth: 1,
-		borderColor: "rgba(200, 50, 255, 0.2)",
+		borderColor: theme.borderGlass,
 	},
 
 	// Filter chips
@@ -318,7 +318,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		borderRadius: 16,
 		backgroundColor: theme.borderGlass,
 		borderWidth: 1,
-		borderColor: "rgba(255,255,255,0.2)",
+		borderColor: theme.borderGlass,
 	},
 	filterChipActive: {
 		backgroundColor: theme.accentPrimary,

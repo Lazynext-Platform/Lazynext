@@ -105,7 +105,7 @@ export function ResetPasswordScreen({
 						value={password}
 						onChangeText={setPassword}
 						placeholder="Min. 8 characters"
-						placeholderTextColor="#52525b"
+						placeholderTextColor={theme.textMuted}
 						secureTextEntry
 						autoComplete="new-password"
 					/>
@@ -116,7 +116,7 @@ export function ResetPasswordScreen({
 						value={confirmPassword}
 						onChangeText={setConfirmPassword}
 						placeholder="Re-enter your password"
-						placeholderTextColor="#52525b"
+						placeholderTextColor={theme.textMuted}
 						secureTextEntry
 						autoComplete="new-password"
 					/>
@@ -127,7 +127,7 @@ export function ResetPasswordScreen({
 						disabled={loading}
 					>
 						{loading ? (
-							<ActivityIndicator color="#050505" />
+							<ActivityIndicator color={theme.textOnAccent} />
 						) : (
 							<Text style={styles.buttonText}>Reset Password</Text>
 						)}
@@ -159,7 +159,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		marginBottom: 16,
 	},
 	errorText: {
-		color: "#ef4444",
+		color: theme.accentSecondary,
 		fontSize: 13,
 		marginBottom: 12,
 		textAlign: "center",

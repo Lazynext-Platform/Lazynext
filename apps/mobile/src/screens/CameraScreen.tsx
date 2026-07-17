@@ -245,7 +245,7 @@ export function CameraScreen() {
 }
 
 const getStyles = (theme: Theme) => StyleSheet.create({
-	container: { flex: 1, backgroundColor: "#000000" },
+	container: { flex: 1, backgroundColor: theme.bgMain },
 	camera: { flex: 1 },
 	permissionContainer: {
 		flex: 1,
@@ -311,7 +311,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		width: 44,
 		height: 44,
 		borderRadius: 22,
-		backgroundColor: "rgba(0,0,0,0.5)",
+		backgroundColor: theme.bgPanel,
 		justifyContent: "center",
 		alignItems: "center",
 	},
@@ -319,7 +319,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 	recordingIndicator: {
 		flexDirection: "row",
 		alignItems: "center",
-		backgroundColor: "rgba(255,0,68,0.3)",
+		backgroundColor: theme.bgHover,
 		paddingHorizontal: 14,
 		paddingVertical: 6,
 		borderRadius: 16,
@@ -329,7 +329,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		width: 10,
 		height: 10,
 		borderRadius: 5,
-		backgroundColor: "#ff0044",
+		backgroundColor: theme.accentSecondary,
 	},
 	timerText: {
 		color: theme.textPrimary,
@@ -356,14 +356,14 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		alignItems: "center",
 	},
 	recordBtnActive: {
-		borderColor: "#ff0044",
+		borderColor: theme.accentSecondary,
 		transform: [{ scale: 1.2 }],
 	},
 	recordBtnInner: {
 		width: 60,
 		height: 60,
 		borderRadius: 30,
-		backgroundColor: "#ff0044",
+		backgroundColor: theme.accentSecondary,
 	},
 	recordBtnInnerRecording: {
 		width: 28,

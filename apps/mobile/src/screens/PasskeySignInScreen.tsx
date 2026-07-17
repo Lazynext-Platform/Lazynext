@@ -58,7 +58,7 @@ export function PasskeySignInScreen({ navigation }: { navigation: any }) {
 					disabled={loading}
 				>
 					{loading ? (
-						<ActivityIndicator color="#fff" />
+						<ActivityIndicator color={theme.textPrimary} />
 					) : (
 						<>
 							<Text style={styles.fingerprintEmoji}>🔑</Text>
@@ -92,7 +92,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		textAlign: "center",
 		marginBottom: 24,
 	},
-	errorText: { color: "#ef4444", fontSize: 13, marginBottom: 12 },
+	errorText: { color: theme.accentSecondary, fontSize: 13, marginBottom: 12 },
 	passkeyButton: {
 		backgroundColor: theme.borderGlass,
 		paddingVertical: 20,
