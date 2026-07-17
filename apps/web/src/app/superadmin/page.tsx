@@ -78,7 +78,7 @@ export default async function SuperAdminDashboard() {
 							</p>
 						</div>
 						<div className="flex gap-3">
-							<button className="bg-[var(--bg-panel)] border border-border text-foreground px-4 py-2 rounded-lg font-medium hover:bg-hover transition-colors">
+							<button className="bg-panel border border-border text-foreground px-4 py-2 rounded-lg font-medium hover:bg-hover transition-colors">
 								Export Logs
 							</button>
 							<button className="bg-red-600 text-foreground px-4 py-2 rounded-lg font-medium hover:bg-red-500 transition-colors shadow-[0_0_15px_rgba(220,38,38,0.4)]">
@@ -93,7 +93,7 @@ export default async function SuperAdminDashboard() {
 						Infrastructure Health
 					</h2>
 					<div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-						<div className="bg-[var(--bg-panel)] border border-border p-5 rounded-xl flex flex-col justify-between">
+						<div className="bg-panel border border-border p-5 rounded-xl flex flex-col justify-between">
 							<h3 className="text-muted text-xs font-semibold uppercase tracking-wider">
 								Total Users
 							</h3>
@@ -101,7 +101,7 @@ export default async function SuperAdminDashboard() {
 								{metrics.totalUsers.toLocaleString()}
 							</p>
 						</div>
-						<div className="bg-[var(--bg-panel)] border border-border p-5 rounded-xl flex flex-col justify-between">
+						<div className="bg-panel border border-border p-5 rounded-xl flex flex-col justify-between">
 							<h3 className="text-muted text-xs font-semibold uppercase tracking-wider">
 								Paid Subscribers
 							</h3>
@@ -109,7 +109,7 @@ export default async function SuperAdminDashboard() {
 								{metrics.activeSubscriptions}
 							</p>
 						</div>
-						<div className="bg-[var(--bg-panel)] border border-border p-5 rounded-xl flex flex-col justify-between">
+						<div className="bg-panel border border-border p-5 rounded-xl flex flex-col justify-between">
 							<h3 className="text-muted text-xs font-semibold uppercase tracking-wider">
 								Total Projects
 							</h3>
@@ -117,7 +117,7 @@ export default async function SuperAdminDashboard() {
 								{metrics.totalProjects.toLocaleString()}
 							</p>
 						</div>
-						<div className="bg-[var(--bg-panel)] border border-border p-5 rounded-xl flex flex-col justify-between">
+						<div className="bg-panel border border-border p-5 rounded-xl flex flex-col justify-between">
 							<h3 className="text-muted text-xs font-semibold uppercase tracking-wider">
 								Est. MRR
 							</h3>
@@ -132,7 +132,7 @@ export default async function SuperAdminDashboard() {
 						<Cpu className="w-5 h-5 text-[var(--accent-primary)]" />
 						AI Provider Status
 					</h2>
-					<div className="bg-[var(--bg-panel)] border border-border rounded-xl overflow-hidden">
+					<div className="bg-panel border border-border rounded-xl overflow-hidden">
 						<table className="w-full text-sm text-left">
 							<thead className="text-xs text-muted uppercase bg-background border-b border-border">
 								<tr>

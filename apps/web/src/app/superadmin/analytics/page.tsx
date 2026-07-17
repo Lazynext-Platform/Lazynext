@@ -85,7 +85,7 @@ export default function AnalyticsDashboard() {
 
 				{/* KPI Cards */}
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-					<div className="bg-[var(--bg-panel)] border border-border p-5 rounded-xl">
+					<div className="bg-panel border border-border p-5 rounded-xl">
 						<div className="flex justify-between items-start">
 							<h3 className="text-muted text-sm font-semibold">
 								Daily Active Users
@@ -98,7 +98,7 @@ export default function AnalyticsDashboard() {
 						</p>
 					</div>
 
-					<div className="bg-[var(--bg-panel)] border border-border p-5 rounded-xl">
+					<div className="bg-panel border border-border p-5 rounded-xl">
 						<div className="flex justify-between items-start">
 							<h3 className="text-muted text-sm font-semibold">
 								Event Ingestion Rate
@@ -111,7 +111,7 @@ export default function AnalyticsDashboard() {
 						</p>
 					</div>
 
-					<div className="bg-[var(--bg-panel)] border border-border p-5 rounded-xl">
+					<div className="bg-panel border border-border p-5 rounded-xl">
 						<div className="flex justify-between items-start">
 							<h3 className="text-muted text-sm font-semibold">
 								Average LTV
@@ -124,7 +124,7 @@ export default function AnalyticsDashboard() {
 						</p>
 					</div>
 
-					<div className="bg-[var(--bg-panel)] border border-border p-5 rounded-xl">
+					<div className="bg-panel border border-border p-5 rounded-xl">
 						<div className="flex justify-between items-start">
 							<h3 className="text-muted text-sm font-semibold">
 								Platform Churn (30d)
@@ -140,7 +140,7 @@ export default function AnalyticsDashboard() {
 
 				{/* Charts Row 1 */}
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-					<div className="lg:col-span-2 bg-[var(--bg-panel)] border border-border p-6 rounded-xl">
+					<div className="lg:col-span-2 bg-panel border border-border p-6 rounded-xl">
 						<h3 className="text-lg font-bold mb-6">Global Event Velocity</h3>
 						<div className="h-[300px] w-full">
 							<ResponsiveContainer width="100%" height="100%">
@@ -197,7 +197,7 @@ export default function AnalyticsDashboard() {
 						</div>
 					</div>
 
-					<div className="bg-[var(--bg-panel)] border border-border p-6 rounded-xl">
+					<div className="bg-panel border border-border p-6 rounded-xl">
 						<h3 className="text-lg font-bold mb-6">Platform Distribution</h3>
 						<div className="h-[300px] w-full flex items-center justify-center">
 							<ResponsiveContainer width="100%" height="100%">
@@ -247,7 +247,7 @@ export default function AnalyticsDashboard() {
 				</div>
 
 				{/* Charts Row 2 */}
-				<div className="bg-[var(--bg-panel)] border border-border p-6 rounded-xl">
+				<div className="bg-panel border border-border p-6 rounded-xl">
 					<h3 className="text-lg font-bold mb-6">Top Event Triggers</h3>
 					<div className="h-[300px] w-full">
 						<ResponsiveContainer width="100%" height="100%">

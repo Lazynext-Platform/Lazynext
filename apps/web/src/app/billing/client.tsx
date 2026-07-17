@@ -173,7 +173,7 @@ export function BillingPageClient() {
 
 				{/* Current Usage Banner */}
 				{org && (
-					<div className="mb-12 bg-[var(--bg-panel)] border border-border rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+					<div className="mb-12 bg-panel border border-border rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
 						<div>
 							<h2 className="font-bold text-xl">Current Billing Cycle</h2>
 							<p className="text-muted text-sm mt-1">
@@ -222,7 +222,7 @@ export function BillingPageClient() {
 							className={`relative rounded-3xl p-8 flex flex-col transition-all duration-300 ${
 								plan.highlight
 									? "border border-[var(--accent-primary)] bg-[var(--accent-primary)]/5 shadow-[var(--accent-glow)] scale-105 z-10"
-									: "border border-border bg-[var(--bg-panel)]"
+									: "border border-border bg-panel"
 							}`}
 						>
 							{plan.highlight && (

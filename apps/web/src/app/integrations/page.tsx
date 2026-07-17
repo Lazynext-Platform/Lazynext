@@ -72,7 +72,7 @@ export default function IntegrationsPage() {
 							key={app.name} 
 							variants={itemVariants}
 							whileHover={{ y: -5 }}
-							className="bg-[var(--bg-panel)] backdrop-blur-xl border border-border rounded-3xl p-8 shadow-lg hover:border-[var(--accent-primary)]/30 transition-all duration-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
+							className="bg-panel backdrop-blur-xl border border-border rounded-3xl p-8 shadow-lg hover:border-[var(--accent-primary)]/30 transition-all duration-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
 						>
 							<div className="flex items-center gap-6">
 								<div className="w-16 h-16 bg-hover border border-border rounded-2xl flex items-center justify-center">

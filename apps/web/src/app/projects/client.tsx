@@ -574,7 +574,7 @@ function NewProjectButton() {
 	return (
 		<Button
 			size="lg"
-			className="flex px-5 md:px-6 bg-[var(--accent-primary)] text-[var(--text-on-accent)] hover:opacity-90 shadow-[var(--accent-glow)]"
+			className="flex px-5 md:px-6 bg-[var(--accent-primary)] text-background hover:opacity-90 shadow-[var(--accent-glow)]"
 			onClick={handleCreateProject}
 		>
 			<span className="text-sm font-bold hidden md:block">New project</span>
@@ -634,7 +634,7 @@ function ProjectItem({
 	};
 
 	const gridContent = (
-		<Card 				className="bg-[var(--bg-panel)] backdrop-blur-xl border border-border overflow-hidden p-0 transition-all duration-300 hover:scale-[1.02] hover:border-[var(--accent-primary)] hover:shadow-[var(--accent-glow)] group rounded-2xl">
+		<Card 				className="bg-panel backdrop-blur-xl border border-border overflow-hidden p-0 transition-all duration-300 hover:scale-[1.02] hover:border-[var(--accent-primary)] hover:shadow-[var(--accent-glow)] group rounded-2xl">
 			<div className="bg-panel/50 relative aspect-video overflow-hidden">
 				<div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105">
 					{project.thumbnail ? (
@@ -708,7 +708,7 @@ function ProjectItem({
 			className={`flex items-center gap-4 py-3 px-5 rounded-xl border transition-all duration-200 group ${
 				isSelected
 					? "bg-[var(--accent-primary)]/10 border-[var(--accent-primary)]/50 shadow-[0_0_20px_-5px_rgba(1,243,254,0.15)]"
-					: "bg-[var(--bg-panel)] hover:bg-background backdrop-blur-sm border-border hover:border-[var(--accent-primary)]/50"
+					: "bg-panel hover:bg-background backdrop-blur-sm border-border hover:border-[var(--accent-primary)]/50"
 			}`}
 		>
 			<Checkbox

@@ -91,7 +91,7 @@ export function SettingsPageClient() {
 
 				<div className="mt-8 space-y-8">
 					{/* Profile Section */}
-					<section className="rounded-xl border border-border bg-[var(--bg-panel)] p-6 shadow-[var(--accent-glow)]">
+					<section className="rounded-xl border border-border bg-panel p-6 shadow-[var(--accent-glow)]">
 						<h2 className="text-lg font-bold text-foreground">
 							Profile
 						</h2>
@@ -131,7 +131,7 @@ export function SettingsPageClient() {
 							<button
 								type="submit"
 								disabled={saving}
-								className="rounded-lg bg-[var(--accent-primary)] px-4 py-2 text-sm font-bold text-[var(--text-on-accent)] hover:opacity-90 disabled:opacity-50 transition-all shadow-[var(--accent-glow)]"
+								className="rounded-lg bg-[var(--accent-primary)] px-4 py-2 text-sm font-bold text-background hover:opacity-90 disabled:opacity-50 transition-all shadow-[var(--accent-glow)]"
 							>
 								{saving ? "Saving..." : "Save Changes"}
 							</button>
@@ -139,7 +139,7 @@ export function SettingsPageClient() {
 					</section>
 
 					{/* Preferences Section */}
-					<section className="rounded-xl border border-border bg-[var(--bg-panel)] p-6 shadow-[var(--accent-glow)]">
+					<section className="rounded-xl border border-border bg-panel p-6 shadow-[var(--accent-glow)]">
 						<h2 className="text-lg font-bold text-foreground">
 							Preferences
 						</h2>

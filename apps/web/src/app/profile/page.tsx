@@ -56,7 +56,7 @@ export default function ProfilePage() {
 				</motion.div>
 
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-					<motion.div variants={itemVariants} className="bg-[var(--bg-panel)] backdrop-blur-xl border border-border rounded-3xl p-8 shadow-lg hover:border-[var(--accent-primary)]/20 transition-all duration-300">
+					<motion.div variants={itemVariants} className="bg-panel backdrop-blur-xl border border-border rounded-3xl p-8 shadow-lg hover:border-[var(--accent-primary)]/20 transition-all duration-300">
 						<div className="flex items-center gap-4 mb-8">
 							<div className="w-16 h-16 bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] rounded-full flex items-center justify-center text-[var(--text-on-accent)] text-2xl font-bold">
 								{profile.initials}
@@ -80,7 +80,7 @@ export default function ProfilePage() {
 					</motion.div>
 
 					<div className="space-y-8">
-						<motion.div variants={itemVariants} className="bg-[var(--bg-panel)] backdrop-blur-xl border border-border rounded-3xl p-8 shadow-lg hover:border-[var(--accent-primary)]/20 transition-all duration-300">
+						<motion.div variants={itemVariants} className="bg-panel backdrop-blur-xl border border-border rounded-3xl p-8 shadow-lg hover:border-[var(--accent-primary)]/20 transition-all duration-300">
 							<div className="flex items-center gap-3 mb-6">
 								<Shield className="w-6 h-6 text-[var(--accent-primary)]" />
 								<h2 className="text-xl font-semibold text-foreground">Security</h2>
@@ -91,7 +91,7 @@ export default function ProfilePage() {
 							</button>
 						</motion.div>
 
-						<motion.div variants={itemVariants} className="bg-[var(--bg-panel)] backdrop-blur-xl border border-border rounded-3xl p-8 shadow-lg hover:border-[var(--accent-primary)]/20 transition-all duration-300">
+						<motion.div variants={itemVariants} className="bg-panel backdrop-blur-xl border border-border rounded-3xl p-8 shadow-lg hover:border-[var(--accent-primary)]/20 transition-all duration-300">
 							<div className="flex items-center gap-3 mb-6">
 								<HardDrive className="w-6 h-6 text-[var(--accent-primary)]" />
 								<h2 className="text-xl font-semibold text-foreground">Cloud Storage</h2>

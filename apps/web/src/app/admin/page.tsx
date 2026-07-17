@@ -16,7 +16,7 @@ export default async function AdminDashboard() {
 		<div className="min-h-screen bg-background text-foreground max-w-6xl mx-auto space-y-8 p-4 pt-8">
 			{/* Metric Cards */}
 			<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-				<div className="bg-[var(--bg-panel)] border border-border p-6 rounded-2xl flex items-center gap-4">
+				<div className="bg-panel border border-border p-6 rounded-2xl flex items-center gap-4">
 					<div className="p-4 bg-[var(--accent-primary)]/10 text-[var(--accent-primary)] rounded-xl">
 						<Users className="w-8 h-8" />
 					</div>
@@ -26,7 +26,7 @@ export default async function AdminDashboard() {
 					</div>
 				</div>
 
-				<div className="bg-[var(--bg-panel)] border border-border p-6 rounded-2xl flex items-center gap-4">
+				<div className="bg-panel border border-border p-6 rounded-2xl flex items-center gap-4">
 					<div className="p-4 bg-[var(--accent-primary)]/10 text-[var(--accent-primary)] rounded-xl">
 						<CreditCard className="w-8 h-8" />
 					</div>
@@ -38,7 +38,7 @@ export default async function AdminDashboard() {
 					</div>
 				</div>
 
-				<div className="bg-[var(--bg-panel)] border border-border p-6 rounded-2xl flex items-center gap-4">
+				<div className="bg-panel border border-border p-6 rounded-2xl flex items-center gap-4">
 					<div className="p-4 bg-[var(--accent-secondary)]/10 text-[var(--accent-secondary)] rounded-xl">
 						<Server className="w-8 h-8" />
 					</div>
@@ -50,7 +50,7 @@ export default async function AdminDashboard() {
 			</div>
 
 			{/* Users Table */}
-			<div className="bg-[var(--bg-panel)] border border-border rounded-2xl overflow-hidden">
+			<div className="bg-panel border border-border rounded-2xl overflow-hidden">
 				<div className="p-6 border-b border-border">
 					<h2 className="text-xl font-bold">Recent Users</h2>
 				</div>
