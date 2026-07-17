@@ -98,7 +98,7 @@ export function CornerHandle({
 			onPointerUp={onPointerUp}
 		>
 			<div
-				className="rounded-sm bg-white"
+				className="rounded-sm bg-background"
 				style={{ width: HANDLE_SIZE, height: HANDLE_SIZE }}
 			/>
 		</HandleButton>
@@ -133,7 +133,7 @@ export function CircleHandle({
 			onPointerUp={onPointerUp}
 		>
 			<div
-				className={cn("rounded-full", isSelected ? "bg-primary" : "bg-white")}
+				className={cn("rounded-full", isSelected ? "bg-primary" : "bg-background")}
 				style={{ width: size, height: size }}
 			/>
 		</HandleButton>
@@ -177,7 +177,7 @@ export function EdgeHandle({
 			onPointerUp={onPointerUp}
 		>
 			<div
-				className="rounded-sm bg-white"
+				className="rounded-sm bg-background"
 				style={{ width, height, transform: `rotate(${rotation}deg)` }}
 			/>
 		</HandleButton>
@@ -202,7 +202,7 @@ export function IconHandle({
 		<HandleButton
 			screen={screen}
 			hitAreaSize={ICON_HANDLE_RADIUS * 2}
-			className="rounded-full bg-white text-background shadow-sm"
+			className="rounded-full bg-background text-background shadow-sm"
 			onPointerDown={onPointerDown}
 			onPointerMove={onPointerMove}
 			onPointerUp={onPointerUp}

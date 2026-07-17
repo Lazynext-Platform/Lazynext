@@ -64,7 +64,7 @@ function GridGuideOverlay() {
 
 	return (
 		<div className="absolute inset-0">
-			<GridLines rows={rows} cols={cols} color="bg-white/35" />
+			<GridLines rows={rows} cols={cols} color="bg-foreground/20" />
 		</div>
 	);
 }

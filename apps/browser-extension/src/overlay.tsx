@@ -77,12 +77,12 @@ function TimelinePreview() {
         flexDirection: "column",
         gap: "4px",
         padding: "10px",
-        background: "rgba(255, 255, 255, 0.03)",
+        background: "var(--bg-hover)",
         border: "1px solid #333",
         borderRadius: "6px",
       }}
     >
-      <span style={{ fontSize: "11px", fontWeight: 600, color: "#888" }}>
+      <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-muted)" }}>
         Timeline ({clips.length} clip{clips.length !== 1 ? "s" : ""})
       </span>
       {clips.map((clip) => (
@@ -93,7 +93,7 @@ function TimelinePreview() {
             alignItems: "center",
             gap: "6px",
             fontSize: "12px",
-            color: "#ccc",
+            color: "var(--text-secondary)",
           }}
         >
           <span
@@ -102,7 +102,7 @@ function TimelinePreview() {
               width: "8px",
               height: "8px",
               borderRadius: "2px",
-              background: clip.type === "video" ? "#00e5ff" : "#ffaa00",
+              background: clip.type === "video" ? "var(--accent-primary)" : "var(--accent-secondary)",
             }}
           />
           {clip.type} — {clip.source}
@@ -225,30 +225,30 @@ function OverlayEditor() {
   return (
     <div style={{
       width: "100%", height: "100%", display: "flex", flexDirection: "column",
-      backgroundColor: "rgba(15, 15, 15, 0.98)", color: "#fff",
-      fontFamily: "system-ui, -apple-system, sans-serif", borderTop: "2px solid #00e5ff",
+      backgroundColor: "var(--bg-main)", color: "var(--text-primary)",
+      fontFamily: "system-ui, -apple-system, sans-serif", borderTop: "2px solid var(--accent-primary)",
       boxShadow: "0 -8px 30px rgba(0, 0, 0, 0.5)"
     }}>
-      <div style={{ padding: "12px 16px", backgroundColor: "#1e1e1e", borderBottom: "1px solid #333", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h3 style={{ margin: 0, fontSize: "16px", color: "#00e5ff", display: "flex", alignItems: "center", gap: "8px" }}>
+      <div style={{ padding: "12px 16px", backgroundColor: "var(--bg-panel)", borderBottom: "1px solid var(--border-glass)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h3 style={{ margin: 0, fontSize: "16px", color: "var(--accent-primary)", display: "flex", alignItems: "center", gap: "8px" }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
           Lazynext Extension
         </h3>
         <button 
           onClick={() => window.parent.postMessage({ type: "CLOSE_OVERLAY" }, "https://lazynext.com")}
-          style={{ background: "transparent", border: "none", color: "#888", cursor: "pointer", fontSize: "16px", padding: "4px 8px" }}>
+          style={{ background: "transparent", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "16px", padding: "4px 8px" }}>
           ✕
         </button>
       </div>
 
       <div style={{ flex: 1, padding: "20px", display: "flex", flexDirection: "column", gap: "20px", overflowY: "auto" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-          <label style={{ fontSize: "14px", fontWeight: "600", color: "#aaa" }}>Select Target Project</label>
+          <label style={{ fontSize: "14px", fontWeight: "600", color: "var(--text-secondary)" }}>Select Target Project</label>
           <select 
             value={selectedProjectId}
             onChange={(e) => setSelectedProjectId(e.target.value)}
             style={{ 
-              padding: "10px", backgroundColor: "#252525", color: "#fff", border: "1px solid #444", 
+              padding: "10px", backgroundColor: "var(--bg-glass)", color: "var(--text-primary)", border: "1px solid var(--border-glass)", 
               borderRadius: "6px", fontSize: "14px", outline: "none" 
             }}
           >
@@ -264,13 +264,13 @@ function OverlayEditor() {
             onClick={handleRecord}
             disabled={isRecording || !selectedProjectId}
             style={{ 
-              padding: "12px", background: isRecording ? "#ff4444" : "#00e5ff", color: isRecording ? "#fff" : "#000", 
+              padding: "12px", background: isRecording ? "var(--accent-secondary)" : "var(--accent-primary)", color: isRecording ? "var(--text-primary)" : "var(--text-on-accent)", 
               border: "none", borderRadius: "6px", fontWeight: "bold", cursor: isRecording ? "default" : "pointer",
               display: "flex", justifyContent: "center", alignItems: "center", gap: "8px", transition: "background 0.2s"
             }}>
             {isRecording ? (
               <>
-                <span style={{ display: "inline-block", width: "10px", height: "10px", background: "#fff", borderRadius: "50%", animation: "pulse 1.5s infinite" }} />
+                <span style={{ display: "inline-block", width: "10px", height: "10px", background: "var(--text-primary)", borderRadius: "50%", animation: "pulse 1.5s infinite" }} />
                 Recording (10s limit)
               </>
             ) : "🔴 Record Stream to Project"}
@@ -279,8 +279,8 @@ function OverlayEditor() {
           <button 
             onClick={handleExtract}
             style={{ 
-              padding: "12px", background: "#2a2a2a", color: "#fff", 
-              border: "1px solid #444", borderRadius: "6px", cursor: "pointer",
+              padding: "12px", background: "var(--bg-panel)", color: "var(--text-primary)", 
+              border: "1px solid var(--border-glass)", borderRadius: "6px", cursor: "pointer",
               transition: "background 0.2s"
             }}>
             Extract Videos on Page
@@ -289,8 +289,8 @@ function OverlayEditor() {
         
         {status && (
           <div style={{ 
-            marginTop: "auto", padding: "12px", background: "rgba(0, 229, 255, 0.1)", 
-            borderLeft: "3px solid #00e5ff", color: "#00e5ff", fontSize: "13px", borderRadius: "4px" 
+            marginTop: "auto", padding: "12px", background: "var(--bg-hover)", 
+            borderLeft: "3px solid var(--accent-primary)", color: "var(--accent-primary)", fontSize: "13px", borderRadius: "4px" 
           }}>
             {status}
           </div>
@@ -299,15 +299,15 @@ function OverlayEditor() {
         <TimelinePreview />
 
         <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "10px" }}>
-          <label style={{ fontSize: "14px", fontWeight: "600", color: "#00e5ff" }}>Lazynext AI Agent</label>
+          <label style={{ fontSize: "14px", fontWeight: "600", color: "var(--accent-primary)" }}>Lazynext AI Agent</label>
           <div style={{ display: "flex", gap: "8px" }}>
             <input 
               type="text" 
               id="ai-prompt"
               placeholder="e.g. 'Extract all videos'" 
               style={{
-                flex: 1, padding: "10px", backgroundColor: "#252525", color: "#fff", 
-                border: "1px solid #00e5ff", borderRadius: "6px", fontSize: "14px", outline: "none"
+                flex: 1, padding: "10px", backgroundColor: "var(--bg-glass)", color: "var(--text-primary)", 
+                border: "1px solid var(--accent-primary)", borderRadius: "6px", fontSize: "14px", outline: "none"
               }}
             />
             <button 
@@ -348,7 +348,7 @@ function OverlayEditor() {
                 }
               }}
               style={{ 
-                padding: "10px 16px", background: "#00e5ff", color: "#000", 
+                padding: "10px 16px", background: "var(--accent-primary)", color: "var(--text-on-accent)", 
                 border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "bold"
               }}>
               Apply

@@ -845,7 +845,7 @@ export default function Timeline({
 
 					{/* Viewport Highlight */}
 					<div
-						className="absolute top-0 bottom-0 bg-white/20 border-x border-white/50 cursor-ew-resize pointer-events-none shadow-[0_0_10px_rgba(255,255,255,0.1)]"
+						className="absolute top-0 bottom-0 bg-foreground/20 border-x border-border cursor-ew-resize pointer-events-none shadow-[0_0_10px_rgba(255,255,255,0.1)]"
 						style={{
 							left: `${viewportLeft}px`,
 							width: `${viewportWidth}px`,
@@ -1398,7 +1398,7 @@ export default function Timeline({
 										{clip.keyframes?.map((kf: any, i: number) => {
 											const kfLeft = kf.frame * pxPerFrame;
 											let yPos = "80%";
-											let color = "bg-white";
+											let color = "bg-foreground";
 											if (kf.property === "volume") {
 												yPos = `${100 - (Math.min(2.0, kf.value) / 2.0) * 100}%`;
 												color = "bg-amber-400";
@@ -1445,7 +1445,7 @@ export default function Timeline({
 										{/* Left Trim Handle */}
 										{!track.isLocked && (
 											<div
-												className="absolute left-0 top-0 bottom-0 w-2 hover:bg-white/40 cursor-ew-resize z-30 transition-colors"
+												className="absolute left-0 top-0 bottom-0 w-2 hover:bg-foreground/40 cursor-ew-resize z-30 transition-colors"
 												role="button"
 												tabIndex={0}
 												onMouseDown={(e) => {
@@ -1466,7 +1466,7 @@ export default function Timeline({
 										{/* Right Trim Handle */}
 										{!track.isLocked && (
 											<div
-												className="absolute right-0 top-0 bottom-0 w-2 hover:bg-white/40 cursor-ew-resize z-30 transition-colors"
+												className="absolute right-0 top-0 bottom-0 w-2 hover:bg-foreground/40 cursor-ew-resize z-30 transition-colors"
 												role="button"
 												tabIndex={0}
 												onMouseDown={(e) => {

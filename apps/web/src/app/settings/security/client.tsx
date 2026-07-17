@@ -135,7 +135,7 @@ export function SecuritySettingsClient({ user }: { user: any }) {
 									Scan this QR code with your authenticator app (Google
 									Authenticator, Authy, 1Password, etc.)
 								</p>
-								<div className="mx-auto flex h-48 w-48 items-center justify-center rounded-lg bg-white p-2">
+								<div className="mx-auto flex h-48 w-48 items-center justify-center rounded-lg bg-background p-2">
 								{/* eslint-disable-next-line @next/next/no-img-element */}
 									<img
 										src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(totpURI)}`}

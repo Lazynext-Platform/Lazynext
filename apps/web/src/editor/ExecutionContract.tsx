@@ -43,7 +43,7 @@ export const ExecutionContract: React.FC = () => {
 					operations.map((op: CrdtOperation, index: number) => (
 						<div
 							key={op.id}
-							className="flex items-center justify-between group hover:bg-white/5 p-1 rounded transition-colors"
+							className="flex items-center justify-between group hover:bg-glass p-1 rounded transition-colors"
 						>
 							<div className="flex items-center gap-3">
 								<span className="text-gray-600">

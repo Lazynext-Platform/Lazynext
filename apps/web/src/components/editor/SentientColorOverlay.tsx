@@ -36,8 +36,8 @@ export function SentientColorOverlay({ isActive }: SentientColorOverlayProps) {
 							"conic-gradient(red, yellow, lime, aqua, blue, magenta, red)",
 					}}
 				>
-					<div className="absolute top-1/2 left-1/2 w-10 h-[2px] bg-white origin-left -rotate-45 shadow-[0_0_5px_white]" />
-					<div className="absolute top-1/2 left-1/2 w-10 h-[2px] bg-white origin-left rotate-135 shadow-[0_0_5px_white]" />
+					<div className="absolute top-1/2 left-1/2 w-10 h-[2px] bg-foreground origin-left -rotate-45 shadow-[0_0_5px_white]" />
+					<div className="absolute top-1/2 left-1/2 w-10 h-[2px] bg-foreground origin-left rotate-135 shadow-[0_0_5px_white]" />
 				</div>
 				<div className="absolute inset-0 flex items-center justify-center">
 					<div className="w-8 h-8 rounded-full bg-background shadow-inner" />

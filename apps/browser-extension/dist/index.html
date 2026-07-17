@@ -10,7 +10,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Lazynext Extension</title>
 		<style>
-			:root {
+			:root, html.light {
 				--bg-main: #fcfcfc;
 				--bg-panel: rgba(255,255,255,0.7);
 				--bg-glass: rgba(255,255,255,0.4);
@@ -22,10 +22,10 @@
 				--text-muted: #71717a;
 				--text-on-accent: #050505;
 				--border-glass: rgba(0,0,0,0.08);
-				color-scheme: light dark;
+				color-scheme: light;
 			}
 			@media (prefers-color-scheme: dark) {
-				:root {
+				:root:not(.light) {
 					--bg-main: #050505;
 					--bg-panel: rgba(24,24,27,0.5);
 					--bg-glass: rgba(24,24,27,0.3);
@@ -37,7 +37,22 @@
 					--text-muted: #52525b;
 					--text-on-accent: #050505;
 					--border-glass: rgba(255,255,255,0.08);
+					color-scheme: dark;
 				}
+			}
+			html.dark {
+				--bg-main: #050505;
+				--bg-panel: rgba(24,24,27,0.5);
+				--bg-glass: rgba(24,24,27,0.3);
+				--bg-hover: rgba(255,255,255,0.05);
+				--accent-primary: #00e5ff;
+				--accent-secondary: #0033ff;
+				--text-primary: #fafafa;
+				--text-secondary: #a1a1aa;
+				--text-muted: #52525b;
+				--text-on-accent: #050505;
+				--border-glass: rgba(255,255,255,0.08);
+				color-scheme: dark;
 			}
 			body {
 				max-width: 360px;
@@ -51,7 +66,7 @@
 				color: var(--text-primary);
 			}
 		</style>
-		<script type="module" crossorigin src="/assets/popup-Bs1s5hKx.js"></script>
+		<script type="module" crossorigin src="/assets/popup-3GdkM_nC.js"></script>
 		<link rel="modulepreload" crossorigin href="/assets/jsx-runtime-CD01Ob4I.js">
 	</head>
 	<body>

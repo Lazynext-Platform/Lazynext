@@ -138,7 +138,7 @@ function SuggestionCard({
 			animate={{ opacity: 1, y: 0 }}
 			exit={{ opacity: 0, y: -8, height: 0 }}
 			transition={{ duration: 0.2 }}
-			className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-3.5 space-y-2.5 hover:border-border transition-colors"
+			className="bg-glass[0.03] border border-border[0.06] rounded-xl p-3.5 space-y-2.5 hover:border-border transition-colors"
 		>
 			{/* Category badge */}
 			<div className="flex items-center justify-between gap-2">

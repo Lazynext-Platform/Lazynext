@@ -1313,7 +1313,7 @@ export function MediaPoolSidebar({
 													className={`block w-8 h-5 rounded-full transition-colors ${plugin.enabled ? "bg-indigo-500" : "bg-glass"}`}
 												></div>
 												<div
-													className={`dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform ${plugin.enabled ? "transform translate-x-3" : ""}`}
+													className={`dot absolute left-1 top-1 bg-foreground w-3 h-3 rounded-full transition-transform ${plugin.enabled ? "transform translate-x-3" : ""}`}
 												></div>
 											</div>
 										</label>

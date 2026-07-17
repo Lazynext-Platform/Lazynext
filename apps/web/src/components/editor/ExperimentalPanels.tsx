@@ -271,19 +271,19 @@ function OmniOrbPanel({ onDismiss }: { onDismiss: () => void }) {
 				<div className="absolute inset-2 rounded-full bg-cyan-400/80 animate-pulse shadow-[inset_0_0_15px_rgba(255,255,255,1)] blur-[2px]"></div>
 				<div className="relative z-10 flex gap-1 items-center justify-center w-full h-full">
 					<div
-						className="w-0.5 h-3 bg-white rounded-full animate-bounce"
+						className="w-0.5 h-3 bg-foreground rounded-full animate-bounce"
 						style={{ animationDelay: "0ms" }}
 					></div>
 					<div
-						className="w-0.5 h-6 bg-white rounded-full animate-bounce"
+						className="w-0.5 h-6 bg-foreground rounded-full animate-bounce"
 						style={{ animationDelay: "150ms" }}
 					></div>
 					<div
-						className="w-0.5 h-4 bg-white rounded-full animate-bounce"
+						className="w-0.5 h-4 bg-foreground rounded-full animate-bounce"
 						style={{ animationDelay: "300ms" }}
 					></div>
 					<div
-						className="w-0.5 h-2 bg-white rounded-full animate-bounce"
+						className="w-0.5 h-2 bg-foreground rounded-full animate-bounce"
 						style={{ animationDelay: "450ms" }}
 					></div>
 				</div>

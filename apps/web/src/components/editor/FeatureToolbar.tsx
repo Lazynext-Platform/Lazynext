@@ -346,8 +346,8 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 			<button
 				className={`text-[10px] font-black backdrop-blur border-2 px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5 mr-2 ${
 					props.isSingularity
-						? "bg-white text-background border-white shadow-[0_0_50px_rgba(255,255,255,1)] animate-bounce scale-110"
-						: "bg-background text-foreground border-border hover:border-white hover:shadow-[0_0_20px_rgba(255,255,255,0.5)]"
+						? "bg-foreground text-background border-border shadow-[0_0_50px_rgba(255,255,255,1)] animate-bounce scale-110"
+						: "bg-background text-foreground border-border hover:border-border hover:shadow-[0_0_20px_rgba(255,255,255,0.5)]"
 				}`}
 				onClick={() => props.setIsSingularity(!props.isSingularity)}
 				title="Activate The Singularity: Infinite Canvas Mode"

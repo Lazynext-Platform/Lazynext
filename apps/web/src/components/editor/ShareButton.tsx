@@ -71,7 +71,7 @@ export function ShareButton({ projectId, className }: ShareButtonProps) {
 			onClick={handleShare}
 			disabled={isSharing}
 			className={cn(
-				"flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-white/5 bg-white/5 hover:bg-white/10 text-foreground/70 hover:text-foreground transition-colors disabled:opacity-50",
+				"flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-border bg-glass hover:bg-white/10 text-foreground/70 hover:text-foreground transition-colors disabled:opacity-50",
 				isCopied &&
 					"border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
 				className,

@@ -75,7 +75,7 @@ export function EditorUIClient({ project, projectId, projectName }: EditorUIClie
 					<ShareButton projectId={projectId} />
 					<button
 						onClick={() => setShowCommandPalette(true)}
-						className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-white/5 bg-white/5 hover:bg-white/10 text-foreground/60 hover:text-foreground transition-colors"
+						className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-border bg-glass/5 hover:bg-glass/10 text-foreground/60 hover:text-foreground transition-colors"
 						title="Command Palette (Cmd+K)"
 					>
 						<Sparkles className="w-3.5 h-3.5" />
