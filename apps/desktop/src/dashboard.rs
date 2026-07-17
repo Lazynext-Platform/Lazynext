@@ -4,7 +4,6 @@
 //! and hands off to the EditorShell when a project is opened.
 
 use crate::editor::EditorShell;
-use crate::theme::Theme;
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use lazynext_core::NLEState;
@@ -31,9 +30,6 @@ pub struct Dashboard {
     pub recent_add_clicked: Rc<Cell<bool>>,
     /// Path of the recent project pending addition.
     pub recent_add_path: Rc<Cell<Option<String>>>,
-    /// Active UI theme.
-    #[allow(dead_code)]
-    pub theme: Arc<Theme>,
 }
 
 impl Dashboard {
@@ -42,7 +38,6 @@ impl Dashboard {
         nle: Arc<Mutex<NLEState>>,
         engine: Arc<Mutex<CoreEngine>>,
         rt_handle: tokio::runtime::Handle,
-        theme: Arc<Theme>,
     ) -> Self {
         let recent_projects = Self::load_recent_projects();
         Self {
@@ -53,7 +48,6 @@ impl Dashboard {
             recent_projects,
             recent_add_clicked: Rc::new(Cell::new(false)),
             recent_add_path: Rc::new(Cell::new(None)),
-            theme,
         }
     }
 
@@ -441,7 +435,6 @@ mod tests {
             nle,
             engine,
             rt_handle,
-            Arc::new(crate::theme::Theme::auto()),
         );
         assert_eq!(dashboard.version, "0.1.0");
     }
