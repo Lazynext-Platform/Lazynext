@@ -64,6 +64,7 @@ class NerfPipeline:
     """
     
     def __init__(self, config: Optional[NerfConfig] = None):
+        """Initialize the class instance."""
         self.config = config or NerfConfig()
     
     def extract_3d(self, video_path: str, output_dir: Optional[str] = None) -> NerfResult:

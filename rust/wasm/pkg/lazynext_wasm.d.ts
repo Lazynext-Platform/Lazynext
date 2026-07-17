@@ -42,76 +42,91 @@ export interface ParseTimecodeOptions {
  */
 export type TimeCodeFormat = "MM:SS" | "HH:MM:SS" | "HH:MM:SS:CS" | "HH:MM:SS:FF";
 
+/** Type definition for FloorToFrameOptions. */
 export interface FloorToFrameOptions {
     time: MediaTime;
     rate: FrameRate;
 }
 
+/** Type definition for IsFrameAlignedOptions. */
 export interface IsFrameAlignedOptions {
     time: MediaTime;
     rate: FrameRate;
 }
 
+/** Type definition for LastFrameTimeOptions. */
 export interface LastFrameTimeOptions {
     duration: MediaTime;
     rate: FrameRate;
 }
 
+/** Type definition for MediaTimeAddOptions. */
 export interface MediaTimeAddOptions {
     lhs: MediaTime;
     rhs: MediaTime;
 }
 
+/** Type definition for MediaTimeClampOptions. */
 export interface MediaTimeClampOptions {
     time: MediaTime;
     min: MediaTime;
     max: MediaTime;
 }
 
+/** Type definition for MediaTimeFromFrameOptions. */
 export interface MediaTimeFromFrameOptions {
     frame: number;
     rate: FrameRate;
 }
 
+/** Type definition for MediaTimeFromSecondsOptions. */
 export interface MediaTimeFromSecondsOptions {
     seconds: number;
 }
 
+/** Type definition for MediaTimeMaxOptions. */
 export interface MediaTimeMaxOptions {
     lhs: MediaTime;
     rhs: MediaTime;
 }
 
+/** Type definition for MediaTimeMinOptions. */
 export interface MediaTimeMinOptions {
     lhs: MediaTime;
     rhs: MediaTime;
 }
 
+/** Type definition for MediaTimeSubOptions. */
 export interface MediaTimeSubOptions {
     lhs: MediaTime;
     rhs: MediaTime;
 }
 
+/** Type definition for MediaTimeToFrameOptions. */
 export interface MediaTimeToFrameOptions {
     time: MediaTime;
     rate: FrameRate;
 }
 
+/** Type definition for MediaTimeToSecondsOptions. */
 export interface MediaTimeToSecondsOptions {
     time: MediaTime;
 }
 
+/** Type definition for RoundToFrameOptions. */
 export interface RoundToFrameOptions {
     time: MediaTime;
     rate: FrameRate;
 }
 
+/** Type definition for SnappedSeekTimeOptions. */
 export interface SnappedSeekTimeOptions {
     time: MediaTime;
     duration: MediaTime;
     rate: FrameRate;
 }
 
+/** Type definition for MediaTime. */
 export type MediaTime = number;
 
 
@@ -196,6 +211,7 @@ export class CrdtEngine {
     undo(): boolean;
 }
 
+/** Class representing NLEState. */
 export class NLEState {
     free(): void;
     [Symbol.dispose](): void;
@@ -233,6 +249,7 @@ export class ProxyGenerator {
     constructor();
 }
 
+/** Utility representing TICKS_PER_SECOND. */
 export function TICKS_PER_SECOND(): number;
 
 /**
@@ -297,6 +314,7 @@ export class VideoDecoderWrapper {
     reset(): void;
 }
 
+/** Class representing WasmEngine. */
 export class WasmEngine {
     free(): void;
     [Symbol.dispose](): void;
@@ -308,6 +326,7 @@ export class WasmEngine {
     render_to_canvas(canvas: HTMLCanvasElement, frame_idx: number): Promise<void>;
 }
 
+/** Class representing WasmPluginRuntime. */
 export class WasmPluginRuntime {
     free(): void;
     [Symbol.dispose](): void;
@@ -315,10 +334,13 @@ export class WasmPluginRuntime {
     constructor();
 }
 
+/** Utility representing analyze_waveform. */
 export function analyze_waveform(): Uint32Array;
 
+/** Utility representing apply3DLut. */
 export function apply3DLut(options: any): OffscreenCanvas;
 
+/** Utility representing applyChromaKey. */
 export function applyChromaKey(options: any): OffscreenCanvas;
 
 /**
@@ -326,8 +348,10 @@ export function applyChromaKey(options: any): OffscreenCanvas;
  */
 export function applyCompressor(buffer: Float64Array, sample_rate: number, threshold_db: number, ratio: number, attack_ms: number, release_ms: number, makeup_gain_db: number): Float64Array;
 
+/** Utility representing applyEffectPasses. */
 export function applyEffectPasses(options: any): OffscreenCanvas;
 
+/** Utility representing applyMaskFeather. */
 export function applyMaskFeather(options: any): OffscreenCanvas;
 
 /**
@@ -337,12 +361,16 @@ export function applyMaskFeather(options: any): OffscreenCanvas;
  */
 export function applyParametricEq(buffer: Float64Array, sample_rate: number, low_freq: number, low_gain_db: number, mid_freq: number, mid_gain_db: number, mid_q: number, high_freq: number, high_gain_db: number): Float64Array;
 
+/** Utility representing applyPlacement. */
 export function applyPlacement(tracks_js: any, placement_result_js: any, elements_js: any, new_track_insert_index_override?: number | null): any;
 
+/** Utility representing applyPolygonMask. */
 export function applyPolygonMask(options: any): OffscreenCanvas;
 
+/** Utility representing apply_crdt_patch_native. */
 export function apply_crdt_patch_native(patch_json: string): string;
 
+/** Utility representing autoTagFootage. */
 export function autoTagFootage(clip_ids: any[]): any;
 
 /**
@@ -355,16 +383,22 @@ export function buildAafManifest(project_name: string, clip_ids_js: any): string
  */
 export function buildDcpCpl(project_name: string, reel_count: number, duration_frames: number): string;
 
+/** Utility representing buildSmartBins. */
 export function buildSmartBins(tagged: any): any;
 
+/** Utility representing deleteElements. */
 export function deleteElements(tracks_js: any, elements_js: any): any;
 
+/** Utility representing detectFaces. */
 export function detectFaces(frame_data: Uint8Array, width: number, height: number): any;
 
+/** Utility representing evaluateDiscreteChannel. */
 export function evaluateDiscreteChannel(channel_json: any, time_ticks: number, default_value: string): string;
 
+/** Utility representing evaluateScalarChannel. */
 export function evaluateScalarChannel(channel_json: any, time_ticks: number, default_value: number): number;
 
+/** Utility representing floorToFrame. */
 export function floorToFrame(arg0: FloorToFrameOptions): MediaTime | undefined;
 
 /**
@@ -373,10 +407,13 @@ export function floorToFrame(arg0: FloorToFrameOptions): MediaTime | undefined;
  */
 export function formatTimecode(arg0: FormatTimecodeOptions): string | undefined;
 
+/** Utility representing getCompositorCanvas. */
 export function getCompositorCanvas(): HTMLCanvasElement;
 
+/** Utility representing getLastFrameProfile. */
 export function getLastFrameProfile(): Array<any>;
 
+/** Utility representing get_wgpu_limits. */
 export function get_wgpu_limits(): any;
 
 /**
@@ -384,32 +421,46 @@ export function get_wgpu_limits(): any;
  */
 export function guessTimecodeFormat(arg0: GuessTimecodeFormatOptions): TimeCodeFormat | undefined;
 
+/** Utility representing initCompositor. */
 export function initCompositor(width: number, height: number): void;
 
+/** Utility representing initNeuralEngine. */
 export function initNeuralEngine(): any;
 
+/** Utility representing initializeGpu. */
 export function initializeGpu(): Promise<void>;
 
+/** Utility representing isFrameAligned. */
 export function isFrameAligned(arg0: IsFrameAlignedOptions): boolean | undefined;
 
+/** Utility representing lastFrameTime. */
 export function lastFrameTime(arg0: LastFrameTimeOptions): MediaTime | undefined;
 
+/** Utility representing mediaTimeAdd. */
 export function mediaTimeAdd(arg0: MediaTimeAddOptions): MediaTime;
 
+/** Utility representing mediaTimeClamp. */
 export function mediaTimeClamp(arg0: MediaTimeClampOptions): MediaTime;
 
+/** Utility representing mediaTimeFromFrame. */
 export function mediaTimeFromFrame(arg0: MediaTimeFromFrameOptions): MediaTime | undefined;
 
+/** Utility representing mediaTimeFromSeconds. */
 export function mediaTimeFromSeconds(arg0: MediaTimeFromSecondsOptions): MediaTime | undefined;
 
+/** Utility representing mediaTimeMax. */
 export function mediaTimeMax(arg0: MediaTimeMaxOptions): MediaTime;
 
+/** Utility representing mediaTimeMin. */
 export function mediaTimeMin(arg0: MediaTimeMinOptions): MediaTime;
 
+/** Utility representing mediaTimeSub. */
 export function mediaTimeSub(arg0: MediaTimeSubOptions): MediaTime;
 
+/** Utility representing mediaTimeToFrame. */
 export function mediaTimeToFrame(arg0: MediaTimeToFrameOptions): bigint | undefined;
 
+/** Utility representing mediaTimeToSeconds. */
 export function mediaTimeToSeconds(arg0: MediaTimeToSecondsOptions): number;
 
 /**
@@ -418,8 +469,10 @@ export function mediaTimeToSeconds(arg0: MediaTimeToSecondsOptions): number;
  */
 export function parseTimecode(arg0: ParseTimecodeOptions): MediaTime | undefined;
 
+/** Utility representing parse_project_crdt. */
 export function parse_project_crdt(project_json: string): boolean;
 
+/** Utility representing placeElementsOnTimeline. */
 export function placeElementsOnTimeline(tracks_js: any, subject_js: any, time_spans_js: any, strategy_js: any, elements_js: any, new_track_insert_index_override?: number | null): any;
 
 /**
@@ -432,24 +485,34 @@ export function prepareExportManifest(format: string, width: number, height: num
  */
 export function processAudioBuffer(buffer: Float32Array, sample_rate: number, channels: number): Float32Array;
 
+/** Utility representing releaseTexture. */
 export function releaseTexture(id: string): void;
 
+/** Utility representing renderFrame. */
 export function renderFrame(options: any): void;
 
+/** Utility representing renderProjectFrame. */
 export function renderProjectFrame(project_json: string, frame_idx: number): void;
 
+/** Utility representing resizeCompositor. */
 export function resizeCompositor(width: number, height: number): void;
 
+/** Utility representing resolveTrackPlacement. */
 export function resolveTrackPlacement(tracks_js: any, subject_js: any, time_spans_js: any, strategy_js: any): any;
 
+/** Utility representing roundToFrame. */
 export function roundToFrame(arg0: RoundToFrameOptions): MediaTime | undefined;
 
+/** Utility representing snappedSeekTime. */
 export function snappedSeekTime(arg0: SnappedSeekTimeOptions): MediaTime | undefined;
 
+/** Utility representing uploadTexture. */
 export function uploadTexture(options: any): void;
 
+/** Type definition for InitInput. */
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
+/** Type definition for InitOutput. */
 export interface InitOutput {
     readonly memory: WebAssembly.Memory;
     readonly __wbg_wasmengine_free: (a: number, b: number) => void;
@@ -578,6 +641,7 @@ export interface InitOutput {
     readonly __wbindgen_start: () => void;
 }
 
+/** Type definition for SyncInitInput. */
 export type SyncInitInput = BufferSource | WebAssembly.Module;
 
 /**

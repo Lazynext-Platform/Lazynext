@@ -72,6 +72,7 @@ class UpscalePipeline:
     }
     
     def __init__(self, config: Optional[UpscaleConfig] = None):
+        """Initialize the class instance."""
         self.config = config or UpscaleConfig()
         self.models_dir = os.path.join(
             os.path.dirname(__file__), "..", "..", "models"

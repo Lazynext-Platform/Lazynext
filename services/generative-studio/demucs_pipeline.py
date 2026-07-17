@@ -70,6 +70,7 @@ class DemucsPipeline:
     """
     
     def __init__(self, config: Optional[DemucsConfig] = None):
+        """Initialize the class instance."""
         self.config = config or DemucsConfig()
         self.is_available = importlib.util.find_spec("demucs") is not None
 

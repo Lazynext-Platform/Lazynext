@@ -20,6 +20,7 @@ const renderLatency = new Trend("render_latency_ms");
 const aiLatency = new Trend("ai_latency_ms");
 const apiLatency = new Trend("api_latency_ms");
 
+/** Utility representing options. */
 export const options = {
   stages: [
     { duration: "30s", target: 10 },  // Ramp up to 10 users
@@ -35,6 +36,7 @@ export const options = {
   },
 };
 
+/** Default exported function for this module. */
 export default function () {
   // ── 1. Health Checks (SLO baseline) ──
   group("Health Checks", () => {
@@ -180,6 +182,7 @@ export default function () {
   });
 }
 
+/** Utility representing handleSummary. */
 export function handleSummary(data) {
   return {
     "scripts/load-test-results.json": JSON.stringify(data, null, 2),

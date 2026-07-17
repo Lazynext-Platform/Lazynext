@@ -225,6 +225,7 @@ export class CrdtEngine {
 }
 if (Symbol.dispose) CrdtEngine.prototype[Symbol.dispose] = CrdtEngine.prototype.free;
 
+/** Class representing NLEState. */
 export class NLEState {
     __destroy_into_raw() {
         const ptr = this.__wbg_ptr;
@@ -545,6 +546,7 @@ export class VideoDecoderWrapper {
 }
 if (Symbol.dispose) VideoDecoderWrapper.prototype[Symbol.dispose] = VideoDecoderWrapper.prototype.free;
 
+/** Class representing WasmEngine. */
 export class WasmEngine {
     static __wrap(ptr) {
         const obj = Object.create(WasmEngine.prototype);
@@ -633,6 +635,7 @@ export class WasmEngine {
 }
 if (Symbol.dispose) WasmEngine.prototype[Symbol.dispose] = WasmEngine.prototype.free;
 
+/** Class representing WasmPluginRuntime. */
 export class WasmPluginRuntime {
     __destroy_into_raw() {
         const ptr = this.__wbg_ptr;

@@ -41,6 +41,7 @@ _meter = None
 class Metrics:
     """In-process metrics counters (always available, even without OTel)."""
     def __init__(self):
+        """Initialize the class instance."""
         self.request_count = 0
         self.error_count = 0
         self.inference_count = 0

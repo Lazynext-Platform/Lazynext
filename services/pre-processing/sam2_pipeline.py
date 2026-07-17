@@ -39,6 +39,7 @@ class Sam2Pipeline:
     """
 
     def __init__(self, config: Optional[Sam2Config] = None):
+        """Initialize the class instance."""
         self.config = config or Sam2Config()
         self._onnx_session = None
         self._rembg_session = None
