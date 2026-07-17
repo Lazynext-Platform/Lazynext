@@ -12465,7 +12465,7 @@ export default function EditorClient({ project }: { project: Project }) {
 						<button
 							onClick={handleCopilotSubmit}
 							disabled={isCopilotThinking || !copilotPrompt.trim()}
-							className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-[var(--accent-primary)] text-[#050505] rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+							className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-[var(--accent-primary)] text-[var(--text-on-accent)] rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							<Send className="w-4 h-4" />
 						</button>

@@ -50,7 +50,7 @@ export function VideoScopes({ isPlaying, frame }: VideoScopesProps) {
 					);
 					const data = imageData.data;
 
-					ctx.fillStyle = "#09090b";
+					ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--bg-main");
 					ctx.fillRect(0, 0, scopeCanvas.width, scopeCanvas.height);
 					ctx.globalAlpha = 0.4;
 

@@ -226,7 +226,7 @@ export function BillingPageClient() {
 							}`}
 						>
 							{plan.highlight && (
-								<div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[var(--accent-primary)] text-[#050505] px-4 py-1 text-xs font-bold uppercase tracking-wider shadow-lg">
+								<div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[var(--accent-primary)] text-[var(--text-on-accent)] px-4 py-1 text-xs font-bold uppercase tracking-wider shadow-lg">
 									Most Popular
 								</div>
 							)}
@@ -268,7 +268,7 @@ export function BillingPageClient() {
 									plan.current
 										? "bg-background border border-border text-muted cursor-not-allowed"
 										: plan.highlight
-											? "bg-[var(--accent-primary)] text-[#050505] hover:opacity-90 shadow-lg shadow-[var(--accent-primary)]/20"
+											? "bg-[var(--accent-primary)] text-[var(--text-on-accent)] hover:opacity-90 shadow-lg shadow-[var(--accent-primary)]/20"
 											: "bg-background border border-border text-foreground hover:bg-hover"
 								}`}
 							>
