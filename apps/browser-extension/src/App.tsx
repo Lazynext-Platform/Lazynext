@@ -32,10 +32,20 @@ function App() {
   const [detectedVideos, setDetectedVideos] = useState<string[]>([]);
   const [status, setStatus] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
+  const [themeMode, setThemeMode] = useState<"light" | "dark" | "system">("system");
 
   useEffect(() => {
+    // Load theme preference
+    chrome.storage.local.get("themeMode").then((stored) => {
+      if (stored.themeMode) {
+        setThemeMode(stored.themeMode as "light" | "dark" | "system");
+        applyTheme(stored.themeMode as "light" | "dark" | "system");
+      }
+    });
+
     // Detect <video> elements on the current page
     (async () => {
+
       try {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         if (!tab?.id) return;
@@ -62,6 +72,23 @@ function App() {
       }
     })();
   }, []);
+
+  const applyTheme = (mode: "light" | "dark" | "system") => {
+    const html = document.documentElement;
+    html.classList.remove("light", "dark");
+    if (mode === "system") {
+      // It naturally falls back to prefers-color-scheme
+    } else {
+      html.classList.add(mode);
+    }
+  };
+
+  const toggleTheme = () => {
+    const nextMode = themeMode === "system" ? "dark" : themeMode === "dark" ? "light" : "system";
+    setThemeMode(nextMode);
+    applyTheme(nextMode);
+    chrome.storage.local.set({ themeMode: nextMode });
+  };
 
   const handleImport = async (videoSrc: string) => {
     setImporting(true);
@@ -187,16 +214,35 @@ function App() {
           'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
-      <h1
-        style={{
-          fontSize: "20px",
-          margin: 0,
-          fontWeight: 700,
-          letterSpacing: "-0.5px",
-        }}
-      >
-        LAZYNEXT<span style={{ color: "var(--accent-primary)" }}>.</span>
-      </h1>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h1
+          style={{
+            fontSize: "20px",
+            margin: 0,
+            fontWeight: 700,
+            letterSpacing: "-0.5px",
+          }}
+        >
+          LAZYNEXT<span style={{ color: "var(--accent-primary)" }}>.</span>
+        </h1>
+        <button
+          onClick={toggleTheme}
+          style={{
+            background: "var(--bg-hover)",
+            border: "1px solid var(--border-glass)",
+            color: "var(--text-primary)",
+            padding: "4px 8px",
+            borderRadius: "6px",
+            fontSize: "11px",
+            fontWeight: 600,
+            cursor: "pointer",
+            textTransform: "capitalize"
+          }}
+          title="Toggle Theme"
+        >
+          {themeMode}
+        </button>
+      </div>
 
       {detectedVideos.length > 0 ? (
         <>

@@ -5,8 +5,33 @@
 document.addEventListener('DOMContentLoaded', () => {
   const captureBtn = document.getElementById('captureBtn');
   const statusDiv = document.getElementById('status');
-
   const stopBtn = document.getElementById('stopBtn');
+  const themeBtn = document.getElementById('themeBtn');
+
+  // Theme Management
+  chrome.storage.local.get("themeMode", (res) => {
+    let mode = res.themeMode || "system";
+    themeBtn.textContent = mode;
+    applyTheme(mode);
+  });
+
+  function applyTheme(mode) {
+    const html = document.documentElement;
+    html.classList.remove("light", "dark");
+    if (mode !== "system") {
+      html.classList.add(mode);
+    }
+  }
+
+  themeBtn.addEventListener('click', () => {
+    chrome.storage.local.get("themeMode", (res) => {
+      let currentMode = res.themeMode || "system";
+      let nextMode = currentMode === "system" ? "dark" : currentMode === "dark" ? "light" : "system";
+      chrome.storage.local.set({ themeMode: nextMode });
+      themeBtn.textContent = nextMode;
+      applyTheme(nextMode);
+    });
+  });
 
   // Check if we are already recording (a robust extension would store this in storage)
   // For simplicity, we just send a message and handle it statelessly if we can.
