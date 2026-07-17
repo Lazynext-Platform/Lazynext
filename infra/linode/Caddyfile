@@ -26,33 +26,33 @@
 
 # ── HTTPS (port 443) — uncomment once DNS is configured ──
 
-# lazynext.com, www.lazynext.com {
-#     reverse_proxy 127.0.0.1:3000
-#     encode gzip zstd
-#     header {
-#         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-#         X-Frame-Options "DENY"
-#         X-Content-Type-Options "nosniff"
-#         Referrer-Policy "strict-origin-when-cross-origin"
-#         # CORS for API Gateway subdomain
-#         Access-Control-Allow-Origin "https://lazynext.com"
-#     }
-# }
+lazynext.com, www.lazynext.com {
+    reverse_proxy 127.0.0.1:3000
+    encode gzip zstd
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Frame-Options "DENY"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        # CORS for API Gateway subdomain
+        Access-Control-Allow-Origin "https://lazynext.com"
+    }
+}
 
-# api.lazynext.com {
-#     reverse_proxy 127.0.0.1:8005
-#     encode gzip zstd
-#     header {
-#         Access-Control-Allow-Origin "https://lazynext.com"
-#         Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-#         Access-Control-Allow-Headers "Authorization, Content-Type"
-#     }
-# }
+api.lazynext.com {
+    reverse_proxy 127.0.0.1:8005
+    encode gzip zstd
+    header {
+        Access-Control-Allow-Origin "https://lazynext.com"
+        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Authorization, Content-Type"
+    }
+}
 
-# collab.lazynext.com {
-#     reverse_proxy 127.0.0.1:8004
-#     header {
-#         Connection "Upgrade"
-#         Upgrade "websocket"
-#     }
-# }
+collab.lazynext.com {
+    reverse_proxy 127.0.0.1:8004
+    header {
+        Connection "Upgrade"
+        Upgrade "websocket"
+    }
+}
