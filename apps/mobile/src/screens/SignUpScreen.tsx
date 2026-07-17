@@ -259,7 +259,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 	divider: {
 		flex: 1,
 		height: 1,
-		backgroundColor: "rgba(255,255,255,0.1)",
+		backgroundColor: theme.borderGlass,
 	},
 	dividerText: {
 		color: theme.textMuted,
@@ -273,14 +273,14 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		gap: 12,
 	},
 	socialButton: {
-		backgroundColor: "rgba(255,255,255,0.08)",
+		backgroundColor: theme.borderGlass,
 		width: 56,
 		height: 44,
 		borderRadius: 12,
 		alignItems: "center",
 		justifyContent: "center",
 		borderWidth: 1,
-		borderColor: "rgba(255,255,255,0.1)",
+		borderColor: theme.borderGlass,
 	},
 	socialButtonText: {
 		color: theme.textPrimary,

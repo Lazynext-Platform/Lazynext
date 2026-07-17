@@ -175,7 +175,7 @@ export function TimelineScreen() {
 
 const getStyles = (theme: Theme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.bgMain },
-  timelineHeader: { padding: 24, paddingTop: 48, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.08)" },
+  timelineHeader: { padding: 24, paddingTop: 48, borderBottomWidth: 1, borderBottomColor: theme.borderGlass },
   timelineHeaderTitle: { color: theme.textPrimary, fontSize: 28, fontWeight: "900", letterSpacing: -0.5 },
   timelineHeaderSub: { color: theme.textMuted, fontSize: 14, marginTop: 4 },
   timelineLoading: { flex: 1, justifyContent: "center", alignItems: "center", gap: 12 },
@@ -192,9 +192,9 @@ const getStyles = (theme: Theme) => StyleSheet.create({
   },
   trackHeader: {
     width: 64, height: "100%", justifyContent: "center", alignItems: "center",
-    backgroundColor: "rgba(24,24,27,0.9)", borderRightWidth: 1, borderRightColor: "rgba(255,255,255,0.08)", zIndex: 5,
+    backgroundColor: theme.bgMain, borderRightWidth: 1, borderRightColor: theme.borderGlass, zIndex: 5,
   },
-  trackHeaderText: { color: "rgba(255,255,255,0.7)", fontSize: 14, fontWeight: "bold" },
+  trackHeaderText: { color: theme.textSecondary, fontSize: 14, fontWeight: "bold" },
   trackContent: { flex: 1, height: "100%", position: "relative" },
   clip: {
     position: "absolute", height: "80%", top: "10%", borderRadius: 6,

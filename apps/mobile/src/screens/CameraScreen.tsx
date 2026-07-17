@@ -285,11 +285,11 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		flex: 1,
 	},
 	gridCellBorder: {
-		borderColor: "rgba(255,255,255,0.25)",
+		borderColor: theme.textMuted,
 		borderWidth: 0.5,
 	},
 	gridCellBorderH: {
-		borderColor: "rgba(255,255,255,0.25)",
+		borderColor: theme.textMuted,
 		borderTopWidth: 0.5,
 		borderBottomWidth: 0.5,
 	},

@@ -268,7 +268,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		borderRadius: 8,
 		opacity: 0.85,
 		borderWidth: 2,
-		borderColor: "rgba(255,255,255,0.3)",
+		borderColor: theme.textMuted,
 	},
 	hatOverlay: {
 		position: "absolute",
@@ -293,7 +293,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		...StyleSheet.absoluteFill,
 	},
 	bgBlur: {
-		backgroundColor: "rgba(255,255,255,0.1)",
+		backgroundColor: theme.borderGlass,
 	},
 	bgBW: {
 		backgroundColor: "rgba(0,0,0,0.4)",
@@ -316,7 +316,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		paddingHorizontal: 14,
 		paddingVertical: 8,
 		borderRadius: 16,
-		backgroundColor: "rgba(255,255,255,0.1)",
+		backgroundColor: theme.borderGlass,
 		borderWidth: 1,
 		borderColor: "rgba(255,255,255,0.2)",
 	},
@@ -325,7 +325,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		borderColor: theme.accentPrimary,
 	},
 	filterChipText: {
-		color: "rgba(255,255,255,0.7)",
+		color: theme.textSecondary,
 		fontSize: 12,
 		fontWeight: "600",
 	},

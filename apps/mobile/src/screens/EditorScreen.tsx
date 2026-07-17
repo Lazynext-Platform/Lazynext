@@ -343,7 +343,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		backgroundColor: "rgba(20, 20, 30, 0.95)",
 		borderTopWidth: 1,
 		borderBottomWidth: 1,
-		borderColor: "rgba(255, 255, 255, 0.1)",
+		borderColor: theme.borderGlass,
 		padding: 12,
 	},
 	maskAreaHeader: {
@@ -378,7 +378,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 	},
 	pressureBar: {
 		height: 4,
-		backgroundColor: "rgba(255,255,255,0.1)",
+		backgroundColor: theme.borderGlass,
 		borderRadius: 2,
 		marginBottom: 8,
 		overflow: "hidden",
@@ -393,13 +393,13 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		backgroundColor: "rgba(0,0,0,0.2)",
 		borderRadius: 8,
 		borderWidth: 1,
-		borderColor: "rgba(255,255,255,0.06)",
+		borderColor: theme.borderGlass,
 		justifyContent: "center",
 		alignItems: "center",
 		overflow: "hidden",
 	},
 	maskHint: {
-		color: "rgba(255,255,255,0.25)",
+		color: theme.textMuted,
 		fontSize: 13,
 	},
 	maskPoint: {
@@ -414,7 +414,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		borderTopRightRadius: 16,
 		padding: 12,
 		borderTopWidth: 1,
-		borderColor: "rgba(255, 255, 255, 0.1)",
+		borderColor: theme.borderGlass,
 	},
 	header: {
 		flexDirection: "row",
