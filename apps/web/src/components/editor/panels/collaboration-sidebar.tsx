@@ -92,7 +92,7 @@ export function CollaborationSidebar({
 					.map((c) => (
 					<div
 						key={c.id}
-						className="bg-background border border-border rounded-lg p-3 hover:border-zinc-600 transition-colors cursor-pointer group"
+						className="bg-background border border-border rounded-lg p-3 hover:border-border transition-colors cursor-pointer group"
 						onClick={() => onNavigateToFrame(c.frame)}
 						onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
 						role="button"

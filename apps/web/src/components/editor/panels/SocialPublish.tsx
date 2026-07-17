@@ -367,7 +367,7 @@ export function SocialPublish({
 									className={`flex flex-col items-center justify-center py-3 rounded-lg border transition-colors ${
 										selectedPlatform.id === p.id
 											? "border-pink-500 bg-pink-600/10 text-foreground"
-											: "border-border text-muted hover:border-zinc-600 hover:text-foreground"
+											: "border-border text-muted hover:border-border hover:text-foreground"
 									}`}
 								>
 									<p.icon className="w-5 h-5 mb-1" style={{ color: p.color }} />
@@ -513,7 +513,7 @@ export function SocialPublish({
 										className={`relative aspect-video rounded border overflow-hidden ${
 											selectedThumbnail === idx
 												? "border-pink-500 ring-1 ring-pink-500/50"
-												: "border-border hover:border-zinc-500"
+												: "border-border hover:border-border"
 										}`}
 									>
 										<div className="w-full h-full bg-panel flex items-center justify-center text-[8px] text-muted">
@@ -563,7 +563,7 @@ export function SocialPublish({
 						</div>
 						<button
 							onClick={handleSchedulePost}
-							className="w-full py-2 bg-panel border border-border rounded-lg text-xs font-bold text-muted hover:border-zinc-500 hover:text-foreground transition-colors flex items-center justify-center gap-2"
+							className="w-full py-2 bg-panel border border-border rounded-lg text-xs font-bold text-muted hover:border-border hover:text-foreground transition-colors flex items-center justify-center gap-2"
 						>
 							<Timer className="w-3.5 h-3.5" />
 							Schedule Post
@@ -681,11 +681,11 @@ export function SocialPublish({
 
 				{/* Info text */}
 				<div className="relative z-10 text-center mt-4">
-					<p className="text-xs text-zinc-600">
+					<p className="text-xs text-secondary">
 						{projectData?.tracks?.reduce((acc: number, t: any) => acc + (t.clips?.length || 0), 0) || 0} clips
 						{" "}across {projectData?.tracks?.length || 0} tracks
 					</p>
-					<p className="text-[10px] text-zinc-700 mt-1">
+					<p className="text-[10px] text-secondary mt-1">
 						Duration: {projectData?.duration ? `${projectData.duration}s` : "N/A"}
 					</p>
 				</div>

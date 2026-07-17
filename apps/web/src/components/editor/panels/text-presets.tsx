@@ -49,7 +49,7 @@ export function TextPresets({
 					onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
 					role="button"
 					tabIndex={0}
-					className="flex flex-col items-center justify-center p-4 border border-border rounded-lg bg-background hover:border-zinc-500 cursor-pointer transition-all hover:scale-[1.02] group"
+					className="flex flex-col items-center justify-center p-4 border border-border rounded-lg bg-background hover:border-border cursor-pointer transition-all hover:scale-[1.02] group"
 				>
 						<div
 							className={`w-12 h-12 rounded-full ${preset.bg} flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition-transform relative`}

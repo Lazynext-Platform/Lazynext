@@ -45,14 +45,14 @@ export function TranscriptEditor() {
 
 			<div className="flex flex-col gap-4">
 				{script.length === 0 ? (
-					<p className="text-gray-400 text-sm">
+					<p className="text-muted text-sm">
 						No transcript loaded. Use the Lazynext AI Agent to generate a transcript from your video.
 					</p>
 				) : (
 					script.map((line) => (
 					<div
 						key={line.id}
-						className={`flex items-start justify-between p-2 rounded transition-colors ${line.deleted ? 'opacity-30 line-through bg-gray-100' : 'hover:bg-blue-50'}`}
+						className={`flex items-start justify-between p-2 rounded transition-colors ${line.deleted ? 'opacity-30 line-through bg-glass' : 'hover:bg-blue-50'}`}
 					>
                         <div
                             className="cursor-pointer flex-1"

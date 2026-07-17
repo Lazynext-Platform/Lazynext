@@ -30,7 +30,7 @@ export default function GlobalError({
 			<body className="bg-background">
 				<div className="flex min-h-screen items-center justify-center px-4">
 					<div className="text-center">
-						<div className="text-7xl font-bold text-zinc-800">500</div>
+						<div className="text-7xl font-bold text-foreground">500</div>
 						<h1 className="mt-4 text-2xl font-bold text-foreground">
 							Something went wrong
 						</h1>

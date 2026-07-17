@@ -114,7 +114,7 @@ export function AudioMixer({
 									style={{ width: "150px", left: "-67px", top: "10px" }} // CSS rotation hacks for vertical slider
 								/>
 								<div
-									className="absolute left-1/2 -translate-x-1/2 w-6 h-3 bg-zinc-600 rounded cursor-pointer pointer-events-none group-hover:bg-zinc-500 border border-zinc-400"
+									className="absolute left-1/2 -translate-x-1/2 w-6 h-3 bg-hover rounded cursor-pointer pointer-events-none group-hover:bg-hover border border-border"
 									style={{ bottom: `${((track.volume ?? 1) / 2) * 100}%` }}
 								/>
 							</div>

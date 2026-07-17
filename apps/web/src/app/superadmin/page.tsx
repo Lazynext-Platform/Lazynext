@@ -166,7 +166,7 @@ export default async function SuperAdminDashboard() {
 													? "bg-amber-500/10 text-amber-400 border-amber-500/20"
 													: provider.status === "Failing"
 													? "bg-red-500/10 text-red-400 border-red-500/20"
-													: "bg-gray-500/10 text-gray-400 border-gray-500/20"
+													: "bg-hover/10 text-muted border-border"
 											}`}>
 												{provider.status}
 											</span>

@@ -142,7 +142,7 @@ export function ExportDelivery({
 									setFormat("aaf");
 									setPreset("protools");
 								}}
-								className={`flex flex-col items-center justify-center py-4 border rounded-lg transition-colors ${format === "aaf" ? "bg-indigo-600/20 border-indigo-500 text-indigo-300" : "bg-background border-border text-muted hover:border-zinc-600 hover:text-foreground"}`}
+								className={`flex flex-col items-center justify-center py-4 border rounded-lg transition-colors ${format === "aaf" ? "bg-indigo-600/20 border-indigo-500 text-indigo-300" : "bg-background border-border text-muted hover:border-border hover:text-foreground"}`}
 							>
 								<AudioWaveform className="w-6 h-6 mb-2" />
 								<span className="text-[10px] font-bold">ProTools (.AAF)</span>
@@ -152,7 +152,7 @@ export function ExportDelivery({
 									setFormat("fcpxml");
 									setPreset("premiere");
 								}}
-								className={`flex flex-col items-center justify-center py-4 border rounded-lg transition-colors ${format === "fcpxml" ? "bg-indigo-600/20 border-indigo-500 text-indigo-300" : "bg-background border-border text-muted hover:border-zinc-600 hover:text-foreground"}`}
+								className={`flex flex-col items-center justify-center py-4 border rounded-lg transition-colors ${format === "fcpxml" ? "bg-indigo-600/20 border-indigo-500 text-indigo-300" : "bg-background border-border text-muted hover:border-border hover:text-foreground"}`}
 							>
 								<Film className="w-6 h-6 mb-2" />
 								<span className="text-[10px] font-bold">
@@ -258,11 +258,11 @@ export function ExportDelivery({
 			<div className="flex-1 bg-background border border-border rounded-xl flex flex-col items-center justify-center relative overflow-hidden">
 				<div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-500 via-zinc-900 to-zinc-950"></div>
 				<div className="z-10 text-center">
-					<Film className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
+					<Film className="w-16 h-16 text-secondary mx-auto mb-4" />
 					<h2 className="text-xl font-bold text-muted mb-2">
 						Export Preparation
 					</h2>
-					<p className="text-sm text-zinc-600 max-w-sm mx-auto">
+					<p className="text-sm text-secondary max-w-sm mx-auto">
 						Your timeline contains{" "}
 						{projectData.tracks?.reduce(
 							(acc: number, track: any) => acc + (track.clips?.length || 0),

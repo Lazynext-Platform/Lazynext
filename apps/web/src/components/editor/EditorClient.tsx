@@ -3532,7 +3532,7 @@ export default function EditorClient({ project }: { project: Project }) {
 			{isInfiniteCanvas && (
 				<div className="absolute inset-0 pointer-events-none grid grid-cols-[repeat(40,minmax(0,1fr))] grid-rows-[repeat(40,minmax(0,1fr))] opacity-5">
 					{Array.from({ length: 1600 }).map((_, i) => (
-						<div key={i} className="border-r border-b border-zinc-500"></div>
+						<div key={i} className="border-r border-b border-border"></div>
 					))}
 				</div>
 			)}
@@ -3874,10 +3874,10 @@ export default function EditorClient({ project }: { project: Project }) {
 								className="flex -space-x-2 mr-2 cursor-pointer"
 								title="Multiplayer Session (2 Active Editors)"
 							>
-								<div className="w-6 h-6 rounded-full bg-indigo-600 border border-zinc-900 flex items-center justify-center text-[10px] font-bold text-foreground z-20">
+								<div className="w-6 h-6 rounded-full bg-indigo-600 border border-border flex items-center justify-center text-[10px] font-bold text-foreground z-20">
 									You
 								</div>
-								<div className="w-6 h-6 rounded-full bg-pink-600 border border-zinc-900 flex items-center justify-center text-[10px] font-bold text-foreground z-10">
+								<div className="w-6 h-6 rounded-full bg-pink-600 border border-border flex items-center justify-center text-[10px] font-bold text-foreground z-10">
 									AL
 								</div>
 							</div>
@@ -4282,7 +4282,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												<div className="w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-700 to-zinc-900" />
 											) : (
 												<div className="w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-800 to-black flex items-center justify-center">
-													<span className="text-zinc-700 font-mono text-xs">
+													<span className="text-secondary font-mono text-xs">
 														NO SIGNAL
 													</span>
 												</div>
@@ -4477,7 +4477,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												>
 													{/* Pan Knob */}
 													<div className="mb-2 w-full flex flex-col items-center group">
-														<div className="w-8 h-8 rounded-full border border-border bg-panel shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)] relative cursor-ns-resize group-hover:border-zinc-500 transition-colors">
+														<div className="w-8 h-8 rounded-full border border-border bg-panel shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)] relative cursor-ns-resize group-hover:border-border transition-colors">
 															<div
 																className="absolute top-0 left-1/2 w-0.5 h-2 bg-amber-400 origin-[50%_16px] transition-transform"
 																style={{
@@ -4507,13 +4507,13 @@ export default function EditorClient({ project }: { project: Project }) {
 														</div>
 														{/* Fader Track */}
 														<div className="absolute right-[-14px] top-0 bottom-0 w-1 bg-background rounded-full shadow-inner flex flex-col items-center justify-center">
-															<div className="w-3 h-1 bg-zinc-600 rounded-full" />
-															<div className="w-3 h-1 bg-zinc-600 rounded-full mt-4" />
-															<div className="w-3 h-1 bg-zinc-600 rounded-full mt-4" />
+															<div className="w-3 h-1 bg-hover rounded-full" />
+															<div className="w-3 h-1 bg-hover rounded-full mt-4" />
+															<div className="w-3 h-1 bg-hover rounded-full mt-4" />
 														</div>
 														{/* Fader Cap */}
 														<div
-															className="absolute right-[-24px] w-5 h-8 bg-glass border-y-4 border-zinc-900 rounded shadow-[0_4px_6px_rgba(0,0,0,0.5)] cursor-ns-resize hover:bg-zinc-600 transition-colors z-10 flex items-center justify-center"
+															className="absolute right-[-24px] w-5 h-8 bg-glass border-y-4 border-border rounded shadow-[0_4px_6px_rgba(0,0,0,0.5)] cursor-ns-resize hover:bg-hover transition-colors z-10 flex items-center justify-center"
 															style={{
 																bottom: `${((trackVol + 60) / 72) * 100}%`,
 																transform: "translateY(50%)",
@@ -4565,12 +4565,12 @@ export default function EditorClient({ project }: { project: Project }) {
 												/>
 											</div>
 											<div className="absolute right-[-18px] top-0 bottom-0 w-1 bg-background rounded-full shadow-inner flex flex-col items-center justify-center">
-												<div className="w-4 h-1 bg-zinc-600 rounded-full" />
-												<div className="w-4 h-1 bg-zinc-600 rounded-full mt-4" />
-												<div className="w-4 h-1 bg-zinc-600 rounded-full mt-4" />
+												<div className="w-4 h-1 bg-hover rounded-full" />
+												<div className="w-4 h-1 bg-hover rounded-full mt-4" />
+												<div className="w-4 h-1 bg-hover rounded-full mt-4" />
 											</div>
 											<div
-												className="absolute right-[-30px] w-7 h-8 bg-zinc-200 border-y-4 border-zinc-400 rounded shadow-[0_4px_6px_rgba(0,0,0,0.5)] cursor-ns-resize hover:bg-background transition-colors z-10 flex items-center justify-center"
+												className="absolute right-[-30px] w-7 h-8 bg-hover border-y-4 border-border rounded shadow-[0_4px_6px_rgba(0,0,0,0.5)] cursor-ns-resize hover:bg-background transition-colors z-10 flex items-center justify-center"
 												style={{ bottom: "80%", transform: "translateY(50%)" }}
 											>
 												<div className="w-full h-0.5 bg-red-500/50" />
@@ -6617,7 +6617,7 @@ export default function EditorClient({ project }: { project: Project }) {
 															</span>
 
 				<div
-					className="w-16 h-16 rounded-full relative shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)] cursor-crosshair border border-border hover:border-zinc-500 transition-colors"
+					className="w-16 h-16 rounded-full relative shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)] cursor-crosshair border border-border hover:border-border transition-colors"
 					role="button"
 					tabIndex={0}
 																style={{
@@ -8670,7 +8670,7 @@ export default function EditorClient({ project }: { project: Project }) {
 																		});
 																		commitState(projectData);
 																	}}
-																	className="text-zinc-700 hover:text-red-400 transition-colors opacity-0 group-hover/note:opacity-100 shrink-0"
+																	className="text-secondary hover:text-red-400 transition-colors opacity-0 group-hover/note:opacity-100 shrink-0"
 																>
 																	<svg
 																		className="w-3 h-3"
@@ -8697,7 +8697,7 @@ export default function EditorClient({ project }: { project: Project }) {
 																<span className="text-[8px] text-muted">
 																	{note.author}
 																</span>
-																<span className="text-[8px] text-zinc-700">
+																<span className="text-[8px] text-secondary">
 																	{new Date(note.timestamp).toLocaleTimeString(
 																		[],
 																		{ hour: "2-digit", minute: "2-digit" },
@@ -9916,8 +9916,8 @@ export default function EditorClient({ project }: { project: Project }) {
 								</svg>
 
 								{/* MediaIn Node */}
-								<div className="absolute top-[120px] left-[50px] w-[100px] bg-panel border border-zinc-600 rounded-md shadow-xl flex flex-col overflow-hidden">
-									<div className="h-6 bg-glass border-b border-zinc-600 flex items-center px-2">
+								<div className="absolute top-[120px] left-[50px] w-[100px] bg-panel border border-border rounded-md shadow-xl flex flex-col overflow-hidden">
+									<div className="h-6 bg-glass border-b border-border flex items-center px-2">
 										<span className="text-[10px] font-semibold text-foreground">
 											MediaIn1
 										</span>
@@ -9941,8 +9941,8 @@ export default function EditorClient({ project }: { project: Project }) {
 								</div>
 
 								{/* MediaOut Node */}
-								<div className="absolute top-[120px] left-[650px] w-[100px] bg-panel border border-zinc-600 rounded-md shadow-xl flex flex-col overflow-hidden">
-									<div className="h-6 bg-glass border-b border-zinc-600 flex items-center px-2">
+								<div className="absolute top-[120px] left-[650px] w-[100px] bg-panel border border-border rounded-md shadow-xl flex flex-col overflow-hidden">
+									<div className="h-6 bg-glass border-b border-border flex items-center px-2">
 										<span className="text-[10px] font-semibold text-foreground">
 											MediaOut1
 										</span>
@@ -10034,7 +10034,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							{/* Timeline Header Toolbar */}
 							<div className="h-8 w-full border-b border-border bg-background flex items-center px-4 gap-2">
 								<button
-									className="text-xs font-medium text-foreground bg-panel border border-border px-3 py-1 rounded hover:bg-glass active:bg-zinc-600 transition-colors"
+									className="text-xs font-medium text-foreground bg-panel border border-border px-3 py-1 rounded hover:bg-glass active:bg-hover transition-colors"
 									onClick={() => {
 										setFrame(0);
 										setIsPlaying(false);
@@ -10249,7 +10249,7 @@ export default function EditorClient({ project }: { project: Project }) {
 								</div>
 								<div className="ml-2 pl-4 border-l border-border flex gap-2">
 									<button
-										className={`text-xs font-medium text-foreground px-3 py-1 rounded transition-colors shadow-sm ${activeTool === "select" ? "bg-glass border border-zinc-600" : "bg-panel border border-border hover:bg-glass"}`}
+										className={`text-xs font-medium text-foreground px-3 py-1 rounded transition-colors shadow-sm ${activeTool === "select" ? "bg-glass border border-border" : "bg-panel border border-border hover:bg-glass"}`}
 										onClick={() => setActiveTool("select")}
 										title="Selection Tool (V)"
 									>
@@ -10907,8 +10907,8 @@ export default function EditorClient({ project }: { project: Project }) {
 									</span>
 
 									{/* Pan knob */}
-									<div className="w-8 h-8 rounded-full bg-background border border-zinc-600 mb-2 relative">
-										<div className="absolute top-1 left-1/2 w-0.5 h-3 bg-zinc-400 origin-bottom transform rotate-0"></div>
+									<div className="w-8 h-8 rounded-full bg-background border border-border mb-2 relative">
+										<div className="absolute top-1 left-1/2 w-0.5 h-3 bg-hover origin-bottom transform rotate-0"></div>
 									</div>
 									<span className="text-[8px] text-muted mb-4">PAN</span>
 
@@ -10928,20 +10928,20 @@ export default function EditorClient({ project }: { project: Project }) {
 										>
 											+ VST
 										</div>
-										<div className="w-full h-4 bg-background/50 border border-border rounded text-[8px] text-zinc-600 flex items-center justify-center border-dashed">
+										<div className="w-full h-4 bg-background/50 border border-border rounded text-[8px] text-secondary flex items-center justify-center border-dashed">
 											empty
 										</div>
 									</div>
 
 									{/* Fader Track */}
 									<div className="flex-1 w-full flex justify-center relative px-2">
-										<div className="w-1.5 h-full bg-background rounded-full border border-zinc-900 relative">
-											<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-8 bg-glass border-b-4 border-zinc-900 rounded cursor-ns-resize hover:bg-zinc-600 shadow-lg flex items-center justify-center">
-												<div className="w-3 h-0.5 bg-zinc-400"></div>
+										<div className="w-1.5 h-full bg-background rounded-full border border-border relative">
+											<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-8 bg-glass border-b-4 border-border rounded cursor-ns-resize hover:bg-hover shadow-lg flex items-center justify-center">
+												<div className="w-3 h-0.5 bg-hover"></div>
 											</div>
 										</div>
 										{/* Volume Meter */}
-										<div className="w-2 h-full bg-background rounded-sm border border-zinc-900 ml-2 relative overflow-hidden flex flex-col justify-end">
+										<div className="w-2 h-full bg-background rounded-sm border border-border ml-2 relative overflow-hidden flex flex-col justify-end">
 											<div
 												className={`w-full bg-emerald-500 transition-all duration-100 ${isPlaying ? "h-[60%] animate-pulse" : "h-0"}`}
 											></div>
@@ -10961,7 +10961,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							))}
 
 						{/* Master Bus */}
-						<div className="w-24 bg-panel border-2 border-zinc-600 rounded flex flex-col items-center py-2 shrink-0 ml-auto shadow-lg relative overflow-hidden">
+						<div className="w-24 bg-panel border-2 border-border rounded flex flex-col items-center py-2 shrink-0 ml-auto shadow-lg relative overflow-hidden">
 							<div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-amber-500"></div>
 							<span className="text-[11px] font-bold text-foreground mb-2 truncate w-full text-center px-1">
 								MAIN
@@ -10977,19 +10977,19 @@ export default function EditorClient({ project }: { project: Project }) {
 							</div>
 
 							<div className="flex-1 w-full flex justify-center relative px-2">
-								<div className="w-2 h-full bg-background rounded-full border border-zinc-900 relative">
-									<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-zinc-300 border-b-4 border-zinc-500 rounded cursor-ns-resize hover:bg-background shadow-lg flex items-center justify-center">
+								<div className="w-2 h-full bg-background rounded-full border border-border relative">
+									<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-hover border-b-4 border-border rounded cursor-ns-resize hover:bg-background shadow-lg flex items-center justify-center">
 										<div className="w-4 h-0.5 bg-panel"></div>
 									</div>
 								</div>
 								{/* Stereo Volume Meter */}
 								<div className="flex gap-0.5 ml-2">
-									<div className="w-2 h-full bg-background rounded-sm border border-zinc-900 relative overflow-hidden flex flex-col justify-end">
+									<div className="w-2 h-full bg-background rounded-sm border border-border relative overflow-hidden flex flex-col justify-end">
 										<div
 											className={`w-full bg-emerald-400 transition-all duration-75 ${isPlaying ? "h-[75%]" : "h-0"}`}
 										></div>
 									</div>
-									<div className="w-2 h-full bg-background rounded-sm border border-zinc-900 relative overflow-hidden flex flex-col justify-end">
+									<div className="w-2 h-full bg-background rounded-sm border border-border relative overflow-hidden flex flex-col justify-end">
 										<div
 											className={`w-full bg-emerald-400 transition-all duration-75 ${isPlaying ? "h-[70%]" : "h-0"}`}
 										></div>
@@ -11548,7 +11548,7 @@ export default function EditorClient({ project }: { project: Project }) {
 										}}
 									/>
 									<svg
-										className="w-14 h-14 text-zinc-700 mb-3"
+										className="w-14 h-14 text-secondary mb-3"
 										fill="none"
 										viewBox="0 0 24 24"
 										stroke="currentColor"
@@ -11607,7 +11607,7 @@ export default function EditorClient({ project }: { project: Project }) {
 										<div className="flex items-center justify-center h-full text-muted text-xs">
 											<div className="text-center">
 												<svg
-													className="w-8 h-8 mx-auto mb-2 text-zinc-700"
+													className="w-8 h-8 mx-auto mb-2 text-secondary"
 													fill="none"
 													viewBox="0 0 24 24"
 													stroke="currentColor"
@@ -11637,7 +11637,7 @@ export default function EditorClient({ project }: { project: Project }) {
 																	? "bg-amber-500 animate-pulse"
 																	: item.status === "error"
 																		? "bg-red-500"
-																		: "bg-zinc-600"
+																		: "bg-hover"
 														}`}
 													/>
 													<div className="flex-1 min-w-0">
@@ -11815,7 +11815,7 @@ export default function EditorClient({ project }: { project: Project }) {
 									<p className="text-muted text-sm">
 										Holographic projection area
 									</p>
-									<p className="text-zinc-600 text-xs mt-1">
+									<p className="text-secondary text-xs mt-1">
 										Ready to synthesize {assetForgeMaterial}
 									</p>
 								</div>

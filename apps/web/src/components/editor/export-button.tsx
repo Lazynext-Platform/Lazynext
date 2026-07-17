@@ -45,7 +45,7 @@ export default function ExportButton({ projectId }: { projectId: string }) {
 			<button
 				onClick={handleExport}
 				disabled={isExporting}
-				className="rounded-md bg-glass px-3 py-1 text-sm text-foreground hover:bg-zinc-600 disabled:opacity-50"
+				className="rounded-md bg-glass px-3 py-1 text-sm text-foreground hover:bg-hover disabled:opacity-50"
 			>
 				{isExporting ? "Exporting..." : "Export"}
 			</button>

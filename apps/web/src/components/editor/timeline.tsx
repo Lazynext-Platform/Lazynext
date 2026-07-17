@@ -883,12 +883,12 @@ export default function Timeline({
 						style={{ left: `${mark.x + 128}px` }}
 					>
 						<span
-							className={`text-[10px] mb-0.5 select-none ${mark.isMajor ? "text-muted" : "text-zinc-700"}`}
+							className={`text-[10px] mb-0.5 select-none ${mark.isMajor ? "text-muted" : "text-secondary"}`}
 						>
 							{mark.label}
 						</span>
 						<div
-							className={`w-px ${mark.isMajor ? "h-2 bg-zinc-600" : "h-1 bg-panel"}`}
+							className={`w-px ${mark.isMajor ? "h-2 bg-hover" : "h-1 bg-panel"}`}
 						/>
 					</div>
 				))}

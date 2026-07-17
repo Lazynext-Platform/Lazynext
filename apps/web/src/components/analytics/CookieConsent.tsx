@@ -51,7 +51,7 @@ export function CookieConsent() {
 					<button
 						type="button"
 						onClick={acceptEssential}
-						className="rounded-lg border border-zinc-600 px-4 py-2 text-xs font-medium text-foreground hover:bg-panel transition-colors"
+						className="rounded-lg border border-border px-4 py-2 text-xs font-medium text-foreground hover:bg-panel transition-colors"
 					>
 						Essential Only
 					</button>

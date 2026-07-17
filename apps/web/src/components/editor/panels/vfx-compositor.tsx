@@ -120,7 +120,7 @@ export function VFXCompositor({
 							Fire
 						</span>
 					</div>
-					<div className="bg-background border border-border rounded p-3 text-center cursor-pointer hover:border-zinc-400 transition-colors group">
+					<div className="bg-background border border-border rounded p-3 text-center cursor-pointer hover:border-border transition-colors group">
 						<div className="text-lg mb-1 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-transform">
 							💨
 						</div>

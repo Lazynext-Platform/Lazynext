@@ -52,7 +52,7 @@ export const ExecutionContract: React.FC = () => {
 								<span className="text-gray-300">
 									<span className="text-blue-400">{op.type}</span>
 									<span className="text-gray-500">(</span>
-									<span className="text-gray-400">
+									<span className="text-muted">
 										{Object.entries(op.args)
 											.map(([k, v]) => `${k}=${JSON.stringify(v)}`)
 											.join(", ")}

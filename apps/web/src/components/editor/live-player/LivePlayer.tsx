@@ -11,7 +11,7 @@ export const LivePlayer: React.FC = () => {
 	return (
 		<div className="w-full flex justify-center p-2 bg-panel">
 			<button className="px-4 py-2 bg-blue-600 rounded">Play</button>
-			<button className="px-4 py-2 bg-gray-700 rounded ml-2">Pause</button>
+			<button className="px-4 py-2 bg-hover rounded ml-2">Pause</button>
 		</div>
 	);
 };

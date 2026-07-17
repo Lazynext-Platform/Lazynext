@@ -211,7 +211,7 @@ export const Canvas: React.FC<CanvasProps> = ({
 
 			{/* Resolution Badge */}
 			<div className="absolute top-3 left-3 z-20">
-				<span className="text-[9px] font-mono text-zinc-600 bg-background/60 px-2 py-0.5 rounded border border-border">
+				<span className="text-[9px] font-mono text-secondary bg-background/60 px-2 py-0.5 rounded border border-border">
 					{width}×{height}
 				</span>
 			</div>

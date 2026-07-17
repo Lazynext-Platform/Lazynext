@@ -35,10 +35,10 @@ export function MulticamGrid({ isMulticamMode }: { isMulticamMode: boolean }) {
 						onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
 						role="button"
 						tabIndex={0}
-						className={`relative bg-background border-2 rounded overflow-hidden cursor-pointer transition-colors ${activeCam === camNum ? "border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)]" : "border-border hover:border-zinc-600"}`}
+						className={`relative bg-background border-2 rounded overflow-hidden cursor-pointer transition-colors ${activeCam === camNum ? "border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)]" : "border-border hover:border-border"}`}
 					>
 						{/* Placeholder for camera feeds */}
-						<div className="absolute inset-0 flex items-center justify-center text-zinc-800 text-6xl font-black">
+						<div className="absolute inset-0 flex items-center justify-center text-foreground text-6xl font-black">
 							CAM {camNum}
 						</div>
 

@@ -438,7 +438,7 @@ export function MediaPoolSidebar({
 					<>
 						{/* Phase 21: Multi-Cam Generation */}
 						<button
-							className="w-full mb-2 bg-panel hover:bg-glass border border-zinc-600 text-foreground text-[10px] font-bold py-1.5 rounded flex items-center justify-center gap-1.5 transition-colors"
+							className="w-full mb-2 bg-panel hover:bg-glass border border-border text-foreground text-[10px] font-bold py-1.5 rounded flex items-center justify-center gap-1.5 transition-colors"
 							onClick={() => {
 								const vids = assets.filter((a: any) => a.type === "video");
 								if (vids.length < 2) {
@@ -1411,7 +1411,7 @@ export function MediaPoolSidebar({
 									return (
 										<div className="text-center p-8 flex flex-col items-center">
 											<svg
-												className="w-8 h-8 text-zinc-700 mb-2"
+												className="w-8 h-8 text-secondary mb-2"
 												fill="none"
 												viewBox="0 0 24 24"
 												stroke="currentColor"
