@@ -185,6 +185,7 @@ bun run dev
 - GPU compositor (17 blend modes, 11 effect shaders, JFA masking)
 - Audio engine (10-band EQ, compressor, VST host, stem separation)
 - Export pipeline (MP4, ProRes, DCP, AAF, MOV, GIF) — compositor→ffmpeg WYSIWYG, all 7 formats
+- Direct social media publishing (TikTok, YouTube, Instagram) integration across all 7 formats
 - AI: transcription, filler removal, speaker diarization, voice cloning, auto-reframe
 - Plugin SDK (VST3 audio, custom shaders)
 - REST API Gateway (Axum, JWT, RBAC, rate limiting, OpenAPI/Swagger UI)
@@ -200,7 +201,6 @@ bun run dev
 ### Out of Scope (v1.0)
 
 - 3D camera tracking and advanced VFX compositing
-- Direct social media publishing APIs (social-publish module exists in render-service but platforms require OAuth — deferred)
 - libp2p DHT upgrade for p2p-sync (UDP/TCP mesh works; libp2p is documented enhancement)
 
 ### Known Constraints

@@ -10,13 +10,13 @@
 
 | Metric | Count |
 |---|---|
-| Total Features | 37 |
+| Total Features | 38 |
 | 🟢 Complete | 37 |
 | ⏸️ On Hold | 0 |
 | 🔴 Not Started | 0 |
-| 🟡 In Progress | 0 |
+| 🟡 In Progress | 1 |
 
-**Overall Progress**: ██████████ 100% — all 37 features complete. Production deployment + API keys remain.
+**Overall Progress**: █████████░ 97% — Core features complete. Social Publish Integration in progress.
 
 ---
 
@@ -61,6 +61,7 @@
 | 35 | Platform Finalization — All 7 Formats | 🟢 Complete | #34 | `feature/35` | Desktop play/pause, Mobile NativeBridge, MCP verified, 16/22. |
 | 36 | E2E Launch Readiness | 🟢 Complete | #35 | `feature/36` | Phase 0-1 code fixes, test suite verified, docs finalized. |
 | 37 | CAPTCHA — All 7 Formats | 🟢 Complete | #36 | `feature/37` | Turnstile (web) + PoW (5 clients). API Gateway, 28 files, 23+11 tests. |
+| 38 | Social Publish Integration | 🟡 In Progress | #37 | `feature/38` | OAuth flow, UI, and proxy across all 7 formats. |
 
 ---
 
