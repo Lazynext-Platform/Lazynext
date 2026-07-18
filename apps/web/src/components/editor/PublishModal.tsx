@@ -272,6 +272,116 @@ export function PublishModal({ isOpen, onClose, projectId, renderJobId }: Publis
 							>
 								Telegram
 							</button>
+							<button
+								onClick={() => togglePlatform("dailymotion")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("dailymotion")
+										? "border-[#0064d2] bg-[#0064d2] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Dailymotion
+							</button>
+							<button
+								onClick={() => togglePlatform("bilibili")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("bilibili")
+										? "border-[#00a1d6] bg-[#00a1d6] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Bilibili
+							</button>
+							<button
+								onClick={() => togglePlatform("patreon")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("patreon")
+										? "border-[#FF424D] bg-[#FF424D] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Patreon
+							</button>
+							<button
+								onClick={() => togglePlatform("medium")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("medium")
+										? "border-[#000000] bg-[#000000] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Medium
+							</button>
+							<button
+								onClick={() => togglePlatform("whatsapp")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("whatsapp")
+										? "border-[#25D366] bg-[#25D366] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								WhatsApp
+							</button>
+							<button
+								onClick={() => togglePlatform("wechat")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("wechat")
+										? "border-[#07C160] bg-[#07C160] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								WeChat
+							</button>
+							<button
+								onClick={() => togglePlatform("line")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("line")
+										? "border-[#00C300] bg-[#00C300] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Line
+							</button>
+							<button
+								onClick={() => togglePlatform("kwai")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("kwai")
+										? "border-[#FF7700] bg-[#FF7700] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Kwai
+							</button>
+							<button
+								onClick={() => togglePlatform("tumblr")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("tumblr")
+										? "border-[#36465D] bg-[#36465D] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Tumblr
+							</button>
+							<button
+								onClick={() => togglePlatform("onlyfans")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("onlyfans")
+										? "border-[#00AFF0] bg-[#00AFF0] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								OnlyFans
+							</button>
+							<button
+								onClick={() => togglePlatform("xigua")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("xigua")
+										? "border-[#FF3355] bg-[#FF3355] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Xigua
+							</button>
 						</div>
 					</div>
 

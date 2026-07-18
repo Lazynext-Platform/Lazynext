@@ -97,6 +97,22 @@ impl Render for PublishModal {
                     .child(self.render_platform_button("Discord", "discord", rgb(0x888888), cx))
                     .child(self.render_platform_button("Bluesky", "bluesky", rgb(0x888888), cx))
                     .child(self.render_platform_button("Mastodon", "mastodon", rgb(0x888888), cx))
+                    .child(self.render_platform_button(
+                        "Dailymotion",
+                        "dailymotion",
+                        rgb(0x888888),
+                        cx,
+                    ))
+                    .child(self.render_platform_button("Bilibili", "bilibili", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Patreon", "patreon", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Medium", "medium", rgb(0x888888), cx))
+                    .child(self.render_platform_button("WhatsApp", "whatsapp", rgb(0x888888), cx))
+                    .child(self.render_platform_button("WeChat", "wechat", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Line", "line", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Kwai", "kwai", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Tumblr", "tumblr", rgb(0x888888), cx))
+                    .child(self.render_platform_button("OnlyFans", "onlyfans", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Xigua", "xigua", rgb(0x888888), cx))
                     .child(self.render_platform_button("Telegram", "telegram", rgb(0x888888), cx))
                     .child(self.render_platform_button("Rumble", "rumble", rgb(0x888888), cx))
                     .child(self.render_platform_button(

@@ -34,6 +34,17 @@ import {
 	publishToBluesky,
 	publishToMastodon,
 	publishToTelegram,
+	publishToDailymotion,
+	publishToBilibili,
+	publishToPatreon,
+	publishToMedium,
+	publishToWhatsApp,
+	publishToWeChat,
+	publishToLine,
+	publishToKwai,
+	publishToTumblr,
+	publishToOnlyFans,
+	publishToXigua,
 	assertSafeVideoPath,
 	type PublishResult,
 } from "@lazynext/social-publish-core";
@@ -303,6 +314,17 @@ app.post("/publish/discord", buildPlatformPublisher("discord"));
 app.post("/publish/bluesky", buildPlatformPublisher("bluesky"));
 app.post("/publish/mastodon", buildPlatformPublisher("mastodon"));
 app.post("/publish/telegram", buildPlatformPublisher("telegram"));
+app.post("/publish/dailymotion", buildPlatformPublisher("dailymotion"));
+app.post("/publish/bilibili", buildPlatformPublisher("bilibili"));
+app.post("/publish/patreon", buildPlatformPublisher("patreon"));
+app.post("/publish/medium", buildPlatformPublisher("medium"));
+app.post("/publish/whatsapp", buildPlatformPublisher("whatsapp"));
+app.post("/publish/wechat", buildPlatformPublisher("wechat"));
+app.post("/publish/line", buildPlatformPublisher("line"));
+app.post("/publish/kwai", buildPlatformPublisher("kwai"));
+app.post("/publish/tumblr", buildPlatformPublisher("tumblr"));
+app.post("/publish/onlyfans", buildPlatformPublisher("onlyfans"));
+app.post("/publish/xigua", buildPlatformPublisher("xigua"));
 
 /**
  * Routes a publish request to the platform-specific publisher.
@@ -357,6 +379,28 @@ async function publishToPlatform(
 			return publishToMastodon(req.video_path, req.description);
 		case "telegram":
 			return publishToTelegram(req.video_path, req.description);
+		case "dailymotion":
+			return publishToDailymotion(req.video_path, req.description);
+		case "bilibili":
+			return publishToBilibili(req.video_path, req.description);
+		case "patreon":
+			return publishToPatreon(req.video_path, req.description);
+		case "medium":
+			return publishToMedium(req.video_path, req.description);
+		case "whatsapp":
+			return publishToWhatsApp(req.video_path, req.description);
+		case "wechat":
+			return publishToWeChat(req.video_path, req.description);
+		case "line":
+			return publishToLine(req.video_path, req.description);
+		case "kwai":
+			return publishToKwai(req.video_path, req.description);
+		case "tumblr":
+			return publishToTumblr(req.video_path, req.description);
+		case "onlyfans":
+			return publishToOnlyFans(req.video_path, req.description);
+		case "xigua":
+			return publishToXigua(req.video_path, req.description);
 		default:
 			return {
 				platform,
@@ -681,7 +725,7 @@ function generatePlatformMetadata(
 ): Omit<MetadataResult, "success"> {
 	// Constrain platform to a known allowlist so it can never dispatch to an
 	// inherited Object method (e.g. "constructor"/"hasOwnProperty").
-	const ALLOWED_PLATFORMS = ["tiktok","youtube","instagram","twitter","facebook","linkedin","pinterest","snapchat","twitch","vimeo","threads","rumble","reddit","discord","bluesky","mastodon","telegram"] as const;
+	const ALLOWED_PLATFORMS = ["tiktok","youtube","instagram","twitter","facebook","linkedin","pinterest","snapchat","twitch","vimeo","threads","rumble","reddit","discord","bluesky","mastodon","telegram","dailymotion","bilibili","patreon","medium","whatsapp","wechat","line","kwai","tumblr","onlyfans","xigua"] as const;
 	const safePlatform = (ALLOWED_PLATFORMS as readonly string[]).includes(
 		platform,
 	)

@@ -689,6 +689,160 @@ export async function publishToTelegram(
 	};
 }
 
+
+export async function publishToDailymotion(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Dailymotion (Mock)...`);
+	return {
+		platform: "dailymotion",
+		success: true,
+		postId: `mock_dailymotion_id`,
+		postUrl: `https://dailymotion.com/mock`,
+	};
+}
+
+
+export async function publishToBilibili(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Bilibili (Mock)...`);
+	return {
+		platform: "bilibili",
+		success: true,
+		postId: `mock_bilibili_id`,
+		postUrl: `https://bilibili.com/mock`,
+	};
+}
+
+
+export async function publishToPatreon(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Patreon (Mock)...`);
+	return {
+		platform: "patreon",
+		success: true,
+		postId: `mock_patreon_id`,
+		postUrl: `https://patreon.com/mock`,
+	};
+}
+
+
+export async function publishToMedium(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Medium (Mock)...`);
+	return {
+		platform: "medium",
+		success: true,
+		postId: `mock_medium_id`,
+		postUrl: `https://medium.com/mock`,
+	};
+}
+
+
+export async function publishToWhatsApp(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to WhatsApp (Mock)...`);
+	return {
+		platform: "whatsapp",
+		success: true,
+		postId: `mock_whatsapp_id`,
+		postUrl: `https://whatsapp.com/mock`,
+	};
+}
+
+
+export async function publishToWeChat(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to WeChat (Mock)...`);
+	return {
+		platform: "wechat",
+		success: true,
+		postId: `mock_wechat_id`,
+		postUrl: `https://wechat.com/mock`,
+	};
+}
+
+
+export async function publishToLine(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Line (Mock)...`);
+	return {
+		platform: "line",
+		success: true,
+		postId: `mock_line_id`,
+		postUrl: `https://line.com/mock`,
+	};
+}
+
+
+export async function publishToKwai(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Kwai (Mock)...`);
+	return {
+		platform: "kwai",
+		success: true,
+		postId: `mock_kwai_id`,
+		postUrl: `https://kwai.com/mock`,
+	};
+}
+
+
+export async function publishToTumblr(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Tumblr (Mock)...`);
+	return {
+		platform: "tumblr",
+		success: true,
+		postId: `mock_tumblr_id`,
+		postUrl: `https://tumblr.com/mock`,
+	};
+}
+
+
+export async function publishToOnlyFans(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to OnlyFans (Mock)...`);
+	return {
+		platform: "onlyfans",
+		success: true,
+		postId: `mock_onlyfans_id`,
+		postUrl: `https://onlyfans.com/mock`,
+	};
+}
+
+
+export async function publishToXigua(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Xigua (Mock)...`);
+	return {
+		platform: "xigua",
+		success: true,
+		postId: `mock_xigua_id`,
+		postUrl: `https://xigua.com/mock`,
+	};
+}
+
 // ── Unified Publish Entry Point ───────────────────────────────────────
 
 export async function publish(
@@ -779,6 +933,40 @@ export async function publish(
 				break;
 			case "telegram":
 				result = await publishToTelegram(safePath, metadata.description);
+				break;
+
+			case "dailymotion":
+				result = await publishToDailymotion(safePath, metadata.description);
+				break;
+			case "bilibili":
+				result = await publishToBilibili(safePath, metadata.description);
+				break;
+			case "patreon":
+				result = await publishToPatreon(safePath, metadata.description);
+				break;
+			case "medium":
+				result = await publishToMedium(safePath, metadata.description);
+				break;
+			case "whatsapp":
+				result = await publishToWhatsApp(safePath, metadata.description);
+				break;
+			case "wechat":
+				result = await publishToWeChat(safePath, metadata.description);
+				break;
+			case "line":
+				result = await publishToLine(safePath, metadata.description);
+				break;
+			case "kwai":
+				result = await publishToKwai(safePath, metadata.description);
+				break;
+			case "tumblr":
+				result = await publishToTumblr(safePath, metadata.description);
+				break;
+			case "onlyfans":
+				result = await publishToOnlyFans(safePath, metadata.description);
+				break;
+			case "xigua":
+				result = await publishToXigua(safePath, metadata.description);
 				break;
 			default:
 				result = {
