@@ -27,10 +27,12 @@ export type MediaTime = number & { readonly __mediaTime: unique symbol };
 /** Utility representing TICKS_PER_SECOND. */
 export const TICKS_PER_SECOND = 120_000; // Mirrors rust/crates/time/src/media_time.rs
 
+/** Utility representing isMediaTime. */
 function isMediaTime(value: number): value is MediaTime {
 	return Number.isInteger(value);
 }
 
+/** Utility representing requireMediaTime. */
 function requireMediaTime({
 	value,
 	context,
