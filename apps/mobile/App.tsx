@@ -1,4 +1,5 @@
 /** @module App Root application component for mobile */
+import "./src/i18n";
 import React, { useEffect, useRef, useState } from "react";
 import {
 	StyleSheet,
@@ -45,8 +46,11 @@ function AuthNavigator() {
 	);
 }
 
+import { useTranslation } from "react-i18next";
+
 /** Dashboard screen with project stats, quick actions, and AI Copilot prompt input. */
 function DashboardScreen() {
+    const { t } = useTranslation();
 	const { theme, mode, setMode } = useTheme();
 	const styles = React.useMemo(() => getStyles(theme), [theme]);
 	const [projectName, setProjectName] = useState("Loading...");
@@ -125,7 +129,7 @@ function DashboardScreen() {
 				<Text style={styles.title}>
 					LAZYNEXT<Text style={styles.cyan}>.</Text>
 				</Text>
-				<Text style={styles.subtitle}>Mobile NLE Shell</Text>
+				<Text style={styles.subtitle}>{t("welcome")}</Text>
 				{isApplePencil && (
 					<Text style={{ color: theme.accentPrimary, fontSize: 12, marginTop: 4 }}>
 						Apple Pencil Detected
