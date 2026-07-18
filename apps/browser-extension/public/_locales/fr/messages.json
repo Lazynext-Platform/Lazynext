@@ -1,0 +1,82 @@
+{
+  "extName": {
+    "message": "Extension Navigateur Lazynext",
+    "description": "Extension name shown in Chrome Web Store and toolbar"
+  },
+  "extDescription": {
+    "message": "Capturez des vidéos de n'importe quelle page web dans votre timeline Lazynext.",
+    "description": "Short description shown in Chrome Web Store"
+  },
+  "extActionTitle": {
+    "message": "Lazynext",
+    "description": "Tooltip shown when hovering the extension icon"
+  },
+  "captureStatus": {
+    "message": "Capturez une vidéo de la page actuelle et importez-la dans votre timeline Lazynext.",
+    "description": "Status shown in popup panel"
+  },
+  "drmProtected": {
+    "message": "Capture impossible — vidéo potentiellement protégée par DRM.",
+    "description": "Error shown when video capture fails due to DRM"
+  },
+  "accessFailed": {
+    "message": "Échec de l'accès à la page. Essayez d'actualiser.",
+    "description": "Error shown when page access fails"
+  },
+  "importing": {
+    "message": "Importation...",
+    "description": "Status shown while importing media"
+  },
+  "importSuccess": {
+    "message": "Média importé avec succès !",
+    "description": "Success notification after import"
+  },
+  "import": {
+    "message": "Importer",
+    "description": "Import button label"
+  },
+  "noVideos": {
+    "message": "Aucune vidéo détectée sur cette page.",
+    "description": "Message when no video elements found"
+  },
+  "tryAgain": {
+    "message": "Naviguez vers une page avec du contenu vidéo et réessayez.",
+    "description": "Suggestion when no videos found"
+  },
+  "launchOverlay": {
+    "message": "Lancer l'Agent IA Lazynext (Superposition)",
+    "description": "Button to launch overlay capture"
+  },
+  "toggleTheme": {
+    "message": "Changer le Thème",
+    "description": "Title for theme toggle button"
+  },
+  "videosDetected": {
+    "message": "$1$ vidéo$2$ détectée$2$",
+    "description": "Shows number of videos detected. $1$ = number, $2$ = 's' or empty"
+  },
+  "aiIngest": {
+    "message": "Envoyer à l'Agent IA Lazynext pour analyse",
+    "description": "Label for AI ingest button"
+  },
+  "signIn": {
+    "message": "Se Connecter",
+    "description": "Sign in button"
+  },
+  "signOut": {
+    "message": "Se Déconnecter",
+    "description": "Sign out button"
+  },
+  "overlayCapture": {
+    "message": "Capturer la Zone Sélectionnée",
+    "description": "Overlay capture button"
+  },
+  "overlayCancel": {
+    "message": "Annuler",
+    "description": "Overlay cancel button"
+  },
+  "selectArea": {
+    "message": "Faites glisser pour sélectionner une zone à capturer",
+    "description": "Instruction text in overlay selection"
+  }
+}

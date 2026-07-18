@@ -1,6 +1,7 @@
 /** @module App Root application component for browser extension */
 import { useState, useEffect } from "react";
 import { performCaptcha } from "./captcha";
+import { t } from "./i18n";
 
 async function getApiGatewayUrl(): Promise<string> {
   const stored = (await chrome.storage.local.get("apiGatewayUrl")) as {
@@ -187,10 +188,10 @@ function App() {
           );
         }
       } else {
-        setStatus("Could not capture — video may be DRM-protected.");
+	    setStatus(t("drmProtected"));
       }
     } catch (err) {
-      setStatus("Failed to access page. Try refreshing.");
+	    setStatus(t("accessFailed"));
     } finally {
       setImporting(false);
     }
@@ -238,7 +239,7 @@ function App() {
             cursor: "pointer",
             textTransform: "capitalize"
           }}
-          title="Toggle Theme"
+          title={t("toggleTheme")}
         >
           {themeMode}
         </button>
@@ -247,7 +248,7 @@ function App() {
       {detectedVideos.length > 0 ? (
         <>
           <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: 0 }}>
-            {detectedVideos.length} video{detectedVideos.length > 1 ? "s" : ""} detected
+            {t("videosDetected", [detectedVideos.length.toString(), detectedVideos.length > 1 ? "s" : ""])}
           </p>
 
           {detectedVideos.slice(0, 5).map((src) => (
@@ -293,16 +294,16 @@ function App() {
                   opacity: importing ? 0.6 : 1,
                 }}
               >
-                Import
+                {t("import")}
               </button>
             </div>
           ))}
         </>
       ) : (
         <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: 0 }}>
-          No videos detected on this page.
+          {t("noVideos")}
           <br />
-          Navigate to a page with video content and try again.
+          {t("tryAgain")}
         </p>
       )}
 
@@ -341,7 +342,7 @@ function App() {
             width: "100%",
           }}
         >
-          Launch Lazynext AI Agent (Overlay)
+          {t("launchOverlay")}
         </button>
       </div>
 
