@@ -255,7 +255,7 @@ export const userSocialTokens = pgTable("user_social_tokens", {
   userId: text("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  platform: text("platform").notNull(), // e.g. "youtube", "tiktok", "instagram"
+  platform: text("platform").notNull(), // e.g. "youtube", "tiktok", "instagram", "twitter"
   accessToken: text("access_token").notNull(),
   refreshToken: text("refresh_token"),
   expiresAt: timestamp("expires_at"),

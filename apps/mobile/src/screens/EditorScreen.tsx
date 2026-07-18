@@ -116,17 +116,31 @@ export const EditorScreen = () => {
 		}
 	};
 
-	const handleConnectSocial = async () => {
+	const handleConnectSocial = () => {
+		Alert.alert(
+			"Connect Social Account",
+			"Select platform to authorize:",
+			[
+				{ text: "TikTok", onPress: () => initiateOAuth("tiktok") },
+				{ text: "YouTube", onPress: () => initiateOAuth("youtube") },
+				{ text: "Instagram", onPress: () => initiateOAuth("instagram") },
+				{ text: "X (Twitter)", onPress: () => initiateOAuth("twitter") },
+				{ text: "Cancel", style: "cancel" }
+			]
+		);
+	};
+
+	const initiateOAuth = async (platform: string) => {
 		try {
 			// Simulate OAuth flow using expo-web-browser
 			const API_GATEWAY = "https://api.lazynext.com";
 			const result = await WebBrowser.openAuthSessionAsync(
-				`${API_GATEWAY}/api/v1/auth/social/tiktok?token=MOBILE_SESSION_TOKEN`,
+				`${API_GATEWAY}/api/v1/auth/social/${platform}?token=MOBILE_SESSION_TOKEN`,
 				"lazynext://oauth/callback"
 			);
 			
 			if (result.type === "success") {
-				Alert.alert("Success", "Social account connected via WebBrowser!");
+				Alert.alert("Success", `${platform} account connected!`);
 			}
 		} catch (e: any) {
 			Alert.alert("OAuth Error", e.message);

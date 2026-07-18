@@ -1,7 +1,7 @@
 //! Desktop GPUI Publish Modal
 //!
 //! Handles metadata input and dispatching to the Lazynext API Gateway
-//! for social media publishing (TikTok, YouTube, Instagram).
+//! for social media publishing (TikTok, YouTube, Instagram, Twitter).
 
 use gpui::*;
 
@@ -77,6 +77,7 @@ impl Render for PublishModal {
                     .child(self.render_platform_button("TikTok", "tiktok", rgb(0x000000), cx))
                     .child(self.render_platform_button("YouTube", "youtube", rgb(0xff0000), cx))
                     .child(self.render_platform_button("Instagram", "instagram", rgb(0xe1306c), cx))
+                    .child(self.render_platform_button("X (Twitter)", "twitter", rgb(0x1da1f2), cx))
             )
             .child(div().h(px(20.0)))
             .child(

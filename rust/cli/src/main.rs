@@ -107,7 +107,7 @@ enum Commands {
         #[arg(short, long)]
         output: Option<String>,
 
-        /// Social platform to publish to after render (tiktok, youtube, instagram)
+        /// Social platform to publish to after render (tiktok, youtube, instagram, twitter)
         #[arg(long)]
         publish_to: Option<String>,
 

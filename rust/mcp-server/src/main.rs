@@ -216,7 +216,7 @@ async fn process_mcp_request(
                                 "render_job_id": {"type": "string", "description": "The ID of the render job or project to publish"},
                                 "platforms": {
                                     "type": "array",
-                                    "items": {"type": "string", "enum": ["tiktok", "youtube", "instagram"]},
+                                    "items": {"type": "string", "enum": ["tiktok", "youtube", "instagram", "twitter"]},
                                     "description": "Platforms to publish to"
                                 },
                                 "metadata": {
@@ -571,7 +571,7 @@ async fn process_mcp_request(
                         "jsonrpc": "2.0",
                         "id": id,
                         "result": {
-                            "content": [{"type": "text", "text": "Social connections must be managed via the Web App at /settings. To publish, specify platform: 'youtube', 'tiktok', or 'instagram' and the Gateway will authorize using stored tokens."}]
+                            "content": [{"type": "text", "text": "Social connections must be managed via the Web App at /settings. To publish, specify platform: 'youtube', 'tiktok', 'instagram', or 'twitter' and the Gateway will authorize using stored tokens."}]
                         }
                     })
                 }

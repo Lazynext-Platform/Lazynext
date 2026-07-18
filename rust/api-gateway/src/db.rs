@@ -86,7 +86,7 @@ pub struct UserSocialToken {
     pub id: String,
     /// User ID that owns this token.
     pub user_id: String,
-    /// Social platform identifier (e.g. "youtube", "tiktok", "instagram").
+    /// Social platform identifier (e.g. "youtube", "tiktok", "instagram", "twitter").
     pub platform: String,
     /// OAuth access token.
     pub access_token: String,
