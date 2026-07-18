@@ -15,6 +15,9 @@ import { useSession } from "@/auth/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
+import { LocaleSelector } from "@/components/locale-selector";
+import { CountrySelector } from "@/components/country-selector";
+import { CurrencySelector } from "@/components/locale-selector";
 
 /** React component rendering SettingsPageClient. */
 export function SettingsPageClient() {
@@ -23,6 +26,10 @@ export function SettingsPageClient() {
 
 	const [name, setName] = useState(session?.user?.name ?? "");
 	const [saving, setSaving] = useState(false);
+	const [locale, setLocale] = useState("en");
+	const [country, setCountry] = useState("US");
+	const [currency, setCurrency] = useState("USD");
+	const [savingRegion, setSavingRegion] = useState(false);
 
 	React.useEffect(() => {
 		if (!isPending && !session) {
@@ -77,12 +84,34 @@ export function SettingsPageClient() {
 			}
 		} catch {
 			toast.error("An error occurred");
-		} finally {
-			setSaving(false);
-		}
-	};
+			} finally {
+				setSaving(false);
+			}
+		};
 
-	return (
+		const handleSaveRegion = async () => {
+			setSavingRegion(true);
+			try {
+				const res = await fetch("/api/user/locale", {
+					method: "PUT",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ locale, country, currency }),
+				});
+				if (res.ok) {
+					toast.success("Region preferences saved!");
+					// Update locale cookie for immediate effect
+					document.cookie = `NEXT_LOCALE=${locale};path=/;max-age=31536000`;
+				} else {
+					toast.error("Failed to save preferences");
+				}
+			} catch {
+				toast.error("An error occurred");
+			} finally {
+				setSavingRegion(false);
+			}
+		};
+
+		return (
 		<div className="min-h-screen bg-background text-foreground relative">
 			{/* Ambient Background */}
 			<div className="fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[var(--accent-primary)]/10 via-[var(--bg-main)] to-[var(--bg-main)] pointer-events-none" />
@@ -190,9 +219,43 @@ export function SettingsPageClient() {
 								/>
 							</label>
 						</div>
-					</section>
+						</section>
 
-					{/* Social Integrations Section */}
+						{/* Region & Currency Section */}
+						<section className="rounded-xl border border-border bg-panel p-6 shadow-[var(--accent-glow)]">
+							<h2 className="text-lg font-bold text-foreground">
+								Region &amp; Currency
+							</h2>
+							<p className="mt-1 text-sm text-muted">
+								Set your language, country, and preferred currency for localized pricing and formatting.
+							</p>
+							<div className="mt-4 grid gap-4 sm:grid-cols-3">
+								<div>
+									<label className="mb-1 block text-xs font-medium text-muted">Language</label>
+									<LocaleSelector />
+								</div>
+								<div>
+									<label className="mb-1 block text-xs font-medium text-muted">Country</label>
+									<CountrySelector value={country} onChange={setCountry} />
+								</div>
+								<div>
+									<label className="mb-1 block text-xs font-medium text-muted">Currency</label>
+									<CurrencySelector value={currency} onChange={setCurrency} />
+								</div>
+							</div>
+							<div className="mt-4">
+								<button
+									type="button"
+									onClick={handleSaveRegion}
+									disabled={savingRegion}
+									className="rounded-lg bg-[var(--accent-primary)] px-4 py-2 text-sm font-bold text-background hover:opacity-90 disabled:opacity-50 transition-all shadow-[var(--accent-glow)]"
+								>
+									{savingRegion ? "Saving..." : "Save Region Preferences"}
+								</button>
+							</div>
+						</section>
+
+						{/* Social Integrations Section */}
 					<section className="rounded-xl border border-border bg-panel p-6 shadow-[var(--accent-glow)]">
 						<h2 className="text-lg font-bold text-foreground">
 							Social Integrations

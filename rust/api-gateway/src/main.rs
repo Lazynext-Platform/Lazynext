@@ -2205,16 +2205,25 @@ async fn handle_get_wallet_balance(
 ) -> Json<Value> {
     let user_id = claims.sub.clone();
 
+    // Fetch user's preferred currency
+    let currency = state.db.get_user(&user_id).await
+        .ok()
+        .flatten()
+        .and_then(|u| u.currency)
+        .unwrap_or_else(|| "USD".to_string());
+
     match state.db.get_wallet_balance(&user_id).await {
         Ok(balance) => Json(json!({
             "success": true,
             "balance": balance,
-            "currency": "USD"
+            "currency": currency,
+            "formatted": lazynext_international::format::format_currency(balance as i64, &currency, "en"),
         })),
         Err(_) => Json(json!({
             "success": true,
             "balance": 0,
-            "currency": "USD"
+            "currency": currency,
+            "formatted": lazynext_international::format::format_currency(0, &currency, "en"),
         })),
     }
 }
@@ -2225,20 +2234,31 @@ async fn handle_get_my_referrals(
 ) -> Json<Value> {
     let user_id = claims.sub.clone();
 
+    // Fetch user's preferred currency
+    let currency = state.db.get_user(&user_id).await
+        .ok()
+        .flatten()
+        .and_then(|u| u.currency)
+        .unwrap_or_else(|| "USD".to_string());
+
     match state.db.get_referral_stats(&user_id).await {
         Ok((link, total, converted, earned)) => Json(json!({
             "success": true,
             "referral_link": link,
             "total_referrals": total,
             "converted": converted,
-            "earned": earned
+            "earned": earned,
+            "currency": currency,
+            "formatted": lazynext_international::format::format_currency(earned as i64, &currency, "en"),
         })),
         Err(_) => Json(json!({
             "success": true,
             "referral_link": format!("https://lazynext.com/ref/{}", user_id),
             "total_referrals": 0,
             "converted": 0,
-            "earned": 0
+            "earned": 0,
+            "currency": currency,
+            "formatted": lazynext_international::format::format_currency(0, &currency, "en"),
         })),
     }
 }
