@@ -1,0 +1,4 @@
+{
+  "Index": { "title": "Видеоредактор Lazynext", "description": "Создавайте потрясающие видео с помощью ИИ." },
+  "Dashboard": { "welcome": "С возвращением, {name}", "balance": "Ваш баланс: {balance}", "projects": "Проекты" }
+}

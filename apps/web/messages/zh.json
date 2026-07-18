@@ -1,0 +1,4 @@
+{
+  "Index": { "title": "Lazynext 视频编辑器", "description": "用AI创建精彩的视频。" },
+  "Dashboard": { "welcome": "欢迎回来，{name}", "balance": "您的余额为 {balance}", "projects": "项目" }
+}

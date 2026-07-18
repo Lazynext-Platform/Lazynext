@@ -1,0 +1,4 @@
+{
+  "Index": { "title": "Lazynext Video Düzenleyici", "description": "AI ile harika videolar oluşturun." },
+  "Dashboard": { "welcome": "Tekrar hoş geldiniz, {name}", "balance": "Bakiyeniz: {balance}", "projects": "Projeler" }
+}

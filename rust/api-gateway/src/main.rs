@@ -517,6 +517,9 @@ async fn handle_get_profile(
                 "tier": "Pro Creator Tier",
                 "initials": initials(&user.name),
                 "ai_credits": user.ai_credits,
+                "locale": user.locale.unwrap_or_else(|| "en-US".to_string()),
+                "country": user.country.unwrap_or_else(|| "US".to_string()),
+                "currency": user.currency.unwrap_or_else(|| "USD".to_string()),
             }
         })),
         Ok(None) => {
@@ -531,6 +534,9 @@ async fn handle_get_profile(
                     "tier": "Free",
                     "initials": initials(claims.name.as_deref().unwrap_or("U")),
                     "ai_credits": 50,
+                    "locale": "en-US",
+                    "country": "US",
+                    "currency": "USD",
                 }
             }))
         }
@@ -775,6 +781,9 @@ async fn find_user_by_dodo_customer(
         role: r.get("role"),
         dodo_customer_id: r.get("dodo_customer_id"),
         ai_credits: r.get("ai_credits"),
+        locale: r.get("locale"),
+        country: r.get("country"),
+        currency: r.get("currency"),
         created_at: r.get("created_at"),
         updated_at: r.get("updated_at"),
     }))

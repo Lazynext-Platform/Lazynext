@@ -1,8 +1,9 @@
 import { getRequestConfig } from 'next-intl/server';
 import { cookies, headers } from 'next/headers';
 
+const ALL_LOCALES = ['en','fr','es','de','ja','ko','zh','hi','ar','pt','ru','it','nl','pl','tr','th','vi','id'];
+
 export default getRequestConfig(async () => {
-  // Try to get locale from cookie, then accept-language header, default to en
   let locale = 'en';
   
   const cookieStore = await cookies();
@@ -14,18 +15,15 @@ export default getRequestConfig(async () => {
     const headersList = await headers();
     const acceptLanguage = headersList.get('accept-language');
     if (acceptLanguage) {
-      // Basic extraction of the primary locale
       const match = acceptLanguage.match(/^[a-z]{2}(-[A-Z]{2})?/i);
       if (match) {
-        locale = match[0].split('-')[0]; // Extract just 'en', 'fr', etc for now
+        const base = match[0].split('-')[0];
+        if (ALL_LOCALES.includes(base)) locale = base;
       }
     }
   }
 
-  // Ensure fallback if locale isn't supported yet
-  if (!['en', 'fr', 'es'].includes(locale)) {
-    locale = 'en';
-  }
+  if (!ALL_LOCALES.includes(locale)) locale = 'en';
 
   return {
     locale,

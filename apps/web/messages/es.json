@@ -1,11 +1,4 @@
 {
-  "Index": {
-    "title": "Editor de Video Lazynext",
-    "description": "Crea videos increíbles con IA."
-  },
-  "Dashboard": {
-    "welcome": "Bienvenido de nuevo, {name}",
-    "balance": "Tu saldo es {balance}",
-    "projects": "Proyectos"
-  }
+  "Index": { "title": "Editor de Video Lazynext", "description": "Crea videos increíbles con IA." },
+  "Dashboard": { "welcome": "Bienvenido de nuevo, {name}", "balance": "Tu saldo es {balance}", "projects": "Proyectos" }
 }

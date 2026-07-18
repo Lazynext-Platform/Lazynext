@@ -27,7 +27,7 @@ const AUTH_PATHS = [
 ];
 
 const intlMiddleware = createMiddleware({
-  locales: ['en', 'fr', 'es'],
+  locales: ['en','fr','es','de','ja','ko','zh','hi','ar','pt','ru','it','nl','pl','tr','th','vi','id'],
   defaultLocale: 'en'
 });
 
@@ -35,7 +35,7 @@ export async function proxy(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
     // Remove locale prefix for auth path checking
-    const pathnameWithoutLocale = pathname.replace(/^\/(en|fr|es)/, '') || '/';
+    const pathnameWithoutLocale = pathname.replace(/^\/(en|fr|es|de|ja|ko|zh|hi|ar|pt|ru|it|nl|pl|tr|th|vi|id)/, '') || '/';
 
 	const sessionToken =
 		request.cookies.get("better-auth.session_token")?.value ||

@@ -1,0 +1,4 @@
+{
+  "Index": { "title": "โปรแกรมตัดต่อวิดีโอ Lazynext", "description": "สร้างวิดีโอที่น่าทึ่งด้วย AI" },
+  "Dashboard": { "welcome": "ยินดีต้อนรับกลับ, {name}", "balance": "ยอดคงเหลือของคุณคือ {balance}", "projects": "โปรเจกต์" }
+}

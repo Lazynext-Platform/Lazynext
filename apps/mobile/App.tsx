@@ -1,4 +1,9 @@
 /** @module App Root application component for mobile */
+import "@formatjs/intl-getcanonicallocales/polyfill";
+import "@formatjs/intl-locale/polyfill";
+import "@formatjs/intl-pluralrules/polyfill";
+import "@formatjs/intl-numberformat/polyfill";
+import "@formatjs/intl-datetimeformat/polyfill";
 import "./src/i18n";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -47,6 +52,9 @@ function AuthNavigator() {
 }
 
 import { useTranslation } from "react-i18next";
+import i18n from "./src/i18n";
+
+const SUPPORTED_MOBILE_LOCALES = ["en","fr","es","de","ja","ko","zh","hi","ar","pt","ru","it","nl","pl","tr","th","vi","id"];
 
 /** Dashboard screen with project stats, quick actions, and AI Copilot prompt input. */
 function DashboardScreen() {
@@ -144,6 +152,17 @@ function DashboardScreen() {
 					}}
 				>
 					<Text style={styles.themeToggleText}>Mode: {mode}</Text>
+				</TouchableOpacity>
+				
+				<TouchableOpacity 
+					style={[styles.themeToggle, { right: 80 }]}
+					onPress={() => {
+						const currentIdx = SUPPORTED_MOBILE_LOCALES.indexOf(i18n.language);
+						const nextIdx = (currentIdx + 1) % SUPPORTED_MOBILE_LOCALES.length;
+						i18n.changeLanguage(SUPPORTED_MOBILE_LOCALES[nextIdx]);
+					}}
+				>
+					<Text style={styles.themeToggleText}>{i18n.language.toUpperCase()}</Text>
 				</TouchableOpacity>
 			</View>
 

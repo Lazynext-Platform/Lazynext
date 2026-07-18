@@ -1,0 +1,4 @@
+{
+  "Index": { "title": "Lazynext 비디오 편집기", "description": "AI로 놀라운 비디오를 만드세요." },
+  "Dashboard": { "welcome": "돌아오신 것을 환영합니다, {name}님", "balance": "잔액: {balance}", "projects": "프로젝트" }
+}
