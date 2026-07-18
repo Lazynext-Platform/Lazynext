@@ -98,8 +98,9 @@ export function BillingPageClient() {
 				.then(r => r.json())
 				.then(d => { if (d?.profile?.currency) setUserCurrency(d.profile.currency); })
 				.catch(() => {});
+		}, []);
 
-	useEffect(() => {
+		useEffect(() => {
 		// Fetch real AI credits from database
 		fetch("/api/user/credits")
 			.then((res) => res.json())
