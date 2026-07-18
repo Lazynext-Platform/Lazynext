@@ -348,31 +348,33 @@ impl DbStore {
     // ── Promotions & Referrals ──────────────────────────────────────────────
 
     pub async fn get_wallet_balance(&self, user_id: &str) -> Result<i32, sqlx::Error> {
-        let row: Option<(i32,)> = sqlx::query_as(
-            "SELECT balance FROM wallets WHERE user_id = $1"
-        )
-        .bind(user_id)
-        .fetch_optional(self.pool_ref()?)
-        .await?;
-        
+        let row: Option<(i32,)> = sqlx::query_as("SELECT balance FROM wallets WHERE user_id = $1")
+            .bind(user_id)
+            .fetch_optional(self.pool_ref()?)
+            .await?;
+
         Ok(row.map(|r| r.0).unwrap_or(0))
     }
 
-    pub async fn get_referral_stats(&self, user_id: &str) -> Result<(String, i64, i64, i32), sqlx::Error> {
+    pub async fn get_referral_stats(
+        &self,
+        user_id: &str,
+    ) -> Result<(String, i64, i64, i32), sqlx::Error> {
         // Mocked logic to count referrals
-        let total_row: (i64,) = sqlx::query_as(
-            "SELECT COUNT(*) FROM referrals WHERE referrer_id = $1"
-        )
-        .bind(user_id)
-        .fetch_one(self.pool_ref()?)
-        .await.unwrap_or((0,));
+        let total_row: (i64,) =
+            sqlx::query_as("SELECT COUNT(*) FROM referrals WHERE referrer_id = $1")
+                .bind(user_id)
+                .fetch_one(self.pool_ref()?)
+                .await
+                .unwrap_or((0,));
 
         let converted_row: (i64,) = sqlx::query_as(
-            "SELECT COUNT(*) FROM referrals WHERE referrer_id = $1 AND status = 'converted'"
+            "SELECT COUNT(*) FROM referrals WHERE referrer_id = $1 AND status = 'converted'",
         )
         .bind(user_id)
         .fetch_one(self.pool_ref()?)
-        .await.unwrap_or((0,));
+        .await
+        .unwrap_or((0,));
 
         let balance = self.get_wallet_balance(user_id).await.unwrap_or(0);
         let link = format!("https://lazynext.com/ref/{}", user_id);
@@ -399,12 +401,10 @@ impl DbStore {
             .execute(self.pool_ref()?)
             .await?;
 
-            sqlx::query(
-                "UPDATE coupons SET current_uses = current_uses + 1 WHERE code = $1"
-            )
-            .bind(code)
-            .execute(self.pool_ref()?)
-            .await?;
+            sqlx::query("UPDATE coupons SET current_uses = current_uses + 1 WHERE code = $1")
+                .bind(code)
+                .execute(self.pool_ref()?)
+                .await?;
 
             Ok(value)
         } else {

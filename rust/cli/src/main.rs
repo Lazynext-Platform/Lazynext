@@ -323,7 +323,7 @@ async fn main() {
             if *use_credits {
                 println!("💳 Using wallet credits to offset render cost...");
             }
-            
+
             let render_args = RenderArgs {
                 format: format.clone(),
                 width: *width,
@@ -395,7 +395,10 @@ async fn main() {
                 PromoCommands::Apply { code } => {
                     println!("Applying promo code: {}", code);
                     // Hit the local API gateway endpoint (mocking actual HTTP call)
-                    println!("✅ Successfully applied code '{}'. $10.00 discount applied to wallet.", code);
+                    println!(
+                        "✅ Successfully applied code '{}'. $10.00 discount applied to wallet.",
+                        code
+                    );
                 }
                 PromoCommands::GenerateReferral => {
                     println!("Generating referral link...");

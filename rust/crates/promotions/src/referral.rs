@@ -1,6 +1,6 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
@@ -30,7 +30,7 @@ impl Referral {
             created_at: Utc::now(),
         }
     }
-    
+
     pub fn convert(&mut self) {
         self.status = ReferralStatus::Converted;
     }

@@ -641,12 +641,16 @@ async fn handle_dodo_webhook(
                     if let Err(e) = state.db.upsert_subscription(&sub).await {
                         tracing::error!(?e, "Failed to upsert subscription");
                     }
-                    
+
                     // Trigger referral conversion evaluation via promotions crate logic
-                    let mut referral = promotions::Referral::new("dummy_referrer".to_string(), user.id.clone());
+                    let mut referral =
+                        promotions::Referral::new("dummy_referrer".to_string(), user.id.clone());
                     referral.convert(); // Subscription successful
                     referral.grant_reward();
-                    tracing::info!("Processed referral conversion and granted rewards for user {}", user.id);
+                    tracing::info!(
+                        "Processed referral conversion and granted rewards for user {}",
+                        user.id
+                    );
                 }
             }
         }
@@ -2126,7 +2130,7 @@ async fn handle_apply_promotion(
     Json(payload): Json<ApplyPromotionPayload>,
 ) -> Json<Value> {
     let user_id = claims.sub.clone();
-    
+
     match state.db.apply_coupon(&user_id, &payload.code).await {
         Ok(value) => Json(json!({
             "success": true,
@@ -2136,7 +2140,7 @@ async fn handle_apply_promotion(
         Err(_) => Json(json!({
             "success": false,
             "error": "Invalid, expired, or fully claimed coupon code."
-        }))
+        })),
     }
 }
 
@@ -2145,7 +2149,7 @@ async fn handle_get_wallet_balance(
     Extension(claims): Extension<AuthClaims>,
 ) -> Json<Value> {
     let user_id = claims.sub.clone();
-    
+
     match state.db.get_wallet_balance(&user_id).await {
         Ok(balance) => Json(json!({
             "success": true,
@@ -2156,7 +2160,7 @@ async fn handle_get_wallet_balance(
             "success": true,
             "balance": 0,
             "currency": "USD"
-        }))
+        })),
     }
 }
 
@@ -2165,7 +2169,7 @@ async fn handle_get_my_referrals(
     Extension(claims): Extension<AuthClaims>,
 ) -> Json<Value> {
     let user_id = claims.sub.clone();
-    
+
     match state.db.get_referral_stats(&user_id).await {
         Ok((link, total, converted, earned)) => Json(json!({
             "success": true,
@@ -2180,7 +2184,6 @@ async fn handle_get_my_referrals(
             "total_referrals": 0,
             "converted": 0,
             "earned": 0
-        }))
+        })),
     }
 }
-

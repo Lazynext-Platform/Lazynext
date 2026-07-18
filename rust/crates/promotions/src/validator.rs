@@ -43,14 +43,22 @@ mod tests {
     #[test]
     fn test_expired_coupon() {
         let past = Utc::now() - Duration::days(1);
-        let coupon = Coupon::new("SAVE10".to_string(), DiscountType::Percentage, 1000).with_expiry(past);
-        assert_eq!(PromotionValidator::validate_coupon(&coupon), Err(PromotionError::Expired));
+        let coupon =
+            Coupon::new("SAVE10".to_string(), DiscountType::Percentage, 1000).with_expiry(past);
+        assert_eq!(
+            PromotionValidator::validate_coupon(&coupon),
+            Err(PromotionError::Expired)
+        );
     }
 
     #[test]
     fn test_max_uses_reached() {
-        let mut coupon = Coupon::new("SAVE10".to_string(), DiscountType::Percentage, 1000).with_max_uses(5);
+        let mut coupon =
+            Coupon::new("SAVE10".to_string(), DiscountType::Percentage, 1000).with_max_uses(5);
         coupon.current_uses = 5;
-        assert_eq!(PromotionValidator::validate_coupon(&coupon), Err(PromotionError::UsageLimitReached));
+        assert_eq!(
+            PromotionValidator::validate_coupon(&coupon),
+            Err(PromotionError::UsageLimitReached)
+        );
     }
 }

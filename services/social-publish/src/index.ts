@@ -29,39 +29,6 @@ import {
 	publishToVimeo,
 	publishToThreads,
 	publishToRumble,
-	publishToReddit,
-	publishToDiscord,
-	publishToBluesky,
-	publishToMastodon,
-	publishToTelegram,
-	publishToDailymotion,
-	publishToBilibili,
-	publishToPatreon,
-	publishToMedium,
-	publishToWhatsApp,
-	publishToWeChat,
-	publishToLine,
-	publishToKwai,
-	publishToTumblr,
-	publishToOnlyFans,
-	publishToXigua,
-	publishToKick,
-	publishToTruthSocial,
-	publishToVKontakte,
-	publishToWeibo,
-	publishToKakaoTalk,
-	publishToViber,
-	publishToSignal,
-	publishToSlack,
-	publishToSubstack,
-	publishToGhost,
-	publishToLocals,
-	publishToOdysee,
-	publishToBitChute,
-	publishToFlickr,
-	publishToMixcloud,
-	publishToDTube,
-	publishToTrovo,
 	assertSafeVideoPath,
 	type PublishResult,
 } from "@lazynext/social-publish-core";
@@ -403,72 +370,6 @@ async function publishToPlatform(
 			return publishToThreads(req.video_path, req.description);
 		case "rumble":
 			return publishToRumble(req.video_path, req.description);
-		case "reddit":
-			return publishToReddit(req.video_path, req.description);
-		case "discord":
-			return publishToDiscord(req.video_path, req.description);
-		case "bluesky":
-			return publishToBluesky(req.video_path, req.description);
-		case "mastodon":
-			return publishToMastodon(req.video_path, req.description);
-		case "telegram":
-			return publishToTelegram(req.video_path, req.description);
-		case "dailymotion":
-			return publishToDailymotion(req.video_path, req.description);
-		case "bilibili":
-			return publishToBilibili(req.video_path, req.description);
-		case "patreon":
-			return publishToPatreon(req.video_path, req.description);
-		case "medium":
-			return publishToMedium(req.video_path, req.description);
-		case "whatsapp":
-			return publishToWhatsApp(req.video_path, req.description);
-		case "wechat":
-			return publishToWeChat(req.video_path, req.description);
-		case "line":
-			return publishToLine(req.video_path, req.description);
-		case "kwai":
-			return publishToKwai(req.video_path, req.description);
-		case "tumblr":
-			return publishToTumblr(req.video_path, req.description);
-		case "onlyfans":
-			return publishToOnlyFans(req.video_path, req.description);
-		case "xigua":
-			return publishToXigua(req.video_path, req.description);
-		case "kick":
-			return publishToKick(req.video_path, req.description);
-		case "truthsocial":
-			return publishToTruthSocial(req.video_path, req.description);
-		case "vk":
-			return publishToVKontakte(req.video_path, req.description);
-		case "weibo":
-			return publishToWeibo(req.video_path, req.description);
-		case "kakaotalk":
-			return publishToKakaoTalk(req.video_path, req.description);
-		case "viber":
-			return publishToViber(req.video_path, req.description);
-		case "signal":
-			return publishToSignal(req.video_path, req.description);
-		case "slack":
-			return publishToSlack(req.video_path, req.description);
-		case "substack":
-			return publishToSubstack(req.video_path, req.description);
-		case "ghost":
-			return publishToGhost(req.video_path, req.description);
-		case "locals":
-			return publishToLocals(req.video_path, req.description);
-		case "odysee":
-			return publishToOdysee(req.video_path, req.description);
-		case "bitchute":
-			return publishToBitChute(req.video_path, req.description);
-		case "flickr":
-			return publishToFlickr(req.video_path, req.description);
-		case "mixcloud":
-			return publishToMixcloud(req.video_path, req.description);
-		case "dtube":
-			return publishToDTube(req.video_path, req.description);
-		case "trovo":
-			return publishToTrovo(req.video_path, req.description);
 		default:
 			return {
 				platform,

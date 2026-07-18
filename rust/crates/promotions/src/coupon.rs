@@ -1,6 +1,6 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
@@ -32,7 +32,7 @@ impl Coupon {
             expires_at: None,
         }
     }
-    
+
     pub fn with_expiry(mut self, expires_at: DateTime<Utc>) -> Self {
         self.expires_at = Some(expires_at);
         self

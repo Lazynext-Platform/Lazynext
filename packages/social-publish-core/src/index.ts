@@ -703,9 +703,10 @@ export async function publishToPinterest(
 export async function publishToSnapchat(
 	videoPath: string,
 	description?: string,
+	platform: string = "snapchat",
 ): Promise<PublishResult> {
 	
-	const webhookEnv = process.env[`${"snapchat".toUpperCase()}_WEBHOOK_URL`];
+	const webhookEnv = process.env[`${platform.toUpperCase()}_WEBHOOK_URL`];
 	const publicUrl = resolvePublicMediaUrl(videoPath) || "https://lazynext.com/pending-video.mp4";
 	
 	if (webhookEnv) {
@@ -719,9 +720,9 @@ export async function publishToSnapchat(
 				body: JSON.stringify({ text: description, video_url: publicUrl })
 			});
 			*/
-			return { platform: "snapchat", success: true, postId: "webhook_delivery", postUrl: webhookEnv };
+			return { platform: platform, success: true, postId: "webhook_delivery", postUrl: webhookEnv };
 		} catch (err: any) {
-			return { platform: "snapchat", success: false, error: err?.message || String(err) };
+			return { platform: platform, success: false, error: err?.message || String(err) };
 		}
 	} else {
 		// Fallback: Generate a functional Deep-Link / Share Intent URL
@@ -729,16 +730,16 @@ export async function publishToSnapchat(
 		let intentUrl = `https://snapchat.com/share?text=${text}`;
 		
 		// Custom native intent formatting for messaging and niche apps
-		if ("snapchat" === "whatsapp") intentUrl = `https://wa.me/?text=${text}`;
-		if ("snapchat" === "line") intentUrl = `https://line.me/R/msg/text/?${text}`;
-		if ("snapchat" === "viber") intentUrl = `viber://forward?text=${text}`;
-		if ("snapchat" === "vkontakte") intentUrl = `https://vk.com/share.php?url=${encodeURIComponent(publicUrl)}&title=${encodeURIComponent(description || "")}`;
-		if ("snapchat" === "weibo") intentUrl = `http://service.weibo.com/share/share.php?url=${encodeURIComponent(publicUrl)}&title=${encodeURIComponent(description || "")}`;
-		if ("snapchat" === "snapchat") intentUrl = `https://snapchat.com/scan?attachmentUrl=${encodeURIComponent(publicUrl)}`;
+		if (platform === "whatsapp") intentUrl = `https://wa.me/?text=${text}`;
+		if (platform === "line") intentUrl = `https://line.me/R/msg/text/?${text}`;
+		if (platform === "viber") intentUrl = `viber://forward?text=${text}`;
+		if (platform === "vkontakte") intentUrl = `https://vk.com/share.php?url=${encodeURIComponent(publicUrl)}&title=${encodeURIComponent(description || "")}`;
+		if (platform === "weibo") intentUrl = `http://service.weibo.com/share/share.php?url=${encodeURIComponent(publicUrl)}&title=${encodeURIComponent(description || "")}`;
+		if (platform === "snapchat") intentUrl = `https://snapchat.com/scan?attachmentUrl=${encodeURIComponent(publicUrl)}`;
 
-		console.log(`[Social] Generated Share Intent URL for Snapchat`);
+		console.log(`[Social] Generated Share Intent URL for ${platform}`);
 		return {
-			platform: "snapchat",
+			platform: platform,
 			success: true,
 			postId: "share_intent",
 			postUrl: intentUrl,
@@ -1028,106 +1029,73 @@ export async function publish(
 				break;
 
 			case "reddit":
-				result = await publishToReddit(safePath, metadata.description);
-				break;
+				throw new Error("Reddit publishing not yet implemented.");
 			case "discord":
-				result = await publishToDiscord(safePath, metadata.description);
-				break;
+				throw new Error("Discord publishing not yet implemented.");
 			case "bluesky":
-				result = await publishToBluesky(safePath, metadata.description);
-				break;
+				throw new Error("Bluesky publishing not yet implemented.");
 			case "mastodon":
-				result = await publishToMastodon(safePath, metadata.description);
-				break;
+				throw new Error("Mastodon publishing not yet implemented.");
 			case "telegram":
-				result = await publishToTelegram(safePath, metadata.description);
-				break;
+				throw new Error("Telegram publishing not yet implemented.");
 
 			case "dailymotion":
-				result = await publishToDailymotion(safePath, metadata.description);
-				break;
+				throw new Error("Dailymotion publishing not yet implemented.");
 			case "bilibili":
-				result = await publishToBilibili(safePath, metadata.description);
-				break;
+				throw new Error("Bilibili publishing not yet implemented.");
 			case "patreon":
-				result = await publishToPatreon(safePath, metadata.description);
-				break;
+				throw new Error("Patreon publishing not yet implemented.");
 			case "medium":
-				result = await publishToMedium(safePath, metadata.description);
-				break;
+				throw new Error("Medium publishing not yet implemented.");
 			case "whatsapp":
-				result = await publishToWhatsApp(safePath, metadata.description);
-				break;
+				throw new Error("WhatsApp publishing not yet implemented.");
 			case "wechat":
-				result = await publishToWeChat(safePath, metadata.description);
-				break;
+				throw new Error("WeChat publishing not yet implemented.");
 			case "line":
-				result = await publishToLine(safePath, metadata.description);
-				break;
+				throw new Error("Line publishing not yet implemented.");
 			case "kwai":
-				result = await publishToKwai(safePath, metadata.description);
-				break;
+				throw new Error("Kwai publishing not yet implemented.");
 			case "tumblr":
-				result = await publishToTumblr(safePath, metadata.description);
-				break;
+				throw new Error("Tumblr publishing not yet implemented.");
 			case "onlyfans":
-				result = await publishToOnlyFans(safePath, metadata.description);
-				break;
+				throw new Error("OnlyFans publishing not yet implemented.");
 			case "xigua":
-				result = await publishToXigua(safePath, metadata.description);
-				break;
+				throw new Error("Xigua publishing not yet implemented.");
 
 			case "kick":
-				result = await publishToKick(safePath, metadata.description);
-				break;
+				throw new Error("Kick publishing not yet implemented.");
 			case "truthsocial":
-				result = await publishToTruthSocial(safePath, metadata.description);
-				break;
+				throw new Error("Truth Social publishing not yet implemented.");
 			case "vk":
-				result = await publishToVKontakte(safePath, metadata.description);
-				break;
+				throw new Error("VKontakte publishing not yet implemented.");
 			case "weibo":
-				result = await publishToWeibo(safePath, metadata.description);
-				break;
+				throw new Error("Weibo publishing not yet implemented.");
 			case "kakaotalk":
-				result = await publishToKakaoTalk(safePath, metadata.description);
-				break;
+				throw new Error("KakaoTalk publishing not yet implemented.");
 			case "viber":
-				result = await publishToViber(safePath, metadata.description);
-				break;
+				throw new Error("Viber publishing not yet implemented.");
 			case "signal":
-				result = await publishToSignal(safePath, metadata.description);
-				break;
+				throw new Error("Signal publishing not yet implemented.");
 			case "slack":
-				result = await publishToSlack(safePath, metadata.description);
-				break;
+				throw new Error("Slack publishing not yet implemented.");
 			case "substack":
-				result = await publishToSubstack(safePath, metadata.description);
-				break;
+				throw new Error("Substack publishing not yet implemented.");
 			case "ghost":
-				result = await publishToGhost(safePath, metadata.description);
-				break;
+				throw new Error("Ghost publishing not yet implemented.");
 			case "locals":
-				result = await publishToLocals(safePath, metadata.description);
-				break;
+				throw new Error("Locals publishing not yet implemented.");
 			case "odysee":
-				result = await publishToOdysee(safePath, metadata.description);
-				break;
+				throw new Error("Odysee publishing not yet implemented.");
 			case "bitchute":
-				result = await publishToBitChute(safePath, metadata.description);
-				break;
+				throw new Error("BitChute publishing not yet implemented.");
 			case "flickr":
-				result = await publishToFlickr(safePath, metadata.description);
-				break;
+				throw new Error("Flickr publishing not yet implemented.");
 			case "mixcloud":
-				result = await publishToMixcloud(safePath, metadata.description);
-				break;
+				throw new Error("Mixcloud publishing not yet implemented.");
 			case "dtube":
-				result = await publishToDTube(safePath, metadata.description);
-				break;
+				throw new Error("DTube publishing not yet implemented.");
 			case "trovo":
-				result = await publishToTrovo(safePath, metadata.description);
-				break;
+				throw new Error("Trovo publishing not yet implemented.");
 			default:
 				result = {
 					platform,
