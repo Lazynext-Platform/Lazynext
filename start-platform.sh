@@ -43,6 +43,8 @@ if command -v $PYTHON_EXEC &>/dev/null; then
     PYTHON_EXEC=$(which python3.13 || which python3)
     $PYTHON_EXEC -m venv venv
     export PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1
+    # Load env vars for the Python process
+    set -a; source ../../.env 2>/dev/null; set +a
     venv/bin/python -m pip install --disable-pip-version-check -r requirements.txt fastapi uvicorn pydantic
     PYTHONPATH="$PWD" venv/bin/python src/main.py
 else
@@ -63,6 +65,8 @@ if command -v $PYTHON_EXEC &>/dev/null; then
     if [ ! -f "requirements.txt" ]; then
         echo -e "fastapi\nuvicorn\npydantic" > requirements.txt
     fi
+    # Load env vars for the Python process
+    set -a; source ../../.env 2>/dev/null; set +a
     venv/bin/python -m pip install --disable-pip-version-check -r requirements.txt
     PYTHONPATH="$PWD" venv/bin/python src/main.py
 else
