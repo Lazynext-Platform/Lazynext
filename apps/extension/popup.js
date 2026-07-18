@@ -100,4 +100,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('shareTiktokBtn').addEventListener('click', () => handleShare('tiktok'));
   document.getElementById('shareYoutubeBtn').addEventListener('click', () => handleShare('youtube'));
+  document.getElementById('shareInstagramBtn').addEventListener('click', () => handleShare('instagram'));
 });
