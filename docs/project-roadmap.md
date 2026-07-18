@@ -10,8 +10,8 @@
 
 | Metric | Count |
 |---|---|
-| Total Features | 39 |
-| 🟢 Complete | 39 |
+| Total Features | 40 |
+| 🟢 Complete | 40 |
 | ⏸️ On Hold | 0 |
 | 🔴 Not Started | 0 |
 | 🟡 In Progress | 0 |
@@ -63,12 +63,13 @@
 | 37 | CAPTCHA — All 7 Formats | 🟢 Complete | #36 | `feature/37` | Turnstile (web) + PoW (5 clients). API Gateway, 28 files, 23+11 tests. |
 | 38 | Social Publish Integration | 🟢 Complete | #37 | `feature/38` | OAuth flow, UI, and proxy across all 7 formats. |
 | 39 | Referrals & Discounts | 🟢 Complete | #38 | `feature/39` | Promo codes, wallet credits, refer-and-earn across 7 formats. |
+| 40 | Global Localization | 🟢 Complete | #39 | `feature/40` | 18 languages, 190 countries, 100+ currencies across all 7 platforms. i18n infrastructure, UI selectors, multi-currency payments. |
 
 ---
 
 ## Remaining Work
 
-All 36 features code-complete. Remaining items require external access:
+All 40 features code-complete. Remaining items require external access:
 
 - **Linode deployment** (#35 Phase F, #36 Phase 2-3): `infra/linode/deploy.sh` → `bootstrap` → `deploy`. Set up DNS (lazynext.com → 192.46.209.127), populate `.env.linode`, verify all 9 systemd services and SSL via Caddy.
 - **API keys**: GEMINI_API_KEY, Resend, Dodo Payments, PostHog, Marble CMS, Freesound, Apple Developer cert, Google Play/Chrome Store accounts.
