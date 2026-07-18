@@ -1,3 +1,5 @@
-cli_start: "Starting Lazynext CLI Renderer"
-cli_done: "Rendering complete."
-cli_error: "An error occurred during rendering."
+hello: "Hallo"
+welcome: "Willkommen bei Lazynext"
+error_unauthorized: "Unbefugter Zugriff"
+error_not_found: "Ressource nicht gefunden"
+error_internal: "Interner Serverfehler"

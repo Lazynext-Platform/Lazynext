@@ -1,82 +1,22 @@
 {
-  "extName": {
-    "message": "Lazynext Browser Extension",
-    "description": "Extension name shown in Chrome Web Store and toolbar"
-  },
-  "extDescription": {
-    "message": "Capture videos from any webpage into your Lazynext timeline.",
-    "description": "Short description shown in Chrome Web Store"
-  },
-  "extActionTitle": {
-    "message": "Lazynext",
-    "description": "Tooltip shown when hovering the extension icon"
-  },
-  "captureStatus": {
-    "message": "Capture video from current page and import into your Lazynext timeline.",
-    "description": "Status shown in popup panel"
-  },
-  "drmProtected": {
-    "message": "Could not capture — video may be DRM-protected.",
-    "description": "Error shown when video capture fails due to DRM"
-  },
-  "accessFailed": {
-    "message": "Failed to access page. Try refreshing.",
-    "description": "Error shown when page access fails"
-  },
-  "importing": {
-    "message": "Importing...",
-    "description": "Status shown while importing media"
-  },
-  "importSuccess": {
-    "message": "Media imported successfully!",
-    "description": "Success notification after import"
-  },
-  "import": {
-    "message": "Import",
-    "description": "Import button label"
-  },
-  "noVideos": {
-    "message": "No videos detected on this page.",
-    "description": "Message when no video elements found"
-  },
-  "tryAgain": {
-    "message": "Navigate to a page with video content and try again.",
-    "description": "Suggestion when no videos found"
-  },
-  "launchOverlay": {
-    "message": "Launch Lazynext AI Agent (Overlay)",
-    "description": "Button to launch overlay capture"
-  },
-  "toggleTheme": {
-    "message": "Toggle Theme",
-    "description": "Title for theme toggle button"
-  },
-  "videosDetected": {
-    "message": "$1$ video$2$ detected",
-    "description": "Shows number of videos detected. $1$ = number, $2$ = 's' or empty"
-  },
-  "aiIngest": {
-    "message": "Send to Lazynext AI Agent for analysis",
-    "description": "Label for AI ingest button"
-  },
-  "signIn": {
-    "message": "Sign In",
-    "description": "Sign in button"
-  },
-  "signOut": {
-    "message": "Sign Out",
-    "description": "Sign out button"
-  },
-  "overlayCapture": {
-    "message": "Capture Selected Area",
-    "description": "Overlay capture button"
-  },
-  "overlayCancel": {
-    "message": "Cancel",
-    "description": "Overlay cancel button"
-  },
-  "selectArea": {
-    "message": "Drag to select an area to capture",
-    "description": "Instruction text in overlay selection"
-  }
+  "extName": { "message": "Lazynext 浏览器扩展" },
+  "extDescription": { "message": "从任何网页捕获视频到您的Lazynext时间线。" },
+  "extActionTitle": { "message": "Lazynext" },
+  "captureStatus": { "message": "从当前页面捕获视频并导入到您的Lazynext时间线。" },
+  "drmProtected": { "message": "无法捕获 — 视频可能受DRM保护。" },
+  "accessFailed": { "message": "访问页面失败。请刷新重试。" },
+  "importing": { "message": "导入中..." },
+  "importSuccess": { "message": "媒体导入成功！" },
+  "import": { "message": "导入" },
+  "noVideos": { "message": "此页面未检测到视频。" },
+  "tryAgain": { "message": "请导航到包含视频内容的页面并重试。" },
+  "launchOverlay": { "message": "启动 Lazynext AI 代理 (叠加层)" },
+  "toggleTheme": { "message": "切换主题" },
+  "videosDetected": { "message": "检测到 $1$ 个视频" },
+  "aiIngest": { "message": "发送到 Lazynext AI 代理进行分析" },
+  "signIn": { "message": "登录" },
+  "signOut": { "message": "退出" },
+  "overlayCapture": { "message": "捕获选定区域" },
+  "overlayCancel": { "message": "取消" },
+  "selectArea": { "message": "拖动以选择要捕获的区域" }
 }
