@@ -492,21 +492,46 @@ export async function publishToInstagram(
 }
 
 
+
 // ── Facebook Publisher ──────────────────────────────────────────────────
 
 export async function publishToFacebook(
 	videoPath: string,
 	description?: string,
 ): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Facebook (Mock)...`);
-	return {
-		platform: "facebook",
-		success: true,
-		postId: `mock_facebook_id`,
-		postUrl: `https://facebook.com/mock`,
-	};
-}
+	const pageId = process.env.FACEBOOK_PAGE_ID;
+	const token = process.env.FACEBOOK_ACCESS_TOKEN;
+	if (!pageId || !token) {
+		return { platform: "facebook", success: false, error: "Facebook API keys missing. Set FACEBOOK_PAGE_ID and FACEBOOK_ACCESS_TOKEN." };
+	}
 
+	try {
+		const safePath = assertSafeVideoPath(videoPath);
+		const fileSize = fs.statSync(safePath).size;
+		const videoBuffer = fs.readFileSync(safePath);
+		
+		const formData = new FormData();
+		formData.append("access_token", token);
+		formData.append("description", description || "");
+		formData.append("source", new Blob([videoBuffer], { type: "video/mp4" }));
+
+		const resp = await fetchWithStatus(`https://graph.facebook.com/v21.0/${pageId}/videos`, {
+			method: "POST",
+			body: formData,
+		});
+
+		const data = await resp.json() as { id: string };
+
+		return {
+			platform: "facebook",
+			success: true,
+			postId: data.id,
+			postUrl: `https://facebook.com/${pageId}/videos/${data.id}`,
+		};
+	} catch (err: any) {
+		return { platform: "facebook", success: false, error: err?.message || String(err) };
+	}
+}
 
 // ── LinkedIn Publisher ──────────────────────────────────────────────────
 
@@ -514,16 +539,77 @@ export async function publishToLinkedIn(
 	videoPath: string,
 	description?: string,
 ): Promise<PublishResult> {
-	console.log(`[Social] Publishing to LinkedIn (Mock)...`);
-	return {
-		platform: "linkedin",
-		success: true,
-		postId: `mock_linkedin_id`,
-		postUrl: `https://linkedin.com/mock`,
-	};
+	const urn = process.env.LINKEDIN_PERSON_URN;
+	const token = process.env.LINKEDIN_ACCESS_TOKEN;
+	if (!urn || !token) {
+		return { platform: "linkedin", success: false, error: "LinkedIn API keys missing. Set LINKEDIN_PERSON_URN and LINKEDIN_ACCESS_TOKEN." };
+	}
+
+	try {
+		const safePath = assertSafeVideoPath(videoPath);
+		const fileSize = fs.statSync(safePath).size;
+		
+		// 1. Register Upload
+		const registerResp = await fetchWithStatus('https://api.linkedin.com/v2/assets?action=registerUpload', {
+			method: "POST",
+			headers: { 
+				"Authorization": `Bearer ${token}`,
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({
+				registerUploadRequest: {
+					recipes: ["urn:li:digitalmediaRecipe:feedshare-video"],
+					owner: urn,
+					serviceRelationships: [{ relationshipType: "OWNER", identifier: "urn:li:userGeneratedContent" }]
+				}
+			})
+		});
+		
+		const registerData = await registerResp.json() as any;
+		const uploadUrl = registerData.value.uploadMechanism["com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"].uploadUrl;
+		const assetUrn = registerData.value.asset;
+
+		// 2. Upload Video
+		const videoBuffer = fs.readFileSync(safePath);
+		await fetchWithStatus(uploadUrl, {
+			method: "PUT",
+			headers: { "Authorization": `Bearer ${token}` },
+			body: videoBuffer
+		});
+
+		// 3. Create UGC Post
+		const postResp = await fetchWithStatus('https://api.linkedin.com/v2/ugcPosts', {
+			method: "POST",
+			headers: { 
+				"Authorization": `Bearer ${token}`,
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({
+				author: urn,
+				lifecycleState: "PUBLISHED",
+				specificContent: {
+					"com.linkedin.ugc.ShareContent": {
+						shareCommentary: { text: description || "Video published via Lazynext" },
+						shareMediaCategory: "VIDEO",
+						media: [{ status: "READY", description: { text: "Lazynext Video" }, media: assetUrn }]
+					}
+				},
+				visibility: { "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC" }
+			})
+		});
+
+		const postData = await postResp.json() as { id: string };
+
+		return {
+			platform: "linkedin",
+			success: true,
+			postId: postData.id,
+			postUrl: `https://linkedin.com/feed/update/${postData.id}`,
+		};
+	} catch (err: any) {
+		return { platform: "linkedin", success: false, error: err?.message || String(err) };
+	}
 }
-
-
 // ── Pinterest Publisher ──────────────────────────────────────────────────
 
 export async function publishToPinterest(
