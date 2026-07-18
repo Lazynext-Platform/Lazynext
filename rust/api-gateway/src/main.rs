@@ -297,7 +297,7 @@ async fn main() {
         .route("/api/v1/ws", get(ws::ws_handler))
         .route("/api/v1/social/schedule", get(handle_social_schedule))
         .route(
-            "/api/v1/auth/social/:platform",
+            "/api/v1/auth/social/{platform}",
             get(handle_social_auth_init),
         )
         .route("/api/v1/routines", get(handle_list_routines))
