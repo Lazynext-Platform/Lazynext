@@ -10,7 +10,7 @@ use axum::http::{HeaderMap, StatusCode, header};
 use axum::middleware::{self, Next};
 use axum::extract::Request;
 use axum::response::{IntoResponse, Redirect};
-use axum::routing::{delete, get, post};
+use axum::routing::{delete, get, post, put};
 use axum::{Extension, Json, Router};
 use rust_i18n::i18n;
 // Note: axum 0.8 retains `Extension` as an extractor.
@@ -32,6 +32,7 @@ use tracing::{info, warn};
 pub mod captcha;
 pub mod csrf;
 pub mod db;
+pub mod international;
 pub mod ratelimit;
 pub mod rbac;
 pub mod ws;
@@ -268,6 +269,18 @@ async fn main() {
             "/api/v1/captcha/verify-pow",
             post(captcha::handle_verify_pow),
         )
+        .route(
+            "/api/v1/international/countries",
+            get(international::handle_get_countries),
+        )
+        .route(
+            "/api/v1/international/currencies",
+            get(international::handle_get_currencies),
+        )
+        .route(
+            "/api/v1/international/format-currency",
+            post(international::handle_format_currency),
+        )
         .layer(middleware::from_fn_with_state(
             state.clone(),
             ratelimit::rate_limit,
@@ -276,6 +289,7 @@ async fn main() {
     let authenticated_routes = Router::new()
         .route("/api/v1/timeline", get(handle_get_timeline))
         .route("/api/v1/user/profile", get(handle_get_profile))
+        .route("/api/v1/user/locale", put(international::handle_update_user_locale))
         .route("/api/v1/user/credits", get(handle_get_user_credits))
         .route("/api/v1/projects", get(handle_get_projects))
         .route("/api/v1/promotions/wallet", get(handle_get_wallet_balance))
