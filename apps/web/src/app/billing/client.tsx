@@ -84,13 +84,14 @@ const PLANS = [
 /** React component rendering BillingPageClient. */
 export function BillingPageClient() {
 		const t = useTranslations("Billing");
-		const c = useTranslations("Common");
+		const _c = useTranslations("Common");
 		const { data: _session, isPending } = useSession();
 		const _router = useRouter();
 
-		const [org, setOrg] = useState<Organization | null>(null);
-		const [realCredits, setRealCredits] = useState<number | null>(null);
-		const [userCurrency, setUserCurrency] = useState("USD");
+	const [org, setOrg] = useState<Organization | null>(null);
+	const [realCredits, setRealCredits] = useState<number | null>(null);
+	const [userCurrency, setUserCurrency] = useState("USD");
+	const [promoCode, setPromoCode] = useState("");
 
 		useEffect(() => {
 			// Fetch user profile to get preferred currency
@@ -137,8 +138,6 @@ export function BillingPageClient() {
 			</div>
 		);
 	}
-
-	const [promoCode, setPromoCode] = useState("");
 
 	const handleCheckout = async (priceId: string | null, planName: string) => {
 		if (!priceId) return;
