@@ -12,7 +12,7 @@ use axum::extract::Request;
 use axum::response::{IntoResponse, Redirect};
 use axum::routing::{delete, get, post};
 use axum::{Extension, Json, Router};
-use rust_i18n::{i18n, set_locale, t};
+use rust_i18n::i18n;
 // Note: axum 0.8 retains `Extension` as an extractor.
 // AuthClaims are inserted in `rbac::authorize_request` and
 // extracted by handlers via `Extension(claims): Extension<AuthClaims>`.`
