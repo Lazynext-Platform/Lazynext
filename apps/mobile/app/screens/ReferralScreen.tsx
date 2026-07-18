@@ -1,17 +1,71 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Share, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Share, TextInput, Alert } from 'react-native';
+
+const API_BASE = "https://api.lazynext.com/api/v1";
 
 export default function ReferralScreen() {
-  const [balance, setBalance] = useState(50.00);
-  const referralLink = "https://lazynext.com/ref/mobile_user_99";
+  const [balance, setBalance] = useState(0.00);
+  const [referralLink, setReferralLink] = useState("Loading...");
+  const [code, setCode] = useState("");
+  const [applying, setApplying] = useState(false);
+
+  useEffect(() => {
+    // Fetch Wallet Balance
+    fetch(`${API_BASE}/promotions/wallet`, {
+      headers: { "Authorization": `Bearer placeholder_token` } // In real app, inject actual token
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) setBalance(d.balance / 100);
+      })
+      .catch(console.error);
+
+    // Fetch Referral Link
+    fetch(`${API_BASE}/referrals/me`, {
+      headers: { "Authorization": `Bearer placeholder_token` } // In real app, inject actual token
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) setReferralLink(d.referral_link);
+      })
+      .catch(console.error);
+  }, []);
 
   const handleShare = async () => {
+    if (referralLink === "Loading...") return;
     try {
       await Share.share({
         message: `Check out Lazynext, the AI video editor! Sign up with my link and we both get $15 in credits: ${referralLink}`,
       });
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const handleApply = async () => {
+    if (!code) return;
+    setApplying(true);
+    try {
+      const res = await fetch(`${API_BASE}/promotions/apply`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer placeholder_token` 
+        },
+        body: JSON.stringify({ code })
+      });
+      const data = await res.json();
+      if (data.success) {
+        Alert.alert("Success", "Coupon applied successfully!");
+        setBalance(prev => prev + (data.discount_applied / 100));
+        setCode("");
+      } else {
+        Alert.alert("Error", data.error || "Failed to apply coupon");
+      }
+    } catch (e) {
+      Alert.alert("Error", "Network error occurred.");
+    } finally {
+      setApplying(false);
     }
   };
 
@@ -39,9 +93,16 @@ export default function ReferralScreen() {
           style={styles.input} 
           placeholder="Enter discount code" 
           placeholderTextColor="#666"
+          value={code}
+          onChangeText={setCode}
+          autoCapitalize="characters"
         />
-        <TouchableOpacity style={styles.secondaryButton}>
-          <Text style={styles.secondaryButtonText}>Apply Code</Text>
+        <TouchableOpacity 
+          style={styles.secondaryButton} 
+          onPress={handleApply}
+          disabled={applying || !code}
+        >
+          <Text style={styles.secondaryButtonText}>{applying ? "Applying..." : "Apply Code"}</Text>
         </TouchableOpacity>
       </View>
     </View>

@@ -36,7 +36,7 @@ export async function POST(req: Request) {
 			);
 		}
 
-		const { priceId } = parsed.data;
+		const { priceId, code } = parsed.data;
 
 		// Map price IDs to amounts (in paise/cents)
 		const priceMap: Record<string, number> = {
@@ -44,7 +44,29 @@ export async function POST(req: Request) {
 			[process.env.NEXT_PUBLIC_DODO_STUDIO_PRICE_ID || "studio_monthly"]: 9900,
 		};
 
-		const amount = priceMap[priceId] || 1900;
+		let amount = priceMap[priceId] || 1900;
+
+		// Discount via promotion code integration
+		if (code) {
+		  try {
+		    // We securely hit the Axum internal gateway on behalf of the user to process the promotion
+		    const gatewayReq = await fetch(`${process.env.API_GATEWAY_URL || 'http://localhost:8005'}/api/v1/promotions/apply`, {
+		      method: 'POST',
+		      headers: {
+		        'Content-Type': 'application/json',
+		        'Authorization': req.headers.get("Authorization") || "", // Forward auth
+		      },
+		      body: JSON.stringify({ code })
+		    });
+		    const gatewayRes = await gatewayReq.json();
+		    if (gatewayRes.success && gatewayRes.discount_applied) {
+		       // Reduce price by the value of the coupon (prevent negative prices)
+		       amount = Math.max(0, amount - gatewayRes.discount_applied);
+		    }
+		  } catch(e) {
+		    console.error("Failed to apply promotion via gateway", e);
+		  }
+		}
 
 		const response = await fetch(`${DODO_API_BASE}/payment_links`, {
 			method: "POST",

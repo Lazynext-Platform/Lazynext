@@ -125,6 +125,8 @@ export function BillingPageClient() {
 		);
 	}
 
+	const [promoCode, setPromoCode] = useState("");
+
 	const handleCheckout = async (priceId: string | null, planName: string) => {
 		if (!priceId) return;
 		try {
@@ -134,7 +136,7 @@ export function BillingPageClient() {
 			const res = await fetch("/api/dodo/checkout", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ priceId }),
+				body: JSON.stringify({ priceId, code: promoCode }),
 			});
 
 			if (!res.ok) {
@@ -215,6 +217,23 @@ export function BillingPageClient() {
 				)}
 
 				{/* Plans Grid */}
+				<div className="mb-6 flex justify-center">
+					<div className="flex w-full max-w-sm flex-col gap-2 rounded-xl border border-border bg-glass p-4">
+						<label className="text-sm font-semibold text-foreground/80">
+							Promo / Referral Code
+						</label>
+						<input
+							type="text"
+							placeholder="e.g. SAVE20"
+							value={promoCode}
+							onChange={(e) => setPromoCode(e.target.value)}
+							className="rounded-lg border border-border bg-background px-4 py-2 text-sm text-foreground focus:border-[var(--accent-primary)] focus:outline-none"
+						/>
+						<p className="text-xs text-foreground/50">
+							Valid codes automatically discount your payment at checkout.
+						</p>
+					</div>
+				</div>
 				<div className="grid gap-6 md:grid-cols-3 items-stretch">
 					{PLANS.map((plan) => (
 						<div
