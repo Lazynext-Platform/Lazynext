@@ -303,10 +303,7 @@ impl DbStore {
     }
 
     /// Upserts a social token.
-    pub async fn upsert_social_token(
-        &self,
-        token: &UserSocialToken,
-    ) -> Result<(), sqlx::Error> {
+    pub async fn upsert_social_token(&self, token: &UserSocialToken) -> Result<(), sqlx::Error> {
         if self.is_dev_mode {
             return Ok(());
         }
