@@ -216,7 +216,7 @@ async fn process_mcp_request(
                                 "render_job_id": {"type": "string", "description": "The ID of the render job or project to publish"},
                                 "platforms": {
                                     "type": "array",
-                                    "items": {"type": "string", "enum": ["tiktok", "youtube", "instagram", "twitter"]},
+                                    "items": {"type": "string", "enum": ["tiktok","youtube","instagram","twitter","facebook","linkedin","pinterest","snapchat","twitch","vimeo","threads","rumble"]},
                                     "description": "Platforms to publish to"
                                 },
                                 "metadata": {
@@ -571,16 +571,18 @@ async fn process_mcp_request(
                         "jsonrpc": "2.0",
                         "id": id,
                         "result": {
-                            "content": [{"type": "text", "text": "Social connections must be managed via the Web App at /settings. To publish, specify platform: 'youtube', 'tiktok', 'instagram', or 'twitter' and the Gateway will authorize using stored tokens."}]
+                            "content": [{"type": "text", "text": "Social connections must be managed via the Web App at /settings. To publish, specify platform: 'youtube', 'tiktok', 'instagram', 'twitter', 'facebook', 'linkedin', 'pinterest', 'snapchat', 'twitch', 'vimeo', 'threads', or 'rumble' and the Gateway will authorize using stored tokens."}]
                         }
                     })
                 }
 
                 "publish_video" => {
-                    let job_id = req["params"]["arguments"]["render_job_id"].as_str().unwrap_or("");
+                    let job_id = req["params"]["arguments"]["render_job_id"]
+                        .as_str()
+                        .unwrap_or("");
                     let platforms = req["params"]["arguments"]["platforms"].as_array();
                     let metadata = req["params"]["arguments"]["metadata"].clone();
-                    
+
                     if job_id.is_empty() || platforms.is_none() {
                         return json!({
                             "jsonrpc": "2.0",
@@ -591,18 +593,20 @@ async fn process_mcp_request(
                             }
                         });
                     }
-                    
+
                     let gateway = std::env::var("RUST_API_GATEWAY_URL")
                         .unwrap_or_else(|_| "http://127.0.0.1:8005".to_string());
-                    let api_key = std::env::var("INTERNAL_API_KEY").unwrap_or_else(|_| "lazynext-internal-dev-key".to_string());
+                    let api_key = std::env::var("INTERNAL_API_KEY")
+                        .unwrap_or_else(|_| "lazynext-internal-dev-key".to_string());
                     let client = reqwest::Client::new();
-                    
+
                     let mut successes = Vec::new();
                     let mut failures = Vec::new();
 
                     for plat in platforms.unwrap() {
                         if let Some(p) = plat.as_str() {
-                            let res = client.post(&format!("{}/api/v1/social/publish", gateway))
+                            let res = client
+                                .post(&format!("{}/api/v1/social/publish", gateway))
                                 .header("x-internal-api-key", &api_key)
                                 .json(&serde_json::json!({
                                     "platform": p,
@@ -611,11 +615,11 @@ async fn process_mcp_request(
                                 }))
                                 .send()
                                 .await;
-                                
+
                             match res {
                                 Ok(r) if r.status().is_success() => successes.push(p.to_string()),
                                 Ok(r) => failures.push(format!("{}: {}", p, r.status())),
-                                Err(e) => failures.push(format!("{}: {}", p, e))
+                                Err(e) => failures.push(format!("{}: {}", p, e)),
                             }
                         }
                     }

@@ -101,5 +101,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('shareTiktokBtn').addEventListener('click', () => handleShare('tiktok'));
   document.getElementById('shareYoutubeBtn').addEventListener('click', () => handleShare('youtube'));
   document.getElementById('shareInstagramBtn').addEventListener('click', () => handleShare('instagram'));
+    document.getElementById('shareFacebookBtn').addEventListener('click', () => handleShare('facebook'));
+  document.getElementById('shareLinkedInBtn').addEventListener('click', () => handleShare('linkedin'));
+  document.getElementById('sharePinterestBtn').addEventListener('click', () => handleShare('pinterest'));
+  document.getElementById('shareSnapchatBtn').addEventListener('click', () => handleShare('snapchat'));
+  document.getElementById('shareTwitchBtn').addEventListener('click', () => handleShare('twitch'));
+  document.getElementById('shareVimeoBtn').addEventListener('click', () => handleShare('vimeo'));
+  document.getElementById('shareThreadsBtn').addEventListener('click', () => handleShare('threads'));
+  document.getElementById('shareRumbleBtn').addEventListener('click', () => handleShare('rumble'));
   document.getElementById('shareTwitterBtn').addEventListener('click', () => handleShare('twitter'));
 });

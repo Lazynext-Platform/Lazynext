@@ -38,12 +38,8 @@ impl PublishModal {
     ) -> impl IntoElement {
         let is_selected = self.platforms.iter().any(|p| p == id);
         let id_str = id.to_string();
-        
-        let bg_color = if is_selected {
-            color
-        } else {
-            rgb(0x333333)
-        };
+
+        let bg_color = if is_selected { color } else { rgb(0x333333) };
 
         div()
             .bg(bg_color)
@@ -52,7 +48,10 @@ impl PublishModal {
             .rounded_md()
             .p_2()
             .cursor_pointer()
-            .on_mouse_down(gpui::MouseButton::Left, cx.listener(move |this, _, _, cx| this.toggle_platform(&id_str, cx)))
+            .on_mouse_down(
+                gpui::MouseButton::Left,
+                cx.listener(move |this, _, _, cx| this.toggle_platform(&id_str, cx)),
+            )
             .child(name.to_string())
     }
 }
@@ -66,9 +65,19 @@ impl Render for PublishModal {
             .p_4()
             .rounded_xl()
             .w(px(400.0))
-            .child(div().text_xl().font_weight(FontWeight::BOLD).child("Publish to Socials"))
+            .child(
+                div()
+                    .text_xl()
+                    .font_weight(FontWeight::BOLD)
+                    .child("Publish to Socials"),
+            )
             .child(div().h(px(10.0)))
-            .child(div().text_sm().text_color(rgb(0xaaaaaa)).child("Push your exported video directly to connected social accounts."))
+            .child(
+                div()
+                    .text_sm()
+                    .text_color(rgb(0xaaaaaa))
+                    .child("Push your exported video directly to connected social accounts."),
+            )
             .child(div().h(px(20.0)))
             .child(
                 div()
@@ -77,7 +86,20 @@ impl Render for PublishModal {
                     .child(self.render_platform_button("TikTok", "tiktok", rgb(0x000000), cx))
                     .child(self.render_platform_button("YouTube", "youtube", rgb(0xff0000), cx))
                     .child(self.render_platform_button("Instagram", "instagram", rgb(0xe1306c), cx))
-                    .child(self.render_platform_button("X (Twitter)", "twitter", rgb(0x1da1f2), cx))
+                    .child(self.render_platform_button("Facebook", "facebook", rgb(0x888888), cx))
+                    .child(self.render_platform_button("LinkedIn", "linkedin", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Pinterest", "pinterest", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Snapchat", "snapchat", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Twitch", "twitch", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Vimeo", "vimeo", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Threads", "threads", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Rumble", "rumble", rgb(0x888888), cx))
+                    .child(self.render_platform_button(
+                        "X (Twitter)",
+                        "twitter",
+                        rgb(0x1da1f2),
+                        cx,
+                    )),
             )
             .child(div().h(px(20.0)))
             .child(
@@ -90,11 +112,14 @@ impl Render for PublishModal {
                     .flex()
                     .justify_center()
                     .cursor_pointer()
-                    .on_mouse_down(gpui::MouseButton::Left, cx.listener(|_, _, _, _cx| {
-                        log::info!("Triggering publish via Gateway API...");
-                        // In a real app, this dispatches a reqwest POST to Gateway.
-                    }))
-                    .child(format!("Publish to {} platform(s)", self.platforms.len()))
+                    .on_mouse_down(
+                        gpui::MouseButton::Left,
+                        cx.listener(|_, _, _, _cx| {
+                            log::info!("Triggering publish via Gateway API...");
+                            // In a real app, this dispatches a reqwest POST to Gateway.
+                        }),
+                    )
+                    .child(format!("Publish to {} platform(s)", self.platforms.len())),
             )
     }
 }

@@ -124,6 +124,14 @@ export const EditorScreen = () => {
 				{ text: "TikTok", onPress: () => initiateOAuth("tiktok") },
 				{ text: "YouTube", onPress: () => initiateOAuth("youtube") },
 				{ text: "Instagram", onPress: () => initiateOAuth("instagram") },
+								{ text: "Facebook", onPress: () => initiateOAuth("facebook") },
+				{ text: "LinkedIn", onPress: () => initiateOAuth("linkedin") },
+				{ text: "Pinterest", onPress: () => initiateOAuth("pinterest") },
+				{ text: "Snapchat", onPress: () => initiateOAuth("snapchat") },
+				{ text: "Twitch", onPress: () => initiateOAuth("twitch") },
+				{ text: "Vimeo", onPress: () => initiateOAuth("vimeo") },
+				{ text: "Threads", onPress: () => initiateOAuth("threads") },
+				{ text: "Rumble", onPress: () => initiateOAuth("rumble") },
 				{ text: "X (Twitter)", onPress: () => initiateOAuth("twitter") },
 				{ text: "Cancel", style: "cancel" }
 			]

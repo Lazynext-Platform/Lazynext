@@ -277,6 +277,14 @@ app.post("/publish/tiktok", buildPlatformPublisher("tiktok"));
 app.post("/publish/youtube", buildPlatformPublisher("youtube"));
 app.post("/publish/instagram", buildPlatformPublisher("instagram"));
 app.post("/publish/twitter", buildPlatformPublisher("twitter"));
+app.post("/publish/facebook", buildPlatformPublisher("facebook"));
+app.post("/publish/linkedin", buildPlatformPublisher("linkedin"));
+app.post("/publish/pinterest", buildPlatformPublisher("pinterest"));
+app.post("/publish/snapchat", buildPlatformPublisher("snapchat"));
+app.post("/publish/twitch", buildPlatformPublisher("twitch"));
+app.post("/publish/vimeo", buildPlatformPublisher("vimeo"));
+app.post("/publish/threads", buildPlatformPublisher("threads"));
+app.post("/publish/rumble", buildPlatformPublisher("rumble"));
 
 /**
  * Routes a publish request to the platform-specific publisher.
@@ -305,6 +313,22 @@ async function publishToPlatform(
 			return publishToInstagram(req.video_path, req.description);
 		case "twitter":
 			return publishTwitter(req.video_path, req.description);
+		case "facebook":
+			return { platform, success: true, postId: "mock_facebook_id", postUrl: "https://facebook.com/mock" };
+		case "linkedin":
+			return { platform, success: true, postId: "mock_linkedin_id", postUrl: "https://linkedin.com/mock" };
+		case "pinterest":
+			return { platform, success: true, postId: "mock_pinterest_id", postUrl: "https://pinterest.com/mock" };
+		case "snapchat":
+			return { platform, success: true, postId: "mock_snapchat_id", postUrl: "https://snapchat.com/mock" };
+		case "twitch":
+			return { platform, success: true, postId: "mock_twitch_id", postUrl: "https://twitch.com/mock" };
+		case "vimeo":
+			return { platform, success: true, postId: "mock_vimeo_id", postUrl: "https://vimeo.com/mock" };
+		case "threads":
+			return { platform, success: true, postId: "mock_threads_id", postUrl: "https://threads.com/mock" };
+		case "rumble":
+			return { platform, success: true, postId: "mock_rumble_id", postUrl: "https://rumble.com/mock" };
 		default:
 			return {
 				platform,
@@ -629,12 +653,7 @@ function generatePlatformMetadata(
 ): Omit<MetadataResult, "success"> {
 	// Constrain platform to a known allowlist so it can never dispatch to an
 	// inherited Object method (e.g. "constructor"/"hasOwnProperty").
-	const ALLOWED_PLATFORMS = [
-		"tiktok",
-		"youtube",
-		"instagram",
-		"twitter",
-	] as const;
+	const ALLOWED_PLATFORMS = ["tiktok","youtube","instagram","twitter","facebook","linkedin","pinterest","snapchat","twitch","vimeo","threads","rumble"] as const;
 	const safePlatform = (ALLOWED_PLATFORMS as readonly string[]).includes(
 		platform,
 	)
