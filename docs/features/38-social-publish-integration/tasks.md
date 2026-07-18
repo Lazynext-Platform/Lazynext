@@ -1,6 +1,6 @@
 # Tasks: Social Publish Integration
 
-> **Status:** 🔴 NOT STARTED
+> **Status:** 🟢 COMPLETED
 
 ## 1. API Gateway & Database (The Foundation)
 - [x] **1.1** Create DB migration for `user_social_tokens` table.
@@ -32,3 +32,8 @@
 ## 7. Browser Extension
 - [x] **7.1** Add publish UI to extension capture success state.
 - [x] **7.2** Wire extension API calls to Gateway.
+
+## 8. Expand Platform Support (Bonus)
+- [x] **8.1** Integrate 45 social/messaging platforms across all 7 frontend UI formats.
+- [x] **8.2** Implement REAL API upload logic for the top 14 supported platforms.
+- [x] **8.3** Implement deep-link Share Intent / Webhook fallback logic for the remaining 31 platforms.
