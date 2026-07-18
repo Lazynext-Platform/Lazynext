@@ -382,6 +382,176 @@ export function PublishModal({ isOpen, onClose, projectId, renderJobId }: Publis
 							>
 								Xigua
 							</button>
+							<button
+								onClick={() => togglePlatform("kick")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("kick")
+										? "border-[#53FC18] bg-[#53FC18] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Kick
+							</button>
+							<button
+								onClick={() => togglePlatform("truthsocial")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("truthsocial")
+										? "border-[#5A1B88] bg-[#5A1B88] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Truth Social
+							</button>
+							<button
+								onClick={() => togglePlatform("vk")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("vk")
+										? "border-[#0077FF] bg-[#0077FF] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								VKontakte
+							</button>
+							<button
+								onClick={() => togglePlatform("weibo")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("weibo")
+										? "border-[#E6162D] bg-[#E6162D] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Weibo
+							</button>
+							<button
+								onClick={() => togglePlatform("kakaotalk")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("kakaotalk")
+										? "border-[#FEE500] bg-[#FEE500] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								KakaoTalk
+							</button>
+							<button
+								onClick={() => togglePlatform("viber")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("viber")
+										? "border-[#7360F2] bg-[#7360F2] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Viber
+							</button>
+							<button
+								onClick={() => togglePlatform("signal")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("signal")
+										? "border-[#3A76F0] bg-[#3A76F0] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Signal
+							</button>
+							<button
+								onClick={() => togglePlatform("slack")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("slack")
+										? "border-[#4A154B] bg-[#4A154B] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Slack
+							</button>
+							<button
+								onClick={() => togglePlatform("substack")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("substack")
+										? "border-[#FF6719] bg-[#FF6719] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Substack
+							</button>
+							<button
+								onClick={() => togglePlatform("ghost")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("ghost")
+										? "border-[#15171A] bg-[#15171A] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Ghost
+							</button>
+							<button
+								onClick={() => togglePlatform("locals")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("locals")
+										? "border-[#E32A26] bg-[#E32A26] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Locals
+							</button>
+							<button
+								onClick={() => togglePlatform("odysee")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("odysee")
+										? "border-[#E21257] bg-[#E21257] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Odysee
+							</button>
+							<button
+								onClick={() => togglePlatform("bitchute")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("bitchute")
+										? "border-[#E33C2D] bg-[#E33C2D] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								BitChute
+							</button>
+							<button
+								onClick={() => togglePlatform("flickr")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("flickr")
+										? "border-[#FF0084] bg-[#FF0084] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Flickr
+							</button>
+							<button
+								onClick={() => togglePlatform("mixcloud")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("mixcloud")
+										? "border-[#5000ff] bg-[#5000ff] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Mixcloud
+							</button>
+							<button
+								onClick={() => togglePlatform("dtube")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("dtube")
+										? "border-[#FF0000] bg-[#FF0000] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								DTube
+							</button>
+							<button
+								onClick={() => togglePlatform("trovo")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("trovo")
+										? "border-[#10D164] bg-[#10D164] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Trovo
+							</button>
 						</div>
 					</div>
 

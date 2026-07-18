@@ -107,7 +107,7 @@ enum Commands {
         #[arg(short, long)]
         output: Option<String>,
 
-        /// Social platform to publish to after render (tiktok, youtube, instagram, twitter, facebook, linkedin, pinterest, snapchat, twitch, vimeo, threads, rumble, reddit, discord, bluesky, mastodon, telegram, dailymotion, bilibili, patreon, medium, whatsapp, wechat, line, kwai, tumblr, onlyfans, xigua)
+        /// Social platform to publish to after render (tiktok, youtube, instagram, twitter, facebook, linkedin, pinterest, snapchat, twitch, vimeo, threads, rumble, reddit, discord, bluesky, mastodon, telegram, dailymotion, bilibili, patreon, medium, whatsapp, wechat, line, kwai, tumblr, onlyfans, xigua, kick, truthsocial, vk, weibo, kakaotalk, viber, signal, slack, substack, ghost, locals, odysee, bitchute, flickr, mixcloud, dtube, trovo)
         #[arg(long)]
         publish_to: Option<String>,
 

@@ -45,6 +45,23 @@ import {
 	publishToTumblr,
 	publishToOnlyFans,
 	publishToXigua,
+	publishToKick,
+	publishToTruthSocial,
+	publishToVKontakte,
+	publishToWeibo,
+	publishToKakaoTalk,
+	publishToViber,
+	publishToSignal,
+	publishToSlack,
+	publishToSubstack,
+	publishToGhost,
+	publishToLocals,
+	publishToOdysee,
+	publishToBitChute,
+	publishToFlickr,
+	publishToMixcloud,
+	publishToDTube,
+	publishToTrovo,
 	assertSafeVideoPath,
 	type PublishResult,
 } from "@lazynext/social-publish-core";
@@ -325,6 +342,23 @@ app.post("/publish/kwai", buildPlatformPublisher("kwai"));
 app.post("/publish/tumblr", buildPlatformPublisher("tumblr"));
 app.post("/publish/onlyfans", buildPlatformPublisher("onlyfans"));
 app.post("/publish/xigua", buildPlatformPublisher("xigua"));
+app.post("/publish/kick", buildPlatformPublisher("kick"));
+app.post("/publish/truthsocial", buildPlatformPublisher("truthsocial"));
+app.post("/publish/vk", buildPlatformPublisher("vk"));
+app.post("/publish/weibo", buildPlatformPublisher("weibo"));
+app.post("/publish/kakaotalk", buildPlatformPublisher("kakaotalk"));
+app.post("/publish/viber", buildPlatformPublisher("viber"));
+app.post("/publish/signal", buildPlatformPublisher("signal"));
+app.post("/publish/slack", buildPlatformPublisher("slack"));
+app.post("/publish/substack", buildPlatformPublisher("substack"));
+app.post("/publish/ghost", buildPlatformPublisher("ghost"));
+app.post("/publish/locals", buildPlatformPublisher("locals"));
+app.post("/publish/odysee", buildPlatformPublisher("odysee"));
+app.post("/publish/bitchute", buildPlatformPublisher("bitchute"));
+app.post("/publish/flickr", buildPlatformPublisher("flickr"));
+app.post("/publish/mixcloud", buildPlatformPublisher("mixcloud"));
+app.post("/publish/dtube", buildPlatformPublisher("dtube"));
+app.post("/publish/trovo", buildPlatformPublisher("trovo"));
 
 /**
  * Routes a publish request to the platform-specific publisher.
@@ -401,6 +435,40 @@ async function publishToPlatform(
 			return publishToOnlyFans(req.video_path, req.description);
 		case "xigua":
 			return publishToXigua(req.video_path, req.description);
+		case "kick":
+			return publishToKick(req.video_path, req.description);
+		case "truthsocial":
+			return publishToTruthSocial(req.video_path, req.description);
+		case "vk":
+			return publishToVKontakte(req.video_path, req.description);
+		case "weibo":
+			return publishToWeibo(req.video_path, req.description);
+		case "kakaotalk":
+			return publishToKakaoTalk(req.video_path, req.description);
+		case "viber":
+			return publishToViber(req.video_path, req.description);
+		case "signal":
+			return publishToSignal(req.video_path, req.description);
+		case "slack":
+			return publishToSlack(req.video_path, req.description);
+		case "substack":
+			return publishToSubstack(req.video_path, req.description);
+		case "ghost":
+			return publishToGhost(req.video_path, req.description);
+		case "locals":
+			return publishToLocals(req.video_path, req.description);
+		case "odysee":
+			return publishToOdysee(req.video_path, req.description);
+		case "bitchute":
+			return publishToBitChute(req.video_path, req.description);
+		case "flickr":
+			return publishToFlickr(req.video_path, req.description);
+		case "mixcloud":
+			return publishToMixcloud(req.video_path, req.description);
+		case "dtube":
+			return publishToDTube(req.video_path, req.description);
+		case "trovo":
+			return publishToTrovo(req.video_path, req.description);
 		default:
 			return {
 				platform,
@@ -725,7 +793,7 @@ function generatePlatformMetadata(
 ): Omit<MetadataResult, "success"> {
 	// Constrain platform to a known allowlist so it can never dispatch to an
 	// inherited Object method (e.g. "constructor"/"hasOwnProperty").
-	const ALLOWED_PLATFORMS = ["tiktok","youtube","instagram","twitter","facebook","linkedin","pinterest","snapchat","twitch","vimeo","threads","rumble","reddit","discord","bluesky","mastodon","telegram","dailymotion","bilibili","patreon","medium","whatsapp","wechat","line","kwai","tumblr","onlyfans","xigua"] as const;
+	const ALLOWED_PLATFORMS = ["tiktok","youtube","instagram","twitter","facebook","linkedin","pinterest","snapchat","twitch","vimeo","threads","rumble","reddit","discord","bluesky","mastodon","telegram","dailymotion","bilibili","patreon","medium","whatsapp","wechat","line","kwai","tumblr","onlyfans","xigua", "kick", "truthsocial", "vk", "weibo", "kakaotalk", "viber", "signal", "slack", "substack", "ghost", "locals", "odysee", "bitchute", "flickr", "mixcloud", "dtube", "trovo"] as const;
 	const safePlatform = (ALLOWED_PLATFORMS as readonly string[]).includes(
 		platform,
 	)

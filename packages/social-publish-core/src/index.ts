@@ -843,6 +843,244 @@ export async function publishToXigua(
 	};
 }
 
+
+export async function publishToKick(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Kick (Mock)...`);
+	return {
+		platform: "kick",
+		success: true,
+		postId: `mock_kick_id`,
+		postUrl: `https://kick.com/mock`,
+	};
+}
+
+
+export async function publishToTruthSocial(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Truth Social (Mock)...`);
+	return {
+		platform: "truthsocial",
+		success: true,
+		postId: `mock_truthsocial_id`,
+		postUrl: `https://truthsocial.com/mock`,
+	};
+}
+
+
+export async function publishToVKontakte(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to VKontakte (Mock)...`);
+	return {
+		platform: "vk",
+		success: true,
+		postId: `mock_vk_id`,
+		postUrl: `https://vk.com/mock`,
+	};
+}
+
+
+export async function publishToWeibo(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Weibo (Mock)...`);
+	return {
+		platform: "weibo",
+		success: true,
+		postId: `mock_weibo_id`,
+		postUrl: `https://weibo.com/mock`,
+	};
+}
+
+
+export async function publishToKakaoTalk(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to KakaoTalk (Mock)...`);
+	return {
+		platform: "kakaotalk",
+		success: true,
+		postId: `mock_kakaotalk_id`,
+		postUrl: `https://kakaotalk.com/mock`,
+	};
+}
+
+
+export async function publishToViber(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Viber (Mock)...`);
+	return {
+		platform: "viber",
+		success: true,
+		postId: `mock_viber_id`,
+		postUrl: `https://viber.com/mock`,
+	};
+}
+
+
+export async function publishToSignal(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Signal (Mock)...`);
+	return {
+		platform: "signal",
+		success: true,
+		postId: `mock_signal_id`,
+		postUrl: `https://signal.com/mock`,
+	};
+}
+
+
+export async function publishToSlack(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Slack (Mock)...`);
+	return {
+		platform: "slack",
+		success: true,
+		postId: `mock_slack_id`,
+		postUrl: `https://slack.com/mock`,
+	};
+}
+
+
+export async function publishToSubstack(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Substack (Mock)...`);
+	return {
+		platform: "substack",
+		success: true,
+		postId: `mock_substack_id`,
+		postUrl: `https://substack.com/mock`,
+	};
+}
+
+
+export async function publishToGhost(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Ghost (Mock)...`);
+	return {
+		platform: "ghost",
+		success: true,
+		postId: `mock_ghost_id`,
+		postUrl: `https://ghost.com/mock`,
+	};
+}
+
+
+export async function publishToLocals(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Locals (Mock)...`);
+	return {
+		platform: "locals",
+		success: true,
+		postId: `mock_locals_id`,
+		postUrl: `https://locals.com/mock`,
+	};
+}
+
+
+export async function publishToOdysee(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Odysee (Mock)...`);
+	return {
+		platform: "odysee",
+		success: true,
+		postId: `mock_odysee_id`,
+		postUrl: `https://odysee.com/mock`,
+	};
+}
+
+
+export async function publishToBitChute(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to BitChute (Mock)...`);
+	return {
+		platform: "bitchute",
+		success: true,
+		postId: `mock_bitchute_id`,
+		postUrl: `https://bitchute.com/mock`,
+	};
+}
+
+
+export async function publishToFlickr(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Flickr (Mock)...`);
+	return {
+		platform: "flickr",
+		success: true,
+		postId: `mock_flickr_id`,
+		postUrl: `https://flickr.com/mock`,
+	};
+}
+
+
+export async function publishToMixcloud(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Mixcloud (Mock)...`);
+	return {
+		platform: "mixcloud",
+		success: true,
+		postId: `mock_mixcloud_id`,
+		postUrl: `https://mixcloud.com/mock`,
+	};
+}
+
+
+export async function publishToDTube(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to DTube (Mock)...`);
+	return {
+		platform: "dtube",
+		success: true,
+		postId: `mock_dtube_id`,
+		postUrl: `https://dtube.com/mock`,
+	};
+}
+
+
+export async function publishToTrovo(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Trovo (Mock)...`);
+	return {
+		platform: "trovo",
+		success: true,
+		postId: `mock_trovo_id`,
+		postUrl: `https://trovo.com/mock`,
+	};
+}
+
 // ── Unified Publish Entry Point ───────────────────────────────────────
 
 export async function publish(
@@ -967,6 +1205,58 @@ export async function publish(
 				break;
 			case "xigua":
 				result = await publishToXigua(safePath, metadata.description);
+				break;
+
+			case "kick":
+				result = await publishToKick(safePath, metadata.description);
+				break;
+			case "truthsocial":
+				result = await publishToTruthSocial(safePath, metadata.description);
+				break;
+			case "vk":
+				result = await publishToVKontakte(safePath, metadata.description);
+				break;
+			case "weibo":
+				result = await publishToWeibo(safePath, metadata.description);
+				break;
+			case "kakaotalk":
+				result = await publishToKakaoTalk(safePath, metadata.description);
+				break;
+			case "viber":
+				result = await publishToViber(safePath, metadata.description);
+				break;
+			case "signal":
+				result = await publishToSignal(safePath, metadata.description);
+				break;
+			case "slack":
+				result = await publishToSlack(safePath, metadata.description);
+				break;
+			case "substack":
+				result = await publishToSubstack(safePath, metadata.description);
+				break;
+			case "ghost":
+				result = await publishToGhost(safePath, metadata.description);
+				break;
+			case "locals":
+				result = await publishToLocals(safePath, metadata.description);
+				break;
+			case "odysee":
+				result = await publishToOdysee(safePath, metadata.description);
+				break;
+			case "bitchute":
+				result = await publishToBitChute(safePath, metadata.description);
+				break;
+			case "flickr":
+				result = await publishToFlickr(safePath, metadata.description);
+				break;
+			case "mixcloud":
+				result = await publishToMixcloud(safePath, metadata.description);
+				break;
+			case "dtube":
+				result = await publishToDTube(safePath, metadata.description);
+				break;
+			case "trovo":
+				result = await publishToTrovo(safePath, metadata.description);
 				break;
 			default:
 				result = {

@@ -112,6 +112,28 @@ impl Render for PublishModal {
                     .child(self.render_platform_button("Kwai", "kwai", rgb(0x888888), cx))
                     .child(self.render_platform_button("Tumblr", "tumblr", rgb(0x888888), cx))
                     .child(self.render_platform_button("OnlyFans", "onlyfans", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Kick", "kick", rgb(0x888888), cx))
+                    .child(self.render_platform_button(
+                        "Truth Social",
+                        "truthsocial",
+                        rgb(0x888888),
+                        cx,
+                    ))
+                    .child(self.render_platform_button("VKontakte", "vk", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Weibo", "weibo", rgb(0x888888), cx))
+                    .child(self.render_platform_button("KakaoTalk", "kakaotalk", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Viber", "viber", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Signal", "signal", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Slack", "slack", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Substack", "substack", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Ghost", "ghost", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Locals", "locals", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Odysee", "odysee", rgb(0x888888), cx))
+                    .child(self.render_platform_button("BitChute", "bitchute", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Flickr", "flickr", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Mixcloud", "mixcloud", rgb(0x888888), cx))
+                    .child(self.render_platform_button("DTube", "dtube", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Trovo", "trovo", rgb(0x888888), cx))
                     .child(self.render_platform_button("Xigua", "xigua", rgb(0x888888), cx))
                     .child(self.render_platform_button("Telegram", "telegram", rgb(0x888888), cx))
                     .child(self.render_platform_button("Rumble", "rumble", rgb(0x888888), cx))
