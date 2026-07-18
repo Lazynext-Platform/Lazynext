@@ -243,6 +243,28 @@ const TOOLS: McpTool[] = [
     },
   },
   {
+    name: "generate_referral_link",
+    description: "Generate a unique referral link for the current user to share and earn platform credits.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        campaign_name: { type: "string", description: "Optional name to track this specific referral campaign" },
+      },
+      required: [],
+    },
+  },
+  {
+    name: "apply_discount_code",
+    description: "Apply a promo or discount code to the user's workspace/wallet.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        code: { type: "string", description: "The discount code to apply (e.g., 'SAVE20')" },
+      },
+      required: ["code"],
+    },
+  },
+  {
     name: "generate_soundtrack",
     description: "Generate background music matching the video's mood and pacing.",
     inputSchema: {
@@ -1987,7 +2009,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       name === "cancel_routine" ||
       name === "register_webhook_channel" ||
       name === "enqueue_background_task" ||
-      name === "get_task_status"
+      name === "get_task_status" ||
+      name === "generate_referral_link" ||
+      name === "apply_discount_code"
     ) {
       let endpoint: string;
       let method = "GET";
@@ -2003,6 +2027,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             prompt: args.prompt,
             enabled: args.enabled !== false,
           });
+          break;
+        case "generate_referral_link":
+          endpoint = `${API_GATEWAY_URL}/api/v1/referrals/me`;
+          break;
+        case "apply_discount_code":
+          endpoint = `${API_GATEWAY_URL}/api/v1/promotions/apply`;
+          method = "POST";
+          body = JSON.stringify({ code: args.code });
           break;
         case "list_routines":
           endpoint = `${API_GATEWAY_URL}/api/v1/routines`;

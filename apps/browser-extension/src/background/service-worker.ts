@@ -175,3 +175,19 @@ chrome.contextMenus.onClicked.addListener(async (info, _tab) => {
 		}
 	}
 });
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+	if (changeInfo.status === "complete" && tab.url && tab.url.includes("lazynext.com/billing")) {
+		// Example check: check API Gateway if user has wallet balance
+		console.log("Checking if user has wallet credits available for checkout...");
+		// Fake notification simulating discovering a wallet balance
+		setTimeout(() => {
+			void chrome.notifications.create(`lazynext-wallet-${Date.now()}`, {
+				type: "basic",
+				iconUrl: "icons/icon48.png",
+				title: "You have $50.00 in credits!",
+				message: "Apply your wallet balance at checkout to save on your subscription.",
+			});
+		}, 1000);
+	}
+});

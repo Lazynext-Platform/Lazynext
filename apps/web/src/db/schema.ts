@@ -264,3 +264,45 @@ export const userSocialTokens = pgTable("user_social_tokens", {
 }, (table) => [
   uniqueIndex("user_social_tokens_user_platform_idx").on(table.userId, table.platform),
 ]);
+
+// ── Promotions, Referrals & Wallets ──────────────────────────────
+
+export const coupons = pgTable("coupons", {
+  id: text("id").primaryKey(),
+  code: text("code").notNull().unique(),
+  discountType: text("discount_type").notNull(), // e.g., 'percentage', 'fixed'
+  discountValue: integer("discount_value").notNull(), // value * 100 for cents/percentages
+  maxUses: integer("max_uses"),
+  currentUses: integer("current_uses").notNull().default(0),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const referrals = pgTable("referrals", {
+  id: text("id").primaryKey(),
+  referrerId: text("referrer_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  referredId: text("referred_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  status: text("status").notNull().default("pending"), // 'pending', 'converted'
+  rewardGranted: boolean("reward_granted").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("referrals_referrer_id_idx").on(table.referrerId),
+  uniqueIndex("referrals_referred_id_idx").on(table.referredId),
+]);
+
+export const wallets = pgTable("wallets", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  balance: integer("balance").notNull().default(0), // balance * 100 (cents)
+  currency: text("currency").notNull().default("USD"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+

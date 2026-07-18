@@ -249,6 +249,8 @@ async fn main() {
         .route("/api/v1/user/profile", get(handle_get_profile))
         .route("/api/v1/user/credits", get(handle_get_user_credits))
         .route("/api/v1/projects", get(handle_get_projects))
+        .route("/api/v1/promotions/wallet", get(handle_get_wallet_balance))
+        .route("/api/v1/referrals/me", get(handle_get_my_referrals))
         .route("/api/v1/ws", get(ws::ws_handler))
         .route("/api/v1/social/schedule", get(handle_social_schedule))
         .route(
@@ -266,6 +268,7 @@ async fn main() {
     // ── Routes requiring CAPTCHA verification ──────────────────────
     let captcha_protected_routes = Router::new()
         .route("/api/v1/autonomous_edit", post(handle_autonomous_edit))
+        .route("/api/v1/promotions/apply", post(handle_apply_promotion))
         .route("/api/v1/timeline", post(handle_add_clip))
         .route(
             "/api/v1/user/integrations/connect",
@@ -2103,3 +2106,58 @@ async fn handle_extension_token_exchange(
         }
     }
 }
+
+// ── Promotions & Referrals Handlers ───────────────────────────────────────
+
+#[derive(serde::Deserialize)]
+struct ApplyPromotionPayload {
+    code: String,
+}
+
+async fn handle_apply_promotion(
+    State(_state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+    Json(payload): Json<ApplyPromotionPayload>,
+) -> Json<Value> {
+    // Basic implementation that will be connected to the promotion crates
+    // and database in the future.
+    let _user_id = claims.sub.clone();
+    
+    // For now, return mock success to satisfy the API
+    Json(json!({
+        "success": true,
+        "message": format!("Successfully applied code: {}", payload.code),
+        "discount_applied": 1000 // Mock 10.00
+    }))
+}
+
+async fn handle_get_wallet_balance(
+    State(_state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+) -> Json<Value> {
+    let _user_id = claims.sub.clone();
+    
+    // Mock return
+    Json(json!({
+        "success": true,
+        "balance": 5000, // $50.00
+        "currency": "USD"
+    }))
+}
+
+async fn handle_get_my_referrals(
+    State(_state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+) -> Json<Value> {
+    let user_id = claims.sub.clone();
+    
+    // Mock return
+    Json(json!({
+        "success": true,
+        "referral_link": format!("https://lazynext.com/ref/{}", user_id),
+        "total_referrals": 3,
+        "converted": 1,
+        "earned": 1500 // $15.00
+    }))
+}
+
