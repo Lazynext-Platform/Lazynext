@@ -17,9 +17,12 @@ import { friendlyAuthError } from "./auth-errors";
 import { SocialAuthButtons } from "./SocialAuthButtons";
 import { CaptchaWidget } from "./CaptchaWidget";
 import { verifyCaptchaToken } from "./captcha-verify";
+import { useTranslations } from "next-intl";
 
 /** React component rendering SignInForm. */
 export function SignInForm() {
+	const t = useTranslations("Auth");
+	const c = useTranslations("Common");
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const redirectTo = searchParams.get("redirect") || "/dashboard";
@@ -125,7 +128,7 @@ export function SignInForm() {
 							htmlFor="email"
 							className="mb-1 block text-xs font-medium text-muted"
 						>
-							Email
+							{t("email")}
 						</label>
 						<input
 							id="email"
@@ -144,13 +147,13 @@ export function SignInForm() {
 								htmlFor="password"
 								className="block text-xs font-medium text-muted"
 							>
-								Password
+								{t("password")}
 							</label>
 							<Link
 								href="/forgot-password"
 								className="text-xs text-[var(--accent-secondary)] hover:underline"
 							>
-								Forgot password?
+								{t("forgot_password")}
 							</Link>
 						</div>
 						<input
@@ -179,7 +182,7 @@ export function SignInForm() {
 						disabled={loading}
 						className="w-full rounded-lg bg-[var(--accent-secondary)] py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-[var(--accent-secondary)]/80 disabled:opacity-50"
 					>
-						{loading ? "Signing in..." : "Sign In"}
+						{loading ? c("saving") : t("sign_in")}
 					</button>
 				</form>
 
@@ -194,9 +197,9 @@ export function SignInForm() {
 				<SocialAuthButtons mode="signIn" redirectTo={redirectTo} disabled={loading} />
 
 				<p className="text-center text-xs text-muted">
-					Don&apos;t have an account?{" "}
+					{t("no_account")}{" "}
 					<Link href="/sign-up" className="text-[var(--accent-secondary)] hover:underline">
-						Sign Up
+						{t("sign_up")}
 					</Link>
 				</p>
 			</div>
@@ -211,10 +214,10 @@ export function SignInForm() {
 						htmlFor="magicLinkEmail"
 						className="mb-1 block text-xs font-medium text-muted"
 					>
-						Email
-					</label>
-					<input
-						id="magicLinkEmail"
+							{t("email")}
+						</label>
+						<input
+							id="magicLinkEmail"
 						type="email"
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}

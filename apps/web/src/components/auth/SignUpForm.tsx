@@ -17,9 +17,12 @@ import { friendlyAuthError } from "./auth-errors";
 import { SocialAuthButtons } from "./SocialAuthButtons";
 import { CaptchaWidget } from "./CaptchaWidget";
 import { verifyCaptchaToken } from "./captcha-verify";
+import { useTranslations } from "next-intl";
 
 /** React component rendering SignUpForm. */
 export function SignUpForm() {
+	const t = useTranslations("Auth");
+	const c = useTranslations("Common");
 	const router = useRouter();
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
@@ -92,8 +95,8 @@ export function SignUpForm() {
 						htmlFor="name"
 						className="mb-1 block text-xs font-medium text-muted"
 					>
-						Name
-					</label>
+							{t("name")}
+						</label>
 					<input
 						id="name"
 						type="text"
@@ -110,10 +113,10 @@ export function SignUpForm() {
 						htmlFor="email"
 						className="mb-1 block text-xs font-medium text-muted"
 					>
-						Email
-					</label>
-					<input
-						id="email"
+							{t("email")}
+						</label>
+						<input
+							id="email"
 						type="email"
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}
@@ -128,8 +131,8 @@ export function SignUpForm() {
 						htmlFor="password"
 						className="mb-1 block text-xs font-medium text-muted"
 					>
-						Password
-					</label>
+							{t("password")}
+						</label>
 					<input
 						id="password"
 						type="password"
@@ -175,18 +178,18 @@ export function SignUpForm() {
 					disabled={loading}
 					className="w-full rounded-lg bg-[var(--accent-secondary)] py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-[var(--accent-secondary)]/80 disabled:opacity-50"
 				>
-					{loading ? "Creating account..." : "Create Account"}
-				</button>
+						{loading ? c("saving") : t("create_account")}
+					</button>
 			</form>
 
 			<SocialAuthButtons mode="signUp" redirectTo="/dashboard" disabled={loading} />
 
-			<p className="text-center text-xs text-muted">
-				Already have an account?{" "}
-				<Link href="/sign-in" className="text-[var(--accent-secondary)] hover:underline">
-					Sign In
-				</Link>
-			</p>
+				<p className="text-center text-xs text-muted">
+					{t("have_account")}{" "}
+					<Link href="/sign-in" className="text-[var(--accent-secondary)] hover:underline">
+						{t("sign_in")}
+					</Link>
+				</p>
 		</div>
 	);
 }
