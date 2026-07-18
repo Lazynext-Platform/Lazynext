@@ -5093,6 +5093,7 @@ dependencies = [
  "jsonwebtoken",
  "lazynext-export",
  "lazynext_core",
+ "lazynext_international",
  "neural_engine",
  "opentelemetry",
  "opentelemetry-otlp",
@@ -5191,6 +5192,10 @@ dependencies = [
  "uuid",
  "webbrowser",
 ]
+
+[[package]]
+name = "lazynext_international"
+version = "0.1.0"
 
 [[package]]
 name = "lazynext_mcp_server"
