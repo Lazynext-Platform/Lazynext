@@ -101,11 +101,23 @@ enum Commands {
 
         /// Video bitrate in kbps
         #[arg(long, default_value_t = 8000)]
-        bitrate: u32,
+        bitrate_kbps: u32,
 
-        /// Enable progress bar
-        #[arg(long, default_value_t = false)]
-        progress: bool,
+        /// Output file path (defaults to auto-generated path)
+        #[arg(short, long)]
+        output: Option<String>,
+
+        /// Social platform to publish to after render (tiktok, youtube, instagram)
+        #[arg(long)]
+        publish_to: Option<String>,
+
+        /// Post title for social publishing
+        #[arg(long)]
+        title: Option<String>,
+
+        /// Privacy status for social publishing (public, private, unlisted)
+        #[arg(long, default_value = "public")]
+        privacy: String,
     },
     /// Batch render multiple projects
     BatchRender {
@@ -239,6 +251,7 @@ async fn main() {
                     duration: 10,
                     bitrate: 8000,
                     progress: false,
+                    output: None,
                 };
                 match render_single(project, &render_args).await {
                     Ok(path) => {
@@ -268,8 +281,11 @@ async fn main() {
             height,
             framerate,
             duration,
-            bitrate,
-            progress,
+            bitrate_kbps,
+            output,
+            publish_to,
+            title,
+            privacy,
         } => {
             let render_args = RenderArgs {
                 format: format.clone(),
@@ -277,11 +293,54 @@ async fn main() {
                 height: *height,
                 framerate: *framerate,
                 duration: *duration,
-                bitrate: *bitrate,
-                progress: *progress,
+                bitrate: *bitrate_kbps,
+                progress: true,
+                output: output.clone(),
             };
             match render_single(project, &render_args).await {
-                Ok(path) => println!("✅ Export complete: {}", path),
+                Ok(path) => {
+                    println!("✅ Export complete: {}", path);
+                    if let Some(platform) = publish_to {
+                        let req_title = title.clone().unwrap_or_else(|| "Headless Lazynext Export".to_string());
+                        println!("🚀 Publishing to {}...", platform);
+                        // In a real headless mode we would need an OAuth token or API key.
+                        // Here we simulate the call to our API Gateway publish endpoint.
+                        let gateway = std::env::var("RUST_API_GATEWAY_URL")
+                            .unwrap_or_else(|_| "http://127.0.0.1:8005".to_string());
+                        let client = reqwest::Client::new();
+                        
+                        // We use the `x-internal-api-key` to authorize headless publishing.
+                        // NOTE: In production, headless CLI requires an API key.
+                        let api_key = std::env::var("INTERNAL_API_KEY").unwrap_or_else(|_| "lazynext-internal-dev-key".to_string());
+                        
+                        let res = client.post(&format!("{}/api/v1/social/publish", gateway))
+                            .header("x-internal-api-key", api_key)
+                            .json(&serde_json::json!({
+                                "platform": platform,
+                                // Assuming we pass a path or an ID. 
+                                "render_job_id": project, // Using project ID as job ID for local renders
+                                "metadata": {
+                                    "title": req_title,
+                                    "privacyStatus": privacy
+                                }
+                            }))
+                            .send()
+                            .await;
+                            
+                        match res {
+                            Ok(r) if r.status().is_success() => {
+                                println!("✅ Successfully published to {}!", platform);
+                            }
+                            Ok(r) => {
+                                let txt = r.text().await.unwrap_or_default();
+                                eprintln!("❌ Failed to publish: {}", txt);
+                            }
+                            Err(e) => {
+                                eprintln!("❌ Network error publishing: {}", e);
+                            }
+                        }
+                    }
+                }
                 Err(e) => eprintln!("❌ Export failed: {}", e),
             }
         }
@@ -536,6 +595,8 @@ struct RenderArgs {
     bitrate: u32,
     /// Whether to display a progress bar.
     progress: bool,
+    /// Output file path (optional)
+    output: Option<String>,
 }
 
 /// Render a single project to the specified output format.
@@ -595,7 +656,7 @@ async fn render_single(project: &str, args: &RenderArgs) -> Result<String, Strin
         .file_stem()
         .and_then(|s| s.to_str())
         .unwrap_or(project);
-    let out_path = format!("./out/{}.{}", project_name, ext);
+    let out_path = args.output.clone().unwrap_or_else(|| format!("./out/{}.{}", project_name, ext));
     let output_ext = std::path::Path::new(&out_path)
         .extension()
         .and_then(|e| e.to_str())

@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { usePostHog } from "posthog-js/react";
 import { dispatchExport } from "../../../export/dispatch";
 
+import { PublishModal } from "../PublishModal";
+
 /** React component rendering ExportDelivery. */
 export function ExportDelivery({
 	projectData,
@@ -24,12 +26,15 @@ export function ExportDelivery({
 	const [isExporting, setIsExporting] = useState(false);
 	const [renderProgress, setRenderProgress] = useState<number | null>(null);
 	const [renderStatus, setRenderStatus] = useState<string | null>(null);
+	const [lastJobId, setLastJobId] = useState<string | null>(null);
+	const [showPublishModal, setShowPublishModal] = useState(false);
 	const posthog = usePostHog();
 
 	const handleExport = async () => {
 		setIsExporting(true);
 		setRenderProgress(0);
 		setRenderStatus("queued");
+		setLastJobId(null);
 
 		try {
 			if (format === "mp4" || format === "webm") {
@@ -65,6 +70,7 @@ export function ExportDelivery({
 				if (!res.ok) throw new Error("Failed to queue job");
 
 				const data = await res.json();
+				setLastJobId(data.jobId);
 
 				posthog?.capture("export_queued", {
 					format: format,
@@ -94,13 +100,14 @@ export function ExportDelivery({
 							eventSource.close();
 							setIsExporting(false);
 							toast.success("Render complete! Your video is ready.");
+							setShowPublishModal(true);
 						} else if (job.status === "failed") {
 							eventSource.close();
 							setIsExporting(false);
 							toast.error("Render job failed.");
 						}
-					} catch (e) {
-						console.error("SSE parse error:", e);
+					} catch {
+						// Ignored
 					}
 				};
 
@@ -270,8 +277,24 @@ export function ExportDelivery({
 						) || 0}{" "}
 						clips across {projectData.tracks?.length || 0} tracks.
 					</p>
+					
+					{renderStatus === "completed" && lastJobId && (
+						<button
+							onClick={() => setShowPublishModal(true)}
+							className="mt-6 px-6 py-2 bg-gradient-to-r from-fuchsia-600 to-indigo-600 hover:from-fuchsia-500 hover:to-indigo-500 text-white font-bold rounded-lg shadow-lg transition-all flex items-center gap-2 mx-auto"
+						>
+							<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+							Publish to Socials
+						</button>
+					)}
 				</div>
 			</div>
+			<PublishModal 
+				isOpen={showPublishModal} 
+				onClose={() => setShowPublishModal(false)} 
+				projectId={projectData.id} 
+				renderJobId={lastJobId}
+			/>
 		</div>
 	);
 }

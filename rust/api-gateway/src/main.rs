@@ -1341,7 +1341,7 @@ async fn handle_social_auth_callback(
                 }
 
                 // Redirect to web app dashboard/settings on success
-                Redirect::to("/dashboard/settings?social_auth=success").into_response()
+                Redirect::to("/settings?social_auth=success").into_response()
             } else {
                 (StatusCode::BAD_REQUEST, "Invalid token response from provider").into_response()
             }

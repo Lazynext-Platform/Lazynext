@@ -40,8 +40,44 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	} else if (message.action === "stopCapture") {
 		stopCapture(sendResponse);
 		return true;
+	} else if (message.action === "publishSocial") {
+		publishSocial(message.platform, sendResponse);
+		return true;
 	}
 });
+
+async function publishSocial(platform, sendResponse) {
+	if (!sessionId) {
+		sendResponse({ success: false, error: "No active session ID found." });
+		return;
+	}
+	try {
+		const headers = { "Content-Type": "application/json" };
+		if (authToken) {
+			headers["Authorization"] = `Bearer ${authToken}`;
+		}
+		const res = await fetch(`${API_GATEWAY}/api/v1/social/publish`, {
+			method: "POST",
+			headers,
+			body: JSON.stringify({
+				platform,
+				render_job_id: sessionId, // Assume the ingest session triggers a render
+				metadata: {
+					title: "Captured with Lazynext",
+					privacyStatus: "unlisted"
+				}
+			})
+		});
+		if (res.ok) {
+			sendResponse({ success: true });
+		} else {
+			const txt = await res.text();
+			sendResponse({ success: false, error: txt });
+		}
+	} catch (e) {
+		sendResponse({ success: false, error: e.message });
+	}
+}
 
 function startCapture(sendResponse) {
 	if (activeRecorder) {

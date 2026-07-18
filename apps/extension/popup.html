@@ -117,8 +117,16 @@
   </div>
   <p>Record the current tab and send to Lazynext.</p>
   <button id="captureBtn">Start Recording</button>
-  <button id="stopBtn" style="display: none; background-color: #ff4444; color: var(--text-on-accent);">Stop Recording</button>
+  <button id="stopBtn" style="display: none; background-color: #ff4444; color: var(--text-primary);">Stop Recording</button>
   <div id="status"></div>
+  
+  <div id="publishSection" style="display: none; margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px;">
+    <h2 style="font-size: 14px; margin-bottom: 8px;">Quick Share</h2>
+    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+      <button id="shareTiktokBtn" style="background: #000; color: #fff; font-size: 12px; padding: 6px;">TikTok</button>
+      <button id="shareYoutubeBtn" style="background: #f00; color: #fff; font-size: 12px; padding: 6px;">YouTube</button>
+    </div>
+  </div>
   <script src="popup.js"></script>
 </body>
 </html>

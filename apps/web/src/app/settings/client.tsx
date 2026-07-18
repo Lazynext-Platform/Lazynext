@@ -30,6 +30,16 @@ export function SettingsPageClient() {
 		}
 	}, [session, isPending, router]);
 
+	React.useEffect(() => {
+		if (typeof window !== "undefined") {
+			const searchParams = new URLSearchParams(window.location.search);
+			if (searchParams.get("social_auth") === "success") {
+				toast.success("Social account connected successfully!");
+				router.replace("/settings");
+			}
+		}
+	}, [router]);
+
 	if (isPending) {
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-background">
@@ -179,6 +189,74 @@ export function SettingsPageClient() {
 									className="h-4 w-4 rounded accent-[var(--accent-primary)]"
 								/>
 							</label>
+						</div>
+					</section>
+
+					{/* Social Integrations Section */}
+					<section className="rounded-xl border border-border bg-panel p-6 shadow-[var(--accent-glow)]">
+						<h2 className="text-lg font-bold text-foreground">
+							Social Integrations
+						</h2>
+						<p className="mt-1 text-sm text-muted">
+							Connect your social media accounts for direct publishing.
+						</p>
+						<div className="mt-6 space-y-4">
+							{/* TikTok */}
+							<div className="flex items-center justify-between rounded-lg border border-border bg-background/50 px-4 py-3">
+								<div className="flex items-center gap-3">
+									<div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-900 text-white">
+										<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 15.68l.01.2a6.33 6.33 0 009.68 4.09 6.47 6.47 0 003.07-5.52V8.9a8.36 8.36 0 004.83 1.54V7.05a5.38 5.38 0 01-3-1l.01.64z"/></svg>
+									</div>
+									<div>
+										<span className="text-sm font-bold text-foreground">TikTok</span>
+										<p className="text-xs text-muted">Publish directly to TikTok</p>
+									</div>
+								</div>
+								<button
+									onClick={() => { window.location.href = "/api/social/tiktok"; }}
+									className="rounded-lg bg-[var(--accent-primary)] px-4 py-2 text-sm font-bold text-background hover:opacity-90 transition-all shadow-[var(--accent-glow)]"
+								>
+									Connect
+								</button>
+							</div>
+
+							{/* YouTube */}
+							<div className="flex items-center justify-between rounded-lg border border-border bg-background/50 px-4 py-3">
+								<div className="flex items-center gap-3">
+									<div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-600 text-white">
+										<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+									</div>
+									<div>
+										<span className="text-sm font-bold text-foreground">YouTube</span>
+										<p className="text-xs text-muted">Publish directly to YouTube Shorts</p>
+									</div>
+								</div>
+								<button
+									onClick={() => { window.location.href = "/api/social/youtube"; }}
+									className="rounded-lg bg-[var(--accent-primary)] px-4 py-2 text-sm font-bold text-background hover:opacity-90 transition-all shadow-[var(--accent-glow)]"
+								>
+									Connect
+								</button>
+							</div>
+
+							{/* Instagram */}
+							<div className="flex items-center justify-between rounded-lg border border-border bg-background/50 px-4 py-3">
+								<div className="flex items-center gap-3">
+									<div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr from-yellow-400 to-fuchsia-600 text-white">
+										<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+									</div>
+									<div>
+										<span className="text-sm font-bold text-foreground">Instagram</span>
+										<p className="text-xs text-muted">Publish directly to Instagram Reels</p>
+									</div>
+								</div>
+								<button
+									onClick={() => { window.location.href = "/api/social/instagram"; }}
+									className="rounded-lg bg-[var(--accent-primary)] px-4 py-2 text-sm font-bold text-background hover:opacity-90 transition-all shadow-[var(--accent-glow)]"
+								>
+									Connect
+								</button>
+							</div>
 						</div>
 					</section>
 

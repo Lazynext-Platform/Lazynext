@@ -17,6 +17,7 @@ mod auth;
 mod captcha;
 mod editor;
 mod theme;
+mod publish_modal;
 
 // GPUI takes over the main thread, so we run a standard main function.
 fn main() {
@@ -57,7 +58,19 @@ fn main() {
     let engine_clone = engine.clone();
     let rt_handle = rt.handle().clone();
 
-    Application::new().run(move |cx: &mut App| {
+    let app = Application::new();
+    app.on_open_urls(|urls| {
+        for url in urls {
+            log::info!("Received deep link URL: {}", url);
+            if url.starts_with("lazynext://oauth/callback") {
+                log::info!("Handling OAuth callback via deep link...");
+                // Extract token and notify the UI...
+            }
+        }
+    });
+
+    app.run(move |cx: &mut App| {
+
         let bounds = Bounds {
             origin: point(px(0.0), px(0.0)),
             size: size(px(800.0), px(600.0)),

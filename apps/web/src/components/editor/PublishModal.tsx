@@ -1,0 +1,173 @@
+"use client";
+
+import { useState } from "react";
+import { toast } from "sonner";
+import { X } from "lucide-react";
+
+interface PublishModalProps {
+	isOpen: boolean;
+	onClose: () => void;
+	projectId: string;
+	renderJobId?: string | null;
+}
+
+export function PublishModal({ isOpen, onClose, projectId, renderJobId }: PublishModalProps) {
+	const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
+	const [title, setTitle] = useState("");
+	const [description, setDescription] = useState("");
+	const [publishing, setPublishing] = useState(false);
+
+	if (!isOpen) return null;
+
+	const togglePlatform = (platform: string) => {
+		setSelectedPlatforms((prev) =>
+			prev.includes(platform) ? prev.filter((p) => p !== platform) : [...prev, platform],
+		);
+	};
+
+	const handlePublish = async () => {
+		if (selectedPlatforms.length === 0) {
+			toast.error("Please select at least one platform");
+			return;
+		}
+
+		if (!renderJobId) {
+			toast.error("No active render job found. Export the video via Render Farm first.");
+			return;
+		}
+
+		setPublishing(true);
+
+		try {
+			// Get token for API Gateway
+			const sessionRes = await fetch("/api/auth/session");
+			const session = await sessionRes.json();
+			const token = session?.session?.token;
+
+			for (const platform of selectedPlatforms) {
+				const RUST_API_GATEWAY_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL || "http://127.0.0.1:8005";
+				const res = await fetch(`${RUST_API_GATEWAY_URL}/api/v1/social/publish`, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						...(token && { Authorization: `Bearer ${token}` }),
+					},
+					body: JSON.stringify({
+						platform,
+						render_job_id: renderJobId,
+						metadata: {
+							title,
+							description,
+							tags: ["lazynext", "video"],
+						},
+					}),
+				});
+
+				if (!res.ok) {
+					const errorText = await res.text();
+					throw new Error(`Failed to publish to ${platform}: ${errorText}`);
+				}
+			}
+
+			toast.success("Successfully queued for publishing!");
+			onClose();
+		} catch (error: any) {
+			toast.error(error.message);
+		} finally {
+			setPublishing(false);
+		}
+	};
+
+	return (
+		<div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/90 backdrop-blur-sm">
+			<div className="w-[500px] rounded-xl border border-border bg-panel p-6 shadow-2xl relative">
+				<button
+					onClick={onClose}
+					className="absolute top-4 right-4 text-muted hover:text-foreground transition-colors"
+				>
+					<X className="h-5 w-5" />
+				</button>
+				<h2 className="text-xl font-bold text-foreground">Publish to Socials</h2>
+				<p className="mt-1 text-sm text-muted">
+					Push your exported video directly to connected social accounts.
+				</p>
+
+				<div className="mt-6 space-y-4">
+					<div>
+						<label className="text-xs font-bold text-muted uppercase tracking-wider block mb-2">
+							Platforms
+						</label>
+						<div className="flex gap-3">
+							<button
+								onClick={() => togglePlatform("tiktok")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("tiktok")
+										? "border-black bg-black text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 15.68l.01.2a6.33 6.33 0 009.68 4.09 6.47 6.47 0 003.07-5.52V8.9a8.36 8.36 0 004.83 1.54V7.05a5.38 5.38 0 01-3-1l.01.64z"/></svg>
+								TikTok
+							</button>
+							<button
+								onClick={() => togglePlatform("youtube")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("youtube")
+										? "border-red-600 bg-red-600 text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+								YouTube
+							</button>
+							<button
+								onClick={() => togglePlatform("instagram")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("instagram")
+										? "border-fuchsia-600 bg-gradient-to-tr from-yellow-400 to-fuchsia-600 text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+								Instagram
+							</button>
+						</div>
+					</div>
+
+					<div>
+						<label className="text-xs font-bold text-muted uppercase tracking-wider block mb-2">
+							Post Title
+						</label>
+						<input
+							type="text"
+							value={title}
+							onChange={(e) => setTitle(e.target.value)}
+							className="w-full rounded border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-indigo-500 focus:outline-none"
+							placeholder="My Awesome Edit"
+						/>
+					</div>
+
+					<div>
+						<label className="text-xs font-bold text-muted uppercase tracking-wider block mb-2">
+							Description & Tags
+						</label>
+						<textarea
+							value={description}
+							onChange={(e) => setDescription(e.target.value)}
+							className="w-full h-24 rounded border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-indigo-500 focus:outline-none resize-none"
+							placeholder="Check out this edit! #lazynext"
+						/>
+					</div>
+
+					<button
+						onClick={handlePublish}
+						disabled={publishing || selectedPlatforms.length === 0}
+						className="w-full rounded-lg bg-indigo-600 py-3 text-sm font-bold text-white hover:bg-indigo-500 disabled:opacity-50 transition-colors mt-4"
+					>
+						{publishing ? "Publishing..." : `Publish to ${selectedPlatforms.length} platform(s)`}
+					</button>
+				</div>
+			</div>
+		</div>
+	);
+}

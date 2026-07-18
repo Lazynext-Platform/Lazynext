@@ -208,6 +208,38 @@ async fn process_mcp_request(
                         }
                     },
                     {
+                        "name": "publish_video",
+                        "description": "Publish a rendered video to social media platforms via the API Gateway",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {
+                                "render_job_id": {"type": "string", "description": "The ID of the render job or project to publish"},
+                                "platforms": {
+                                    "type": "array",
+                                    "items": {"type": "string", "enum": ["tiktok", "youtube", "instagram"]},
+                                    "description": "Platforms to publish to"
+                                },
+                                "metadata": {
+                                    "type": "object",
+                                    "properties": {
+                                        "title": {"type": "string"},
+                                        "description": {"type": "string"},
+                                        "privacyStatus": {"type": "string", "enum": ["public", "private", "unlisted"]}
+                                    }
+                                }
+                            },
+                            "required": ["render_job_id", "platforms", "metadata"]
+                        }
+                    },
+                    {
+                        "name": "get_social_connections",
+                        "description": "Get a list of currently connected social media platforms for the user",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {}
+                        }
+                    },
+                    {
                         "name": "analyze_media",
                         "description": "Analyze a media file and return editing recommendations (silence detection, scene cuts, color profile)",
                         "inputSchema": {
@@ -528,6 +560,71 @@ async fn process_mcp_request(
                                 "Failed to set keyframe — clip not found.".to_string()
                             }}],
                             "isError": !ok
+                        }
+                    })
+                }
+
+                "get_social_connections" => {
+                    // For MCP server running locally, we simulate fetching from the gateway
+                    // or instruct the agent that social connections require web UI setup.
+                    json!({
+                        "jsonrpc": "2.0",
+                        "id": id,
+                        "result": {
+                            "content": [{"type": "text", "text": "Social connections must be managed via the Web App at /settings. To publish, specify platform: 'youtube', 'tiktok', or 'instagram' and the Gateway will authorize using stored tokens."}]
+                        }
+                    })
+                }
+
+                "publish_video" => {
+                    let job_id = req["params"]["arguments"]["render_job_id"].as_str().unwrap_or("");
+                    let platforms = req["params"]["arguments"]["platforms"].as_array();
+                    let metadata = req["params"]["arguments"]["metadata"].clone();
+                    
+                    if job_id.is_empty() || platforms.is_none() {
+                        return json!({
+                            "jsonrpc": "2.0",
+                            "id": id,
+                            "result": {
+                                "content": [{"type": "text", "text": "Error: render_job_id and platforms array are required."}],
+                                "isError": true
+                            }
+                        });
+                    }
+                    
+                    let gateway = std::env::var("RUST_API_GATEWAY_URL")
+                        .unwrap_or_else(|_| "http://127.0.0.1:8005".to_string());
+                    let api_key = std::env::var("INTERNAL_API_KEY").unwrap_or_else(|_| "lazynext-internal-dev-key".to_string());
+                    let client = reqwest::Client::new();
+                    
+                    let mut successes = Vec::new();
+                    let mut failures = Vec::new();
+
+                    for plat in platforms.unwrap() {
+                        if let Some(p) = plat.as_str() {
+                            let res = client.post(&format!("{}/api/v1/social/publish", gateway))
+                                .header("x-internal-api-key", &api_key)
+                                .json(&serde_json::json!({
+                                    "platform": p,
+                                    "render_job_id": job_id,
+                                    "metadata": metadata
+                                }))
+                                .send()
+                                .await;
+                                
+                            match res {
+                                Ok(r) if r.status().is_success() => successes.push(p.to_string()),
+                                Ok(r) => failures.push(format!("{}: {}", p, r.status())),
+                                Err(e) => failures.push(format!("{}: {}", p, e))
+                            }
+                        }
+                    }
+
+                    json!({
+                        "jsonrpc": "2.0",
+                        "id": id,
+                        "result": {
+                            "content": [{"type": "text", "text": format!("Publish task completed. Success: {:?}, Failures: {:?}", successes, failures)}]
                         }
                     })
                 }

@@ -9,7 +9,9 @@ import {
 	Dimensions,
 	TouchableOpacity,
 	Alert,
+	Share,
 } from "react-native";
+import * as WebBrowser from "expo-web-browser";
 import { NativeBridge } from "../NativeBridge";
 import { useApplePencil } from "../hooks/use-apple-pencil";
 import { OfflineStorage } from "../services/offline-storage";
@@ -98,6 +100,37 @@ export const EditorScreen = () => {
 			"Import Media",
 			"Media import will be available when expo-image-picker is integrated.\n\nYou can also use the Lazynext AI Agent tab to generate B-roll or add clips via natural language.",
 		);
+	};
+
+	const handleShareLocal = async () => {
+		try {
+			// Simulating a local file export path. In reality, NativeBridge would return the file URI.
+			const fakeFileUri = "file:///tmp/lazynext/export.mp4";
+			await Share.share({
+				url: fakeFileUri,
+				message: "Check out my edit from Lazynext!",
+				title: "Lazynext Export"
+			});
+		} catch (e: any) {
+			Alert.alert("Share Error", e.message);
+		}
+	};
+
+	const handleConnectSocial = async () => {
+		try {
+			// Simulate OAuth flow using expo-web-browser
+			const API_GATEWAY = "https://api.lazynext.com";
+			const result = await WebBrowser.openAuthSessionAsync(
+				`${API_GATEWAY}/api/v1/auth/social/tiktok?token=MOBILE_SESSION_TOKEN`,
+				"lazynext://oauth/callback"
+			);
+			
+			if (result.type === "success") {
+				Alert.alert("Success", "Social account connected via WebBrowser!");
+			}
+		} catch (e: any) {
+			Alert.alert("OAuth Error", e.message);
+		}
 	};
 
 	// ── Mask Drawing with Pencil Pressure ──
@@ -251,12 +284,28 @@ export const EditorScreen = () => {
 					</View>
 				</View>
 
-				<TouchableOpacity
-					style={styles.importButton}
-					onPress={handleImportMedia}
-				>
-					<Text style={styles.importButtonText}>Import Media</Text>
-				</TouchableOpacity>
+				<View style={{ flexDirection: "row", gap: 8, marginBottom: 8 }}>
+					<TouchableOpacity
+						style={[styles.importButton, { flex: 1 }]}
+						onPress={handleImportMedia}
+					>
+						<Text style={styles.importButtonText}>Import Media</Text>
+					</TouchableOpacity>
+
+					<TouchableOpacity
+						style={[styles.importButton, { flex: 1 }]}
+						onPress={handleShareLocal}
+					>
+						<Text style={styles.importButtonText}>Share Local</Text>
+					</TouchableOpacity>
+
+					<TouchableOpacity
+						style={[styles.importButton, { flex: 1 }]}
+						onPress={handleConnectSocial}
+					>
+						<Text style={styles.importButtonText}>Social OAuth</Text>
+					</TouchableOpacity>
+				</View>
 
 				<ScrollView
 					horizontal
@@ -502,7 +551,7 @@ const getStyles = (theme: Theme) => StyleSheet.create({
 		borderRadius: 8,
 		paddingVertical: 8,
 		alignItems: "center",
-		marginBottom: 8,
+		justifyContent: "center",
 	},
 	importButtonText: {
 		color: theme.accentSecondary,

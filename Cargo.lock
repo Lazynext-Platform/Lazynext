@@ -5036,6 +5036,7 @@ dependencies = [
  "lazynext_core",
  "lazynext_rules",
  "log",
+ "reqwest",
  "serde",
  "serde_json",
  "tokio",

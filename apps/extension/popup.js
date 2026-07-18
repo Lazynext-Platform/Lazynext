@@ -80,7 +80,24 @@ document.addEventListener('DOMContentLoaded', () => {
         captureBtn.style.display = 'block';
         captureBtn.disabled = false;
         captureBtn.textContent = 'Start Recording';
+        document.getElementById('publishSection').style.display = 'block';
       }
     });
   });
+
+  const handleShare = (platform) => {
+    chrome.runtime.sendMessage({ action: 'publishSocial', platform }, (response) => {
+      if (response && response.success) {
+        statusDiv.textContent = `Queued for ${platform}!`;
+        statusDiv.className = 'success';
+        document.getElementById('publishSection').style.display = 'none';
+      } else {
+        statusDiv.textContent = `Error: ${response?.error || 'Unknown'}`;
+        statusDiv.className = 'error';
+      }
+    });
+  };
+
+  document.getElementById('shareTiktokBtn').addEventListener('click', () => handleShare('tiktok'));
+  document.getElementById('shareYoutubeBtn').addEventListener('click', () => handleShare('youtube'));
 });
