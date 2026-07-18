@@ -115,9 +115,13 @@ impl Render for Dashboard {
                 gpui::WindowAppearance::Dark | gpui::WindowAppearance::VibrantDark => "Dark",
                 _ => "Light",
             };
-            crate::tr!("theme_system").replace("{}", actual_os).to_string()
+            crate::tr!("theme_system")
+                .replace("{}", actual_os)
+                .to_string()
         } else {
-            crate::tr!("theme_label").replace("{}", &current_override).to_string()
+            crate::tr!("theme_label")
+                .replace("{}", &current_override)
+                .to_string()
         };
 
         div()
