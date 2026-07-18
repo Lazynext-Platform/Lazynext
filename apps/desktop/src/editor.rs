@@ -174,9 +174,9 @@ impl Render for EditorShell {
                 gpui::WindowAppearance::Dark | gpui::WindowAppearance::VibrantDark => "Dark",
                 _ => "Light",
             };
-            format!("Theme: System ({})", actual_os)
+            format!("{}", crate::tr!("theme_system").replace("{}", actual_os))
         } else {
-            format!("Theme: {}", current_override)
+            format!("{}", crate::tr!("theme_label").replace("{}", &current_override))
         };
         let bg_color = theme.bg_main;
         let panel_bg = theme.bg_panel;
@@ -252,7 +252,7 @@ impl Render for EditorShell {
         let is_prompt_focused = self.prompt_focused.get();
         let prompt_display = SharedString::from(self.ai_prompt_text.clone());
         let prompt_placeholder =
-            SharedString::from("Click to focus and type a command (e.g. 'cut silences')");
+            SharedString::from(crate::tr!("click_to_focus"));
         let prompt_text_color = if self.ai_prompt_text.is_empty() {
             theme.text_muted
         } else {
@@ -341,7 +341,7 @@ impl Render for EditorShell {
                                             .border_color(border_color)
                                             .flex()
                                             .justify_between()
-                                            .child("Project Media")
+                                            .child(crate::tr!("project_media"))
                                             .child(
                                                 div()
                                                     .px_2()
@@ -435,7 +435,7 @@ impl Render for EditorShell {
                                                             .h_full()
                                                             .justify_center()
                                                             .items_center()
-                                                            .child("No Frame Rendered"),
+                                                            .child(crate::tr!("no_frame")),
                                                     )
                                                 }
                                             }),
@@ -544,14 +544,14 @@ impl Render for EditorShell {
                                 div()
                                     .text_sm()
                                     .text_color(theme.text_muted)
-                                    .child(format!("Frame {}", self.current_frame)),
+                                    .child(crate::tr!("frame_label").replace("{}", &self.current_frame.to_string())),
                             )
                             .child(div().flex_1())
                             .child(
                                 div()
                                     .text_xs()
                                     .text_color(theme.text_muted)
-                                    .child("Space:Play/Pause  ←→:Step ±1  ⇧←→:Step ±5"),
+                                    .child(crate::tr!("playback_hint")),
                             )
                             .child(div().flex_1())
                             .child(
@@ -564,7 +564,7 @@ impl Render for EditorShell {
                                     .cursor_pointer()
                                     .text_sm()
                                     .hover(|s| s.bg(theme.accent_secondary))
-                                    .child("Export MP4")
+                                    .child(crate::tr!("export_mp4"))
                                     .on_mouse_down(gpui::MouseButton::Left, {
                                         let engine = self.engine.clone();
                                         let exporting = self.exporting.clone();
@@ -615,8 +615,8 @@ impl Render for EditorShell {
                                     .justify_between()
                                     .border_b_1()
                                     .border_color(border_color)
-                                    .child(div().child("Timeline"))
-                                    .child(div().child(format!("Frame: {}", self.current_frame))),
+                                    .child(div().child(crate::tr!("timeline")))
+                                    .child(div().child(crate::tr!("frame_label").replace("{}", &self.current_frame.to_string()))),
                             )
                             .child(
                                 div()
@@ -709,7 +709,7 @@ impl Render for EditorShell {
                             .p_4()
                             .border_b_1()
                             .border_color(border_color)
-                            .child("Inspector"),
+                            .child(crate::tr!("inspector")),
                     )
                     .child(
                         div()
@@ -726,7 +726,7 @@ impl Render for EditorShell {
                                         div()
                                             .text_sm()
                                             .text_color(theme.text_muted)
-                                            .child("Transform"),
+                                            .child(crate::tr!("transform")),
                                     )
                                     .child(
                                         div()
@@ -735,7 +735,7 @@ impl Render for EditorShell {
                                             .border_1()
                                             .border_color(theme.bg_panel)
                                             .rounded_md()
-                                            .child("Scale: 100%"),
+                                            .child(crate::tr!("scale")),
                                     )
                                     .child(
                                         div()
@@ -744,7 +744,7 @@ impl Render for EditorShell {
                                             .border_1()
                                             .border_color(theme.bg_panel)
                                             .rounded_md()
-                                            .child("Position: X:0 Y:0"),
+                                            .child(crate::tr!("position")),
                                     ),
                             )
                             .child(
@@ -753,7 +753,7 @@ impl Render for EditorShell {
                                     .flex_col()
                                     .gap_1()
                                     .child(
-                                        div().text_sm().text_color(theme.text_muted).child("Opacity"),
+                                        div().text_sm().text_color(theme.text_muted).child(crate::tr!("opacity")),
                                     )
                                     .child(
                                         div()
@@ -777,7 +777,7 @@ impl Render for EditorShell {
                                             .text_sm()
                                             .font_weight(FontWeight::BOLD)
                                             .text_color(accent_color)
-                                            .child("Lazynext AI Agent"),
+                                            .child(crate::tr!("ai_agent")),
                                     )
                                     .child(
                                         // Clickable prompt display area — shows current prompt text
@@ -811,7 +811,7 @@ impl Render for EditorShell {
                                             .flex()
                                             .justify_center()
                                             .hover(|s| s.bg(theme.accent_secondary))
-                                            .child("Run Command")
+                                            .child(crate::tr!("run_command"))
                                             .on_mouse_down(gpui::MouseButton::Left, {
                                                 let text = self.ai_prompt_text.clone();
                                                 let prompt_focused = self.prompt_focused.clone();
@@ -885,7 +885,7 @@ impl Render for EditorShell {
                                                     .text_sm()
                                                     .font_weight(FontWeight::BOLD)
                                                     .text_color(if self.agent_active.get() { theme.accent_primary } else { theme.playhead })
-                                                    .child(if self.agent_active.get() { "Agent: Active" } else { "Agent: Stopped" }),
+                                                    .child(if self.agent_active.get() { crate::tr!("agent_active") } else { crate::tr!("agent_stopped") }),
                                             )
                                             .child(
                                                 div()
@@ -897,7 +897,7 @@ impl Render for EditorShell {
                                                     .bg(if self.agent_active.get() { theme.playhead } else { theme.accent_primary })
                                                     .text_color(theme.bg_main)
                                                     .hover(|s| s.opacity(0.8))
-                                                    .child(if self.agent_active.get() { "Stop" } else { "Start" })
+                                                    .child(if self.agent_active.get() { crate::tr!("stop") } else { crate::tr!("start") })
                                                     .on_mouse_down(gpui::MouseButton::Left, {
                                                         let agent_active = self.agent_active.clone();
                                                         let agent_suggestions = self.agent_suggestions.clone();
@@ -945,7 +945,7 @@ impl Render for EditorShell {
                                                 div()
                                                     .text_sm()
                                                     .text_color(theme.text_muted)
-                                                    .child("Suggestions ▼"),
+                                                    .child(crate::tr!("suggestions")),
                                             )
                                             .child(
                                                 div()
@@ -1052,7 +1052,7 @@ impl Render for EditorShell {
                                                                             .text_xs()
                                                                             .cursor_pointer()
                                                                             .hover(|s| s.bg(theme.bg_hover))
-                                                                            .child("Dismiss")
+                                                                            .child(crate::tr!("dismiss"))
                                                                             .on_mouse_down(gpui::MouseButton::Left, {
                                                                                 let sg = sugs.clone();
                                                                                 let idx = i;
@@ -1081,9 +1081,9 @@ impl Render for EditorShell {
             .when(self.exporting.load(Ordering::SeqCst), |el| {
                 let elapsed = self.export_start_time.map_or(0.0, |t| t.elapsed().as_secs_f32());
                 let eta_text = if elapsed < 1.0 {
-                    "Exporting...".into()
+                    crate::tr!("exporting").into()
                 } else {
-                    format!("Exporting... (elapsed: {:.0}s, est. total: ~{:.0}s)", elapsed, elapsed * 2.5)
+                    format!("{} (elapsed: {:.0}s, est. total: ~{:.0}s)", crate::tr!("exporting"), elapsed, elapsed * 2.5)
                 };
                 el.child(
                     div()
@@ -1104,7 +1104,7 @@ impl Render for EditorShell {
             })
             // Error banner — displayed when an error has occurred
             .when(self.show_error, |el| {
-                let error_text = self.error_message.clone().unwrap_or_else(|| "An unknown error occurred".to_string());
+                let error_text = self.error_message.clone().unwrap_or_else(|| crate::tr!("unknown_error").to_string());
                 el.child(
                     div()
                         .h(px(32.0))

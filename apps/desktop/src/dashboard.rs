@@ -115,9 +115,9 @@ impl Render for Dashboard {
                 gpui::WindowAppearance::Dark | gpui::WindowAppearance::VibrantDark => "Dark",
                 _ => "Light",
             };
-            format!("Theme: System ({})", actual_os)
+            format!("{}", crate::tr!("theme_system").replace("{}", actual_os))
         } else {
-            format!("Theme: {}", current_override)
+            format!("{}", crate::tr!("theme_label").replace("{}", &current_override))
         };
 
         div()
@@ -160,14 +160,14 @@ impl Render for Dashboard {
                     .text_xl()
                     .font_weight(FontWeight::BOLD)
                     .text_color(theme.text_primary)
-                    .child("Lazynext Dashboard"),
+                    .child(crate::tr!("dashboard_title")),
             )
             .child(
                 div()
                     .mt_4()
                     .text_sm()
                     .text_color(theme.text_secondary)
-                    .child(format!("Version {}", self.version)),
+                    .child(crate::tr!("version_label").replace("{}", &self.version)),
             )
             .child(
                 div()
@@ -182,7 +182,7 @@ impl Render for Dashboard {
                             .rounded_md()
                             .cursor_pointer()
                             .hover(|s| s.bg(theme.accent_secondary))
-                            .child("New Project")
+                            .child(crate::tr!("new_project"))
                             .on_mouse_down(gpui::MouseButton::Left, {
                                 let nle = self.nle.clone();
                                 let engine = self.engine.clone();
@@ -196,7 +196,7 @@ impl Render for Dashboard {
                                         WindowOptions {
                                             window_bounds: Some(WindowBounds::Windowed(bounds)),
                                             titlebar: Some(TitlebarOptions {
-                                                title: Some("Lazynext Editor".into()),
+                                                title: Some(crate::tr!("editor_title").into()),
                                                 appears_transparent: true,
                                                 traffic_light_position: None,
                                             }),
@@ -250,7 +250,7 @@ impl Render for Dashboard {
                             .rounded_md()
                             .cursor_pointer()
                             .hover(|s| s.bg(theme.bg_hover))
-                            .child("Open Project")
+                            .child(crate::tr!("open_project"))
                             .on_mouse_down(gpui::MouseButton::Left, {
                                 let nle = self.nle.clone();
                                 let engine = self.engine.clone();
@@ -286,7 +286,7 @@ impl Render for Dashboard {
                                         WindowOptions {
                                             window_bounds: Some(WindowBounds::Windowed(bounds)),
                                             titlebar: Some(TitlebarOptions {
-                                                title: Some("Lazynext Editor".into()),
+                                                title: Some(crate::tr!("editor_title").into()),
                                                 appears_transparent: true,
                                                 traffic_light_position: None,
                                             }),
@@ -345,7 +345,7 @@ impl Render for Dashboard {
                                 .text_sm()
                                 .font_weight(FontWeight::BOLD)
                                 .text_color(theme.text_muted)
-                                .child("Recent Projects"),
+                                .child(crate::tr!("recent_projects")),
                         )
                         .children(self.recent_projects.iter().map(|p| {
                             let path = p.clone();
@@ -392,7 +392,7 @@ impl Render for Dashboard {
                                             WindowOptions {
                                                 window_bounds: Some(WindowBounds::Windowed(bounds)),
                                                 titlebar: Some(TitlebarOptions {
-                                                    title: Some("Lazynext Editor".into()),
+                                                    title: Some(crate::tr!("editor_title").into()),
                                                     appears_transparent: true,
                                                     traffic_light_position: None,
                                                 }),

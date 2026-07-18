@@ -9,6 +9,9 @@ use gpui::*;
 use lazynext_core::NLEState;
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use rust_i18n::i18n;
+
+i18n!("locales");
 
 mod dashboard;
 use dashboard::Dashboard;
@@ -16,11 +19,17 @@ use dashboard::Dashboard;
 mod auth;
 mod captcha;
 mod editor;
+mod i18n_utils;
 mod publish_modal;
 mod theme;
 
 // GPUI takes over the main thread, so we run a standard main function.
 fn main() {
+    // Detect the user's OS locale and set it globally for all UI strings
+    let locale = sys_locale::get_locale().unwrap_or_else(|| String::from("en-US"));
+    rust_i18n::set_locale(&locale);
+    log::info!("Desktop locale set to: {}", locale);
+
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
     log::info!("🎬 Lazynext Desktop starting...");
 
