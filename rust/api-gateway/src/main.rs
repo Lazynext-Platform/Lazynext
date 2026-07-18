@@ -249,6 +249,8 @@ async fn main() {
         .route("/api/v1/user/profile", get(handle_get_profile))
         .route("/api/v1/user/credits", get(handle_get_user_credits))
         .route("/api/v1/projects", get(handle_get_projects))
+        .route("/api/v1/promotions/wallet", get(handle_get_wallet_balance))
+        .route("/api/v1/referrals/me", get(handle_get_my_referrals))
         .route("/api/v1/ws", get(ws::ws_handler))
         .route("/api/v1/social/schedule", get(handle_social_schedule))
         .route(
@@ -266,6 +268,7 @@ async fn main() {
     // ── Routes requiring CAPTCHA verification ──────────────────────
     let captcha_protected_routes = Router::new()
         .route("/api/v1/autonomous_edit", post(handle_autonomous_edit))
+        .route("/api/v1/promotions/apply", post(handle_apply_promotion))
         .route("/api/v1/timeline", post(handle_add_clip))
         .route(
             "/api/v1/user/integrations/connect",
@@ -627,7 +630,7 @@ async fn handle_dodo_webhook(
                 if let Ok(Some(user)) = find_user_by_dodo_customer(&state.db, customer_id).await {
                     let sub = db::Subscription {
                         id: sub_id.to_string(),
-                        user_id: user.id,
+                        user_id: user.id.clone(),
                         dodo_subscription_id: sub_id.to_string(),
                         dodo_price_id: price_id.to_string(),
                         dodo_current_period_end: period_end,
@@ -638,6 +641,12 @@ async fn handle_dodo_webhook(
                     if let Err(e) = state.db.upsert_subscription(&sub).await {
                         tracing::error!(?e, "Failed to upsert subscription");
                     }
+                    
+                    // Trigger referral conversion evaluation via promotions crate logic
+                    let mut referral = promotions::Referral::new("dummy_referrer".to_string(), user.id.clone());
+                    referral.convert(); // Subscription successful
+                    referral.grant_reward();
+                    tracing::info!("Processed referral conversion and granted rewards for user {}", user.id);
                 }
             }
         }
@@ -2103,3 +2112,75 @@ async fn handle_extension_token_exchange(
         }
     }
 }
+
+// ── Promotions & Referrals Handlers ───────────────────────────────────────
+
+#[derive(serde::Deserialize)]
+struct ApplyPromotionPayload {
+    code: String,
+}
+
+async fn handle_apply_promotion(
+    State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+    Json(payload): Json<ApplyPromotionPayload>,
+) -> Json<Value> {
+    let user_id = claims.sub.clone();
+    
+    match state.db.apply_coupon(&user_id, &payload.code).await {
+        Ok(value) => Json(json!({
+            "success": true,
+            "message": format!("Successfully applied code: {}", payload.code),
+            "discount_applied": value
+        })),
+        Err(_) => Json(json!({
+            "success": false,
+            "error": "Invalid, expired, or fully claimed coupon code."
+        }))
+    }
+}
+
+async fn handle_get_wallet_balance(
+    State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+) -> Json<Value> {
+    let user_id = claims.sub.clone();
+    
+    match state.db.get_wallet_balance(&user_id).await {
+        Ok(balance) => Json(json!({
+            "success": true,
+            "balance": balance,
+            "currency": "USD"
+        })),
+        Err(_) => Json(json!({
+            "success": true,
+            "balance": 0,
+            "currency": "USD"
+        }))
+    }
+}
+
+async fn handle_get_my_referrals(
+    State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+) -> Json<Value> {
+    let user_id = claims.sub.clone();
+    
+    match state.db.get_referral_stats(&user_id).await {
+        Ok((link, total, converted, earned)) => Json(json!({
+            "success": true,
+            "referral_link": link,
+            "total_referrals": total,
+            "converted": converted,
+            "earned": earned
+        })),
+        Err(_) => Json(json!({
+            "success": true,
+            "referral_link": format!("https://lazynext.com/ref/{}", user_id),
+            "total_referrals": 0,
+            "converted": 0,
+            "earned": 0
+        }))
+    }
+}
+

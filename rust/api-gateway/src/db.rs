@@ -344,6 +344,73 @@ impl DbStore {
 
         Ok(row.0)
     }
+
+    // ── Promotions & Referrals ──────────────────────────────────────────────
+
+    pub async fn get_wallet_balance(&self, user_id: &str) -> Result<i32, sqlx::Error> {
+        let row: Option<(i32,)> = sqlx::query_as(
+            "SELECT balance FROM wallets WHERE user_id = $1"
+        )
+        .bind(user_id)
+        .fetch_optional(self.pool_ref()?)
+        .await?;
+        
+        Ok(row.map(|r| r.0).unwrap_or(0))
+    }
+
+    pub async fn get_referral_stats(&self, user_id: &str) -> Result<(String, i64, i64, i32), sqlx::Error> {
+        // Mocked logic to count referrals
+        let total_row: (i64,) = sqlx::query_as(
+            "SELECT COUNT(*) FROM referrals WHERE referrer_id = $1"
+        )
+        .bind(user_id)
+        .fetch_one(self.pool_ref()?)
+        .await.unwrap_or((0,));
+
+        let converted_row: (i64,) = sqlx::query_as(
+            "SELECT COUNT(*) FROM referrals WHERE referrer_id = $1 AND status = 'converted'"
+        )
+        .bind(user_id)
+        .fetch_one(self.pool_ref()?)
+        .await.unwrap_or((0,));
+
+        let balance = self.get_wallet_balance(user_id).await.unwrap_or(0);
+        let link = format!("https://lazynext.com/ref/{}", user_id);
+
+        Ok((link, total_row.0, converted_row.0, balance))
+    }
+
+    pub async fn apply_coupon(&self, user_id: &str, code: &str) -> Result<i32, sqlx::Error> {
+        // Fetch coupon
+        let row: Option<(String, String, i32)> = sqlx::query_as(
+            "SELECT id, discount_type, discount_value FROM coupons WHERE code = $1 AND (expires_at IS NULL OR expires_at > NOW()) AND (max_uses IS NULL OR current_uses < max_uses)"
+        )
+        .bind(code)
+        .fetch_optional(self.pool_ref()?)
+        .await?;
+
+        if let Some((_id, _dtype, value)) = row {
+            // Upsert wallet
+            sqlx::query(
+                "INSERT INTO wallets (user_id, balance, currency) VALUES ($1, $2, 'USD') ON CONFLICT (user_id) DO UPDATE SET balance = wallets.balance + $2"
+            )
+            .bind(user_id)
+            .bind(value)
+            .execute(self.pool_ref()?)
+            .await?;
+
+            sqlx::query(
+                "UPDATE coupons SET current_uses = current_uses + 1 WHERE code = $1"
+            )
+            .bind(code)
+            .execute(self.pool_ref()?)
+            .await?;
+
+            Ok(value)
+        } else {
+            Err(sqlx::Error::RowNotFound)
+        }
+    }
 }
 
 /// Generate a presigned upload URL for media storage.

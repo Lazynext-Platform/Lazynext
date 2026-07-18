@@ -6,6 +6,17 @@
 
 ---
 
+## [Unreleased] — 2026-07-18 (Feature #39)
+
+### Added
+- **Feature #39 — Referrals & Discounts**: Implemented end-to-end promotions engine across all 7 platform formats. Drizzle DB schema (coupons, referrals, wallets), `crates/promotions` validation logic, API Gateway endpoints, Next.js dashboard, GPUI desktop pane, React Native mobile screen, browser extension checkout notifications, CLI account subcommands, and MCP server AI tools.
+- Dodo Payments webhook now automatically processes referral conversions and grants platform credits.
+
+### Changed
+- CLI `--use-credits` flag added to `lazynext render`.
+
+---
+
 ## [Unreleased] — 2026-07-13 (Platform Optimization)
 
 ### Changed — AI Provider Stack

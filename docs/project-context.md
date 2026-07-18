@@ -62,7 +62,7 @@ lazynext/
 │   └── browser-extension/   # Chrome MV3
 ├── rust/                    # Single source of truth — ALL business logic
 │   ├── core/                # NLE engine (state, timeline, autonomous editor)
-│   ├── crates/              # Domain crates (15 crates)
+│   ├── crates/              # Domain crates (16 crates)
 │   │   ├── audio/           # DSP: EQ, compressor, VST host
 │   │   ├── bridge/          # Inter-crate communication
 │   │   ├── compositor/      # GPU compositor (17 blend modes)
@@ -75,6 +75,7 @@ lazynext/
 │   │   ├── masks/           # JFA signed distance field masking
 │   │   ├── neural_engine/   # Face detection, clip tagging
 │   │   ├── plugin/          # Plugin host runtime
+│   │   ├── promotions/      # Referral engine, coupons, and discounts
 │   │   ├── state/           # CRDTs, keyframes, tombstones
 │   │   └── time/            # MediaTime, FrameRate, TimeCode
 │   ├── wasm/                # WASM bridge (all crates → JS)
@@ -186,6 +187,7 @@ bun run dev
 - Audio engine (10-band EQ, compressor, VST host, stem separation)
 - Export pipeline (MP4, ProRes, DCP, AAF, MOV, GIF) — compositor→ffmpeg WYSIWYG, all 7 formats
 - Direct social media publishing (TikTok, YouTube, Instagram) integration across all 7 formats
+- Promotions engine: refer-and-earn, coupon codes, and Dodo Payments checkout discounts across all 7 formats
 - AI: transcription, filler removal, speaker diarization, voice cloning, auto-reframe
 - Plugin SDK (VST3 audio, custom shaders)
 - REST API Gateway (Axum, JWT, RBAC, rate limiting, OpenAPI/Swagger UI)

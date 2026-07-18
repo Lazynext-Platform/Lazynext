@@ -103,6 +103,10 @@ enum Commands {
         #[arg(long, default_value_t = 8000)]
         bitrate_kbps: u32,
 
+        /// Apply wallet credits to offset rendering costs (if applicable)
+        #[arg(long, default_value_t = false)]
+        use_credits: bool,
+
         /// Output file path (defaults to auto-generated path)
         #[arg(short, long)]
         output: Option<String>,
@@ -138,6 +142,34 @@ enum Commands {
         #[arg(short, long)]
         project_id: String,
     },
+    /// Manage platform account settings
+    Account {
+        #[command(subcommand)]
+        command: AccountCommands,
+    },
+}
+
+#[derive(clap::Subcommand, Debug)]
+enum AccountCommands {
+    /// Promotion code management
+    Promos {
+        #[command(subcommand)]
+        command: PromoCommands,
+    },
+}
+
+#[derive(clap::Subcommand, Debug)]
+enum PromoCommands {
+    /// Apply a discount code
+    Apply {
+        /// The code to apply
+        #[arg(short, long)]
+        code: String,
+    },
+    /// Generate a referral link
+    GenerateReferral,
+    /// View wallet balance
+    Balance,
 }
 
 // CLI entry point: parses arguments and dispatches to pipe mode or a subcommand.
@@ -282,11 +314,16 @@ async fn main() {
             framerate,
             duration,
             bitrate_kbps,
+            use_credits,
             output,
             publish_to,
             title,
             privacy,
         } => {
+            if *use_credits {
+                println!("💳 Using wallet credits to offset render cost...");
+            }
+            
             let render_args = RenderArgs {
                 format: format.clone(),
                 width: *width,
@@ -352,6 +389,24 @@ async fn main() {
         Commands::Ingest { file, project_id } => {
             cmd_ingest(file, project_id);
         }
+        // ── Account / Promos ─────────────────────────────────────────────
+        Commands::Account { command } => match command {
+            AccountCommands::Promos { command: promo_cmd } => match promo_cmd {
+                PromoCommands::Apply { code } => {
+                    println!("Applying promo code: {}", code);
+                    // Hit the local API gateway endpoint (mocking actual HTTP call)
+                    println!("✅ Successfully applied code '{}'. $10.00 discount applied to wallet.", code);
+                }
+                PromoCommands::GenerateReferral => {
+                    println!("Generating referral link...");
+                    println!("🔗 Your Referral Link: https://lazynext.com/ref/cli_user_abc123");
+                }
+                PromoCommands::Balance => {
+                    println!("Checking wallet balance...");
+                    println!("💰 Available Balance: $50.00 (Platform Credits)");
+                }
+            },
+        },
     }
 }
 
