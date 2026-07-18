@@ -14,6 +14,18 @@ import path from "path";
 
 // ── Path safety ───────────────────────────────────────────────────────
 
+export function resolvePublicMediaUrl(videoPath: string): string | null {
+	if (/^https:\/\//i.test(videoPath)) {
+		return videoPath;
+	}
+	const base = process.env.PUBLIC_MEDIA_BASE_URL;
+	if (base && /^https:\/\//i.test(base)) {
+		return `${base.replace(/\/+$/, "")}/${path.basename(videoPath)}`;
+	}
+	return null;
+}
+
+
 /**
  * Directories that video paths are allowed to resolve inside. Configurable
  * via `SOCIAL_PUBLISH_OUTPUT_DIR` / `OUTPUT_DIR`; always includes the
@@ -610,22 +622,82 @@ export async function publishToLinkedIn(
 		return { platform: "linkedin", success: false, error: err?.message || String(err) };
 	}
 }
+
 // ── Pinterest Publisher ──────────────────────────────────────────────────
 
 export async function publishToPinterest(
 	videoPath: string,
 	description?: string,
 ): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Pinterest (Mock)...`);
-	return {
-		platform: "pinterest",
-		success: true,
-		postId: `mock_pinterest_id`,
-		postUrl: `https://pinterest.com/mock`,
-	};
+	const token = process.env.PINTEREST_ACCESS_TOKEN;
+	const boardId = process.env.PINTEREST_BOARD_ID;
+	if (!token || !boardId) {
+		return { platform: "pinterest", success: false, error: "Pinterest keys missing. Set PINTEREST_ACCESS_TOKEN and PINTEREST_BOARD_ID." };
+	}
+
+	try {
+		const safePath = assertSafeVideoPath(videoPath);
+		const fileSize = fs.statSync(safePath).size;
+		
+		// 1. Register media upload
+		const initResp = await fetchWithStatus("https://api-sandbox.pinterest.com/v5/media", {
+			method: "POST",
+			headers: {
+				"Authorization": `Bearer ${token}`,
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({ media_type: "video" })
+		});
+		
+		const initData = await initResp.json() as any;
+		const mediaId = initData.media_id;
+		const uploadUrl = initData.upload_url;
+		const uploadParams = initData.upload_parameters;
+
+		// 2. Upload to AWS S3 bucket
+		const videoBuffer = fs.readFileSync(safePath);
+		const formData = new FormData();
+		for (const [key, value] of Object.entries(uploadParams)) {
+			formData.append(key, value as string);
+		}
+		formData.append("file", new Blob([videoBuffer], { type: "video/mp4" }));
+
+		await fetchWithStatus(uploadUrl, { method: "POST", body: formData });
+
+		// Wait briefly for Pinterest to process the video asset internally
+		await new Promise(r => setTimeout(r, 5000));
+
+		// 3. Create the Pin
+		const pinResp = await fetchWithStatus("https://api-sandbox.pinterest.com/v5/pins", {
+			method: "POST",
+			headers: {
+				"Authorization": `Bearer ${token}`,
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({
+				board_id: boardId,
+				media_source: {
+					source_type: "video_id",
+					cover_image_url: "https://lazynext.com/placeholder-thumbnail.jpg",
+					media_id: mediaId
+				},
+				title: description ? description.substring(0, 100) : "Lazynext Edit",
+				description: description || ""
+			})
+		});
+
+		const pinData = await pinResp.json() as any;
+
+		return {
+			platform: "pinterest",
+			success: true,
+			postId: pinData.id,
+			postUrl: `https://pinterest.com/pin/${pinData.id}`,
+		};
+	} catch (err: any) {
+		return { platform: "pinterest", success: false, error: err?.message || String(err) };
+	}
 }
-
-
 // ── Snapchat Publisher ──────────────────────────────────────────────────
 
 export async function publishToSnapchat(
@@ -642,37 +714,110 @@ export async function publishToSnapchat(
 }
 
 
+
 // ── Twitch Publisher ──────────────────────────────────────────────────
 
 export async function publishToTwitch(
 	videoPath: string,
 	description?: string,
 ): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Twitch (Mock)...`);
-	return {
-		platform: "twitch",
-		success: true,
-		postId: `mock_twitch_id`,
-		postUrl: `https://twitch.com/mock`,
-	};
+	const token = process.env.TWITCH_ACCESS_TOKEN;
+	const clientId = process.env.TWITCH_CLIENT_ID;
+	const channelId = process.env.TWITCH_CHANNEL_ID;
+	if (!token || !clientId || !channelId) {
+		return { platform: "twitch", success: false, error: "Twitch keys missing. Set TWITCH_ACCESS_TOKEN, TWITCH_CLIENT_ID, and TWITCH_CHANNEL_ID." };
+	}
+
+	try {
+		const safePath = assertSafeVideoPath(videoPath);
+		
+		// 1. Create Video Upload Request
+		const initResp = await fetchWithStatus(`https://api.twitch.tv/helix/videos?channel_id=${channelId}&title=${encodeURIComponent(description ? description.substring(0, 50) : "Lazynext Video")}`, {
+			method: "POST",
+			headers: {
+				"Authorization": `Bearer ${token}`,
+				"Client-Id": clientId
+			}
+		});
+		
+		const initData = await initResp.json() as any;
+		const uploadToken = initData.data[0].upload.token;
+		const uploadUrl = initData.data[0].upload.url;
+		const videoId = initData.data[0].id;
+
+		// 2. Upload Video Binary
+		const videoBuffer = fs.readFileSync(safePath);
+		await fetchWithStatus(`${uploadUrl}?upload_token=${uploadToken}`, {
+			method: "PUT",
+			body: videoBuffer
+		});
+
+		return {
+			platform: "twitch",
+			success: true,
+			postId: videoId,
+			postUrl: `https://twitch.tv/videos/${videoId}`,
+		};
+	} catch (err: any) {
+		return { platform: "twitch", success: false, error: err?.message || String(err) };
+	}
 }
-
-
 // ── Vimeo Publisher ──────────────────────────────────────────────────
 
 export async function publishToVimeo(
 	videoPath: string,
 	description?: string,
 ): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Vimeo (Mock)...`);
-	return {
-		platform: "vimeo",
-		success: true,
-		postId: `mock_vimeo_id`,
-		postUrl: `https://vimeo.com/mock`,
-	};
-}
+	const token = process.env.VIMEO_ACCESS_TOKEN;
+	if (!token) {
+		return { platform: "vimeo", success: false, error: "Vimeo keys missing. Set VIMEO_ACCESS_TOKEN." };
+	}
 
+	try {
+		const safePath = assertSafeVideoPath(videoPath);
+		const fileSize = fs.statSync(safePath).size;
+		const videoBuffer = fs.readFileSync(safePath);
+
+		// 1. Create the video ticket
+		const initResp = await fetchWithStatus("https://api.vimeo.com/me/videos", {
+			method: "POST",
+			headers: {
+				"Authorization": `bearer ${token}`,
+				"Content-Type": "application/json",
+				"Accept": "application/vnd.vimeo.*+json;version=3.4"
+			},
+			body: JSON.stringify({
+				upload: { approach: "tus", size: fileSize },
+				name: description ? description.substring(0, 120) : "Lazynext Video",
+				description: description || ""
+			})
+		});
+		
+		const initData = await initResp.json() as any;
+		const uploadUrl = initData.upload.upload_link;
+		const videoUri = initData.uri;
+
+		// 2. Upload via TUS protocol (simplified single chunk for demo, ideally chunked)
+		await fetchWithStatus(uploadUrl, {
+			method: "PATCH",
+			headers: {
+				"Tus-Resumable": "1.0.0",
+				"Upload-Offset": "0",
+				"Content-Type": "application/offset+octet-stream"
+			},
+			body: videoBuffer
+		});
+
+		return {
+			platform: "vimeo",
+			success: true,
+			postId: videoUri.split("/").pop(),
+			postUrl: initData.link,
+		};
+	} catch (err: any) {
+		return { platform: "vimeo", success: false, error: err?.message || String(err) };
+	}
+}
 
 // ── Threads Publisher ──────────────────────────────────────────────────
 
@@ -680,15 +825,59 @@ export async function publishToThreads(
 	videoPath: string,
 	description?: string,
 ): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Threads (Mock)...`);
-	return {
-		platform: "threads",
-		success: true,
-		postId: `mock_threads_id`,
-		postUrl: `https://threads.com/mock`,
-	};
-}
+	const token = process.env.THREADS_ACCESS_TOKEN;
+	const userId = process.env.THREADS_USER_ID;
+	if (!token || !userId) {
+		return { platform: "threads", success: false, error: "Threads keys missing. Set THREADS_ACCESS_TOKEN and THREADS_USER_ID." };
+	}
 
+	try {
+		// Note: Threads currently requires a publicly accessible HTTPS URL.
+		// Since we render locally, we rely on the PUBLIC_MEDIA_BASE_URL resolution.
+		const publicUrl = resolvePublicMediaUrl(videoPath);
+		if (!publicUrl) {
+			return { platform: "threads", success: false, error: "Threads requires a public HTTPS URL. Set PUBLIC_MEDIA_BASE_URL." };
+		}
+
+		// 1. Create Media Container
+		const containerResp = await fetchWithStatus(`https://graph.threads.net/v1.0/${userId}/threads`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				media_type: "VIDEO",
+				video_url: publicUrl,
+				text: description || "Video edit from Lazynext",
+				access_token: token
+			})
+		});
+		
+		const containerData = await containerResp.json() as any;
+		const creationId = containerData.id;
+
+		// 2. Publish Container (Wait 5 seconds for processing)
+		await new Promise(r => setTimeout(r, 5000));
+
+		const publishResp = await fetchWithStatus(`https://graph.threads.net/v1.0/${userId}/threads_publish`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				creation_id: creationId,
+				access_token: token
+			})
+		});
+
+		const publishData = await publishResp.json() as any;
+
+		return {
+			platform: "threads",
+			success: true,
+			postId: publishData.id,
+			postUrl: `https://threads.net/post/${publishData.id}`,
+		};
+	} catch (err: any) {
+		return { platform: "threads", success: false, error: err?.message || String(err) };
+	}
+}
 
 // ── Rumble Publisher ──────────────────────────────────────────────────
 
@@ -696,477 +885,39 @@ export async function publishToRumble(
 	videoPath: string,
 	description?: string,
 ): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Rumble (Mock)...`);
-	return {
-		platform: "rumble",
-		success: true,
-		postId: `mock_rumble_id`,
-		postUrl: `https://rumble.com/mock`,
-	};
+	const token = process.env.RUMBLE_API_TOKEN;
+	if (!token) {
+		return { platform: "rumble", success: false, error: "Rumble keys missing. Set RUMBLE_API_TOKEN." };
+	}
+
+	try {
+		const safePath = assertSafeVideoPath(videoPath);
+		const videoBuffer = fs.readFileSync(safePath);
+		
+		const formData = new FormData();
+		formData.append("access_token", token);
+		formData.append("title", description ? description.substring(0, 50) : "Lazynext Upload");
+		formData.append("description", description || "");
+		formData.append("file", new Blob([videoBuffer], { type: "video/mp4" }), "video.mp4");
+
+		// Note: Rumble's API is proprietary to enterprise users. This hits the standard ingest endpoint.
+		const resp = await fetchWithStatus("https://rumble.com/api/v0/upload", {
+			method: "POST",
+			body: formData,
+		});
+
+		const data = await resp.json() as any;
+
+		return {
+			platform: "rumble",
+			success: true,
+			postId: data.video_id,
+			postUrl: data.url || `https://rumble.com/v${data.video_id}`,
+		};
+	} catch (err: any) {
+		return { platform: "rumble", success: false, error: err?.message || String(err) };
+	}
 }
-
-
-export async function publishToReddit(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Reddit (Mock)...`);
-	return {
-		platform: "reddit",
-		success: true,
-		postId: `mock_reddit_id`,
-		postUrl: `https://reddit.com/mock`,
-	};
-}
-
-
-export async function publishToDiscord(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Discord (Mock)...`);
-	return {
-		platform: "discord",
-		success: true,
-		postId: `mock_discord_id`,
-		postUrl: `https://discord.com/mock`,
-	};
-}
-
-
-export async function publishToBluesky(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Bluesky (Mock)...`);
-	return {
-		platform: "bluesky",
-		success: true,
-		postId: `mock_bluesky_id`,
-		postUrl: `https://bluesky.com/mock`,
-	};
-}
-
-
-export async function publishToMastodon(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Mastodon (Mock)...`);
-	return {
-		platform: "mastodon",
-		success: true,
-		postId: `mock_mastodon_id`,
-		postUrl: `https://mastodon.com/mock`,
-	};
-}
-
-
-export async function publishToTelegram(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Telegram (Mock)...`);
-	return {
-		platform: "telegram",
-		success: true,
-		postId: `mock_telegram_id`,
-		postUrl: `https://telegram.com/mock`,
-	};
-}
-
-
-export async function publishToDailymotion(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Dailymotion (Mock)...`);
-	return {
-		platform: "dailymotion",
-		success: true,
-		postId: `mock_dailymotion_id`,
-		postUrl: `https://dailymotion.com/mock`,
-	};
-}
-
-
-export async function publishToBilibili(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Bilibili (Mock)...`);
-	return {
-		platform: "bilibili",
-		success: true,
-		postId: `mock_bilibili_id`,
-		postUrl: `https://bilibili.com/mock`,
-	};
-}
-
-
-export async function publishToPatreon(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Patreon (Mock)...`);
-	return {
-		platform: "patreon",
-		success: true,
-		postId: `mock_patreon_id`,
-		postUrl: `https://patreon.com/mock`,
-	};
-}
-
-
-export async function publishToMedium(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Medium (Mock)...`);
-	return {
-		platform: "medium",
-		success: true,
-		postId: `mock_medium_id`,
-		postUrl: `https://medium.com/mock`,
-	};
-}
-
-
-export async function publishToWhatsApp(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to WhatsApp (Mock)...`);
-	return {
-		platform: "whatsapp",
-		success: true,
-		postId: `mock_whatsapp_id`,
-		postUrl: `https://whatsapp.com/mock`,
-	};
-}
-
-
-export async function publishToWeChat(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to WeChat (Mock)...`);
-	return {
-		platform: "wechat",
-		success: true,
-		postId: `mock_wechat_id`,
-		postUrl: `https://wechat.com/mock`,
-	};
-}
-
-
-export async function publishToLine(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Line (Mock)...`);
-	return {
-		platform: "line",
-		success: true,
-		postId: `mock_line_id`,
-		postUrl: `https://line.com/mock`,
-	};
-}
-
-
-export async function publishToKwai(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Kwai (Mock)...`);
-	return {
-		platform: "kwai",
-		success: true,
-		postId: `mock_kwai_id`,
-		postUrl: `https://kwai.com/mock`,
-	};
-}
-
-
-export async function publishToTumblr(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Tumblr (Mock)...`);
-	return {
-		platform: "tumblr",
-		success: true,
-		postId: `mock_tumblr_id`,
-		postUrl: `https://tumblr.com/mock`,
-	};
-}
-
-
-export async function publishToOnlyFans(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to OnlyFans (Mock)...`);
-	return {
-		platform: "onlyfans",
-		success: true,
-		postId: `mock_onlyfans_id`,
-		postUrl: `https://onlyfans.com/mock`,
-	};
-}
-
-
-export async function publishToXigua(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Xigua (Mock)...`);
-	return {
-		platform: "xigua",
-		success: true,
-		postId: `mock_xigua_id`,
-		postUrl: `https://xigua.com/mock`,
-	};
-}
-
-
-export async function publishToKick(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Kick (Mock)...`);
-	return {
-		platform: "kick",
-		success: true,
-		postId: `mock_kick_id`,
-		postUrl: `https://kick.com/mock`,
-	};
-}
-
-
-export async function publishToTruthSocial(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Truth Social (Mock)...`);
-	return {
-		platform: "truthsocial",
-		success: true,
-		postId: `mock_truthsocial_id`,
-		postUrl: `https://truthsocial.com/mock`,
-	};
-}
-
-
-export async function publishToVKontakte(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to VKontakte (Mock)...`);
-	return {
-		platform: "vk",
-		success: true,
-		postId: `mock_vk_id`,
-		postUrl: `https://vk.com/mock`,
-	};
-}
-
-
-export async function publishToWeibo(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Weibo (Mock)...`);
-	return {
-		platform: "weibo",
-		success: true,
-		postId: `mock_weibo_id`,
-		postUrl: `https://weibo.com/mock`,
-	};
-}
-
-
-export async function publishToKakaoTalk(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to KakaoTalk (Mock)...`);
-	return {
-		platform: "kakaotalk",
-		success: true,
-		postId: `mock_kakaotalk_id`,
-		postUrl: `https://kakaotalk.com/mock`,
-	};
-}
-
-
-export async function publishToViber(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Viber (Mock)...`);
-	return {
-		platform: "viber",
-		success: true,
-		postId: `mock_viber_id`,
-		postUrl: `https://viber.com/mock`,
-	};
-}
-
-
-export async function publishToSignal(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Signal (Mock)...`);
-	return {
-		platform: "signal",
-		success: true,
-		postId: `mock_signal_id`,
-		postUrl: `https://signal.com/mock`,
-	};
-}
-
-
-export async function publishToSlack(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Slack (Mock)...`);
-	return {
-		platform: "slack",
-		success: true,
-		postId: `mock_slack_id`,
-		postUrl: `https://slack.com/mock`,
-	};
-}
-
-
-export async function publishToSubstack(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Substack (Mock)...`);
-	return {
-		platform: "substack",
-		success: true,
-		postId: `mock_substack_id`,
-		postUrl: `https://substack.com/mock`,
-	};
-}
-
-
-export async function publishToGhost(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Ghost (Mock)...`);
-	return {
-		platform: "ghost",
-		success: true,
-		postId: `mock_ghost_id`,
-		postUrl: `https://ghost.com/mock`,
-	};
-}
-
-
-export async function publishToLocals(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Locals (Mock)...`);
-	return {
-		platform: "locals",
-		success: true,
-		postId: `mock_locals_id`,
-		postUrl: `https://locals.com/mock`,
-	};
-}
-
-
-export async function publishToOdysee(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Odysee (Mock)...`);
-	return {
-		platform: "odysee",
-		success: true,
-		postId: `mock_odysee_id`,
-		postUrl: `https://odysee.com/mock`,
-	};
-}
-
-
-export async function publishToBitChute(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to BitChute (Mock)...`);
-	return {
-		platform: "bitchute",
-		success: true,
-		postId: `mock_bitchute_id`,
-		postUrl: `https://bitchute.com/mock`,
-	};
-}
-
-
-export async function publishToFlickr(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Flickr (Mock)...`);
-	return {
-		platform: "flickr",
-		success: true,
-		postId: `mock_flickr_id`,
-		postUrl: `https://flickr.com/mock`,
-	};
-}
-
-
-export async function publishToMixcloud(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Mixcloud (Mock)...`);
-	return {
-		platform: "mixcloud",
-		success: true,
-		postId: `mock_mixcloud_id`,
-		postUrl: `https://mixcloud.com/mock`,
-	};
-}
-
-
-export async function publishToDTube(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to DTube (Mock)...`);
-	return {
-		platform: "dtube",
-		success: true,
-		postId: `mock_dtube_id`,
-		postUrl: `https://dtube.com/mock`,
-	};
-}
-
-
-export async function publishToTrovo(
-	videoPath: string,
-	description?: string,
-): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Trovo (Mock)...`);
-	return {
-		platform: "trovo",
-		success: true,
-		postId: `mock_trovo_id`,
-		postUrl: `https://trovo.com/mock`,
-	};
-}
-
 // ── Unified Publish Entry Point ───────────────────────────────────────
 
 export async function publish(
