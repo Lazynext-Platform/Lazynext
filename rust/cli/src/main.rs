@@ -23,6 +23,9 @@ use lazynext_core::nle_state::ProjectData;
 use lazynext_rules::{RuleContext, RuleSet};
 use serde::Serialize;
 use std::io::{self, IsTerminal, Read};
+use rust_i18n::{i18n, set_locale, t};
+
+i18n!("locales");
 
 /// Top-level CLI arguments for the Lazynext headless renderer.
 ///
@@ -175,6 +178,10 @@ enum PromoCommands {
 // CLI entry point: parses arguments and dispatches to pipe mode or a subcommand.
 #[tokio::main]
 async fn main() {
+    // Determine the terminal locale and set it globally
+    let locale = sys_locale::get_locale().unwrap_or_else(|| String::from("en-US"));
+    set_locale(&locale);
+
     let args = Args::parse();
 
     // Pipe mode: -p flag provided — read stdin, process prompt, output, exit
@@ -183,7 +190,7 @@ async fn main() {
         return;
     }
 
-    println!("🚀 Lazynext Headless CLI v{}", env!("CARGO_PKG_VERSION"));
+    println!("{} v{}", t!("cli_start"), env!("CARGO_PKG_VERSION"));
 
     let command = match &args.command {
         Some(cmd) => cmd,

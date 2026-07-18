@@ -1,0 +1,5 @@
+hello: "Halo"
+welcome: "Selamat datang di Lazynext"
+error_unauthorized: "Akses tidak sah"
+error_not_found: "Sumber daya tidak ditemukan"
+error_internal: "Kesalahan server internal"

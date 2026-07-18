@@ -33,6 +33,10 @@ opentelemetry_sdk = { version = "0.32.1", features = ["rt-tokio"] }
 opentelemetry-otlp = { version = "0.32.0", features = ["reqwest-client", "http-proto"] }
 tracing-opentelemetry = "0.33.0"
 promotions = { version = "0.1.0", path = "../crates/promotions" }
+rust-i18n = "4.2.1"
+sys-locale = "0.3.2"
+axum-macros = "0.5.1"
+lazynext_international = { version = "0.1.0", path = "../crates/international" }
 
 [dev-dependencies]
 reqwest = { version = "0.13", features = ["json"] }

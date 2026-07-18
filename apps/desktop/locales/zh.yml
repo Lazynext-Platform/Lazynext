@@ -1,0 +1,5 @@
+hello: "你好"
+welcome: "欢迎使用 Lazynext"
+error_unauthorized: "未授权访问"
+error_not_found: "资源未找到"
+error_internal: "内部服务器错误"

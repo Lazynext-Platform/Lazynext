@@ -1,0 +1,22 @@
+{
+  "extName": { "message": "Lazynext 浏览器扩展" },
+  "extDescription": { "message": "从任何网页捕获视频到您的Lazynext时间线。" },
+  "extActionTitle": { "message": "Lazynext" },
+  "captureStatus": { "message": "从当前页面捕获视频并导入到您的Lazynext时间线。" },
+  "drmProtected": { "message": "无法捕获 — 视频可能受DRM保护。" },
+  "accessFailed": { "message": "访问页面失败。请刷新重试。" },
+  "importing": { "message": "导入中..." },
+  "importSuccess": { "message": "媒体导入成功！" },
+  "import": { "message": "导入" },
+  "noVideos": { "message": "此页面未检测到视频。" },
+  "tryAgain": { "message": "请导航到包含视频内容的页面并重试。" },
+  "launchOverlay": { "message": "启动 Lazynext AI 代理 (叠加层)" },
+  "toggleTheme": { "message": "切换主题" },
+  "videosDetected": { "message": "检测到 $1$ 个视频" },
+  "aiIngest": { "message": "发送到 Lazynext AI 代理进行分析" },
+  "signIn": { "message": "登录" },
+  "signOut": { "message": "退出" },
+  "overlayCapture": { "message": "捕获选定区域" },
+  "overlayCancel": { "message": "取消" },
+  "selectArea": { "message": "拖动以选择要捕获的区域" }
+}

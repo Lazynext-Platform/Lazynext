@@ -60,6 +60,7 @@ export const exportSchema = z.object({
 export const dodoCheckoutSchema = z.object({
 	priceId: z.string().min(1, "priceId must not be empty"),
 	code: z.string().optional(),
+	currency: z.string().length(3).optional(),
 });
 
 /** PATCH /api/user/profile */

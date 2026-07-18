@@ -1,0 +1,22 @@
+{
+  "extName": { "message": "Lazynext ブラウザ拡張機能" },
+  "extDescription": { "message": "任意のウェブページからLazynextタイムラインに動画を取り込みます。" },
+  "extActionTitle": { "message": "Lazynext" },
+  "captureStatus": { "message": "現在のページから動画をキャプチャし、Lazynextタイムラインにインポートします。" },
+  "drmProtected": { "message": "キャプチャできません — 動画がDRM保護されている可能性があります。" },
+  "accessFailed": { "message": "ページにアクセスできませんでした。更新してください。" },
+  "importing": { "message": "インポート中..." },
+  "importSuccess": { "message": "メディアのインポートが完了しました！" },
+  "import": { "message": "インポート" },
+  "noVideos": { "message": "このページには動画が検出されませんでした。" },
+  "tryAgain": { "message": "動画コンテンツのあるページに移動して再試行してください。" },
+  "launchOverlay": { "message": "Lazynext AIエージェントを起動 (オーバーレイ)" },
+  "toggleTheme": { "message": "テーマ切替" },
+  "videosDetected": { "message": "$1$ 件の動画を検出" },
+  "aiIngest": { "message": "Lazynext AIエージェントに分析を送信" },
+  "signIn": { "message": "サインイン" },
+  "signOut": { "message": "サインアウト" },
+  "overlayCapture": { "message": "選択範囲をキャプチャ" },
+  "overlayCancel": { "message": "キャンセル" },
+  "selectArea": { "message": "ドラッグしてキャプチャする領域を選択" }
+}

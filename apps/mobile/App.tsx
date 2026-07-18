@@ -1,4 +1,10 @@
 /** @module App Root application component for mobile */
+import "@formatjs/intl-getcanonicallocales/polyfill";
+import "@formatjs/intl-locale/polyfill";
+import "@formatjs/intl-pluralrules/polyfill";
+import "@formatjs/intl-numberformat/polyfill";
+import "@formatjs/intl-datetimeformat/polyfill";
+import "./src/i18n";
 import React, { useEffect, useRef, useState } from "react";
 import {
 	StyleSheet,
@@ -45,8 +51,14 @@ function AuthNavigator() {
 	);
 }
 
+import { useTranslation } from "react-i18next";
+import i18n from "./src/i18n";
+
+const SUPPORTED_MOBILE_LOCALES = ["en","fr","es","de","ja","ko","zh","hi","ar","pt","ru","it","nl","pl","tr","th","vi","id"];
+
 /** Dashboard screen with project stats, quick actions, and AI Copilot prompt input. */
 function DashboardScreen() {
+    const { t } = useTranslation();
 	const { theme, mode, setMode } = useTheme();
 	const styles = React.useMemo(() => getStyles(theme), [theme]);
 	const [projectName, setProjectName] = useState("Loading...");
@@ -125,7 +137,7 @@ function DashboardScreen() {
 				<Text style={styles.title}>
 					LAZYNEXT<Text style={styles.cyan}>.</Text>
 				</Text>
-				<Text style={styles.subtitle}>Mobile NLE Shell</Text>
+				<Text style={styles.subtitle}>{t("welcome")}</Text>
 				{isApplePencil && (
 					<Text style={{ color: theme.accentPrimary, fontSize: 12, marginTop: 4 }}>
 						Apple Pencil Detected
@@ -140,6 +152,17 @@ function DashboardScreen() {
 					}}
 				>
 					<Text style={styles.themeToggleText}>Mode: {mode}</Text>
+				</TouchableOpacity>
+				
+				<TouchableOpacity 
+					style={[styles.themeToggle, { right: 80 }]}
+					onPress={() => {
+						const currentIdx = SUPPORTED_MOBILE_LOCALES.indexOf(i18n.language);
+						const nextIdx = (currentIdx + 1) % SUPPORTED_MOBILE_LOCALES.length;
+						i18n.changeLanguage(SUPPORTED_MOBILE_LOCALES[nextIdx]);
+					}}
+				>
+					<Text style={styles.themeToggleText}>{i18n.language.toUpperCase()}</Text>
 				</TouchableOpacity>
 			</View>
 

@@ -1,0 +1,5 @@
+hello: "こんにちは"
+welcome: "Lazynextへようこそ"
+error_unauthorized: "不正アクセス"
+error_not_found: "リソースが見つかりません"
+error_internal: "内部サーバーエラー"

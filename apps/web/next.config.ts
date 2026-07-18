@@ -5,6 +5,9 @@
 import type { NextConfig } from "next";
 
 import { withContentCollections } from "@content-collections/next";
+import createNextIntlPlugin from "next-intl/plugin";
+
+const withNextIntl = createNextIntlPlugin("./src/i18n.ts");
 
 const nextConfig: NextConfig = {
 	env: {
@@ -91,6 +94,20 @@ const nextConfig: NextConfig = {
 		];
 	},
 
+	async rewrites() {
+		const locales = ["en","fr","es","de","ja","ko","zh","hi","ar","pt","ru","it","nl","pl","tr","th","vi","id"];
+		return locales.flatMap((locale) => [
+			{
+				source: `/${locale}`,
+				destination: "/",
+			},
+			{
+				source: `/${locale}/:path*`,
+				destination: "/:path*",
+			},
+		]);
+	},
+
 	typescript: {
 		// TypeScript errors fail the build — fix them, don't bypass
 		ignoreBuildErrors: false,
@@ -163,4 +180,4 @@ const nextConfig: NextConfig = {
 	},
 };
 
-export default withContentCollections(nextConfig);
+export default withContentCollections(withNextIntl(nextConfig));

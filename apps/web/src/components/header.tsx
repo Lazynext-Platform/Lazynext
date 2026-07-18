@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 import { Button } from "./ui/button";
 import Image from "next/image";
 import { ThemeToggle } from "./theme-toggle";
+import { LocaleSelector } from "./locale-selector";
 import {
 	Copy01Icon,
 	Download01Icon,
@@ -129,7 +130,8 @@ export function Header() {
 						>
 							Sign Out
 						</Button>
-						<ThemeToggle />
+							<ThemeToggle />
+							<LocaleSelector />
 					</div>
 				</div>
 				<div
@@ -181,10 +183,13 @@ export function Header() {
 								</motion.div>
 							))}
 						</nav>
-						<ThemeToggle
-							className="absolute right-8 bottom-8 size-10"
-							iconClassName="!size-[1.2rem]"
-						/>
+							<ThemeToggle
+								className="absolute right-8 bottom-8 size-10"
+								iconClassName="!size-[1.2rem]"
+							/>
+							<div className="absolute left-8 bottom-8">
+								<LocaleSelector />
+							</div>
 					</div>
 				</div>
 			</div>

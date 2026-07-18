@@ -10,6 +10,7 @@
 import { MarketingNavbar } from "@/components/marketing/navbar";
 import { MarketingFooter } from "@/components/marketing/footer";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
 	Sparkles,
 	ArrowRight,
@@ -103,6 +104,7 @@ const competitorFeatures = [
 
 /** Home landing page with animated hero and all sections. */
 export default function Home() {
+	const t = useTranslations("Index");
 	const containerRef = useRef(null);
 	const { scrollYProgress } = useScroll({
 		target: containerRef,
@@ -158,12 +160,7 @@ export default function Home() {
 							variants={itemVariants}
 							className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tighter mb-6 leading-[1.05]"
 						>
-							The{" "}
-							<span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent-primary)] via-blue-400 to-[var(--accent-secondary)]">
-								Autonomous
-							</span>
-							<br />
-							Video Editor.
+							{t("title")}
 						</motion.h1>
 
 						{/* Tagline */}

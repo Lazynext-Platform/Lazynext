@@ -1,0 +1,5 @@
+[package]
+name = "lazynext_international"
+version = "0.1.0"
+edition = "2024"
+description = "Comprehensive ISO 3166-1 country data, ISO 4217 currency data, and locale-aware formatting for Lazynext"

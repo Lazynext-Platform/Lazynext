@@ -20,6 +20,7 @@ import {
   ListPromptsRequestSchema,
   GetPromptRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
+import { t, setLocale } from "./i18n.js";
 
 const server = new Server(
   {
@@ -1917,7 +1918,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   if (!tool) {
     return {
-      content: [{ type: "text", text: `Unknown tool: ${name}` }],
+	      content: [{ type: "text", text: t("error_unknown_tool").replace("{name}", name) }],
       isError: true,
     };
   }
@@ -2108,7 +2109,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       content: [
         {
           type: "text",
-          text: `Failed to execute ${name}: ${error.message}`,
+          text: t("error_tool_failed").replace("{name}", name).replace("{message}", error.message),
         },
       ],
       isError: true,
@@ -2143,7 +2144,7 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
         {
           uri,
           mimeType: "application/json",
-          text: JSON.stringify({ error: `Unknown resource: ${uri}` }),
+          text: JSON.stringify({ error: t("resource_unknown", `Unknown resource: ${uri}`).replace("{uri}", uri) }),
         },
       ],
     };
@@ -2187,7 +2188,7 @@ server.setRequestHandler(GetPromptRequestSchema, async (request) => {
           role: "assistant",
           content: {
             type: "text",
-            text: `Unknown prompt template: ${name}. Available: ${PROMPTS.map((p) => p.name).join(", ")}`,
+            text: t("prompt_unknown").replace("{name}", name).replace("{available}", PROMPTS.map((p) => p.name).join(", ")),
           },
         },
       ],

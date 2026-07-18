@@ -22,3 +22,5 @@ image = "0.25"
 rfd = "0.17.2"
 uuid = { version = "1.23.4", features = ["v4"] }
 sha2 = "0.11"
+rust-i18n = "4.2.1"
+sys-locale = "0.3.2"

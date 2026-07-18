@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Lazynext Browser Extension",
+  "name": "__MSG_extName__",
   "version": "0.1.0",
-  "description": "Capture videos from any webpage into your Lazynext timeline.",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
   "permissions": [
     "activeTab",
     "contextMenus",
@@ -22,7 +23,7 @@
   ],
   "action": {
     "default_popup": "index.html",
-    "default_title": "Lazynext",
+    "default_title": "__MSG_extActionTitle__",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",

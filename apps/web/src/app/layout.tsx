@@ -35,12 +35,18 @@ import { MatomoProvider } from "@/components/providers/matomo-provider";
 import { OpenPanelProvider } from "@/components/providers/openpanel-provider";
 import { CountlyProvider } from "@/components/providers/countly-provider";
 
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages, getLocale } from 'next-intl/server';
+
 /** App root layout with providers, scripts, and global page shell. */
-export default function RootLayout({
+export default async function RootLayout({
 	children,
 }: Readonly<{ children: React.ReactNode }>) {
+    const locale = await getLocale();
+    const messages = await getMessages();
+
 	return (
-		<html lang="en" suppressHydrationWarning>
+		<html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
 			<head>
 				<OrganizationLD />
 				<SoftwareAppLD />
@@ -55,6 +61,7 @@ export default function RootLayout({
 			<body
 				className={`${siteFont.className} font-sans antialiased min-h-screen selection:bg-cyan-500/30 selection:text-cyan-200`}
 			>
+                <NextIntlClientProvider messages={messages}>
 				{/* Background Mesh */}
 				<div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-900/20 via-background to-background" />
 				<div className="fixed top-0 left-0 w-full h-full -z-20 bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop')] bg-cover bg-center opacity-10 dark:opacity-5 mix-blend-overlay" />
@@ -89,6 +96,7 @@ export default function RootLayout({
 						</TooltipProvider>
 					</ThemeProvider>
 				</PostHogProvider>
+                </NextIntlClientProvider>
 			</body>
 		</html>
 	);

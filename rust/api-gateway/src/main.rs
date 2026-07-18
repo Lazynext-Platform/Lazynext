@@ -6,11 +6,13 @@
 //! Redis-backed WebSocket state.
 
 use axum::extract::{Path, Query, State};
-use axum::http::{HeaderMap, StatusCode};
-use axum::middleware;
+use axum::http::{HeaderMap, StatusCode, header};
+use axum::middleware::{self, Next};
+use axum::extract::Request;
 use axum::response::{IntoResponse, Redirect};
-use axum::routing::{delete, get, post};
+use axum::routing::{delete, get, post, put};
 use axum::{Extension, Json, Router};
+use rust_i18n::i18n;
 // Note: axum 0.8 retains `Extension` as an extractor.
 // AuthClaims are inserted in `rbac::authorize_request` and
 // extracted by handlers via `Extension(claims): Extension<AuthClaims>`.`
@@ -30,6 +32,7 @@ use tracing::{info, warn};
 pub mod captcha;
 pub mod csrf;
 pub mod db;
+pub mod international;
 pub mod ratelimit;
 pub mod rbac;
 pub mod ws;
@@ -37,6 +40,33 @@ pub mod ws;
 use tower_http::trace::TraceLayer;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
+
+i18n!("locales");
+
+/// Middleware to extract Accept-Language header and set the locale for the current thread/request
+async fn extract_locale_middleware(
+    headers: HeaderMap,
+    request: Request,
+    next: Next,
+) -> axum::response::Response {
+    let mut locale = "en-US";
+    if let Some(accept_lang) = headers.get(header::ACCEPT_LANGUAGE) {
+        if let Ok(lang_str) = accept_lang.to_str() {
+            // Very simple parser: takes the first language code (e.g. "fr-CH, fr;q=0.9, en;q=0.8" -> "fr-CH")
+            if let Some(first_lang) = lang_str.split(',').next() {
+                locale = first_lang.split(';').next().unwrap_or("en-US").trim();
+            }
+        }
+    }
+    
+    // In a real application, you'd want to store this in request extensions or thread-local storage.
+    // rust-i18n uses static globals by default which isn't safe for async multi-tenant servers.
+    // We insert it as an extension so handlers can access it.
+    let mut request = request;
+    request.extensions_mut().insert(locale.to_string());
+    
+    next.run(request).await
+}
 
 // Convenience re-imports so handlers can be concise.
 use db::DbStore;
@@ -239,6 +269,18 @@ async fn main() {
             "/api/v1/captcha/verify-pow",
             post(captcha::handle_verify_pow),
         )
+        .route(
+            "/api/v1/international/countries",
+            get(international::handle_get_countries),
+        )
+        .route(
+            "/api/v1/international/currencies",
+            get(international::handle_get_currencies),
+        )
+        .route(
+            "/api/v1/international/format-currency",
+            post(international::handle_format_currency),
+        )
         .layer(middleware::from_fn_with_state(
             state.clone(),
             ratelimit::rate_limit,
@@ -247,6 +289,7 @@ async fn main() {
     let authenticated_routes = Router::new()
         .route("/api/v1/timeline", get(handle_get_timeline))
         .route("/api/v1/user/profile", get(handle_get_profile))
+        .route("/api/v1/user/locale", put(international::handle_update_user_locale))
         .route("/api/v1/user/credits", get(handle_get_user_credits))
         .route("/api/v1/projects", get(handle_get_projects))
         .route("/api/v1/promotions/wallet", get(handle_get_wallet_balance))
@@ -254,7 +297,7 @@ async fn main() {
         .route("/api/v1/ws", get(ws::ws_handler))
         .route("/api/v1/social/schedule", get(handle_social_schedule))
         .route(
-            "/api/v1/auth/social/:platform",
+            "/api/v1/auth/social/{platform}",
             get(handle_social_auth_init),
         )
         .route("/api/v1/routines", get(handle_list_routines))
@@ -316,6 +359,7 @@ async fn main() {
     let app = public_routes
         .merge(all_authenticated)
         .with_state(state)
+        .layer(middleware::from_fn(extract_locale_middleware))
         .layer(TraceLayer::new_for_http());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 8005));
@@ -362,13 +406,15 @@ async fn main() {
     )
 )]
 // Handles the health-check request, reporting service and database status.
-async fn health_handler(State(state): State<AppState>) -> Json<Value> {
+async fn health_handler(State(state): State<AppState>, Extension(locale): Extension<String>) -> Json<Value> {
+    rust_i18n::set_locale(&locale);
+    let message = rust_i18n::t!("welcome");
     let db_status = if state.db.health_check().await.is_ok() {
         "ok"
     } else {
         "degraded"
     };
-    Json(json!({"status": "ok", "service": "api-gateway", "database": db_status}))
+    Json(json!({"status": "ok", "service": "api-gateway", "database": db_status, "message": message}))
 }
 
 // ── Authenticated Handlers ─────────────────────────────────────────────────
@@ -471,6 +517,9 @@ async fn handle_get_profile(
                 "tier": "Pro Creator Tier",
                 "initials": initials(&user.name),
                 "ai_credits": user.ai_credits,
+                "locale": user.locale.unwrap_or_else(|| "en-US".to_string()),
+                "country": user.country.unwrap_or_else(|| "US".to_string()),
+                "currency": user.currency.unwrap_or_else(|| "USD".to_string()),
             }
         })),
         Ok(None) => {
@@ -485,6 +534,9 @@ async fn handle_get_profile(
                     "tier": "Free",
                     "initials": initials(claims.name.as_deref().unwrap_or("U")),
                     "ai_credits": 50,
+                    "locale": "en-US",
+                    "country": "US",
+                    "currency": "USD",
                 }
             }))
         }
@@ -729,6 +781,9 @@ async fn find_user_by_dodo_customer(
         role: r.get("role"),
         dodo_customer_id: r.get("dodo_customer_id"),
         ai_credits: r.get("ai_credits"),
+        locale: r.get("locale"),
+        country: r.get("country"),
+        currency: r.get("currency"),
         created_at: r.get("created_at"),
         updated_at: r.get("updated_at"),
     }))
@@ -2150,16 +2205,25 @@ async fn handle_get_wallet_balance(
 ) -> Json<Value> {
     let user_id = claims.sub.clone();
 
+    // Fetch user's preferred currency
+    let currency = state.db.get_user(&user_id).await
+        .ok()
+        .flatten()
+        .and_then(|u| u.currency)
+        .unwrap_or_else(|| "USD".to_string());
+
     match state.db.get_wallet_balance(&user_id).await {
         Ok(balance) => Json(json!({
             "success": true,
             "balance": balance,
-            "currency": "USD"
+            "currency": currency,
+            "formatted": lazynext_international::format::format_currency(balance as i64, &currency, "en"),
         })),
         Err(_) => Json(json!({
             "success": true,
             "balance": 0,
-            "currency": "USD"
+            "currency": currency,
+            "formatted": lazynext_international::format::format_currency(0, &currency, "en"),
         })),
     }
 }
@@ -2170,20 +2234,31 @@ async fn handle_get_my_referrals(
 ) -> Json<Value> {
     let user_id = claims.sub.clone();
 
+    // Fetch user's preferred currency
+    let currency = state.db.get_user(&user_id).await
+        .ok()
+        .flatten()
+        .and_then(|u| u.currency)
+        .unwrap_or_else(|| "USD".to_string());
+
     match state.db.get_referral_stats(&user_id).await {
         Ok((link, total, converted, earned)) => Json(json!({
             "success": true,
             "referral_link": link,
             "total_referrals": total,
             "converted": converted,
-            "earned": earned
+            "earned": earned,
+            "currency": currency,
+            "formatted": lazynext_international::format::format_currency(earned as i64, &currency, "en"),
         })),
         Err(_) => Json(json!({
             "success": true,
             "referral_link": format!("https://lazynext.com/ref/{}", user_id),
             "total_referrals": 0,
             "converted": 0,
-            "earned": 0
+            "earned": 0,
+            "currency": currency,
+            "formatted": lazynext_international::format::format_currency(0, &currency, "en"),
         })),
     }
 }

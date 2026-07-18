@@ -1,0 +1,5 @@
+hello: "Здравствуйте"
+welcome: "Добро пожаловать в Lazynext"
+error_unauthorized: "Несанкционированный доступ"
+error_not_found: "Ресурс не найден"
+error_internal: "Внутренняя ошибка сервера"

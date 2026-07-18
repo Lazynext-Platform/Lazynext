@@ -1,0 +1,5 @@
+hello: "Hallo"
+welcome: "Welkom bij Lazynext"
+error_unauthorized: "Ongeautoriseerde toegang"
+error_not_found: "Bron niet gevonden"
+error_internal: "Interne serverfout"

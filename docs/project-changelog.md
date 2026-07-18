@@ -2,7 +2,29 @@
 
 > **Project**: Lazynext
 > **Format**: Based on [Keep a Changelog](https://keepachangelog.com/)
-> **Last Updated**: 2026-07-05
+> **Last Updated**: 2026-07-19
+
+---
+
+## [Unreleased] — 2026-07-19 (Feature #40)
+
+### Added
+- **Global Localization** across all 7 platform formats (#40)
+- 18 supported languages: en, fr, es, de, ja, ko, zh, hi, ar, pt, ru, it, nl, pl, tr, th, vi, id
+- ISO 3166-1 country registry (190 countries) in Rust international crate
+- ISO 4217 currency registry (100+ currencies) with locale-aware formatting
+- `lazynext_international` Rust crate with `format_currency()`, `validate_locale()`, country/currency lookups
+- API Gateway: `Accept-Language` middleware, `/api/v1/international/*` endpoints, `PUT /api/v1/user/locale`
+- Web: `next-intl` integration, 120+ message keys across 8 namespaces, `LocaleSelector`/`CountrySelector`/`CurrencySelector` components, RTL support for Arabic
+- Mobile: `react-i18next` + `expo-localization` + `@formatjs/intl-*` polyfills, locale switcher
+- Desktop: `rust-i18n` + GPUI `tr!()` macro, all UI strings localized
+- CLI: `sys-locale` auto-detection at startup
+- Browser Extension: `chrome.i18n` with `_locales/` structure, manifest `__MSG_*__` references
+- MCP Server: 18-language inline i18n module, `MCP_LOCALE` env var
+- Multi-currency Dodo Payments checkout
+- Wallet balance and referral earnings returned in user's preferred currency
+- Settings page with Region & Currency preferences section
+- i18n pipeline documentation (`docs/i18n.md`)
 
 ---
 

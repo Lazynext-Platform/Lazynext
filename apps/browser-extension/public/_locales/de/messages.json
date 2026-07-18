@@ -1,0 +1,22 @@
+{
+  "extName": { "message": "Lazynext Browser-Erweiterung" },
+  "extDescription": { "message": "Videos von jeder Webseite in Ihre Lazynext-Timeline aufnehmen." },
+  "extActionTitle": { "message": "Lazynext" },
+  "captureStatus": { "message": "Video von aktueller Seite aufnehmen und in Ihre Lazynext-Timeline importieren." },
+  "drmProtected": { "message": "Aufnahme nicht möglich — Video könnte DRM-geschützt sein." },
+  "accessFailed": { "message": "Zugriff auf Seite fehlgeschlagen. Bitte aktualisieren." },
+  "importing": { "message": "Importiere..." },
+  "importSuccess": { "message": "Medien erfolgreich importiert!" },
+  "import": { "message": "Importieren" },
+  "noVideos": { "message": "Keine Videos auf dieser Seite erkannt." },
+  "tryAgain": { "message": "Navigieren Sie zu einer Seite mit Videoinhalt und versuchen Sie es erneut." },
+  "launchOverlay": { "message": "Lazynext KI-Agent starten (Overlay)" },
+  "toggleTheme": { "message": "Design wechseln" },
+  "videosDetected": { "message": "$1$ Video$2$ erkannt" },
+  "aiIngest": { "message": "An Lazynext KI-Agent zur Analyse senden" },
+  "signIn": { "message": "Anmelden" },
+  "signOut": { "message": "Abmelden" },
+  "overlayCapture": { "message": "Ausgewählten Bereich aufnehmen" },
+  "overlayCancel": { "message": "Abbrechen" },
+  "selectArea": { "message": "Ziehen Sie, um einen Aufnahmebereich auszuwählen" }
+}

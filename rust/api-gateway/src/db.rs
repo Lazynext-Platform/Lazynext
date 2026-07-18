@@ -27,6 +27,12 @@ pub struct User {
     pub dodo_customer_id: Option<String>,
     /// Remaining AI credits balance.
     pub ai_credits: i32,
+    /// Preferred locale (e.g. "en-US", "fr-FR").
+    pub locale: Option<String>,
+    /// Preferred country (ISO 3166-1 alpha-2).
+    pub country: Option<String>,
+    /// Preferred currency (ISO 4217).
+    pub currency: Option<String>,
     /// Timestamp of user record creation.
     pub created_at: DateTime<Utc>,
     /// Timestamp of last user record update.
@@ -177,8 +183,8 @@ impl DbStore {
     /// app and the gateway needs to cache their profile).
     pub async fn upsert_user(&self, user: &User) -> Result<(), sqlx::Error> {
         sqlx::query(
-            "INSERT INTO \"user\" (id, email, name, email_verified, image, role, dodo_customer_id, ai_credits, created_at, updated_at)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            "INSERT INTO \"user\" (id, email, name, email_verified, image, role, dodo_customer_id, ai_credits, locale, country, currency, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
              ON CONFLICT (id) DO UPDATE SET
                email = EXCLUDED.email,
                name = EXCLUDED.name,
@@ -187,6 +193,9 @@ impl DbStore {
                role = EXCLUDED.role,
                dodo_customer_id = EXCLUDED.dodo_customer_id,
                ai_credits = EXCLUDED.ai_credits,
+               locale = EXCLUDED.locale,
+               country = EXCLUDED.country,
+               currency = EXCLUDED.currency,
                updated_at = EXCLUDED.updated_at",
         )
         .bind(&user.id)
@@ -197,6 +206,9 @@ impl DbStore {
         .bind(&user.role)
         .bind(&user.dodo_customer_id)
         .bind(user.ai_credits)
+        .bind(&user.locale)
+        .bind(&user.country)
+        .bind(&user.currency)
         .bind(user.created_at)
         .bind(user.updated_at)
         .execute(self.pool_ref()?)

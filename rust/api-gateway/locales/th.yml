@@ -1,0 +1,5 @@
+hello: "สวัสดี"
+welcome: "ยินดีต้อนรับสู่ Lazynext"
+error_unauthorized: "การเข้าถึงไม่ได้รับอนุญาต"
+error_not_found: "ไม่พบทรัพยากร"
+error_internal: "ข้อผิดพลาดภายในเซิร์ฟเวอร์"
