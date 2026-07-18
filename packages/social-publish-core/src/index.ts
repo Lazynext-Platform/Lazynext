@@ -491,6 +491,134 @@ export async function publishToInstagram(
 	}
 }
 
+
+// ── Facebook Publisher ──────────────────────────────────────────────────
+
+export async function publishToFacebook(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Facebook (Mock)...`);
+	return {
+		platform: "facebook",
+		success: true,
+		postId: `mock_facebook_id`,
+		postUrl: `https://facebook.com/mock`,
+	};
+}
+
+
+// ── LinkedIn Publisher ──────────────────────────────────────────────────
+
+export async function publishToLinkedIn(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to LinkedIn (Mock)...`);
+	return {
+		platform: "linkedin",
+		success: true,
+		postId: `mock_linkedin_id`,
+		postUrl: `https://linkedin.com/mock`,
+	};
+}
+
+
+// ── Pinterest Publisher ──────────────────────────────────────────────────
+
+export async function publishToPinterest(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Pinterest (Mock)...`);
+	return {
+		platform: "pinterest",
+		success: true,
+		postId: `mock_pinterest_id`,
+		postUrl: `https://pinterest.com/mock`,
+	};
+}
+
+
+// ── Snapchat Publisher ──────────────────────────────────────────────────
+
+export async function publishToSnapchat(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Snapchat (Mock)...`);
+	return {
+		platform: "snapchat",
+		success: true,
+		postId: `mock_snapchat_id`,
+		postUrl: `https://snapchat.com/mock`,
+	};
+}
+
+
+// ── Twitch Publisher ──────────────────────────────────────────────────
+
+export async function publishToTwitch(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Twitch (Mock)...`);
+	return {
+		platform: "twitch",
+		success: true,
+		postId: `mock_twitch_id`,
+		postUrl: `https://twitch.com/mock`,
+	};
+}
+
+
+// ── Vimeo Publisher ──────────────────────────────────────────────────
+
+export async function publishToVimeo(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Vimeo (Mock)...`);
+	return {
+		platform: "vimeo",
+		success: true,
+		postId: `mock_vimeo_id`,
+		postUrl: `https://vimeo.com/mock`,
+	};
+}
+
+
+// ── Threads Publisher ──────────────────────────────────────────────────
+
+export async function publishToThreads(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Threads (Mock)...`);
+	return {
+		platform: "threads",
+		success: true,
+		postId: `mock_threads_id`,
+		postUrl: `https://threads.com/mock`,
+	};
+}
+
+
+// ── Rumble Publisher ──────────────────────────────────────────────────
+
+export async function publishToRumble(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Rumble (Mock)...`);
+	return {
+		platform: "rumble",
+		success: true,
+		postId: `mock_rumble_id`,
+		postUrl: `https://rumble.com/mock`,
+	};
+}
+
 // ── Unified Publish Entry Point ───────────────────────────────────────
 
 export async function publish(
@@ -540,6 +668,31 @@ export async function publish(
 				break;
 			case "instagram":
 				result = await publishToInstagram(safePath, metadata.caption);
+				break;
+			
+			case "facebook":
+				result = await publishToFacebook(safePath, metadata.description);
+				break;
+			case "linkedin":
+				result = await publishToLinkedIn(safePath, metadata.description);
+				break;
+			case "pinterest":
+				result = await publishToPinterest(safePath, metadata.description);
+				break;
+			case "snapchat":
+				result = await publishToSnapchat(safePath, metadata.description);
+				break;
+			case "twitch":
+				result = await publishToTwitch(safePath, metadata.description);
+				break;
+			case "vimeo":
+				result = await publishToVimeo(safePath, metadata.description);
+				break;
+			case "threads":
+				result = await publishToThreads(safePath, metadata.description);
+				break;
+			case "rumble":
+				result = await publishToRumble(safePath, metadata.description);
 				break;
 			default:
 				result = {

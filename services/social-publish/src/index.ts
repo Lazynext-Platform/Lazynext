@@ -21,6 +21,14 @@ import {
 	publishToTikTok,
 	publishToYouTube,
 	publishToInstagram,
+	publishToFacebook,
+	publishToLinkedIn,
+	publishToPinterest,
+	publishToSnapchat,
+	publishToTwitch,
+	publishToVimeo,
+	publishToThreads,
+	publishToRumble,
 	assertSafeVideoPath,
 	type PublishResult,
 } from "@lazynext/social-publish-core";
@@ -313,22 +321,22 @@ async function publishToPlatform(
 			return publishToInstagram(req.video_path, req.description);
 		case "twitter":
 			return publishTwitter(req.video_path, req.description);
-		case "facebook":
-			return { platform, success: true, postId: "mock_facebook_id", postUrl: "https://facebook.com/mock" };
+				case "facebook":
+			return publishToFacebook(req.video_path, req.description);
 		case "linkedin":
-			return { platform, success: true, postId: "mock_linkedin_id", postUrl: "https://linkedin.com/mock" };
+			return publishToLinkedIn(req.video_path, req.description);
 		case "pinterest":
-			return { platform, success: true, postId: "mock_pinterest_id", postUrl: "https://pinterest.com/mock" };
+			return publishToPinterest(req.video_path, req.description);
 		case "snapchat":
-			return { platform, success: true, postId: "mock_snapchat_id", postUrl: "https://snapchat.com/mock" };
+			return publishToSnapchat(req.video_path, req.description);
 		case "twitch":
-			return { platform, success: true, postId: "mock_twitch_id", postUrl: "https://twitch.com/mock" };
+			return publishToTwitch(req.video_path, req.description);
 		case "vimeo":
-			return { platform, success: true, postId: "mock_vimeo_id", postUrl: "https://vimeo.com/mock" };
+			return publishToVimeo(req.video_path, req.description);
 		case "threads":
-			return { platform, success: true, postId: "mock_threads_id", postUrl: "https://threads.com/mock" };
+			return publishToThreads(req.video_path, req.description);
 		case "rumble":
-			return { platform, success: true, postId: "mock_rumble_id", postUrl: "https://rumble.com/mock" };
+			return publishToRumble(req.video_path, req.description);
 		default:
 			return {
 				platform,
