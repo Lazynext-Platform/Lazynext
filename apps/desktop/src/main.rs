@@ -16,8 +16,8 @@ use dashboard::Dashboard;
 mod auth;
 mod captcha;
 mod editor;
-mod theme;
 mod publish_modal;
+mod theme;
 
 // GPUI takes over the main thread, so we run a standard main function.
 fn main() {
@@ -70,7 +70,6 @@ fn main() {
     });
 
     app.run(move |cx: &mut App| {
-
         let bounds = Bounds {
             origin: point(px(0.0), px(0.0)),
             size: size(px(800.0), px(600.0)),

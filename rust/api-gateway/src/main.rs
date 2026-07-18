@@ -5,7 +5,7 @@
 //! initializes the PostgreSQL store, NLE state, webhook dispatcher, and
 //! Redis-backed WebSocket state.
 
-use axum::extract::{Path, State, Query};
+use axum::extract::{Path, Query, State};
 use axum::http::{HeaderMap, StatusCode};
 use axum::middleware;
 use axum::response::{IntoResponse, Redirect};
@@ -19,7 +19,7 @@ use lazynext_core::{
     Channel, ChannelEvent, ChannelManager, NLEEvent, NLEState, Routine, RoutineScheduler, Task,
     TaskQueue,
 };
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -223,7 +223,10 @@ async fn main() {
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .route("/health", get(health_handler))
         .route("/api/v1/dodo/webhook", post(handle_dodo_webhook))
-        .route("/api/v1/auth/social/callback", get(handle_social_auth_callback))
+        .route(
+            "/api/v1/auth/social/callback",
+            get(handle_social_auth_callback),
+        )
         .route(
             "/api/v1/captcha/verify-turnstile",
             post(captcha::handle_verify_turnstile),
@@ -248,7 +251,10 @@ async fn main() {
         .route("/api/v1/projects", get(handle_get_projects))
         .route("/api/v1/ws", get(ws::ws_handler))
         .route("/api/v1/social/schedule", get(handle_social_schedule))
-        .route("/api/v1/auth/social/:platform", get(handle_social_auth_init))
+        .route(
+            "/api/v1/auth/social/:platform",
+            get(handle_social_auth_init),
+        )
         .route("/api/v1/routines", get(handle_list_routines))
         .route("/api/v1/channels", get(handle_list_channels))
         .route("/api/v1/tasks", get(handle_list_tasks))
@@ -1268,7 +1274,7 @@ async fn handle_social_auth_init(
     let state = format!("{}:{}", platform, user_id);
     let base = social_publish_url();
     let client = reqwest::Client::new();
-    
+
     // We request the underlying Node.js service to generate the OAuth URL
     // since it holds the client IDs and secrets via passport/oauth libs.
     let response = client
@@ -1282,12 +1288,18 @@ async fn handle_social_auth_init(
             if let Some(url) = body.get("url").and_then(|u| u.as_str()) {
                 Redirect::to(url).into_response()
             } else {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Invalid URL from provider").into_response()
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Invalid URL from provider",
+                )
+                    .into_response()
             }
         }
-        Err(e) => {
-            (StatusCode::INTERNAL_SERVER_ERROR, format!("Failed to reach auth provider: {}", e)).into_response()
-        }
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("Failed to reach auth provider: {}", e),
+        )
+            .into_response(),
     }
 }
 
@@ -1322,7 +1334,8 @@ async fn handle_social_auth_callback(
                 body.get("refresh_token").and_then(|t| t.as_str()),
                 body.get("expires_in").and_then(|t| t.as_i64()), // in seconds
             ) {
-                let expires_at = expires_in.map(|sec| chrono::Utc::now() + chrono::Duration::seconds(sec));
+                let expires_at =
+                    expires_in.map(|sec| chrono::Utc::now() + chrono::Duration::seconds(sec));
 
                 let token_record = crate::db::UserSocialToken {
                     id: uuid::Uuid::new_v4().to_string(),
@@ -1343,12 +1356,18 @@ async fn handle_social_auth_callback(
                 // Redirect to web app dashboard/settings on success
                 Redirect::to("/settings?social_auth=success").into_response()
             } else {
-                (StatusCode::BAD_REQUEST, "Invalid token response from provider").into_response()
+                (
+                    StatusCode::BAD_REQUEST,
+                    "Invalid token response from provider",
+                )
+                    .into_response()
             }
         }
-        Err(e) => {
-            (StatusCode::INTERNAL_SERVER_ERROR, format!("Failed to exchange code: {}", e)).into_response()
-        }
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("Failed to exchange code: {}", e),
+        )
+            .into_response(),
     }
 }
 

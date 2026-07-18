@@ -21,6 +21,47 @@ import {
 	publishToTikTok,
 	publishToYouTube,
 	publishToInstagram,
+	publishToFacebook,
+	publishToLinkedIn,
+	publishToPinterest,
+	publishToSnapchat,
+	publishToTwitch,
+	publishToVimeo,
+	publishToThreads,
+	publishToRumble,
+	publishToReddit,
+	publishToDiscord,
+	publishToBluesky,
+	publishToMastodon,
+	publishToTelegram,
+	publishToDailymotion,
+	publishToBilibili,
+	publishToPatreon,
+	publishToMedium,
+	publishToWhatsApp,
+	publishToWeChat,
+	publishToLine,
+	publishToKwai,
+	publishToTumblr,
+	publishToOnlyFans,
+	publishToXigua,
+	publishToKick,
+	publishToTruthSocial,
+	publishToVKontakte,
+	publishToWeibo,
+	publishToKakaoTalk,
+	publishToViber,
+	publishToSignal,
+	publishToSlack,
+	publishToSubstack,
+	publishToGhost,
+	publishToLocals,
+	publishToOdysee,
+	publishToBitChute,
+	publishToFlickr,
+	publishToMixcloud,
+	publishToDTube,
+	publishToTrovo,
 	assertSafeVideoPath,
 	type PublishResult,
 } from "@lazynext/social-publish-core";
@@ -277,6 +318,47 @@ app.post("/publish/tiktok", buildPlatformPublisher("tiktok"));
 app.post("/publish/youtube", buildPlatformPublisher("youtube"));
 app.post("/publish/instagram", buildPlatformPublisher("instagram"));
 app.post("/publish/twitter", buildPlatformPublisher("twitter"));
+app.post("/publish/facebook", buildPlatformPublisher("facebook"));
+app.post("/publish/linkedin", buildPlatformPublisher("linkedin"));
+app.post("/publish/pinterest", buildPlatformPublisher("pinterest"));
+app.post("/publish/snapchat", buildPlatformPublisher("snapchat"));
+app.post("/publish/twitch", buildPlatformPublisher("twitch"));
+app.post("/publish/vimeo", buildPlatformPublisher("vimeo"));
+app.post("/publish/threads", buildPlatformPublisher("threads"));
+app.post("/publish/rumble", buildPlatformPublisher("rumble"));
+app.post("/publish/reddit", buildPlatformPublisher("reddit"));
+app.post("/publish/discord", buildPlatformPublisher("discord"));
+app.post("/publish/bluesky", buildPlatformPublisher("bluesky"));
+app.post("/publish/mastodon", buildPlatformPublisher("mastodon"));
+app.post("/publish/telegram", buildPlatformPublisher("telegram"));
+app.post("/publish/dailymotion", buildPlatformPublisher("dailymotion"));
+app.post("/publish/bilibili", buildPlatformPublisher("bilibili"));
+app.post("/publish/patreon", buildPlatformPublisher("patreon"));
+app.post("/publish/medium", buildPlatformPublisher("medium"));
+app.post("/publish/whatsapp", buildPlatformPublisher("whatsapp"));
+app.post("/publish/wechat", buildPlatformPublisher("wechat"));
+app.post("/publish/line", buildPlatformPublisher("line"));
+app.post("/publish/kwai", buildPlatformPublisher("kwai"));
+app.post("/publish/tumblr", buildPlatformPublisher("tumblr"));
+app.post("/publish/onlyfans", buildPlatformPublisher("onlyfans"));
+app.post("/publish/xigua", buildPlatformPublisher("xigua"));
+app.post("/publish/kick", buildPlatformPublisher("kick"));
+app.post("/publish/truthsocial", buildPlatformPublisher("truthsocial"));
+app.post("/publish/vk", buildPlatformPublisher("vk"));
+app.post("/publish/weibo", buildPlatformPublisher("weibo"));
+app.post("/publish/kakaotalk", buildPlatformPublisher("kakaotalk"));
+app.post("/publish/viber", buildPlatformPublisher("viber"));
+app.post("/publish/signal", buildPlatformPublisher("signal"));
+app.post("/publish/slack", buildPlatformPublisher("slack"));
+app.post("/publish/substack", buildPlatformPublisher("substack"));
+app.post("/publish/ghost", buildPlatformPublisher("ghost"));
+app.post("/publish/locals", buildPlatformPublisher("locals"));
+app.post("/publish/odysee", buildPlatformPublisher("odysee"));
+app.post("/publish/bitchute", buildPlatformPublisher("bitchute"));
+app.post("/publish/flickr", buildPlatformPublisher("flickr"));
+app.post("/publish/mixcloud", buildPlatformPublisher("mixcloud"));
+app.post("/publish/dtube", buildPlatformPublisher("dtube"));
+app.post("/publish/trovo", buildPlatformPublisher("trovo"));
 
 /**
  * Routes a publish request to the platform-specific publisher.
@@ -305,6 +387,88 @@ async function publishToPlatform(
 			return publishToInstagram(req.video_path, req.description);
 		case "twitter":
 			return publishTwitter(req.video_path, req.description);
+				case "facebook":
+			return publishToFacebook(req.video_path, req.description);
+		case "linkedin":
+			return publishToLinkedIn(req.video_path, req.description);
+		case "pinterest":
+			return publishToPinterest(req.video_path, req.description);
+		case "snapchat":
+			return publishToSnapchat(req.video_path, req.description);
+		case "twitch":
+			return publishToTwitch(req.video_path, req.description);
+		case "vimeo":
+			return publishToVimeo(req.video_path, req.description);
+		case "threads":
+			return publishToThreads(req.video_path, req.description);
+		case "rumble":
+			return publishToRumble(req.video_path, req.description);
+		case "reddit":
+			return publishToReddit(req.video_path, req.description);
+		case "discord":
+			return publishToDiscord(req.video_path, req.description);
+		case "bluesky":
+			return publishToBluesky(req.video_path, req.description);
+		case "mastodon":
+			return publishToMastodon(req.video_path, req.description);
+		case "telegram":
+			return publishToTelegram(req.video_path, req.description);
+		case "dailymotion":
+			return publishToDailymotion(req.video_path, req.description);
+		case "bilibili":
+			return publishToBilibili(req.video_path, req.description);
+		case "patreon":
+			return publishToPatreon(req.video_path, req.description);
+		case "medium":
+			return publishToMedium(req.video_path, req.description);
+		case "whatsapp":
+			return publishToWhatsApp(req.video_path, req.description);
+		case "wechat":
+			return publishToWeChat(req.video_path, req.description);
+		case "line":
+			return publishToLine(req.video_path, req.description);
+		case "kwai":
+			return publishToKwai(req.video_path, req.description);
+		case "tumblr":
+			return publishToTumblr(req.video_path, req.description);
+		case "onlyfans":
+			return publishToOnlyFans(req.video_path, req.description);
+		case "xigua":
+			return publishToXigua(req.video_path, req.description);
+		case "kick":
+			return publishToKick(req.video_path, req.description);
+		case "truthsocial":
+			return publishToTruthSocial(req.video_path, req.description);
+		case "vk":
+			return publishToVKontakte(req.video_path, req.description);
+		case "weibo":
+			return publishToWeibo(req.video_path, req.description);
+		case "kakaotalk":
+			return publishToKakaoTalk(req.video_path, req.description);
+		case "viber":
+			return publishToViber(req.video_path, req.description);
+		case "signal":
+			return publishToSignal(req.video_path, req.description);
+		case "slack":
+			return publishToSlack(req.video_path, req.description);
+		case "substack":
+			return publishToSubstack(req.video_path, req.description);
+		case "ghost":
+			return publishToGhost(req.video_path, req.description);
+		case "locals":
+			return publishToLocals(req.video_path, req.description);
+		case "odysee":
+			return publishToOdysee(req.video_path, req.description);
+		case "bitchute":
+			return publishToBitChute(req.video_path, req.description);
+		case "flickr":
+			return publishToFlickr(req.video_path, req.description);
+		case "mixcloud":
+			return publishToMixcloud(req.video_path, req.description);
+		case "dtube":
+			return publishToDTube(req.video_path, req.description);
+		case "trovo":
+			return publishToTrovo(req.video_path, req.description);
 		default:
 			return {
 				platform,
@@ -629,12 +793,7 @@ function generatePlatformMetadata(
 ): Omit<MetadataResult, "success"> {
 	// Constrain platform to a known allowlist so it can never dispatch to an
 	// inherited Object method (e.g. "constructor"/"hasOwnProperty").
-	const ALLOWED_PLATFORMS = [
-		"tiktok",
-		"youtube",
-		"instagram",
-		"twitter",
-	] as const;
+	const ALLOWED_PLATFORMS = ["tiktok","youtube","instagram","twitter","facebook","linkedin","pinterest","snapchat","twitch","vimeo","threads","rumble","reddit","discord","bluesky","mastodon","telegram","dailymotion","bilibili","patreon","medium","whatsapp","wechat","line","kwai","tumblr","onlyfans","xigua", "kick", "truthsocial", "vk", "weibo", "kakaotalk", "viber", "signal", "slack", "substack", "ghost", "locals", "odysee", "bitchute", "flickr", "mixcloud", "dtube", "trovo"] as const;
 	const safePlatform = (ALLOWED_PLATFORMS as readonly string[]).includes(
 		platform,
 	)

@@ -86,7 +86,7 @@ pub struct UserSocialToken {
     pub id: String,
     /// User ID that owns this token.
     pub user_id: String,
-    /// Social platform identifier (e.g. "youtube", "tiktok", "instagram").
+    /// Social platform identifier (e.g. "youtube", "tiktok", "instagram", "twitter").
     pub platform: String,
     /// OAuth access token.
     pub access_token: String,
@@ -303,10 +303,7 @@ impl DbStore {
     }
 
     /// Upserts a social token.
-    pub async fn upsert_social_token(
-        &self,
-        token: &UserSocialToken,
-    ) -> Result<(), sqlx::Error> {
+    pub async fn upsert_social_token(&self, token: &UserSocialToken) -> Result<(), sqlx::Error> {
         if self.is_dev_mode {
             return Ok(());
         }

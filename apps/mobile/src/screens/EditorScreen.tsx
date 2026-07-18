@@ -116,17 +116,72 @@ export const EditorScreen = () => {
 		}
 	};
 
-	const handleConnectSocial = async () => {
+	const handleConnectSocial = () => {
+		Alert.alert(
+			"Connect Social Account",
+			"Select platform to authorize:",
+			[
+				{ text: "TikTok", onPress: () => initiateOAuth("tiktok") },
+				{ text: "YouTube", onPress: () => initiateOAuth("youtube") },
+				{ text: "Instagram", onPress: () => initiateOAuth("instagram") },
+								{ text: "Facebook", onPress: () => initiateOAuth("facebook") },
+				{ text: "LinkedIn", onPress: () => initiateOAuth("linkedin") },
+				{ text: "Pinterest", onPress: () => initiateOAuth("pinterest") },
+				{ text: "Snapchat", onPress: () => initiateOAuth("snapchat") },
+				{ text: "Twitch", onPress: () => initiateOAuth("twitch") },
+				{ text: "Vimeo", onPress: () => initiateOAuth("vimeo") },
+				{ text: "Threads", onPress: () => initiateOAuth("threads") },
+								{ text: "Reddit", onPress: () => initiateOAuth("reddit") },
+				{ text: "Discord", onPress: () => initiateOAuth("discord") },
+				{ text: "Bluesky", onPress: () => initiateOAuth("bluesky") },
+				{ text: "Mastodon", onPress: () => initiateOAuth("mastodon") },
+								{ text: "Dailymotion", onPress: () => initiateOAuth("dailymotion") },
+				{ text: "Bilibili", onPress: () => initiateOAuth("bilibili") },
+				{ text: "Patreon", onPress: () => initiateOAuth("patreon") },
+				{ text: "Medium", onPress: () => initiateOAuth("medium") },
+				{ text: "WhatsApp", onPress: () => initiateOAuth("whatsapp") },
+				{ text: "WeChat", onPress: () => initiateOAuth("wechat") },
+				{ text: "Line", onPress: () => initiateOAuth("line") },
+				{ text: "Kwai", onPress: () => initiateOAuth("kwai") },
+				{ text: "Tumblr", onPress: () => initiateOAuth("tumblr") },
+				{ text: "OnlyFans", onPress: () => initiateOAuth("onlyfans") },
+								{ text: "Kick", onPress: () => initiateOAuth("kick") },
+				{ text: "Truth Social", onPress: () => initiateOAuth("truthsocial") },
+				{ text: "VKontakte", onPress: () => initiateOAuth("vk") },
+				{ text: "Weibo", onPress: () => initiateOAuth("weibo") },
+				{ text: "KakaoTalk", onPress: () => initiateOAuth("kakaotalk") },
+				{ text: "Viber", onPress: () => initiateOAuth("viber") },
+				{ text: "Signal", onPress: () => initiateOAuth("signal") },
+				{ text: "Slack", onPress: () => initiateOAuth("slack") },
+				{ text: "Substack", onPress: () => initiateOAuth("substack") },
+				{ text: "Ghost", onPress: () => initiateOAuth("ghost") },
+				{ text: "Locals", onPress: () => initiateOAuth("locals") },
+				{ text: "Odysee", onPress: () => initiateOAuth("odysee") },
+				{ text: "BitChute", onPress: () => initiateOAuth("bitchute") },
+				{ text: "Flickr", onPress: () => initiateOAuth("flickr") },
+				{ text: "Mixcloud", onPress: () => initiateOAuth("mixcloud") },
+				{ text: "DTube", onPress: () => initiateOAuth("dtube") },
+				{ text: "Trovo", onPress: () => initiateOAuth("trovo") },
+				{ text: "Xigua", onPress: () => initiateOAuth("xigua") },
+				{ text: "Telegram", onPress: () => initiateOAuth("telegram") },
+				{ text: "Rumble", onPress: () => initiateOAuth("rumble") },
+				{ text: "X (Twitter)", onPress: () => initiateOAuth("twitter") },
+				{ text: "Cancel", style: "cancel" }
+			]
+		);
+	};
+
+	const initiateOAuth = async (platform: string) => {
 		try {
 			// Simulate OAuth flow using expo-web-browser
 			const API_GATEWAY = "https://api.lazynext.com";
 			const result = await WebBrowser.openAuthSessionAsync(
-				`${API_GATEWAY}/api/v1/auth/social/tiktok?token=MOBILE_SESSION_TOKEN`,
+				`${API_GATEWAY}/api/v1/auth/social/${platform}?token=MOBILE_SESSION_TOKEN`,
 				"lazynext://oauth/callback"
 			);
 			
 			if (result.type === "success") {
-				Alert.alert("Success", "Social account connected via WebBrowser!");
+				Alert.alert("Success", `${platform} account connected!`);
 			}
 		} catch (e: any) {
 			Alert.alert("OAuth Error", e.message);
