@@ -1,0 +1,5 @@
+hello: "Bonjour"
+welcome: "Bienvenue sur Lazynext"
+error_unauthorized: "Accès non autorisé"
+error_not_found: "Ressource introuvable"
+error_internal: "Erreur interne du serveur"

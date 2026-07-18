@@ -1,0 +1,3 @@
+cli_start: "Iniciando el renderizador CLI de Lazynext"
+cli_done: "Renderizado completado."
+cli_error: "Ocurrió un error durante el renderizado."

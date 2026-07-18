@@ -6,11 +6,13 @@
 //! Redis-backed WebSocket state.
 
 use axum::extract::{Path, Query, State};
-use axum::http::{HeaderMap, StatusCode};
-use axum::middleware;
+use axum::http::{HeaderMap, StatusCode, header};
+use axum::middleware::{self, Next};
+use axum::extract::Request;
 use axum::response::{IntoResponse, Redirect};
 use axum::routing::{delete, get, post};
 use axum::{Extension, Json, Router};
+use rust_i18n::{i18n, set_locale, t};
 // Note: axum 0.8 retains `Extension` as an extractor.
 // AuthClaims are inserted in `rbac::authorize_request` and
 // extracted by handlers via `Extension(claims): Extension<AuthClaims>`.`
@@ -37,6 +39,33 @@ pub mod ws;
 use tower_http::trace::TraceLayer;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
+
+i18n!("locales");
+
+/// Middleware to extract Accept-Language header and set the locale for the current thread/request
+async fn extract_locale_middleware(
+    headers: HeaderMap,
+    request: Request,
+    next: Next,
+) -> axum::response::Response {
+    let mut locale = "en-US";
+    if let Some(accept_lang) = headers.get(header::ACCEPT_LANGUAGE) {
+        if let Ok(lang_str) = accept_lang.to_str() {
+            // Very simple parser: takes the first language code (e.g. "fr-CH, fr;q=0.9, en;q=0.8" -> "fr-CH")
+            if let Some(first_lang) = lang_str.split(',').next() {
+                locale = first_lang.split(';').next().unwrap_or("en-US").trim();
+            }
+        }
+    }
+    
+    // In a real application, you'd want to store this in request extensions or thread-local storage.
+    // rust-i18n uses static globals by default which isn't safe for async multi-tenant servers.
+    // We insert it as an extension so handlers can access it.
+    let mut request = request;
+    request.extensions_mut().insert(locale.to_string());
+    
+    next.run(request).await
+}
 
 // Convenience re-imports so handlers can be concise.
 use db::DbStore;
@@ -316,6 +345,7 @@ async fn main() {
     let app = public_routes
         .merge(all_authenticated)
         .with_state(state)
+        .layer(middleware::from_fn(extract_locale_middleware))
         .layer(TraceLayer::new_for_http());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 8005));
@@ -362,13 +392,15 @@ async fn main() {
     )
 )]
 // Handles the health-check request, reporting service and database status.
-async fn health_handler(State(state): State<AppState>) -> Json<Value> {
+async fn health_handler(State(state): State<AppState>, Extension(locale): Extension<String>) -> Json<Value> {
+    rust_i18n::set_locale(&locale);
+    let message = rust_i18n::t!("welcome");
     let db_status = if state.db.health_check().await.is_ok() {
         "ok"
     } else {
         "degraded"
     };
-    Json(json!({"status": "ok", "service": "api-gateway", "database": db_status}))
+    Json(json!({"status": "ok", "service": "api-gateway", "database": db_status, "message": message}))
 }
 
 // ── Authenticated Handlers ─────────────────────────────────────────────────
