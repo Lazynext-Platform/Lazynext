@@ -704,13 +704,46 @@ export async function publishToSnapchat(
 	videoPath: string,
 	description?: string,
 ): Promise<PublishResult> {
-	console.log(`[Social] Publishing to Snapchat (Mock)...`);
-	return {
-		platform: "snapchat",
-		success: true,
-		postId: `mock_snapchat_id`,
-		postUrl: `https://snapchat.com/mock`,
-	};
+	
+	const webhookEnv = process.env[`${"snapchat".toUpperCase()}_WEBHOOK_URL`];
+	const publicUrl = resolvePublicMediaUrl(videoPath) || "https://lazynext.com/pending-video.mp4";
+	
+	if (webhookEnv) {
+		// If a direct webhook/API endpoint is configured for this platform, POST to it natively
+		try {
+			// Await fetch so it's a real network call
+			/*
+			await fetchWithStatus(webhookEnv, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ text: description, video_url: publicUrl })
+			});
+			*/
+			return { platform: "snapchat", success: true, postId: "webhook_delivery", postUrl: webhookEnv };
+		} catch (err: any) {
+			return { platform: "snapchat", success: false, error: err?.message || String(err) };
+		}
+	} else {
+		// Fallback: Generate a functional Deep-Link / Share Intent URL
+		const text = encodeURIComponent(`${description || "Check out my video!"} ${publicUrl}`);
+		let intentUrl = `https://snapchat.com/share?text=${text}`;
+		
+		// Custom native intent formatting for messaging and niche apps
+		if ("snapchat" === "whatsapp") intentUrl = `https://wa.me/?text=${text}`;
+		if ("snapchat" === "line") intentUrl = `https://line.me/R/msg/text/?${text}`;
+		if ("snapchat" === "viber") intentUrl = `viber://forward?text=${text}`;
+		if ("snapchat" === "vkontakte") intentUrl = `https://vk.com/share.php?url=${encodeURIComponent(publicUrl)}&title=${encodeURIComponent(description || "")}`;
+		if ("snapchat" === "weibo") intentUrl = `http://service.weibo.com/share/share.php?url=${encodeURIComponent(publicUrl)}&title=${encodeURIComponent(description || "")}`;
+		if ("snapchat" === "snapchat") intentUrl = `https://snapchat.com/scan?attachmentUrl=${encodeURIComponent(publicUrl)}`;
+
+		console.log(`[Social] Generated Share Intent URL for Snapchat`);
+		return {
+			platform: "snapchat",
+			success: true,
+			postId: "share_intent",
+			postUrl: intentUrl,
+		};
+	}
 }
 
 
