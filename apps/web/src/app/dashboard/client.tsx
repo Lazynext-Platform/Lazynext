@@ -18,6 +18,7 @@ import { useSession } from "@/auth/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Header } from "@/components/header";
+import { useTranslations } from "next-intl";
 import {
 	Video,
 	Sparkles,
@@ -61,6 +62,7 @@ const QUICK_ACTIONS = [
 
 /** React component rendering DashboardClient. */
 export function DashboardClient() {
+	const t = useTranslations("Dashboard");
 	const { data: session, isPending } = useSession();
 	const router = useRouter();
 
@@ -140,11 +142,7 @@ export function DashboardClient() {
 							</span>
 						</h1>
 						<p className="text-foreground/60 text-lg">
-							Welcome back,{" "}
-							<span className="font-semibold text-foreground">
-								{session.user?.name || "Creator"}
-							</span>
-							. Your render nodes are standing by.
+							{t("welcome", { name: session.user?.name || "Creator" })}. Your render nodes are standing by.
 						</p>
 					</div>
 					<button

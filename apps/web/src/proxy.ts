@@ -1,10 +1,11 @@
 /**
  * @module proxy
- * @description Next.js proxy — auth guard + route protection.
+ * @description Next.js proxy — auth guard + route protection + i18n routing.
  * Replaces middleware.ts (deprecated in Next.js 16).
  */
 
 import { NextResponse, type NextRequest } from "next/server";
+import createMiddleware from 'next-intl/middleware';
 
 const PROTECTED_PATHS = [
 	"/dashboard",
@@ -25,19 +26,27 @@ const AUTH_PATHS = [
 	"/reset-password",
 ];
 
+const intlMiddleware = createMiddleware({
+  locales: ['en', 'fr', 'es'],
+  defaultLocale: 'en'
+});
+
 export async function proxy(request: NextRequest) {
 	const { pathname } = request.nextUrl;
+
+    // Remove locale prefix for auth path checking
+    const pathnameWithoutLocale = pathname.replace(/^\/(en|fr|es)/, '') || '/';
 
 	const sessionToken =
 		request.cookies.get("better-auth.session_token")?.value ||
 		request.cookies.get("__Secure-better-auth.session_token")?.value;
 
 	const isProtected = PROTECTED_PATHS.some(
-		(p) => pathname === p || pathname.startsWith(`${p}/`),
+		(p) => pathnameWithoutLocale === p || pathnameWithoutLocale.startsWith(`${p}/`),
 	);
 
 	const isAuth = AUTH_PATHS.some(
-		(p) => pathname === p || pathname.startsWith(`${p}/`),
+		(p) => pathnameWithoutLocale === p || pathnameWithoutLocale.startsWith(`${p}/`),
 	);
 
 	if (isProtected && !sessionToken) {
@@ -50,24 +59,12 @@ export async function proxy(request: NextRequest) {
 		return NextResponse.redirect(new URL("/dashboard", request.url));
 	}
 
-	return NextResponse.next();
+	return intlMiddleware(request);
 }
 
 /** Utility representing config. */
 export const config = {
 	matcher: [
-		"/dashboard/:path*",
-		"/editor/:path*",
-		"/billing/:path*",
-		"/settings/:path*",
-		"/profile/:path*",
-		"/projects/:path*",
-		"/admin/:path*",
-		"/super-admin/:path*",
-		"/superadmin/:path*",
-		"/sign-in",
-		"/sign-up",
-		"/forgot-password",
-		"/reset-password",
+        "/((?!api|_next|_vercel|.*\\..*).*)",
 	],
 };
