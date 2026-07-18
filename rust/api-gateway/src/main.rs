@@ -50,14 +50,13 @@ async fn extract_locale_middleware(
     next: Next,
 ) -> axum::response::Response {
     let mut locale = "en-US";
-    if let Some(accept_lang) = headers.get(header::ACCEPT_LANGUAGE) {
-        if let Ok(lang_str) = accept_lang.to_str() {
+    if let Some(accept_lang) = headers.get(header::ACCEPT_LANGUAGE)
+        && let Ok(lang_str) = accept_lang.to_str() {
             // Very simple parser: takes the first language code (e.g. "fr-CH, fr;q=0.9, en;q=0.8" -> "fr-CH")
             if let Some(first_lang) = lang_str.split(',').next() {
                 locale = first_lang.split(';').next().unwrap_or("en-US").trim();
             }
         }
-    }
 
     // In a real application, you'd want to store this in request extensions or thread-local storage.
     // rust-i18n uses static globals by default which isn't safe for async multi-tenant servers.

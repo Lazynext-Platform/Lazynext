@@ -174,12 +174,9 @@ impl Render for EditorShell {
                 gpui::WindowAppearance::Dark | gpui::WindowAppearance::VibrantDark => "Dark",
                 _ => "Light",
             };
-            format!("{}", crate::tr!("theme_system").replace("{}", actual_os))
+            crate::tr!("theme_system").replace("{}", actual_os).to_string()
         } else {
-            format!(
-                "{}",
-                crate::tr!("theme_label").replace("{}", &current_override)
-            )
+            crate::tr!("theme_label").replace("{}", &current_override).to_string()
         };
         let bg_color = theme.bg_main;
         let panel_bg = theme.bg_panel;
