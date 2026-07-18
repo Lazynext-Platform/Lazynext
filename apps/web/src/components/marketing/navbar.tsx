@@ -6,16 +6,18 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import { ThemeToggle } from "../theme-toggle";
+import { useTranslations } from "next-intl";
 
 /** React component rendering MarketingNavbar. */
 export function MarketingNavbar() {
+	const t = useTranslations("Footer");
 	const [mobileOpen, setMobileOpen] = useState(false);
 
 	const links = [
-		{ href: "#features", label: "Features" },
+		{ href: "#features", label: t("features") },
 		{ href: "#agents", label: "AI Agents" },
 		{ href: "/feed", label: "Discover Feed" },
-		{ href: "/billing", label: "Pricing" },
+		{ href: "/billing", label: t("pricing") },
 	];
 
 	return (

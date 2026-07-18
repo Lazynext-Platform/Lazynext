@@ -70,20 +70,25 @@ export function DashboardClient() {
 	const [isCreating, setIsCreating] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 	const [aiCredits, setAiCredits] = useState<number>(0);
+	const [walletFormatted, setWalletFormatted] = useState<string>("$0.00");
 
 	useEffect(() => {
-		Promise.all([
-			fetch("/api/projects").then((res) => res.json()),
-			fetch("/api/user/credits").then((res) => res.json()),
-		])
-			.then(([projectsData, creditsData]) => {
-				if (projectsData.projects) {
-					setProjects(projectsData.projects);
-				}
-				if (typeof creditsData.aiCredits === "number") {
-					setAiCredits(creditsData.aiCredits);
-				}
-			})
+			Promise.all([
+				fetch("/api/projects").then((res) => res.json()),
+				fetch("/api/user/credits").then((res) => res.json()),
+				fetch("/api/promotions/wallet").then((res) => res.json()).catch(() => ({ balance: 0, currency: "USD" })),
+			])
+				.then(([projectsData, creditsData, walletData]) => {
+					if (projectsData.projects) {
+						setProjects(projectsData.projects);
+					}
+					if (typeof creditsData.aiCredits === "number") {
+						setAiCredits(creditsData.aiCredits);
+					}
+					if (walletData?.formatted) {
+						setWalletFormatted(walletData.formatted);
+					}
+				})
 			.catch(console.error)
 			.finally(() => setIsLoading(false));
 	}, []);
