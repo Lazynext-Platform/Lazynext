@@ -131,6 +131,11 @@ export const EditorScreen = () => {
 				{ text: "Twitch", onPress: () => initiateOAuth("twitch") },
 				{ text: "Vimeo", onPress: () => initiateOAuth("vimeo") },
 				{ text: "Threads", onPress: () => initiateOAuth("threads") },
+								{ text: "Reddit", onPress: () => initiateOAuth("reddit") },
+				{ text: "Discord", onPress: () => initiateOAuth("discord") },
+				{ text: "Bluesky", onPress: () => initiateOAuth("bluesky") },
+				{ text: "Mastodon", onPress: () => initiateOAuth("mastodon") },
+				{ text: "Telegram", onPress: () => initiateOAuth("telegram") },
 				{ text: "Rumble", onPress: () => initiateOAuth("rumble") },
 				{ text: "X (Twitter)", onPress: () => initiateOAuth("twitter") },
 				{ text: "Cancel", style: "cancel" }

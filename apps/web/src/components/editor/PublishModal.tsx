@@ -222,6 +222,56 @@ export function PublishModal({ isOpen, onClose, projectId, renderJobId }: Publis
 							>
 								Rumble
 							</button>
+							<button
+								onClick={() => togglePlatform("reddit")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("reddit")
+										? "border-[#FF4500] bg-[#FF4500] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Reddit
+							</button>
+							<button
+								onClick={() => togglePlatform("discord")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("discord")
+										? "border-[#5865F2] bg-[#5865F2] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Discord
+							</button>
+							<button
+								onClick={() => togglePlatform("bluesky")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("bluesky")
+										? "border-[#0085FF] bg-[#0085FF] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Bluesky
+							</button>
+							<button
+								onClick={() => togglePlatform("mastodon")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("mastodon")
+										? "border-[#6364FF] bg-[#6364FF] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Mastodon
+							</button>
+							<button
+								onClick={() => togglePlatform("telegram")}
+								className={`flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors ${
+									selectedPlatforms.includes("telegram")
+										? "border-[#0088cc] bg-[#0088cc] text-white"
+										: "border-border bg-background text-muted hover:text-foreground"
+								}`}
+							>
+								Telegram
+							</button>
 						</div>
 					</div>
 

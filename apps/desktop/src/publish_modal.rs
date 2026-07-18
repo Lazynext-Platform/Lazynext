@@ -93,6 +93,11 @@ impl Render for PublishModal {
                     .child(self.render_platform_button("Twitch", "twitch", rgb(0x888888), cx))
                     .child(self.render_platform_button("Vimeo", "vimeo", rgb(0x888888), cx))
                     .child(self.render_platform_button("Threads", "threads", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Reddit", "reddit", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Discord", "discord", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Bluesky", "bluesky", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Mastodon", "mastodon", rgb(0x888888), cx))
+                    .child(self.render_platform_button("Telegram", "telegram", rgb(0x888888), cx))
                     .child(self.render_platform_button("Rumble", "rumble", rgb(0x888888), cx))
                     .child(self.render_platform_button(
                         "X (Twitter)",

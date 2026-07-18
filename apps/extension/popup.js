@@ -108,6 +108,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('shareTwitchBtn').addEventListener('click', () => handleShare('twitch'));
   document.getElementById('shareVimeoBtn').addEventListener('click', () => handleShare('vimeo'));
   document.getElementById('shareThreadsBtn').addEventListener('click', () => handleShare('threads'));
+    document.getElementById('shareRedditBtn').addEventListener('click', () => handleShare('reddit'));
+  document.getElementById('shareDiscordBtn').addEventListener('click', () => handleShare('discord'));
+  document.getElementById('shareBlueskyBtn').addEventListener('click', () => handleShare('bluesky'));
+  document.getElementById('shareMastodonBtn').addEventListener('click', () => handleShare('mastodon'));
+  document.getElementById('shareTelegramBtn').addEventListener('click', () => handleShare('telegram'));
   document.getElementById('shareRumbleBtn').addEventListener('click', () => handleShare('rumble'));
   document.getElementById('shareTwitterBtn').addEventListener('click', () => handleShare('twitter'));
 });

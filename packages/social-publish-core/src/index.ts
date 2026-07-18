@@ -619,6 +619,76 @@ export async function publishToRumble(
 	};
 }
 
+
+export async function publishToReddit(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Reddit (Mock)...`);
+	return {
+		platform: "reddit",
+		success: true,
+		postId: `mock_reddit_id`,
+		postUrl: `https://reddit.com/mock`,
+	};
+}
+
+
+export async function publishToDiscord(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Discord (Mock)...`);
+	return {
+		platform: "discord",
+		success: true,
+		postId: `mock_discord_id`,
+		postUrl: `https://discord.com/mock`,
+	};
+}
+
+
+export async function publishToBluesky(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Bluesky (Mock)...`);
+	return {
+		platform: "bluesky",
+		success: true,
+		postId: `mock_bluesky_id`,
+		postUrl: `https://bluesky.com/mock`,
+	};
+}
+
+
+export async function publishToMastodon(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Mastodon (Mock)...`);
+	return {
+		platform: "mastodon",
+		success: true,
+		postId: `mock_mastodon_id`,
+		postUrl: `https://mastodon.com/mock`,
+	};
+}
+
+
+export async function publishToTelegram(
+	videoPath: string,
+	description?: string,
+): Promise<PublishResult> {
+	console.log(`[Social] Publishing to Telegram (Mock)...`);
+	return {
+		platform: "telegram",
+		success: true,
+		postId: `mock_telegram_id`,
+		postUrl: `https://telegram.com/mock`,
+	};
+}
+
 // ── Unified Publish Entry Point ───────────────────────────────────────
 
 export async function publish(
@@ -693,6 +763,22 @@ export async function publish(
 				break;
 			case "rumble":
 				result = await publishToRumble(safePath, metadata.description);
+				break;
+
+			case "reddit":
+				result = await publishToReddit(safePath, metadata.description);
+				break;
+			case "discord":
+				result = await publishToDiscord(safePath, metadata.description);
+				break;
+			case "bluesky":
+				result = await publishToBluesky(safePath, metadata.description);
+				break;
+			case "mastodon":
+				result = await publishToMastodon(safePath, metadata.description);
+				break;
+			case "telegram":
+				result = await publishToTelegram(safePath, metadata.description);
 				break;
 			default:
 				result = {

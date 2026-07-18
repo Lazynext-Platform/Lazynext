@@ -29,6 +29,11 @@ import {
 	publishToVimeo,
 	publishToThreads,
 	publishToRumble,
+	publishToReddit,
+	publishToDiscord,
+	publishToBluesky,
+	publishToMastodon,
+	publishToTelegram,
 	assertSafeVideoPath,
 	type PublishResult,
 } from "@lazynext/social-publish-core";
@@ -293,6 +298,11 @@ app.post("/publish/twitch", buildPlatformPublisher("twitch"));
 app.post("/publish/vimeo", buildPlatformPublisher("vimeo"));
 app.post("/publish/threads", buildPlatformPublisher("threads"));
 app.post("/publish/rumble", buildPlatformPublisher("rumble"));
+app.post("/publish/reddit", buildPlatformPublisher("reddit"));
+app.post("/publish/discord", buildPlatformPublisher("discord"));
+app.post("/publish/bluesky", buildPlatformPublisher("bluesky"));
+app.post("/publish/mastodon", buildPlatformPublisher("mastodon"));
+app.post("/publish/telegram", buildPlatformPublisher("telegram"));
 
 /**
  * Routes a publish request to the platform-specific publisher.
@@ -337,6 +347,16 @@ async function publishToPlatform(
 			return publishToThreads(req.video_path, req.description);
 		case "rumble":
 			return publishToRumble(req.video_path, req.description);
+		case "reddit":
+			return publishToReddit(req.video_path, req.description);
+		case "discord":
+			return publishToDiscord(req.video_path, req.description);
+		case "bluesky":
+			return publishToBluesky(req.video_path, req.description);
+		case "mastodon":
+			return publishToMastodon(req.video_path, req.description);
+		case "telegram":
+			return publishToTelegram(req.video_path, req.description);
 		default:
 			return {
 				platform,
@@ -661,7 +681,7 @@ function generatePlatformMetadata(
 ): Omit<MetadataResult, "success"> {
 	// Constrain platform to a known allowlist so it can never dispatch to an
 	// inherited Object method (e.g. "constructor"/"hasOwnProperty").
-	const ALLOWED_PLATFORMS = ["tiktok","youtube","instagram","twitter","facebook","linkedin","pinterest","snapchat","twitch","vimeo","threads","rumble"] as const;
+	const ALLOWED_PLATFORMS = ["tiktok","youtube","instagram","twitter","facebook","linkedin","pinterest","snapchat","twitch","vimeo","threads","rumble","reddit","discord","bluesky","mastodon","telegram"] as const;
 	const safePlatform = (ALLOWED_PLATFORMS as readonly string[]).includes(
 		platform,
 	)
