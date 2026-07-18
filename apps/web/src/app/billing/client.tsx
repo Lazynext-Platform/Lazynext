@@ -17,6 +17,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Header } from "@/components/header";
 import { Check, Zap, Server } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { formatCurrency } from "@/utils/format-currency";
 
 // Organization type (until real DB integration is wired)
 type Organization = {
@@ -37,55 +39,65 @@ type Organization = {
 };
 
 const PLANS = [
-	{
-		name: "Hobby",
-		price: "$0",
-		period: "forever",
-		features: ["1 project", "720p export", "Basic AI tools (Local Models)"],
-		priceId: null,
-		cta: "Current Plan",
-		current: true,
-		highlight: false,
-	},
-	{
-		name: "Pro",
-		price: "$19",
-		period: "per month",
-		features: [
-			"Unlimited projects",
-			"4K export",
-			"Cloud AI (GPT-4o, Claude)",
-			"Priority support",
-			"50GB Cloud storage",
-		],
-		cta: "Upgrade to Pro",
-		priceId: process.env.NEXT_PUBLIC_DODO_PRO_PRICE_ID || "",
-		highlight: true,
-	},
-	{
-		name: "Studio",
-		price: "$99",
-		period: "per month",
-		features: [
-			"Everything in Pro",
-			"8K Lossless export",
-			"Team collaboration",
-			"18 API access",
-			"Dedicated Render Node",
-		],
-		cta: "Upgrade to Studio",
-		priceId: process.env.NEXT_PUBLIC_DODO_STUDIO_PRICE_ID || "",
-		highlight: false,
-	},
-];
+		{
+			name: "Hobby",
+			price: 0,
+			period: "forever",
+			features: ["1 project", "720p export", "Basic AI tools (Local Models)"],
+			priceId: null,
+			cta: "Current Plan",
+			current: true,
+			highlight: false,
+		},
+		{
+			name: "Pro",
+			price: 19,
+			period: "per month",
+			features: [
+				"Unlimited projects",
+				"4K export",
+				"Cloud AI (GPT-4o, Claude)",
+				"Priority support",
+				"50GB Cloud storage",
+			],
+			cta: "Upgrade to Pro",
+			priceId: process.env.NEXT_PUBLIC_DODO_PRO_PRICE_ID || "",
+			highlight: true,
+		},
+		{
+			name: "Studio",
+			price: 99,
+			period: "per month",
+			features: [
+				"Everything in Pro",
+				"8K Lossless export",
+				"Team collaboration",
+				"18 API access",
+				"Dedicated Render Node",
+			],
+			cta: "Upgrade to Studio",
+			priceId: process.env.NEXT_PUBLIC_DODO_STUDIO_PRICE_ID || "",
+			highlight: false,
+		},
+	];
 
 /** React component rendering BillingPageClient. */
 export function BillingPageClient() {
-	const { data: _session, isPending } = useSession();
-	const _router = useRouter();
+		const t = useTranslations("Billing");
+		const c = useTranslations("Common");
+		const { data: _session, isPending } = useSession();
+		const _router = useRouter();
 
-	const [org, setOrg] = useState<Organization | null>(null);
-	const [realCredits, setRealCredits] = useState<number | null>(null);
+		const [org, setOrg] = useState<Organization | null>(null);
+		const [realCredits, setRealCredits] = useState<number | null>(null);
+		const [userCurrency, setUserCurrency] = useState("USD");
+
+		useEffect(() => {
+			// Fetch user profile to get preferred currency
+			fetch("/api/user/profile")
+				.then(r => r.json())
+				.then(d => { if (d?.profile?.currency) setUserCurrency(d.profile.currency); })
+				.catch(() => {});
 
 	useEffect(() => {
 		// Fetch real AI credits from database
@@ -257,11 +269,11 @@ export function BillingPageClient() {
 							</h3>
 
 							<div className="mt-4 pb-6 border-b border-border">
-								<span className="text-5xl font-black">{plan.price}</span>
-								<span className="ml-2 text-sm text-muted">
-									{plan.period}
-								</span>
-							</div>
+									<span className="text-5xl font-black">{plan.price === 0 ? t("free_tier") : formatCurrency(plan.price, userCurrency, "en")}</span>
+									<span className="ml-2 text-sm text-muted">
+										{plan.period}
+									</span>
+								</div>
 
 							<ul className="mt-6 flex-1 space-y-4">
 								{plan.features.map((f) => (

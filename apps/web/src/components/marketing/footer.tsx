@@ -1,10 +1,15 @@
 /** @module Marketing footer with product and legal links */
+"use client";
+
 import Link from "next/link";
 import { Globe, Code, MessageCircle } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 /** React component rendering MarketingFooter. */
 export function MarketingFooter() {
+	const t = useTranslations("Footer");
+
 	return (
 		<footer className="border-t border-border bg-background py-12 mt-24">
 			<div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -40,7 +45,7 @@ export function MarketingFooter() {
 				</div>
 
 				<div>
-					<h3 className="font-semibold text-foreground mb-4">Product</h3>
+						<h3 className="font-semibold text-foreground mb-4">{t("product")}</h3>
 					<ul className="space-y-3 text-sm text-muted">
 						<li>
 							<Link
@@ -70,7 +75,7 @@ export function MarketingFooter() {
 				</div>
 
 				<div>
-					<h3 className="font-semibold text-foreground mb-4">Legal</h3>
+						<h3 className="font-semibold text-foreground mb-4">{t("legal")}</h3>
 					<ul className="space-y-3 text-sm text-muted">
 						<li>
 							<Link
@@ -92,8 +97,8 @@ export function MarketingFooter() {
 				</div>
 			</div>
 			<div className="max-w-7xl mx-auto px-6 mt-12 pt-8 border-t border-border text-sm text-muted/80 text-center">
-				© {new Date().getFullYear()} Lazynext Corporation. All rights reserved.
-			</div>
-		</footer>
-	);
+					{t("copyright", { year: new Date().getFullYear() })}
+				</div>
+			</footer>
+		);
 }
