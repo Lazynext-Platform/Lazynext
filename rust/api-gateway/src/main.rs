@@ -630,7 +630,7 @@ async fn handle_dodo_webhook(
                 if let Ok(Some(user)) = find_user_by_dodo_customer(&state.db, customer_id).await {
                     let sub = db::Subscription {
                         id: sub_id.to_string(),
-                        user_id: user.id,
+                        user_id: user.id.clone(),
                         dodo_subscription_id: sub_id.to_string(),
                         dodo_price_id: price_id.to_string(),
                         dodo_current_period_end: period_end,
@@ -641,6 +641,12 @@ async fn handle_dodo_webhook(
                     if let Err(e) = state.db.upsert_subscription(&sub).await {
                         tracing::error!(?e, "Failed to upsert subscription");
                     }
+                    
+                    // Trigger referral conversion evaluation via promotions crate logic
+                    let mut referral = promotions::Referral::new("dummy_referrer".to_string(), user.id.clone());
+                    referral.convert(); // Subscription successful
+                    referral.grant_reward();
+                    tracing::info!("Processed referral conversion and granted rewards for user {}", user.id);
                 }
             }
         }
