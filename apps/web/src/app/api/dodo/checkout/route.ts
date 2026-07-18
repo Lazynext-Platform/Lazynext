@@ -46,10 +46,8 @@ export async function POST(req: Request) {
 
 		let amount = priceMap[priceId] || 1900;
 
-		// Use user's preferred currency from DB or request, fallback to INR
-		const checkoutCurrency = currency ||
-			session.user?.preferredCurrency ||
-			"INR";
+		// Use user's preferred currency from request or default to INR
+		const checkoutCurrency = currency || "INR";
 
 		// Discount via promotion code integration
 		if (code) {
