@@ -19,6 +19,9 @@ export const user = pgTable("user", {
   emailVerified: boolean("email_verified").notNull(),
   image: text("image"),
   role: text("role").notNull().default("user"),
+  locale: text("locale").notNull().default("en-US"), // ISO 639-1 language and ISO 3166-1 country (e.g. en-US, fr-FR)
+  country: text("country").notNull().default("US"), // ISO 3166-1 alpha-2 for region-specific compliance
+  currency: text("currency").notNull().default("USD"), // ISO 4217 code moved from user/wallet/etc to global preferences
   dodoCustomerId: text("dodo_customer_id"),
   aiCredits: integer("ai_credits").notNull().default(50),
   createdAt: timestamp("created_at").notNull(),
