@@ -34,24 +34,31 @@ const mcpClients: Map<string, Client> = new Map();
 async function initMcpClient(name: string, command: string, args: string[], env?: Record<string, string>) {
 	console.log(`[MCP] Initializing ${name} MCP Server...`);
 
-	const transport = new StdioClientTransport({
-		command,
-		args,
-		env: buildSubprocessEnv(env),
-	});
+	try {
+		const transport = new StdioClientTransport({
+			command,
+			args,
+			env: buildSubprocessEnv(env),
+			stderr: "pipe", // Suppress npx install noise
+		});
 
-	const client = new Client(
-		{ name: "lazynext-ai-agents", version: "1.0.0" },
-		{ capabilities: { tools: {} } } as any
-	);
+		const client = new Client(
+			{ name: "lazynext-ai-agents", version: "1.0.0" },
+			{ capabilities: { tools: {} } } as any
+		);
 
-	await client.connect(transport);
-	mcpClients.set(name, client);
+		await client.connect(transport);
+		mcpClients.set(name, client);
 
-	const tools = await client.listTools();
-	console.log(`[MCP] ${name} connected successfully. Available tools: ${tools.tools.map(t => t.name).join(", ")}`);
+		const tools = await client.listTools();
+		console.log(`[MCP] ${name} connected successfully. Available tools: ${tools.tools.map(t => t.name).join(", ")}`);
 
-	return client;
+		return client;
+	} catch (error) {
+		const msg = error instanceof Error ? error.message : String(error);
+		console.warn(`[MCP] ${name} server unavailable (${msg}). Continuing without it.`);
+		return undefined;
+	}
 }
 
 /**
@@ -67,27 +74,15 @@ async function initMcpClient(name: string, command: string, args: string[], env?
  * ```
  */
 export async function setupMcpServers() {
-	try {
-		await initMcpClient("playwright", "npx", ["-y", "@modelcontextprotocol/server-playwright"]);
-	} catch (error) {
-		console.warn("[MCP] Failed to start Playwright MCP:", error);
+	await initMcpClient("playwright", "npx", ["-y", "@modelcontextprotocol/server-playwright"]);
+
+	if (process.env.FIRECRAWL_API_KEY) {
+		await initMcpClient("firecrawl", "npx", ["-y", "firecrawl-mcp-server"]);
+	} else {
+		console.warn("[MCP] FIRECRAWL_API_KEY not found, skipping Firecrawl MCP.");
 	}
 
-	try {
-		if (process.env.FIRECRAWL_API_KEY) {
-			await initMcpClient("firecrawl", "npx", ["-y", "firecrawl-mcp-server"]);
-		} else {
-			console.warn("[MCP] FIRECRAWL_API_KEY not found, skipping Firecrawl MCP.");
-		}
-	} catch (error) {
-		console.warn("[MCP] Failed to start Firecrawl MCP:", error);
-	}
-
-	try {
-		await initMcpClient("context7", "npx", ["-y", "context7-mcp"]);
-	} catch (err) {
-		console.warn("[MCP] Failed to start Context7 MCP. It might require specific setup:", err);
-	}
+	await initMcpClient("context7", "npx", ["-y", "context7-mcp"]);
 }
 
 /**
