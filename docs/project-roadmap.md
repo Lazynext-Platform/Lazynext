@@ -10,13 +10,13 @@
 
 | Metric | Count |
 |---|---|
-| Total Features | 38 |
-| 🟢 Complete | 38 |
+| Total Features | 39 |
+| 🟢 Complete | 39 |
 | ⏸️ On Hold | 0 |
 | 🔴 Not Started | 0 |
 | 🟡 In Progress | 0 |
 
-**Overall Progress**: ██████████ 100% — Core features complete. Social Publish Integration complete.
+**Overall Progress**: ██████████ 100% — Core features complete. Promotions engine complete.
 
 ---
 
@@ -62,6 +62,7 @@
 | 36 | E2E Launch Readiness | 🟢 Complete | #35 | `feature/36` | Phase 0-1 code fixes, test suite verified, docs finalized. |
 | 37 | CAPTCHA — All 7 Formats | 🟢 Complete | #36 | `feature/37` | Turnstile (web) + PoW (5 clients). API Gateway, 28 files, 23+11 tests. |
 | 38 | Social Publish Integration | 🟢 Complete | #37 | `feature/38` | OAuth flow, UI, and proxy across all 7 formats. |
+| 39 | Referrals & Discounts | 🟢 Complete | #38 | `feature/39` | Promo codes, wallet credits, refer-and-earn across 7 formats. |
 
 ---
 
