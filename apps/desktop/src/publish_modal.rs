@@ -3,6 +3,8 @@
 //! Handles metadata input and dispatching to the Lazynext API Gateway
 //! for social media publishing (TikTok, YouTube, Instagram, Twitter).
 
+#![allow(dead_code)]
+
 use gpui::*;
 
 pub struct PublishModal {

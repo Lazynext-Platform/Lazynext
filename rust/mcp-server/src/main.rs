@@ -606,7 +606,7 @@ async fn process_mcp_request(
                     for plat in platforms.unwrap() {
                         if let Some(p) = plat.as_str() {
                             let res = client
-                                .post(&format!("{}/api/v1/social/publish", gateway))
+                                .post(format!("{}/api/v1/social/publish", gateway))
                                 .header("x-internal-api-key", &api_key)
                                 .json(&serde_json::json!({
                                     "platform": p,

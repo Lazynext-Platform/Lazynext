@@ -317,7 +317,7 @@ async fn main() {
                             .unwrap_or_else(|_| "lazynext-internal-dev-key".to_string());
 
                         let res = client
-                            .post(&format!("{}/api/v1/social/publish", gateway))
+                            .post(format!("{}/api/v1/social/publish", gateway))
                             .header("x-internal-api-key", api_key)
                             .json(&serde_json::json!({
                                 "platform": platform,
