@@ -52,6 +52,11 @@ const QUICK_ACTIONS = [
 		href: "/settings",
 		icon: <Settings className="w-5 h-5" />,
 	},
+	{
+		label: "Refer & Earn",
+		href: "/dashboard/referrals",
+		icon: <Sparkles className="w-5 h-5 text-[var(--accent-secondary)]" />,
+	},
 ];
 
 /** React component rendering DashboardClient. */

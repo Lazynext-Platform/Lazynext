@@ -2121,49 +2121,66 @@ struct ApplyPromotionPayload {
 }
 
 async fn handle_apply_promotion(
-    State(_state): State<AppState>,
+    State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
     Json(payload): Json<ApplyPromotionPayload>,
 ) -> Json<Value> {
-    // Basic implementation that will be connected to the promotion crates
-    // and database in the future.
-    let _user_id = claims.sub.clone();
+    let user_id = claims.sub.clone();
     
-    // For now, return mock success to satisfy the API
-    Json(json!({
-        "success": true,
-        "message": format!("Successfully applied code: {}", payload.code),
-        "discount_applied": 1000 // Mock 10.00
-    }))
+    match state.db.apply_coupon(&user_id, &payload.code).await {
+        Ok(value) => Json(json!({
+            "success": true,
+            "message": format!("Successfully applied code: {}", payload.code),
+            "discount_applied": value
+        })),
+        Err(_) => Json(json!({
+            "success": false,
+            "error": "Invalid, expired, or fully claimed coupon code."
+        }))
+    }
 }
 
 async fn handle_get_wallet_balance(
-    State(_state): State<AppState>,
-    Extension(claims): Extension<AuthClaims>,
-) -> Json<Value> {
-    let _user_id = claims.sub.clone();
-    
-    // Mock return
-    Json(json!({
-        "success": true,
-        "balance": 5000, // $50.00
-        "currency": "USD"
-    }))
-}
-
-async fn handle_get_my_referrals(
-    State(_state): State<AppState>,
+    State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
 ) -> Json<Value> {
     let user_id = claims.sub.clone();
     
-    // Mock return
-    Json(json!({
-        "success": true,
-        "referral_link": format!("https://lazynext.com/ref/{}", user_id),
-        "total_referrals": 3,
-        "converted": 1,
-        "earned": 1500 // $15.00
-    }))
+    match state.db.get_wallet_balance(&user_id).await {
+        Ok(balance) => Json(json!({
+            "success": true,
+            "balance": balance,
+            "currency": "USD"
+        })),
+        Err(_) => Json(json!({
+            "success": true,
+            "balance": 0,
+            "currency": "USD"
+        }))
+    }
+}
+
+async fn handle_get_my_referrals(
+    State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+) -> Json<Value> {
+    let user_id = claims.sub.clone();
+    
+    match state.db.get_referral_stats(&user_id).await {
+        Ok((link, total, converted, earned)) => Json(json!({
+            "success": true,
+            "referral_link": link,
+            "total_referrals": total,
+            "converted": converted,
+            "earned": earned
+        })),
+        Err(_) => Json(json!({
+            "success": true,
+            "referral_link": format!("https://lazynext.com/ref/{}", user_id),
+            "total_referrals": 0,
+            "converted": 0,
+            "earned": 0
+        }))
+    }
 }
 
