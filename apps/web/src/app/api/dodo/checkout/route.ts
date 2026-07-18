@@ -36,9 +36,9 @@ export async function POST(req: Request) {
 			);
 		}
 
-		const { priceId, code } = parsed.data;
+		const { priceId, code, currency } = parsed.data;
 
-		// Map price IDs to amounts (in paise/cents)
+		// Map price IDs to amounts (in paise/cents for default USD)
 		const priceMap: Record<string, number> = {
 			[process.env.NEXT_PUBLIC_DODO_PRO_PRICE_ID || "pro_monthly"]: 1900,
 			[process.env.NEXT_PUBLIC_DODO_STUDIO_PRICE_ID || "studio_monthly"]: 9900,
@@ -46,21 +46,24 @@ export async function POST(req: Request) {
 
 		let amount = priceMap[priceId] || 1900;
 
+		// Use user's preferred currency from DB or request, fallback to INR
+		const checkoutCurrency = currency ||
+			session.user?.preferredCurrency ||
+			"INR";
+
 		// Discount via promotion code integration
 		if (code) {
 		  try {
-		    // We securely hit the Axum internal gateway on behalf of the user to process the promotion
 		    const gatewayReq = await fetch(`${process.env.API_GATEWAY_URL || 'http://localhost:8005'}/api/v1/promotions/apply`, {
 		      method: 'POST',
 		      headers: {
 		        'Content-Type': 'application/json',
-		        'Authorization': req.headers.get("Authorization") || "", // Forward auth
+		        'Authorization': req.headers.get("Authorization") || "",
 		      },
-		      body: JSON.stringify({ code })
+		      body: JSON.stringify({ code, currency: checkoutCurrency })
 		    });
 		    const gatewayRes = await gatewayReq.json();
 		    if (gatewayRes.success && gatewayRes.discount_applied) {
-		       // Reduce price by the value of the coupon (prevent negative prices)
 		       amount = Math.max(0, amount - gatewayRes.discount_applied);
 		    }
 		  } catch(e) {
@@ -76,7 +79,7 @@ export async function POST(req: Request) {
 			},
 			body: JSON.stringify({
 				amount,
-				currency: "INR",
+				currency: checkoutCurrency,
 				description: "Lazynext Pro",
 			}),
 		});
