@@ -1,3 +1,5 @@
-cli_start: "Starting Lazynext CLI Renderer"
-cli_done: "Rendering complete."
-cli_error: "An error occurred during rendering."
+hello: "مرحباً"
+welcome: "مرحباً بك في Lazynext"
+error_unauthorized: "وصول غير مصرح به"
+error_not_found: "المورد غير موجود"
+error_internal: "خطأ داخلي في الخادم"

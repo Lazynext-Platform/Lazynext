@@ -1,3 +1,5 @@
-cli_start: "Starting Lazynext CLI Renderer"
-cli_done: "Rendering complete."
-cli_error: "An error occurred during rendering."
+hello: "Merhaba"
+welcome: "Lazynext'e Hoş Geldiniz"
+error_unauthorized: "Yetkisiz erişim"
+error_not_found: "Kaynak bulunamadı"
+error_internal: "Dahili sunucu hatası"

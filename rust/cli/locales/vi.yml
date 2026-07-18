@@ -1,3 +1,5 @@
-cli_start: "Starting Lazynext CLI Renderer"
-cli_done: "Rendering complete."
-cli_error: "An error occurred during rendering."
+hello: "xin chào"
+welcome: "Chào mừng đến với Lazynext"
+error_unauthorized: "Truy cập trái phép"
+error_not_found: "Không tìm thấy tài nguyên"
+error_internal: "Lỗi máy chủ nội bộ"

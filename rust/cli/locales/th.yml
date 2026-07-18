@@ -1,3 +1,5 @@
-cli_start: "Starting Lazynext CLI Renderer"
-cli_done: "Rendering complete."
-cli_error: "An error occurred during rendering."
+hello: "สวัสดี"
+welcome: "ยินดีต้อนรับสู่ Lazynext"
+error_unauthorized: "การเข้าถึงไม่ได้รับอนุญาต"
+error_not_found: "ไม่พบทรัพยากร"
+error_internal: "ข้อผิดพลาดภายในเซิร์ฟเวอร์"
