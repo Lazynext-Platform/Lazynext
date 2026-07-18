@@ -5,10 +5,10 @@
 //! initializes the PostgreSQL store, NLE state, webhook dispatcher, and
 //! Redis-backed WebSocket state.
 
+use axum::extract::Request;
 use axum::extract::{Path, Query, State};
 use axum::http::{HeaderMap, StatusCode, header};
 use axum::middleware::{self, Next};
-use axum::extract::Request;
 use axum::response::{IntoResponse, Redirect};
 use axum::routing::{delete, get, post, put};
 use axum::{Extension, Json, Router};
@@ -58,13 +58,13 @@ async fn extract_locale_middleware(
             }
         }
     }
-    
+
     // In a real application, you'd want to store this in request extensions or thread-local storage.
     // rust-i18n uses static globals by default which isn't safe for async multi-tenant servers.
     // We insert it as an extension so handlers can access it.
     let mut request = request;
     request.extensions_mut().insert(locale.to_string());
-    
+
     next.run(request).await
 }
 
@@ -289,7 +289,10 @@ async fn main() {
     let authenticated_routes = Router::new()
         .route("/api/v1/timeline", get(handle_get_timeline))
         .route("/api/v1/user/profile", get(handle_get_profile))
-        .route("/api/v1/user/locale", put(international::handle_update_user_locale))
+        .route(
+            "/api/v1/user/locale",
+            put(international::handle_update_user_locale),
+        )
         .route("/api/v1/user/credits", get(handle_get_user_credits))
         .route("/api/v1/projects", get(handle_get_projects))
         .route("/api/v1/promotions/wallet", get(handle_get_wallet_balance))
@@ -406,7 +409,10 @@ async fn main() {
     )
 )]
 // Handles the health-check request, reporting service and database status.
-async fn health_handler(State(state): State<AppState>, Extension(locale): Extension<String>) -> Json<Value> {
+async fn health_handler(
+    State(state): State<AppState>,
+    Extension(locale): Extension<String>,
+) -> Json<Value> {
     rust_i18n::set_locale(&locale);
     let message = rust_i18n::t!("welcome");
     let db_status = if state.db.health_check().await.is_ok() {
@@ -414,7 +420,9 @@ async fn health_handler(State(state): State<AppState>, Extension(locale): Extens
     } else {
         "degraded"
     };
-    Json(json!({"status": "ok", "service": "api-gateway", "database": db_status, "message": message}))
+    Json(
+        json!({"status": "ok", "service": "api-gateway", "database": db_status, "message": message}),
+    )
 }
 
 // ── Authenticated Handlers ─────────────────────────────────────────────────
@@ -2206,7 +2214,10 @@ async fn handle_get_wallet_balance(
     let user_id = claims.sub.clone();
 
     // Fetch user's preferred currency
-    let currency = state.db.get_user(&user_id).await
+    let currency = state
+        .db
+        .get_user(&user_id)
+        .await
         .ok()
         .flatten()
         .and_then(|u| u.currency)
@@ -2235,7 +2246,10 @@ async fn handle_get_my_referrals(
     let user_id = claims.sub.clone();
 
     // Fetch user's preferred currency
-    let currency = state.db.get_user(&user_id).await
+    let currency = state
+        .db
+        .get_user(&user_id)
+        .await
         .ok()
         .flatten()
         .and_then(|u| u.currency)

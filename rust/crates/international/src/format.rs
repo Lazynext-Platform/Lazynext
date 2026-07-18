@@ -3,8 +3,7 @@
 /// Provides functions to format currency amounts, dates, and numbers
 /// according to locale conventions. Delegates to the system's `Intl`
 /// equivalent where possible.
-
-use super::{Currency, Country};
+use super::{Country, Currency};
 
 /// Format a monetary amount in the user's preferred currency and locale.
 ///
@@ -25,7 +24,12 @@ pub fn format_currency(amount_minor: i64, currency_code: &str, locale: &str) -> 
         let (decimal_sep, grouping_sep) = locale_separators(locale);
 
         // Format the number with proper separators
-        let formatted = format_number_with_separators(major, currency.decimals, &decimal_sep.to_string(), &grouping_sep.to_string());
+        let formatted = format_number_with_separators(
+            major,
+            currency.decimals,
+            &decimal_sep.to_string(),
+            &grouping_sep.to_string(),
+        );
 
         if currency.symbol_before {
             format!("{}{}", currency.symbol, formatted)
@@ -42,7 +46,8 @@ pub fn format_currency(amount_minor: i64, currency_code: &str, locale: &str) -> 
 /// Return decimal and thousands separators for a given locale.
 fn locale_separators(locale: &str) -> (char, char) {
     match locale.split('-').next().unwrap_or("en") {
-        "de" | "fr" | "es" | "it" | "pt" | "nl" | "pl" | "ro" | "hu" | "cs" | "sk" | "sl" | "hr" | "bg" | "el" | "fi" | "sv" | "da" | "no" | "tr" | "vi" | "id" => (',', '.'),
+        "de" | "fr" | "es" | "it" | "pt" | "nl" | "pl" | "ro" | "hu" | "cs" | "sk" | "sl"
+        | "hr" | "bg" | "el" | "fi" | "sv" | "da" | "no" | "tr" | "vi" | "id" => (',', '.'),
         "en" | "ja" | "ko" | "zh" | "th" | "hi" | "ar" | "he" | "fa" | "ur" => ('.', ','),
         _ => ('.', ','),
     }
@@ -52,7 +57,7 @@ fn locale_separators(locale: &str) -> (char, char) {
 fn format_number_with_separators(
     value: f64,
     decimals: u8,
-    _decimal_sep: &str,   // simplified: no grouping for now
+    _decimal_sep: &str, // simplified: no grouping for now
     _grouping_sep: &str,
 ) -> String {
     let multiplier = 10_f64.powi(decimals as i32);

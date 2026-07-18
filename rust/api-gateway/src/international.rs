@@ -2,11 +2,10 @@
 ///
 /// Handlers for country/currency lookups, locale-aware currency
 /// formatting, and user locale preference management.
-
-use axum::extract::{Json, State, Extension};
+use axum::extract::{Extension, Json, State};
 use axum::http::StatusCode;
-use lazynext_international::{Country, Currency};
 use lazynext_international::format as intl_fmt;
+use lazynext_international::{Country, Currency};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
@@ -112,9 +111,18 @@ pub async fn handle_update_user_locale(
     Json(payload): Json<serde_json::Value>,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
     let user_id = claims.sub.clone();
-    let locale = payload.get("locale").and_then(|v| v.as_str()).unwrap_or("en-US");
-    let country = payload.get("country").and_then(|v| v.as_str()).unwrap_or("US");
-    let currency = payload.get("currency").and_then(|v| v.as_str()).unwrap_or("USD");
+    let locale = payload
+        .get("locale")
+        .and_then(|v| v.as_str())
+        .unwrap_or("en-US");
+    let country = payload
+        .get("country")
+        .and_then(|v| v.as_str())
+        .unwrap_or("US");
+    let currency = payload
+        .get("currency")
+        .and_then(|v| v.as_str())
+        .unwrap_or("USD");
 
     if !intl_fmt::validate_locale(locale) {
         return Err((
@@ -130,15 +138,14 @@ pub async fn handle_update_user_locale(
         )
     })?;
 
-    let result = sqlx::query(
-        "UPDATE \"user\" SET locale = $1, country = $2, currency = $3 WHERE id = $4",
-    )
-    .bind(locale)
-    .bind(country)
-    .bind(currency)
-    .bind(&user_id)
-    .execute(pool)
-    .await;
+    let result =
+        sqlx::query("UPDATE \"user\" SET locale = $1, country = $2, currency = $3 WHERE id = $4")
+            .bind(locale)
+            .bind(country)
+            .bind(currency)
+            .bind(&user_id)
+            .execute(pool)
+            .await;
 
     match result {
         Ok(_) => Ok(Json(json!({

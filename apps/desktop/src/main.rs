@@ -7,9 +7,9 @@
 use gpui::prelude::*;
 use gpui::*;
 use lazynext_core::NLEState;
+use rust_i18n::i18n;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use rust_i18n::i18n;
 
 i18n!("locales");
 

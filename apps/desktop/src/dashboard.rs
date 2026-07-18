@@ -117,7 +117,10 @@ impl Render for Dashboard {
             };
             format!("{}", crate::tr!("theme_system").replace("{}", actual_os))
         } else {
-            format!("{}", crate::tr!("theme_label").replace("{}", &current_override))
+            format!(
+                "{}",
+                crate::tr!("theme_label").replace("{}", &current_override)
+            )
         };
 
         div()

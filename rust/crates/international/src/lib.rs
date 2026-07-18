@@ -3,7 +3,6 @@
 /// Provides comprehensive ISO 3166-1 country data, ISO 4217 currency
 /// data, and locale-aware formatting utilities. This is the single source
 /// of truth for all globalization logic across the Lazynext platform.
-
 pub mod countries;
 pub mod currencies;
 pub mod format;

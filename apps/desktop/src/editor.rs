@@ -176,7 +176,10 @@ impl Render for EditorShell {
             };
             format!("{}", crate::tr!("theme_system").replace("{}", actual_os))
         } else {
-            format!("{}", crate::tr!("theme_label").replace("{}", &current_override))
+            format!(
+                "{}",
+                crate::tr!("theme_label").replace("{}", &current_override)
+            )
         };
         let bg_color = theme.bg_main;
         let panel_bg = theme.bg_panel;
@@ -251,8 +254,7 @@ impl Render for EditorShell {
         let prompt_clicked = self.prompt_clicked.clone();
         let is_prompt_focused = self.prompt_focused.get();
         let prompt_display = SharedString::from(self.ai_prompt_text.clone());
-        let prompt_placeholder =
-            SharedString::from(crate::tr!("click_to_focus"));
+        let prompt_placeholder = SharedString::from(crate::tr!("click_to_focus"));
         let prompt_text_color = if self.ai_prompt_text.is_empty() {
             theme.text_muted
         } else {

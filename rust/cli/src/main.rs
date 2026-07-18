@@ -21,9 +21,9 @@ use lazynext_core::engine::AssetLoader;
 use lazynext_core::ffmpeg_loader::{CliFfmpegLoader, probe_media};
 use lazynext_core::nle_state::ProjectData;
 use lazynext_rules::{RuleContext, RuleSet};
+use rust_i18n::{i18n, set_locale, t};
 use serde::Serialize;
 use std::io::{self, IsTerminal, Read};
-use rust_i18n::{i18n, set_locale, t};
 
 i18n!("locales");
 
