@@ -79,6 +79,27 @@ pub struct Subscription {
     pub updated_at: DateTime<Utc>,
 }
 
+/// Mirrors the Drizzle `user_social_tokens` table.
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
+pub struct UserSocialToken {
+    /// Unique token record identifier.
+    pub id: String,
+    /// User ID that owns this token.
+    pub user_id: String,
+    /// Social platform identifier (e.g. "youtube", "tiktok", "instagram").
+    pub platform: String,
+    /// OAuth access token.
+    pub access_token: String,
+    /// OAuth refresh token (if provided).
+    pub refresh_token: Option<String>,
+    /// Expiration timestamp for the access token.
+    pub expires_at: Option<DateTime<Utc>>,
+    /// Timestamp of record creation.
+    pub created_at: DateTime<Utc>,
+    /// Timestamp of last record update.
+    pub updated_at: DateTime<Utc>,
+}
+
 /// Lightweight metrics row returned by admin dashboard queries.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AdminMetrics {
@@ -258,6 +279,59 @@ impl DbStore {
             .bind(project_id)
             .execute(self.pool_ref()?)
             .await?;
+        Ok(())
+    }
+
+    /// Fetches a user's social token for a specific platform.
+    pub async fn get_social_token(
+        &self,
+        user_id: &str,
+        platform: &str,
+    ) -> Result<Option<UserSocialToken>, sqlx::Error> {
+        if self.is_dev_mode {
+            return Ok(None);
+        }
+        let pool = self.pool.as_ref().unwrap();
+        let token = sqlx::query_as::<_, UserSocialToken>(
+            "SELECT * FROM user_social_tokens WHERE user_id = $1 AND platform = $2",
+        )
+        .bind(user_id)
+        .bind(platform)
+        .fetch_optional(pool)
+        .await?;
+        Ok(token)
+    }
+
+    /// Upserts a social token.
+    pub async fn upsert_social_token(
+        &self,
+        token: &UserSocialToken,
+    ) -> Result<(), sqlx::Error> {
+        if self.is_dev_mode {
+            return Ok(());
+        }
+        let pool = self.pool.as_ref().unwrap();
+        sqlx::query(
+            r#"
+            INSERT INTO user_social_tokens (id, user_id, platform, access_token, refresh_token, expires_at, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            ON CONFLICT (user_id, platform) DO UPDATE SET
+                access_token = EXCLUDED.access_token,
+                refresh_token = COALESCE(EXCLUDED.refresh_token, user_social_tokens.refresh_token),
+                expires_at = EXCLUDED.expires_at,
+                updated_at = EXCLUDED.updated_at
+            "#,
+        )
+        .bind(&token.id)
+        .bind(&token.user_id)
+        .bind(&token.platform)
+        .bind(&token.access_token)
+        .bind(&token.refresh_token)
+        .bind(token.expires_at)
+        .bind(token.created_at)
+        .bind(token.updated_at)
+        .execute(pool)
+        .await?;
         Ok(())
     }
 

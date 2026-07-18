@@ -5,9 +5,10 @@
 //! initializes the PostgreSQL store, NLE state, webhook dispatcher, and
 //! Redis-backed WebSocket state.
 
-use axum::extract::{Path, State};
-use axum::http::HeaderMap;
+use axum::extract::{Path, State, Query};
+use axum::http::{HeaderMap, StatusCode};
 use axum::middleware;
+use axum::response::{IntoResponse, Redirect};
 use axum::routing::{delete, get, post};
 use axum::{Extension, Json, Router};
 // Note: axum 0.8 retains `Extension` as an extractor.
@@ -18,7 +19,7 @@ use lazynext_core::{
     Channel, ChannelEvent, ChannelManager, NLEEvent, NLEState, Routine, RoutineScheduler, Task,
     TaskQueue,
 };
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 use serde_json::{Value, json};
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -222,6 +223,7 @@ async fn main() {
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .route("/health", get(health_handler))
         .route("/api/v1/dodo/webhook", post(handle_dodo_webhook))
+        .route("/api/v1/auth/social/callback", get(handle_social_auth_callback))
         .route(
             "/api/v1/captcha/verify-turnstile",
             post(captcha::handle_verify_turnstile),
@@ -246,6 +248,7 @@ async fn main() {
         .route("/api/v1/projects", get(handle_get_projects))
         .route("/api/v1/ws", get(ws::ws_handler))
         .route("/api/v1/social/schedule", get(handle_social_schedule))
+        .route("/api/v1/auth/social/:platform", get(handle_social_auth_init))
         .route("/api/v1/routines", get(handle_list_routines))
         .route("/api/v1/channels", get(handle_list_channels))
         .route("/api/v1/tasks", get(handle_list_tasks))
@@ -1183,13 +1186,53 @@ async fn handle_social_reframe(
 
 /// POST /api/v1/social/publish — Proxy publish to social-publish
 async fn handle_social_publish(
-    Extension(_claims): Extension<AuthClaims>,
-    Json(payload): Json<Value>,
-) -> Json<Value> {
+    State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+    Json(mut payload): Json<Value>,
+) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
+    let user_id = claims.sub.clone();
     let platform = payload
         .get("platform")
         .and_then(|v| v.as_str())
-        .unwrap_or("tiktok");
+        .unwrap_or("tiktok")
+        .to_string();
+
+    // Fetch user token
+    let token_res = state.db.get_social_token(&user_id, &platform).await;
+    match token_res {
+        Ok(Some(token)) => {
+            // Inject token into payload
+            if let Some(obj) = payload.as_object_mut() {
+                obj.insert("access_token".to_string(), json!(token.access_token));
+                if let Some(rt) = token.refresh_token {
+                    obj.insert("refresh_token".to_string(), json!(rt));
+                }
+                if let Some(ea) = token.expires_at {
+                    obj.insert("expires_at".to_string(), json!(ea.timestamp_millis()));
+                }
+            }
+        }
+        Ok(None) => {
+            return Err((
+                StatusCode::BAD_REQUEST,
+                Json(json!({
+                    "success": false,
+                    "error": format!("No linked account found for platform: {}", platform)
+                })),
+            ));
+        }
+        Err(e) => {
+            tracing::error!("DB error fetching social token: {}", e);
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({
+                    "success": false,
+                    "error": "Internal database error"
+                })),
+            ));
+        }
+    }
+
     let base = social_publish_url();
     let client = reqwest::Client::new();
     match client
@@ -1200,12 +1243,112 @@ async fn handle_social_publish(
     {
         Ok(resp) => {
             let body: Value = resp.json().await.unwrap_or(json!({}));
-            Json(body)
+            Ok(Json(body))
         }
-        Err(e) => Json(json!({
+        Err(e) => Ok(Json(json!({
             "success": false,
             "error": format!("Social publish service unreachable: {e}")
-        })),
+        }))),
+    }
+}
+
+#[derive(Deserialize)]
+pub struct AuthCallbackQuery {
+    code: String,
+    state: String, // Contains the platform and user_id separated by a colon, or JSON
+}
+
+/// GET /api/v1/auth/social/:platform — Initiate OAuth flow
+async fn handle_social_auth_init(
+    Path(platform): Path<String>,
+    Extension(claims): Extension<AuthClaims>,
+) -> impl IntoResponse {
+    let user_id = claims.sub.clone();
+    // Pass user_id and platform in state
+    let state = format!("{}:{}", platform, user_id);
+    let base = social_publish_url();
+    let client = reqwest::Client::new();
+    
+    // We request the underlying Node.js service to generate the OAuth URL
+    // since it holds the client IDs and secrets via passport/oauth libs.
+    let response = client
+        .get(format!("{}/auth/url/{}?state={}", base, platform, state))
+        .send()
+        .await;
+
+    match response {
+        Ok(resp) => {
+            let body: Value = resp.json().await.unwrap_or(json!({}));
+            if let Some(url) = body.get("url").and_then(|u| u.as_str()) {
+                Redirect::to(url).into_response()
+            } else {
+                (StatusCode::INTERNAL_SERVER_ERROR, "Invalid URL from provider").into_response()
+            }
+        }
+        Err(e) => {
+            (StatusCode::INTERNAL_SERVER_ERROR, format!("Failed to reach auth provider: {}", e)).into_response()
+        }
+    }
+}
+
+/// GET /api/v1/auth/social/callback — Handle OAuth callback
+async fn handle_social_auth_callback(
+    State(app_state): State<AppState>,
+    Query(query): Query<AuthCallbackQuery>,
+) -> impl IntoResponse {
+    // Parse state to get user_id and platform
+    let parts: Vec<&str> = query.state.split(':').collect();
+    if parts.len() != 2 {
+        return (StatusCode::BAD_REQUEST, "Invalid state format").into_response();
+    }
+    let platform = parts[0].to_string();
+    let user_id = parts[1].to_string();
+
+    let base = social_publish_url();
+    let client = reqwest::Client::new();
+
+    // Exchange code for tokens via Node.js service
+    let response = client
+        .post(format!("{}/auth/exchange/{}", base, platform))
+        .json(&json!({ "code": query.code }))
+        .send()
+        .await;
+
+    match response {
+        Ok(resp) => {
+            let body: Value = resp.json().await.unwrap_or(json!({}));
+            if let (Some(access_token), refresh_token, expires_in) = (
+                body.get("access_token").and_then(|t| t.as_str()),
+                body.get("refresh_token").and_then(|t| t.as_str()),
+                body.get("expires_in").and_then(|t| t.as_i64()), // in seconds
+            ) {
+                let expires_at = expires_in.map(|sec| chrono::Utc::now() + chrono::Duration::seconds(sec));
+
+                let token_record = crate::db::UserSocialToken {
+                    id: uuid::Uuid::new_v4().to_string(),
+                    user_id,
+                    platform,
+                    access_token: access_token.to_string(),
+                    refresh_token: refresh_token.map(|s| s.to_string()),
+                    expires_at,
+                    created_at: chrono::Utc::now(),
+                    updated_at: chrono::Utc::now(),
+                };
+
+                if let Err(e) = app_state.db.upsert_social_token(&token_record).await {
+                    tracing::error!("Failed to save social token: {}", e);
+                    return (StatusCode::INTERNAL_SERVER_ERROR, "Database error").into_response();
+                }
+
+                // Redirect to web app dashboard/settings on success
+                Redirect::to("/dashboard/settings?social_auth=success").into_response()
+            } else {
+                (StatusCode::BAD_REQUEST, "Invalid token response from provider").into_response()
+            }
+        }
+        Err(e) => {
+            (StatusCode::INTERNAL_SERVER_ERROR, format!("Failed to exchange code: {}", e)).into_response()
+        }
     }
 }
 

@@ -247,3 +247,20 @@ export const oidcConnection = pgTable("oidc_connection", {
   index("oidc_connection_user_id_idx").on(table.userId),
   index("oidc_connection_provider_id_idx").on(table.providerId),
 ]);
+
+// ── Social Publish Tokens ────────────────────────────────────────
+
+export const userSocialTokens = pgTable("user_social_tokens", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  platform: text("platform").notNull(), // e.g. "youtube", "tiktok", "instagram"
+  accessToken: text("access_token").notNull(),
+  refreshToken: text("refresh_token"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("user_social_tokens_user_platform_idx").on(table.userId, table.platform),
+]);
