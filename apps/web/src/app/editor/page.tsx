@@ -15,6 +15,7 @@ import { KeyboardShortcutHints } from "@/components/editor/KeyboardShortcutHints
 import { AutoSaveIndicator } from "@/components/editor/AutoSaveIndicator";
 import { MobileGate } from "@/components/editor/mobile-gate";
 import { VoiceInput } from "@/components/editor/VoiceInput";
+import { useTranslations } from "next-intl";
 import {
 	Bot,
 	Loader2,
@@ -32,6 +33,8 @@ import { motion, AnimatePresence } from "framer-motion";
 
 /** React component rendering EditorPage. */
 export default function EditorPage() {
+	const t = useTranslations("Editor");
+	const c = useTranslations("Common");
 	const { isReady, time, frame, projectData: _projectData } = useWasm();
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
