@@ -99,11 +99,11 @@ const nextConfig: NextConfig = {
 		return locales.flatMap((locale) => [
 			{
 				source: `/${locale}`,
-				destination: "/",
+				destination: `/?__locale=${locale}`,
 			},
 			{
 				source: `/${locale}/:path*`,
-				destination: "/:path*",
+				destination: `/:path*?__locale=${locale}`,
 			},
 		]);
 	},
