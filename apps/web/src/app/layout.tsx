@@ -37,6 +37,7 @@ import { CountlyProvider } from "@/components/providers/countly-provider";
 
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getLocale } from 'next-intl/server';
+import { LocaleHtml } from "@/components/locale-html";
 
 /** App root layout with providers, scripts, and global page shell. */
 export default async function RootLayout({
@@ -46,7 +47,7 @@ export default async function RootLayout({
     const messages = await getMessages();
 
 	return (
-		<html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
+		<LocaleHtml>
 			<head>
 				<OrganizationLD />
 				<SoftwareAppLD />
@@ -98,6 +99,6 @@ export default async function RootLayout({
 				</PostHogProvider>
                 </NextIntlClientProvider>
 			</body>
-		</html>
+		</LocaleHtml>
 	);
 }

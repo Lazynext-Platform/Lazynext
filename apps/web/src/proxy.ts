@@ -26,7 +26,6 @@ export async function proxy(request: NextRequest) {
 	if (m && LOCALES.includes(m[1])) {
 		const resp = NextResponse.next();
 		resp.cookies.set("NEXT_LOCALE", m[1], { path: "/", maxAge: 31536000 });
-		// Don't return here — let Next.js handle the routing
 	}
 
 	const clean = stripLocale(pathname);
