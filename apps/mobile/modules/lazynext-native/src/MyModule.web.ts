@@ -64,6 +64,14 @@ class MyModule extends NativeModule<{}> {
     });
   }
 
+  /**
+   * Move a timeline clip to a new position.
+   *
+   * **Web-only stub.** Clip manipulation requires the native UniFFI bridge
+   * which calls into the Rust NLE engine (`lazynext_core`). The web platform
+   * does not have access to this bridge — use the mobile native build or
+   * desktop app for timeline operations.
+   */
   async moveClip(
     _clipId: string,
     _newPosition: number,

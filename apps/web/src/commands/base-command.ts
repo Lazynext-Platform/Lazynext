@@ -25,9 +25,7 @@ export function createElementSelectionResult(
 export abstract class Command {
 	abstract execute(): CommandResult | undefined;
 
-	undo(): void {
-		throw new Error("Undo not implemented for this command");
-	}
+	abstract undo(): void;
 
 	redo(): CommandResult | undefined {
 		return this.execute();
