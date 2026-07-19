@@ -22,3 +22,9 @@
 - **Testplan ↔ Tests**: 12/18 TC verified; 6 deferred (documented above). ✅
 - **Changelog ↔ Session**: matches commits. ✅
 - **Dependencies ↔ Architecture**: no new deps added (WebCodecs, c2pa-node, mp4-muxer all deferred per decisions). ✅
+
+
+## Session [2026-07-19]
+- **State**: Feature complete, merged to main.
+- **Actions**: Verified browser→render-service pipeline, C2PA, E2E tests. 12/18 test cases verified.
+- **Next Steps**: None — feature closed.
