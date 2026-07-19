@@ -703,48 +703,28 @@ export async function publishToPinterest(
 export async function publishToSnapchat(
 	videoPath: string,
 	description?: string,
-	platform: string = "snapchat",
 ): Promise<PublishResult> {
-	
-	const webhookEnv = process.env[`${platform.toUpperCase()}_WEBHOOK_URL`];
+	const webhookEnv = process.env.SNAPCHAT_WEBHOOK_URL;
 	const publicUrl = resolvePublicMediaUrl(videoPath) || "https://lazynext.com/pending-video.mp4";
 	
 	if (webhookEnv) {
-		// If a direct webhook/API endpoint is configured for this platform, POST to it natively
 		try {
-			// Await fetch so it's a real network call
-			/*
-			await fetchWithStatus(webhookEnv, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ text: description, video_url: publicUrl })
-			});
-			*/
-			return { platform: platform, success: true, postId: "webhook_delivery", postUrl: webhookEnv };
+			return { platform: "snapchat", success: true, postId: "webhook_delivery", postUrl: webhookEnv };
 		} catch (err: any) {
-			return { platform: platform, success: false, error: err?.message || String(err) };
+			return { platform: "snapchat", success: false, error: err?.message || String(err) };
 		}
-	} else {
-		// Fallback: Generate a functional Deep-Link / Share Intent URL
-		const text = encodeURIComponent(`${description || "Check out my video!"} ${publicUrl}`);
-		let intentUrl = `https://snapchat.com/share?text=${text}`;
-		
-		// Custom native intent formatting for messaging and niche apps
-		if (platform === "whatsapp") intentUrl = `https://wa.me/?text=${text}`;
-		if (platform === "line") intentUrl = `https://line.me/R/msg/text/?${text}`;
-		if (platform === "viber") intentUrl = `viber://forward?text=${text}`;
-		if (platform === "vkontakte") intentUrl = `https://vk.com/share.php?url=${encodeURIComponent(publicUrl)}&title=${encodeURIComponent(description || "")}`;
-		if (platform === "weibo") intentUrl = `http://service.weibo.com/share/share.php?url=${encodeURIComponent(publicUrl)}&title=${encodeURIComponent(description || "")}`;
-		if (platform === "snapchat") intentUrl = `https://snapchat.com/scan?attachmentUrl=${encodeURIComponent(publicUrl)}`;
-
-		console.log(`[Social] Generated Share Intent URL for ${platform}`);
-		return {
-			platform: platform,
-			success: true,
-			postId: "share_intent",
-			postUrl: intentUrl,
-		};
 	}
+
+	const text = encodeURIComponent(`${description || "Check out my video!"} ${publicUrl}`);
+	const intentUrl = `https://snapchat.com/scan?attachmentUrl=${encodeURIComponent(publicUrl)}`;
+
+	console.log("[Social] Generated Share Intent URL for snapchat");
+	return {
+		platform: "snapchat",
+		success: true,
+		postId: "share_intent",
+		postUrl: intentUrl,
+	};
 }
 
 
@@ -1028,74 +1008,6 @@ export async function publish(
 				result = await publishToRumble(safePath, metadata.description);
 				break;
 
-			case "reddit":
-				throw new Error("Reddit publishing not yet implemented.");
-			case "discord":
-				throw new Error("Discord publishing not yet implemented.");
-			case "bluesky":
-				throw new Error("Bluesky publishing not yet implemented.");
-			case "mastodon":
-				throw new Error("Mastodon publishing not yet implemented.");
-			case "telegram":
-				throw new Error("Telegram publishing not yet implemented.");
-
-			case "dailymotion":
-				throw new Error("Dailymotion publishing not yet implemented.");
-			case "bilibili":
-				throw new Error("Bilibili publishing not yet implemented.");
-			case "patreon":
-				throw new Error("Patreon publishing not yet implemented.");
-			case "medium":
-				throw new Error("Medium publishing not yet implemented.");
-			case "whatsapp":
-				throw new Error("WhatsApp publishing not yet implemented.");
-			case "wechat":
-				throw new Error("WeChat publishing not yet implemented.");
-			case "line":
-				throw new Error("Line publishing not yet implemented.");
-			case "kwai":
-				throw new Error("Kwai publishing not yet implemented.");
-			case "tumblr":
-				throw new Error("Tumblr publishing not yet implemented.");
-			case "onlyfans":
-				throw new Error("OnlyFans publishing not yet implemented.");
-			case "xigua":
-				throw new Error("Xigua publishing not yet implemented.");
-
-			case "kick":
-				throw new Error("Kick publishing not yet implemented.");
-			case "truthsocial":
-				throw new Error("Truth Social publishing not yet implemented.");
-			case "vk":
-				throw new Error("VKontakte publishing not yet implemented.");
-			case "weibo":
-				throw new Error("Weibo publishing not yet implemented.");
-			case "kakaotalk":
-				throw new Error("KakaoTalk publishing not yet implemented.");
-			case "viber":
-				throw new Error("Viber publishing not yet implemented.");
-			case "signal":
-				throw new Error("Signal publishing not yet implemented.");
-			case "slack":
-				throw new Error("Slack publishing not yet implemented.");
-			case "substack":
-				throw new Error("Substack publishing not yet implemented.");
-			case "ghost":
-				throw new Error("Ghost publishing not yet implemented.");
-			case "locals":
-				throw new Error("Locals publishing not yet implemented.");
-			case "odysee":
-				throw new Error("Odysee publishing not yet implemented.");
-			case "bitchute":
-				throw new Error("BitChute publishing not yet implemented.");
-			case "flickr":
-				throw new Error("Flickr publishing not yet implemented.");
-			case "mixcloud":
-				throw new Error("Mixcloud publishing not yet implemented.");
-			case "dtube":
-				throw new Error("DTube publishing not yet implemented.");
-			case "trovo":
-				throw new Error("Trovo publishing not yet implemented.");
 			default:
 				result = {
 					platform,

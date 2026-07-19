@@ -293,39 +293,6 @@ app.post("/publish/twitch", buildPlatformPublisher("twitch"));
 app.post("/publish/vimeo", buildPlatformPublisher("vimeo"));
 app.post("/publish/threads", buildPlatformPublisher("threads"));
 app.post("/publish/rumble", buildPlatformPublisher("rumble"));
-app.post("/publish/reddit", buildPlatformPublisher("reddit"));
-app.post("/publish/discord", buildPlatformPublisher("discord"));
-app.post("/publish/bluesky", buildPlatformPublisher("bluesky"));
-app.post("/publish/mastodon", buildPlatformPublisher("mastodon"));
-app.post("/publish/telegram", buildPlatformPublisher("telegram"));
-app.post("/publish/dailymotion", buildPlatformPublisher("dailymotion"));
-app.post("/publish/bilibili", buildPlatformPublisher("bilibili"));
-app.post("/publish/patreon", buildPlatformPublisher("patreon"));
-app.post("/publish/medium", buildPlatformPublisher("medium"));
-app.post("/publish/whatsapp", buildPlatformPublisher("whatsapp"));
-app.post("/publish/wechat", buildPlatformPublisher("wechat"));
-app.post("/publish/line", buildPlatformPublisher("line"));
-app.post("/publish/kwai", buildPlatformPublisher("kwai"));
-app.post("/publish/tumblr", buildPlatformPublisher("tumblr"));
-app.post("/publish/onlyfans", buildPlatformPublisher("onlyfans"));
-app.post("/publish/xigua", buildPlatformPublisher("xigua"));
-app.post("/publish/kick", buildPlatformPublisher("kick"));
-app.post("/publish/truthsocial", buildPlatformPublisher("truthsocial"));
-app.post("/publish/vk", buildPlatformPublisher("vk"));
-app.post("/publish/weibo", buildPlatformPublisher("weibo"));
-app.post("/publish/kakaotalk", buildPlatformPublisher("kakaotalk"));
-app.post("/publish/viber", buildPlatformPublisher("viber"));
-app.post("/publish/signal", buildPlatformPublisher("signal"));
-app.post("/publish/slack", buildPlatformPublisher("slack"));
-app.post("/publish/substack", buildPlatformPublisher("substack"));
-app.post("/publish/ghost", buildPlatformPublisher("ghost"));
-app.post("/publish/locals", buildPlatformPublisher("locals"));
-app.post("/publish/odysee", buildPlatformPublisher("odysee"));
-app.post("/publish/bitchute", buildPlatformPublisher("bitchute"));
-app.post("/publish/flickr", buildPlatformPublisher("flickr"));
-app.post("/publish/mixcloud", buildPlatformPublisher("mixcloud"));
-app.post("/publish/dtube", buildPlatformPublisher("dtube"));
-app.post("/publish/trovo", buildPlatformPublisher("trovo"));
 
 /**
  * Routes a publish request to the platform-specific publisher.
@@ -694,7 +661,7 @@ function generatePlatformMetadata(
 ): Omit<MetadataResult, "success"> {
 	// Constrain platform to a known allowlist so it can never dispatch to an
 	// inherited Object method (e.g. "constructor"/"hasOwnProperty").
-	const ALLOWED_PLATFORMS = ["tiktok","youtube","instagram","twitter","facebook","linkedin","pinterest","snapchat","twitch","vimeo","threads","rumble","reddit","discord","bluesky","mastodon","telegram","dailymotion","bilibili","patreon","medium","whatsapp","wechat","line","kwai","tumblr","onlyfans","xigua", "kick", "truthsocial", "vk", "weibo", "kakaotalk", "viber", "signal", "slack", "substack", "ghost", "locals", "odysee", "bitchute", "flickr", "mixcloud", "dtube", "trovo"] as const;
+	const ALLOWED_PLATFORMS = ["tiktok","youtube","instagram","twitter","facebook","linkedin","pinterest","snapchat","twitch","vimeo","threads","rumble"] as const;
 	const safePlatform = (ALLOWED_PLATFORMS as readonly string[]).includes(
 		platform,
 	)
