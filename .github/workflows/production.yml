@@ -69,6 +69,8 @@ jobs:
         run: cargo fmt --all -- --check
 
       - name: Rust clippy
+        env:
+          CARGO_BUILD_JOBS: 2
         run: cargo clippy --workspace --all-targets -- -D warnings
 
       - name: Audit passed
@@ -97,6 +99,9 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.96.0
 
       - name: Rust tests (skip desktop)
+        env:
+          CARGO_BUILD_JOBS: 2
+          RUST_TEST_THREADS: 2
         run: cargo test --workspace --exclude lazynext_desktop
 
       - name: TypeScript tests
