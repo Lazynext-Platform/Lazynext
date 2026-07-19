@@ -105,7 +105,9 @@ jobs:
         run: cargo test --workspace --exclude lazynext_desktop
 
       - name: TypeScript tests
-        run: bun run test
+        env:
+          BUN_GARBAGE_COLLECTOR_LEVEL: 1
+        run: bun test --smol apps/web/src 2>&1
 
   # ── Build & Push Docker Images ──────────────────────────────────────────
   docker-build:
