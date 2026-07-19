@@ -43,10 +43,9 @@ export const generateBroll = async (req: Request, res: Response) => {
       return;
     }
   } catch (err) {
-    console.warn(`[Generative] Generative studio unreachable: ${err}. Using mock fallback.`);
+    console.warn(`[Generative] Generative studio unreachable: ${err}.`);
   }
 
-  // Degrade gracefully: return an honest error instead of fake data
   console.warn(`[Generative] Generative studio unreachable — cannot generate b-roll.`);
   res.status(503).json({
     success: false,
@@ -94,10 +93,9 @@ export const generateDub = async (req: Request, res: Response) => {
       return;
     }
   } catch (err) {
-    console.warn(`[Generative] Generative studio unreachable: ${err}. Using mock fallback.`);
+    console.warn(`[Generative] Generative studio unreachable: ${err}.`);
   }
 
-  // Degrade gracefully: return an honest error instead of fake data
   console.warn(`[Generative] Generative studio unreachable — cannot generate dub.`);
   res.status(503).json({
     success: false,

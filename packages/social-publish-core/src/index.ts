@@ -678,7 +678,9 @@ export async function publishToPinterest(
 				board_id: boardId,
 				media_source: {
 					source_type: "video_id",
-					cover_image_url: "https://lazynext.com/placeholder-thumbnail.jpg",
+					cover_image_url: process.env.PUBLIC_MEDIA_BASE_URL
+					? `${process.env.PUBLIC_MEDIA_BASE_URL.replace(/\/+$/, "")}/thumbnail.jpg`
+					: "https://lazynext.com/assets/default-thumbnail.jpg",
 					media_id: mediaId
 				},
 				title: description ? description.substring(0, 100) : "Lazynext Edit",

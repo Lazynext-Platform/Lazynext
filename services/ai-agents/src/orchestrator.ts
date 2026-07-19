@@ -1726,16 +1726,11 @@ async function callService(
 async function fetchStockFootage(query: string): Promise<unknown> {
   const apiKey = process.env.PEXELS_API_KEY;
   if (!apiKey) {
+    console.warn("[Orchestrator] PEXELS_API_KEY not configured — cannot fetch stock footage.");
     return {
-      success: true,
-      source: "mock",
-      assets: [
-        {
-          id: "pexels-mock-1",
-          url: "https://images.pexels.com/photos/example-1",
-          description: `Mock result for: ${query}`,
-        },
-      ],
+      success: false,
+      source: "unconfigured",
+      error: "Stock footage requires PEXELS_API_KEY",
     };
   }
 
