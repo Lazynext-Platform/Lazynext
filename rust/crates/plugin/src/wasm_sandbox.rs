@@ -45,7 +45,7 @@ impl WasmSandbox {
     }
 
     /// Call a specific exported function within the WASM sandbox
-    pub fn call_function(&mut self, function_name: &str, args: &[f64]) -> Result<f64, String> {
+    pub fn call_function(&mut self, function_name: &str, _args: &[f64]) -> Result<f64, String> {
         if !self.is_initialized {
             return Err("WASM Sandbox not initialized with a plugin module.".into());
         }
@@ -55,13 +55,10 @@ impl WasmSandbox {
             function_name
         );
 
-        // In a real implementation:
-        // let instance = wasmtime::Instance::new(&mut self.store, &self.module, &[]).unwrap();
-        // let func = instance.get_typed_func::<f64, f64>(&mut self.store, function_name).unwrap();
-        // let result = func.call(&mut self.store, args[0]).unwrap();
-
-        // Mock successful execution
-        let simulated_result = args.iter().sum::<f64>() * 2.0;
-        Ok(simulated_result)
+        // TODO: Wire wasmtime for real WASM execution. When enabled, this will:
+        //   let instance = wasmtime::Instance::new(&mut self.store, &self.module, &[]).unwrap();
+        //   let func = instance.get_typed_func::<f64, f64>(&mut self.store, function_name).unwrap();
+        //   let result = func.call(&mut self.store, args[0]).unwrap();
+        Err("WASM plugin execution requires wasmtime runtime — not yet wired.".into())
     }
 }

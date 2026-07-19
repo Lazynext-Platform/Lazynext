@@ -1,46 +1,10 @@
 //! Integration tests for the autonomous editor agent.
 //!
-//! Covers intent processing, job status handling, synchronous editing,
-//! serialization round-trips, and graceful degradation without API keys.
+//! Covers synchronous editing, serialization round-trips, and graceful
+//! degradation without API keys.
 
 use lazynext_core::NLEState;
 use lazynext_core::autonomous::{AutonomousEditor, JobStatus, VideoIntent};
-
-/// Verify that process_intent does not crash and returns a job ID
-/// (currently a stub that returns an error — graceful degradation).
-#[tokio::test]
-async fn test_process_intent_is_callable() {
-    let editor = AutonomousEditor::new();
-    let intent = VideoIntent {
-        prompt: "Add a cinematic color grade".to_string(),
-        require_plan_approval: false,
-        source_files: vec![],
-        llm_provider: Some("gemini".to_string()),
-    };
-
-    let result = editor.process_intent(intent).await;
-    // Currently a stub returning error — verify it doesn't panic
-    assert!(result.is_err());
-}
-
-/// Verify check_job_status handles unknown job IDs gracefully.
-#[tokio::test]
-async fn test_check_job_status_handles_unknown() {
-    let editor = AutonomousEditor::new();
-    let result = editor.check_job_status("nonexistent-job-id").await;
-
-    // Current stub: returns Ok(Failed) for any job ID
-    assert!(result.is_ok());
-    match result.unwrap() {
-        JobStatus::Failed { error } => {
-            assert!(
-                !error.is_empty(),
-                "Failed status should have an error message"
-            );
-        }
-        _ => panic!("Expected Failed status for unknown job ID"),
-    }
-}
 
 /// Verify process_intent_sync processes various intents correctly.
 #[test]

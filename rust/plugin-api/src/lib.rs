@@ -132,28 +132,14 @@ impl WasmPluginRuntime {
         }
     }
 
-    /// Load a WASM plugin from raw bytes.
+    /// Load a WASM plugin from raw bytes (metadata-only — execution not yet wired).
     ///
-    /// In production, the WASM module is compiled by `wasmtime::Module::new()`
-    /// and instantiated in a sandboxed `wasmtime::Store`. The store is
-    /// configured with fuel metering to prevent infinite loops.
+    /// Generates a deterministic plugin ID from a hash of the WASM bytes
+    /// and stores metadata. Plugin *execution* requires the wasmtime
+    /// runtime which is not yet integrated — see `rust/crates/plugin/`.
     pub fn load_plugin(&mut self, wasm_bytes: &[u8]) -> Result<String, String> {
-        // In production:
-        // let engine = wasmtime::Engine::default();
-        // let module = wasmtime::Module::new(&engine, wasm_bytes)
-        //     .map_err(|e| format!("Failed to compile WASM module: {e}"))?;
-        //
-        // let mut store = wasmtime::Store::new(&engine, ());
-        // store.set_fuel(1_000_000).unwrap(); // 1M fuel units per frame
-        //
-        // let instance = wasmtime::Instance::new(&mut store, &module, &[])
-        //     .map_err(|e| format!("Failed to instantiate: {e}"))?;
-        //
-        // // Call exports to get plugin metadata
-        // let plugin_id = call_wasm_export_string(&mut store, &instance, "plugin_id");
-        // let name = call_wasm_export_string(&mut store, &instance, "plugin_name");
-
-        // For now, use a hash of the WASM bytes as the plugin ID
+        // TODO: Wire wasmtime Module::new() + Store with fuel metering for
+        // sandboxed execution and real plugin metadata extraction via exports.
         use std::hash::{Hash, Hasher};
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
         wasm_bytes.hash(&mut hasher);
