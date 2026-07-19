@@ -572,8 +572,11 @@ async fn test_webrtc_signaling_with_two_clients() {
     tokio::time::sleep(Duration::from_millis(100)).await;
 
     // Client A sends offer targeting B
-    // Note: target_peer uses a placeholder — the server does not yet
-    // announce peer IDs back to clients, so proper routing is pending.
+    // Note: target_peer uses a placeholder ID because the server does not
+    // yet announce peer IDs back to clients after WebSocket connection.
+    // Full WebRTC peer routing depends on this server-side announcement.
+    // These tests verify the signaling message format and server relay
+    // behavior, not end-to-end ICE connectivity.
     ws_a.send(Message::Text(
         json!({
             "webrtc_offer": {

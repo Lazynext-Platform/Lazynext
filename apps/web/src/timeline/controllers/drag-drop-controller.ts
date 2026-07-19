@@ -474,7 +474,9 @@ export class DragDropController {
 		dragData: Extract<TimelineDragData, { type: "media" }>;
 	}): void {
 		if (target.targetElement) {
-			// Replace media source — not yet implemented
+			console.warn(
+				"[DragDrop] Media source replacement not yet implemented — dropping onto existing elements is unsupported.",
+			);
 			return;
 		}
 

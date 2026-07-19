@@ -42,7 +42,13 @@ impl PromotionsPane {
             cx.spawn(|view, mut cx| async move {
                 let client = reqwest::Client::new();
                 let base_url = "https://api.lazynext.com/api/v1";
-                let token = "placeholder_desktop_token"; // In real app, fetch from keychain
+                let token = match std::env::var("LAZYNEXT_AUTH_TOKEN") {
+                    Ok(t) => t,
+                    Err(_) => {
+                        log::warn!("LAZYNEXT_AUTH_TOKEN not set — promotions pane disabled");
+                        return;
+                    }
+                };
 
                 // Fetch Wallet
                 if let Ok(res) = client.get(format!("{}/promotions/wallet", base_url))
@@ -88,7 +94,16 @@ impl PromotionsPane {
         cx.spawn(|view, mut cx| async move {
             let client = reqwest::Client::new();
             let base_url = "https://api.lazynext.com/api/v1";
-            let token = "placeholder_desktop_token";
+            let token = match std::env::var("LAZYNEXT_AUTH_TOKEN") {
+                Ok(t) => t,
+                Err(_) => {
+                    let _ = view.update(&mut cx, |this, cx| {
+                        this.status_message = Some("Auth token not configured".into());
+                        cx.notify();
+                    });
+                    return;
+                }
+            };
 
             let req_body = serde_json::json!({ "code": code });
 
