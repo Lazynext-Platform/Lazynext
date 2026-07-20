@@ -26,7 +26,7 @@
     "expo-gl": "~57.0.1",
     "expo-localization": "^57.0.1",
     "expo-media-library": "~57.0.1",
-    "expo-sharing": "~13.0.1",
+    "expo-sharing": "~57.0.6",
     "expo-status-bar": "~57.0.0",
     "expo-web-browser": "~14.0.1",
     "i18next": "^26.3.6",
