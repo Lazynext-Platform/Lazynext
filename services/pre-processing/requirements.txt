@@ -12,7 +12,7 @@ opentelemetry-instrumentation-fastapi
 opentelemetry-exporter-otlp-proto-grpc
 # Core deps (always have wheels)
 pillow>=12.3.0
-numpy>=2.4,<2.5  # capped <2.5 for numba compatibility (numba is a transitive dep)
+numpy>=2.5.1,<2.6  # capped <2.5 for numba compatibility (numba is a transitive dep)
 # Security transitive minimums
 urllib3>=2.7.0
 requests>=2.34.2
