@@ -14,7 +14,7 @@ soundfile
 # Edge TTS — free, unlimited, 300+ voices, no API key
 edge-tts>=6.1.0
 # F5-TTS — zero-shot voice cloning, CPU-capable, 300M params, MIT license
-f5-tts>=1.1.0
+f5-tts>=1.1.21
 # Security: transitive dependency minimums
 urllib3>=2.7.0
 requests>=2.34.2
