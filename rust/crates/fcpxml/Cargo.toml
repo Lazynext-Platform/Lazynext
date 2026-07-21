@@ -1,0 +1,16 @@
+[package]
+name = "lazynext-fcpxml"
+description = "FCPXML exporter for DaVinci Resolve interoperability"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0"
+uuid = { version = "1.4", features = ["v4"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+quick-xml = { version = "0.31", features = ["serialize"] }
+editor_core = { path = "../editor_core" }
+
+[dev-dependencies]
+tokio = { version = "1.0", features = ["macros", "rt", "rt-multi-thread"] }

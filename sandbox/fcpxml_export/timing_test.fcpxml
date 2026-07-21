@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fcpxml version="1.8">
+  <resources>
+    <resource id="80310dde-7fed-4db8-813f-08353eb71d36" name="c1" path="./media/a.mp4" type="video"/>
+    <resource id="5ed93733-9d9e-4e44-b3ca-1da0f829f9b9" name="c2" path="./media/b.mp4" type="video"/>
+    <resource id="f3c5eda8-cd57-43ee-89bd-4a71047282a0" name="c3" path="./media/c.mp4" type="video"/>
+  </resources>
+  <timeline>
+    <sequence>
+      <duration>10.25</duration>
+      <track id="track_0" type="video">
+        <clip id="c1">
+          <name>Clip_c1</name>
+          <asset-ref id="80310dde-7fed-4db8-813f-08353eb71d36"/>
+          <offset>0.0</offset>
+          <duration>3.5</duration>
+          <start>0</start>
+        </clip>
+        <clip id="c2">
+          <name>Clip_c2</name>
+          <asset-ref id="5ed93733-9d9e-4e44-b3ca-1da0f829f9b9"/>
+          <offset>3.5</offset>
+          <duration>2.75</duration>
+          <start>0</start>
+        </clip>
+        <clip id="c3">
+          <name>Clip_c3</name>
+          <asset-ref id="f3c5eda8-cd57-43ee-89bd-4a71047282a0"/>
+          <offset>6.25</offset>
+          <duration>4.0</duration>
+          <start>0</start>
+        </clip>
+      </track>
+    </sequence>
+  </timeline>
+</fcpxml>
