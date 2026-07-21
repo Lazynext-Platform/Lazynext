@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fcpxml version="1.8">
+  <resources>
+    <resource id="226a5019-69e9-4333-a435-acf67867b254" name="c1" path="file:///original/path/video.mp4" type="video"/>
+  </resources>
+  <timeline>
+    <sequence>
+      <duration>5.0</duration>
+      <track id="track_0" type="video">
+        <clip id="c1">
+          <name>Clip_c1</name>
+          <asset-ref id="226a5019-69e9-4333-a435-acf67867b254"/>
+          <offset>0.0</offset>
+          <duration>5.0</duration>
+          <start>0</start>
+        </clip>
+      </track>
+    </sequence>
+  </timeline>
+</fcpxml>
