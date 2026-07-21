@@ -1,109 +1,71 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# asdf version management
-.tool-versions
-
-node_modules
-.cursorignore
-.turbo
-
-.env*
-!*.env.example
-!.env.example
-!.env.production.example
-!.env.docker
-
-# cursor
-bun.lockb
-
-# content-collections
-.content-collections
-
-# Twiggy
-.cursor/
-
-.open-next
-
+```
+# Dependencies
 target/
 
-.cargo-tools/
-
-rust-migration-notes.md
-.DS_Store
-.next
-
-# Testing & Logs
-test-results/
-playwright-report/
-blob-report/
-playwright/.cache/
-*.log
-*.tsbuildinfo
-
-# Python
+# Python cache
 __pycache__/
-venv/
-.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
 
-# Terraform
-terraform/.terraform/
-terraform/**/*.tfstate
-terraform/**/*.tfstate.backup
-terraform/.terraform.lock.hcl
-terraform/**/terraform.tfvars
-# Track example tfvars only
-!terraform/**/terraform.tfvars.example
+# Logs
+*.log
 
-# Render Service outputs
-services/render-service/outputs/**/.terraform/
-.terraform/
+# Environment files
+.env
+.env.local
+*.env.*
 
-# Sensitive config files — do NOT commit real secrets
-# Template files env.yaml, web.json, db.json are safe to track
-# (they contain REPLACE_ placeholders, not real credentials)
-*.production.yaml
-*.production.json
+# Coverage reports
+.coverage
+coverage/
+htmlcov/
 
-# Claude Code
-.claude/
-
-# JetBrains IDE
-.idea/
-
-# VS Code workspace settings
+# IDE files
 .vscode/
-
-# Vim
+.idea/
 *.swp
 *.swo
 
-# Merge conflict artifacts
-*.orig
-
-# Ansible
-*.retry
-infra/terraform/**/*.tfstate
-infra/terraform/**/*.tfstate.backup
-infra/terraform/.terraform.lock.hcl
-infra/terraform/**/*.tfvars
-!infra/terraform/**/terraform.tfvars.example
+# OS files
+.DS_Store
+Thumbs.db
 
 # Build artifacts
-Lazynext-Desktop.dmg
-apps/desktop/Lazynext.app/
-apps/mobile/dist/
+dist/
+build/
+*.out
+*.exe
+*.dll
+*.so
+*.a
+*.class
 
-**/.DS_Store
-**/.gradle/
-.venv/
-venv/
-signin-snapshot.txt
-web-app-home.txt
-out/
-.playwright-mcp/
-.opencode/opencode.json
-api-gateway-amd64
-collab-server-amd64
+# Temporary files
+*.tmp
+*.temp
 
-# mdBook documentation site build output
-docs/book/
+# Compressed files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
+```

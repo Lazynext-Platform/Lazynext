@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fcpxml version="1.8">
+  <resources>
+    <resource id="7e949c90-af09-40cc-984c-f1eb47c93100" name="clip_001" path="./media/wedding_intro.mp4" type="video"/>
+    <resource id="cb7616e4-d4cf-4ac7-b241-e16665a41b26" name="clip_002" path="./media/couple_walking.mp4" type="video"/>
+    <resource id="a2398d0d-9f7f-4c6f-91e2-ffb4c8a68492" name="clip_003" path="./media/ring_exchange.mp4" type="video"/>
+    <resource id="b42a77bb-1fad-4220-bee8-cd3c5c50e94c" name="music_001" path="./media/romantic_music.mp3" type="audio"/>
+    <resource id="62c345c0-1f3a-4074-b7d5-62808abce47d" name="sfx_001" path="./media/birds_ambient.wav" type="audio"/>
+    <resource id="63690766-8d37-4392-b937-da6c79c9ab00" name="sfx_002" path="./media/wind_ambient.wav" type="audio"/>
+  </resources>
+  <timeline>
+    <sequence>
+      <duration>15.0</duration>
+      <track id="track_0" type="video">
+        <clip id="clip_001">
+          <name>Clip_clip_001</name>
+          <asset-ref id="7e949c90-af09-40cc-984c-f1eb47c93100"/>
+          <offset>0.0</offset>
+          <duration>5.0</duration>
+          <start>0</start>
+        </clip>
+        <clip id="clip_002">
+          <name>Clip_clip_002</name>
+          <asset-ref id="cb7616e4-d4cf-4ac7-b241-e16665a41b26"/>
+          <offset>5.0</offset>
+          <duration>4.0</duration>
+          <start>0</start>
+        </clip>
+        <clip id="clip_003">
+          <name>Clip_clip_003</name>
+          <asset-ref id="a2398d0d-9f7f-4c6f-91e2-ffb4c8a68492"/>
+          <offset>9.0</offset>
+          <duration>6.0</duration>
+          <start>0</start>
+        </clip>
+      </track>
+      <track id="track_1" type="audio">
+        <clip id="music_001">
+          <name>Clip_music_001</name>
+          <asset-ref id="b42a77bb-1fad-4220-bee8-cd3c5c50e94c"/>
+          <offset>0.0</offset>
+          <duration>15.0</duration>
+          <start>0</start>
+        </clip>
+      </track>
+      <track id="track_2" type="audio">
+        <clip id="sfx_001">
+          <name>Clip_sfx_001</name>
+          <asset-ref id="62c345c0-1f3a-4074-b7d5-62808abce47d"/>
+          <offset>0.0</offset>
+          <duration>5.0</duration>
+          <start>0</start>
+        </clip>
+        <clip id="sfx_002">
+          <name>Clip_sfx_002</name>
+          <asset-ref id="63690766-8d37-4392-b937-da6c79c9ab00"/>
+          <offset>5.0</offset>
+          <duration>10.0</duration>
+          <start>0</start>
+        </clip>
+      </track>
+    </sequence>
+  </timeline>
+</fcpxml>
