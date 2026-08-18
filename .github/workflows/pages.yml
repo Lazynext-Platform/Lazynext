@@ -32,7 +32,7 @@ jobs:
         run: |
           mkdir -p _site/screenshots
           cp landing/index.html _site/
-          cp -r landing/screenshots/ _site/screenshots/
+          cp landing/screenshots/*.png _site/screenshots/
           cp public/lazynext-icon.png _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
