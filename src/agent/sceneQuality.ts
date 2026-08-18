@@ -118,7 +118,7 @@ export function reviewScenePlan(scenes: readonly SceneLike[]): SceneQualityRepor
  severity: 'high',
  dimension: 'decorative_visuals',
  scenes: [],
- message: '',
+ message: 'No scenes were provided for review',
  }],
  };
  }

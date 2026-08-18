@@ -643,7 +643,7 @@ async function syncCuts(args: Args, ctx: AgentContext): Promise<unknown> {
  lockedTargetIds: prepared.lockedIds.slice(0, MAX_MUSIC_PLAN_TARGETS),
  };
  }
- ctx.commands.batch(prepared.actions, 'ok');
+ ctx.commands.batch(prepared.actions, 'Apply music-synced cuts');
  return {
  ok: true,
  changed: true,
@@ -692,7 +692,7 @@ async function syncImages(args: Args, ctx: AgentContext): Promise<unknown> {
  reason: 'no image placements were produced for the requested music range',
  };
  }
- ctx.commands.batch(prepared.actions, 'ok');
+ ctx.commands.batch(prepared.actions, 'Apply music-synced cuts');
  return {
  ok: true,
  changed: true,

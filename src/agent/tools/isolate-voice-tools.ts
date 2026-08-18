@@ -104,7 +104,7 @@ export async function execIsolateVoiceTool(
  denoisedSrc: denoisedAsset.src,
  strength,
  unchanged,
- note: '',
+ note: unchanged ? 'No audible noise detected; original asset kept unchanged' : '',
  };
  }
 

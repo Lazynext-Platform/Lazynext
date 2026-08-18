@@ -41,7 +41,7 @@ Lazynext is a **local-first, agent-native AI video editor**. It brings conversat
 ### Install and run
 
 ```bash
-git clone https://lazynext.com/repo.git
+git clone https://github.com/Lazynext-Platform/Lazynext.git
 cd Lazynext
 npm ci
 cp .env.example .env

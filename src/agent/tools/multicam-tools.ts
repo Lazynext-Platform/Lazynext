@@ -277,7 +277,7 @@ export function execChangeCam(args: Args, ctx: Pick<AgentContext, 'getState' | '
  if (!plan.actions.length) {
  return { ok: true, changed: false, removedSegments: [], message: 'target is already the only listed angle in the range' };
  }
- ctx.commands.batch(plan.actions, 'ok');
+ ctx.commands.batch(plan.actions, 'Apply multicam switch');
  const gapNote = plan.coverageGapFrames > 0
  ? `; WARNING: ${sec(plan.coverageGapFrames)}s of the range has no target coverage (lower layers or black will show)`
  : '';
