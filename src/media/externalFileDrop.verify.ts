@@ -13,12 +13,12 @@ assert.deepEqual(classifyExternalFile({ name: 'caption.srt', type: '' }), {
 assert.deepEqual(
   parseDroppedCaptions(
     'caption.srt',
-    '1\n00:00:01,000 --> 00:00:02,500\n\n\n2\n00:00:03,000 --> 00:00:04,000\n',
+    '1\n00:00:01,000 --> 00:00:02,500\nHello world\n\n2\n00:00:03,000 --> 00:00:04,000\nGoodbye\n',
     10000,
   ),
   [
-    { text: '', start: 10000, end: 11500 },
-    { text: '', start: 12000, end: 13000 },
+    { text: 'Hello world', start: 10000, end: 11500 },
+    { text: 'Goodbye', start: 12000, end: 13000 },
   ],
 );
 assert.deepEqual(

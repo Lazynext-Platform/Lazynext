@@ -40,7 +40,7 @@ try {
   }));
   const measured = chooseSupportedRoute(efficient, software);
   assert.equal(measured.route, 'server');
-  assert.equal(measured.reason, 'historyrender');
+  assert.equal(measured.reason, 'Local render');
 
   values.clear();
   recordExportPerformance(hardware, { width: 1920, height: 1080, frames: 30, elapsedMs: 1000 });

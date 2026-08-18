@@ -165,8 +165,8 @@ async function persistSelectedProposal(
  }
  try {
  await persistence.settle(projectId, proposal, 'applied');
- } catch {
- throw new CommittedProposalRecoveryError();
+ } catch (settleError) {
+ throw new CommittedProposalRecoveryError(settleError instanceof Error ? settleError.message : 'settlement failed');
  }
  return true;
 }
@@ -198,9 +198,9 @@ export async function applySelectedProposal(
  } catch (error) {
  if (error instanceof CommittedProposalRecoveryError) {
  commitAppliedUi(state, proposal, chosen, currentDoc, result);
- showProposalError(state, 'Save toReopen');
+ showProposalError(state, `Project was saved but settlement failed (${error instanceof Error ? error.message : 'unknown'}); reload to continue.`);
  } else {
- showProposalError(state, 'ok');
+ showProposalError(state, `Proposal could not be applied: ${error instanceof Error ? error.message : 'the project was not saved.'}`);
  }
  } finally {
  state.applyingProposalRef.current = false;
@@ -217,7 +217,7 @@ function applyUnlessStale(
  if (isProposalStale(proposal, state.ctxRef.current.getDoc())) {
  state.setProposalStale(true);
  void settleAndRecord(projectId, proposal, 'stale', DEFAULT_PROPOSAL_PERSISTENCE)
- .catch(() => showProposalError(state, 'ok'));
+ .catch(() => showProposalError(state, 'Failed to record proposal outcome; it may need to be reapplied.'));
  return;
  }
  void applySelectedProposal(state, projectId, selected);
@@ -234,7 +234,7 @@ async function replaceStaleProposal(
  await settleAndRecord(projectId, previous, 'reproposed', DEFAULT_PROPOSAL_PERSISTENCE);
  await DEFAULT_PROPOSAL_PERSISTENCE.clear(projectId, previous.id);
  } catch {
- showProposalError(state, 'ok');
+ showProposalError(state, 'Failed to clear the previous proposal; it may still be visible.');
  return;
  }
  state.setProposalStale(false);
@@ -253,7 +253,7 @@ export async function rejectPendingProposal(
  try {
  await persistence.settle(projectId, previous, 'rejected');
  } catch {
- showProposalError(state, 'ok');
+ showProposalError(state, 'Failed to record rejection of the previous proposal.');
  return;
  }
  let warning: string | null = null;
@@ -262,7 +262,7 @@ export async function rejectPendingProposal(
  await recordProposalOutcome(projectId, previous, status.runtime, status.final, status.summary);
  await persistence.clear(projectId, previous.id);
  } catch {
- warning = 'DeniedReopen';
+ warning = 'Failed to record rejection and clean up the previous proposal.';
  }
  state.setProposalStale(false);
  state.llmRef.current = appendRejectedProposal(state.llmRef.current);

@@ -29,7 +29,7 @@ assert.equal(formatFrameTime(2721, 30), '01:30.7');
 // ── timepoint / timerange builders ───────────────────────────────────────────
 const tp = timepointRef(156, state);
 assert.equal(tp.kind, 'timepoint');
-assert.equal(tp.name, '00:05.2 dot');
+assert.equal(tp.name, '00:05.2 timepoint');
 assert.deepEqual(
   { fps: tp.metadata.fps, timelineFrameStart: (tp.metadata as { timelineFrameStart: number }).timelineFrameStart },
   { fps: 30, timelineFrameStart: 156 },
@@ -102,7 +102,7 @@ assert.deepEqual(offRegion, [], 'region misses the transformed rect');
 
 const cr = canvasRegionRef({ x: 0, y: 0, width: 400, height: 400 }, 60, regionState);
 assert.ok(cr.kind === 'canvas-region');
-assert.equal(cr.name, '（1 clip）');
+assert.equal(cr.name, 'Canvas region (1 clips)');
 assert.deepEqual(cr.metadata.containedItems, ['item_1']);
 assert.equal(cr.metadata.compositionWidth, 1920);
 assert.equal(cr.metadata.timelineFrameStart, 60);
@@ -111,21 +111,21 @@ assert.equal(cr.metadata.timelineFrameStart, 60);
 const spoken: TimelineItem = {
   id: 'item_t', track: 'A1', startFrame: 90, durationInFrames: 75, name: '', kind: 'audio', src: '/m/vo.mp3',
   transcript: [
-    { text: '', start: 0, end: 500, speaker: 'A' },
-    { text: '', start: 500, end: 1000, speaker: 'A' },
+    { text: 'こんにちは', start: 0, end: 500, speaker: 'A' },
+    { text: '世界', start: 500, end: 1000, speaker: 'A' },
     { text: 'start', start: 2000, end: 2500, speaker: 'A' },
   ],
 };
 const ts1 = transcriptSelectionRef(spoken, [1, 0], 30); // unsorted input normalizes
 assert.ok(ts1 && ts1.kind === 'transcript-selection');
-assert.equal(ts1.name, '“”（2 ）');
-assert.equal(ts1.metadata.selectedText, '', 'CJK words join without spaces');
+assert.equal(ts1.name, '"こんにちは世界" (2 words)');
+assert.equal(ts1.metadata.selectedText, 'こんにちは世界', 'CJK words join without spaces');
 assert.deepEqual(ts1.metadata.selectedWordIds, [0, 1]);
 assert.equal(ts1.metadata.sourceMediaStartMs, 0);
 assert.equal(ts1.metadata.sourceMediaEndMs, 1000);
 assert.equal(ts1.metadata.timelineFrameStart, 90, 'clip offset applies');
 assert.equal(ts1.metadata.timelineFrameEnd, 120, '1000ms @30fps = 30f after clip start');
-assert.equal(ts1.metadata.speakerName, 'speaker 1');
+assert.equal(ts1.metadata.speakerName, ' 1');
 assert.equal(ts1.id, 'transcript:item_t:0-1', 'deterministic id dedupes repeat picks');
 
 // deleting the middle word compresses the edited timeline — the mapper must follow
@@ -141,7 +141,7 @@ assert.equal(ts2.metadata.timelineFrameEnd, 120, 'kept segments: 15f + 15f after
 const ts3 = transcriptSelectionRef(edited, [1], 30);
 assert.ok(ts3 && ts3.kind === 'transcript-selection');
 assert.equal('timelineFrameStart' in ts3.metadata, false, 'cut word has no timeline frames');
-assert.equal(ts3.metadata.selectedText, '');
+assert.equal(ts3.metadata.selectedText, '世界');
 
 // English words join with spaces; out-of-range indices are dropped
 const english: TimelineItem = {

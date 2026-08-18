@@ -413,7 +413,7 @@ const [storeSource, poolSource, timelineMediaActionsSource] = await Promise.all(
 ]);
 assert.match(storeSource, /sourceAssetId:\s*asset\.id/, 'new timeline clips must retain their pool-master identity');
 assert.match(poolSource, /usedAssetIds/, 'the media pool must receive used-asset state');
-assert.match(poolSource, /？/, 'deleting an in-use asset must explain the destructive cascade');
+assert.match(poolSource, /used in the edit/, 'deleting an in-use asset must explain the destructive cascade');
 assert.match(
  timelineMediaActionsSource,
  /if\s*\(!result\.changed\)/,

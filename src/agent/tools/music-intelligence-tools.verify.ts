@@ -269,7 +269,7 @@ function state(items: TimelineItem[], tracks: TimelineState['tracks'] = {}): Tim
   assert.ok(routed.includes('sync_cuts_to_music'));
   const photoRouted = new ToolActivation(
     TOOL_SCHEMAS,
-    [{ role: 'user', content: 'dot' }],
+    [{ role: 'user', content: 'sync photos to music' }],
   ).names();
   assert.ok(photoRouted.includes('analyze_music'));
   assert.ok(photoRouted.includes('music_image_plan'));

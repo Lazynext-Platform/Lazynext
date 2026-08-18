@@ -920,7 +920,7 @@ assert.equal(
  true,
  'repeated failed tools must terminate at the tool-turn limit',
 );
-assert.doesNotMatch(JSON.stringify(maxTurnResult), /couldn't complete the requested operation|/, 'max-turn close emits no failure-report template');
+assert.doesNotMatch(JSON.stringify(maxTurnResult), /couldn't complete the requested operation/, 'max-turn close emits no failure-report template');
 assert.equal(maxTurnFailures.hasUnresolved, false, 'max-turn failure reporting must close the tracker');
 
 const abortFailures = new ToolFailureTracker();

@@ -24,14 +24,13 @@ for (const slug of slugs) {
   assert.ok(body.trim().length > 500, `${slug}: skillinner`);
 }
 for (const s of CREATIVE_SKILL_METADATA) {
-  assert.ok(s.id && s.name && s.nameZh, `skill ${s.name} is well-formed`);
+  assert.ok(s.id && s.name, `skill ${s.name} is well-formed`);
   assert.ok(Array.isArray(s.scenarios), 'scenarios is an array');
 }
 
-// a known real skill is present with its zh name
+// a known real skill is present
 const shorts = CREATIVE_SKILL_METADATA.find((s) => s.name === 'Long Video to Shorts');
 assert.ok(shorts, 'Long Video to Shorts present');
-assert.strictEqual(shorts!.nameZh, 'longvideoshortvideo');
 
 // findSkill: null/undefined/unknown → undefined (id-hit lookups are covered in
 // skill-loading.verify.ts where the Vite glob is available).

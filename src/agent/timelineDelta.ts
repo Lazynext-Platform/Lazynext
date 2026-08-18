@@ -388,7 +388,7 @@ export function describeTimelineDelta(
  return previousIndex !== -1 && previousIndex !== index;
  });
  if (createdTracks.length || trackOrderChanged || after.trackIds.length !== before.trackIds.length) {
- notes.push('');
+ notes.push(`New track ${createdTracks.join(', ')} added; timeline composition changed`);
  }
 
  const delta: TimelineDelta = {};

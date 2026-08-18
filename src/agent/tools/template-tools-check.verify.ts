@@ -59,7 +59,7 @@ const ctxA = ctxFor(draftA);
 assert.ok('error' in (await call({ action: 'save' }, ctxA) as object));
 
 // save → packages the whole ProjectDoc; carries both pool assets
-const saveRes = await call({ action: 'save', name: '' }, ctxA) as { ok: boolean; saved: { id: string; name: string; assetCount: number } };
+const saveRes = await call({ action: 'save', name: 'My Template' }, ctxA) as { ok: boolean; saved: { id: string; name: string; assetCount: number } };
 assert.ok(saveRes.ok);
 assert.strictEqual(saveRes.saved.assetCount, 2);
 const templateId = saveRes.saved.id;
@@ -67,7 +67,7 @@ const templateId = saveRes.saved.id;
 // get (list) shows it
 const list = await call({ action: 'get' }, ctxA) as { templates: { id: string; name: string; assetCount: number }[] };
 assert.strictEqual(list.templates.length, 1);
-assert.strictEqual(list.templates[0].name, '');
+assert.strictEqual(list.templates[0].name, 'My Template');
 assert.strictEqual(list.templates[0].assetCount, 2);
 
 // get (detail) round-trips the packaged doc: MG list + design-style summary

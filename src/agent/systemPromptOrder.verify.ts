@@ -136,7 +136,7 @@ const commonPrefixLength = (a: string, b: string): number => {
     fonts: [],
     styleGuide: 'Modern editorial style guide.',
   });
-  assert.match(prompt, /stable/, 'ok');
+  assert.match(prompt, /active_design_style/, 'design style prompt includes the active design style block');
   assert.match(prompt, /Follow it for every edit/);
   assert.match(SYSTEM_PROMPT, /creative direction and asset plan/);
   assert.match(SYSTEM_PROMPT, /Never claim or imply success after an unresolved tool failure/);

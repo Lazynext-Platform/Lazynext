@@ -75,7 +75,7 @@ export async function execIsolateVoiceTool(
  }
  if (!item.src || item.src !== sourceAsset.src) {
  return {
- error: 'sourceAssetId ',
+ error: 'sourceAssetId does not match the clip source',
  itemSrc: item.src ?? null,
  sourceAssetId: sourceAsset.id,
  sourceSrc: sourceAsset.src,

@@ -49,14 +49,14 @@ async function startExportJobAfterMaterialization<T extends object>(
 const projectWithBlobs = {
  activeTimelineId: 'main',
  assets: [
- { id: 'asset-a', kind: 'image', name: '.png', src: BLOB_A, durationInFrames: 90 },
+ { id: 'asset-a', kind: 'image', name: 'image.png', src: BLOB_A, durationInFrames: 90 },
  { id: 'asset-b', kind: 'video', name: 'clip.mp4', src: BLOB_B, durationInFrames: 300 },
  ],
  timelines: [
  {
  id: 'main',
  items: [
- { id: 'item-a', kind: 'image', name: '.png', src: BLOB_A, durationInFrames: 90 },
+ { id: 'item-a', kind: 'image', name: 'image.png', src: BLOB_A, durationInFrames: 90 },
  { id: 'item-b', kind: 'video', name: 'clip.mp4', src: BLOB_B, durationInFrames: 300 },
  ],
  },
@@ -75,7 +75,7 @@ async function main(): Promise<void> {
  const result = await materializeBlobMedia(projectWithBlobs, { fetcher });
  assert.equal(uploads.length, 2, 'each distinct blob source uploads exactly once');
  const snapshot = result;
- assert.equal(snapshot.assets[0]!.src, '/media/uploads/-blob.png');
+ assert.equal(snapshot.assets[0]!.src, '/media/uploads/image-blob.png');
  assert.equal(snapshot.assets[1]!.src, '/media/uploads/clip-blob.mp4');
  assert.equal(snapshot.timelines[0]!.items[0]!.src, snapshot.assets[0]!.src, 'item and asset share the same replacement');
  assert.equal(snapshot.timelines[0]!.items[1]!.src, snapshot.assets[1]!.src);
@@ -156,7 +156,7 @@ async function main(): Promise<void> {
  assert.equal(error.failure.code, 'export_media_not_ready');
  assert.equal(error.failure.stage, 'preflight');
  assert.equal(error.failure.retryable, false);
- assert.match(error.message, /error/, 'ok');
+ assert.match(error.message, /not ready/i, 'ok');
  return true;
  },
  );

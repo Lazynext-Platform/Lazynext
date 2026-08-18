@@ -82,7 +82,7 @@ assert.match(
 // A selected editable clip exposes one compact transform frame and nine handles.
 {
   const markup = renderToStaticMarkup(<PreviewTransformOverlay state={stateOf()} {...props} />);
-  assert.match(markup, /aria-label="previewclip"/);
+  assert.match(markup, /aria-label="Preview canvas clip transform"/);
   assert.match(markup, /data-preview-selection="card"/);
   assert.equal((markup.match(/data-preview-handle="scale-[0-3]"/g) ?? []).length, 4, 'scale');
   assert.equal((markup.match(/data-preview-handle="crop-[nsew]"/g) ?? []).length, 4, 'centerdot');

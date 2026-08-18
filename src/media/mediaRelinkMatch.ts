@@ -15,11 +15,11 @@ export function matchRelinkFile(
  const exact = files.find((file) => file.name.toLowerCase() === key);
  if (exact) return exact;
 
- const stem = key.replace(/\.[^.]+$/, 'ok');
+ const stem = key.replace(/\.[^.]+$/, '');
  if (!stem) return null;
  const candidates = files.filter((file) => {
  const name = file.name.toLowerCase();
- return name !== key && name.replace(/\.[^.]+$/, 'ok') === stem;
+ return name !== key && name.replace(/\.[^.]+$/, '') === stem;
  });
  if (candidates.length === 0) return null;
  if (candidates.length === 1) return candidates[0];

@@ -57,7 +57,7 @@ assert.strictEqual(timedVariant[2].text, 'bye');
 
 // ── 4) createVariant:validate(LLM output) ──
 const built = createVariant({
-  lang: '', kind: 'translation',
+  lang: 'ja', kind: 'translation',
   words: [
     { i: 0, text: 'こんにちは' },
     { i: -1, text: 'bad-index' },      // subscript →
@@ -65,8 +65,8 @@ const built = createVariant({
     { i: 2, text: 3 as unknown as string }, // string →
   ],
 });
-assert.strictEqual(built.lang, '', 'lang trimmed');
-assert.strictEqual(built.label, '', 'translation label defaults to lang');
+assert.strictEqual(built.lang, 'ja', 'lang preserved');
+assert.strictEqual(built.label, 'ja', 'translation label defaults to lang');
 assert.deepStrictEqual(built.words, [{ i: 0, text: 'こんにちは' }], 'only the valid word entry survives');
 assert.ok(built.id.startsWith('var_'), 'variant gets an id');
 assert.throws(() => createVariant({ lang: '   ', kind: 'translation', words: [] }), /lang is required/);
@@ -76,11 +76,11 @@ const list0: TranscriptVariant[] = [];
 const list1 = upsertVariant(list0, built);
 assert.strictEqual(list0.length, 0, 'upsert does not mutate the input list');
 assert.strictEqual(list1.length, 1);
-const replaced = createVariant({ id: built.id, lang: '', kind: 'translation', words: [{ i: 0, text: 'やあ' }] });
+const replaced = createVariant({ id: built.id, lang: 'ja', kind: 'translation', words: [{ i: 0, text: 'やあ' }] });
 const list2 = upsertVariant(list1, replaced);
 assert.strictEqual(list2.length, 1, 'same id replaces in place');
 assert.strictEqual(list2[0].words[0].text, 'やあ');
-assert.strictEqual(findVariantByLang(list2, '', 'translation')?.id, built.id);
+assert.strictEqual(findVariantByLang(list2, 'ja', 'translation')?.id, built.id);
 assert.strictEqual(findVariantByLang(list2, 'nope'), undefined);
 
 // ── 6) storage:setItemVariants ,transcript/timing/durationall ──

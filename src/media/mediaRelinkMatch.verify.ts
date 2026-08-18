@@ -11,16 +11,16 @@ const asset = (name: string, extra: Partial<{ sourceFilename: string; kind: stri
 
 async function main(): Promise<void> {
   // 1. Exact filename match (case-insensitive) wins.
-  assert.equal(matchRelinkFile(asset('.png'), [file('.png')])?.name, '.png');
+  assert.equal(matchRelinkFile(asset('cover.png'), [file('cover.png')])?.name, 'cover.png');
   assert.equal(matchRelinkFile(asset('Star.png'), [file('star.PNG')])?.name, 'star.PNG');
   // sourceFilename (original file name) is preferred over display name.
   assert.equal(
-    matchRelinkFile(asset('', { sourceFilename: '.mp4' }), [file('.mp4'), file('.mp4')])?.name,
-    '.mp4',
+    matchRelinkFile(asset('display', { sourceFilename: 'original.mp4' }), [file('original.mp4'), file('other.mp4')])?.name,
+    'original.mp4',
   );
 
   // 2. Stem match bridges extension changes (mp4 → mov) — the #48 report case.
-  assert.equal(matchRelinkFile(asset('.mp4', { kind: 'video' }), [file('.mov')])?.name, '.mov');
+  assert.equal(matchRelinkFile(asset('clip.mp4', { kind: 'video' }), [file('clip.mov')])?.name, 'clip.mov');
   assert.equal(matchRelinkFile(asset('clip.mov', { kind: 'video' }), [file('CLIP.mp4')])?.name, 'CLIP.mp4');
 
   // 3. Multiple stem candidates: prefer the kind-matching file.
@@ -38,7 +38,7 @@ async function main(): Promise<void> {
 
   // 5. No name / no match → null.
   assert.equal(matchRelinkFile(asset(''), [file('x.png')]), null);
-  assert.equal(matchRelinkFile(asset('.png'), [file('.png')]), null);
+  assert.equal(matchRelinkFile(asset('nope.png'), [file('other.png')]), null);
 
   // 6. Exact match beats stem match even when stems collide.
   assert.equal(

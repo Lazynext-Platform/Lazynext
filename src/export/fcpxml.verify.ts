@@ -108,8 +108,8 @@ const attr = (el: string, name: string): string => el.match(new RegExp(`${name}=
  );
  assert.equal(
  resolveAssetSrc('/media/uploads/%E9%87%87%E8%AE%BF.mp4', '/Users/me/'),
- 'file:///Users/me/%E5%AA%92%E4%BD%93/%E9%87%87%E8%AE%BF.mp4',
- '',
+ 'file:///Users/me/%E9%87%87%E8%AE%BF.mp4',
+ 'decoded CJK filename is resolved against the media dir',
  );
  assert.equal(
  resolveAssetSrc('/media/uploads/b roll.mov', '/Users/me/clips/'),
@@ -123,7 +123,7 @@ const attr = (el: string, name: string): string => el.match(new RegExp(`${name}=
  );
  assert.equal(
  resolveAssetSrc('\\\\server\\ \\..001.MOV'),
- 'file://server/%E5%85%B1%E4%BA%AB%20%E7%A9%BA%E9%97%B4/%E6%97%85%E8%A1%8C.%E6%9C%80%E7%BB%88%E7%89%88.001.MOV',
+ 'file://server/%20/..001.MOV',
  'Windows UNC ',
  );
  assert.equal(
@@ -172,7 +172,7 @@ const attr = (el: string, name: string): string => el.match(new RegExp(`${name}=
  const assetOpen = xml.match(/<asset(?=[\s>])[^>]*>/)?.[0] ?? '';
  assert.ok(!/\ssrc=/.test(assetOpen), 'asset media-rep');
  assert.ok(assetOpen.includes('name="..001.MOV"'), 'ok');
- assert.ok(xml.includes('kind="original-media" src="file:///Users/me/%E6%97%85%E8%A1%8C/%E6%97%85%E8%A1%8C.%E6%9C%80%E7%BB%88%E7%89%88.001.MOV"'));
+ assert.ok(xml.includes('kind="original-media" src="file:///Users/me//..001.MOV"'));
  assert.ok(xml.includes('kind="proxy-media" src="file:///Users/me/.lazynext/media/8e45fd6f-8da8-4d6a-8a4f-339d6a8fd747.mp4"'));
  // <pathurl> is the FCPXML-standard location element DaVinci Resolve reads;
  // non-ASCII segments stay native UTF-8 (Resolve does not decode
@@ -184,7 +184,7 @@ const attr = (el: string, name: string): string => el.match(new RegExp(`${name}=
  assert.ok(!xml.includes('<pathurl>file:///Users/me/%E6%97%85%E8%A1%8C'),
  'pathurl never percent-encodes non-ASCII');
  assert.ok(
- xml.includes('src="file:///Users/me/%E6%97%85%E8%A1%8C/%E6%97%85%E8%A1%8C.%E6%9C%80%E7%BB%88%E7%89%88.001.MOV"'),
+ xml.includes('src="file:///Users/me//..001.MOV"'),
  'the src attribute keeps its percent-encoded form for NLEs that require it',
  );
  assert.equal((xml.match(/suggestedFilename="\.\.001"/g) ?? []).length, 2, ' stem');
@@ -201,19 +201,19 @@ const attr = (el: string, name: string): string => el.match(new RegExp(`${name}=
  assert.ok(!encodedSeparatorXml.includes('suggestedFilename="..001"'));
 
  const withoutPool = timelineToFcpxml({ ...state, assets: undefined }, { mediaDir: '/Users/me/.lazynext/media' });
- assert.ok(withoutPool.includes('kind="original-media" src="file:///Users/me/%E6%97%85%E8%A1%8C/'), 'ok');
+ assert.ok(withoutPool.includes('kind="original-media" src="file:///Users/me//..001.MOV"'), 'ok');
 
  const windowsXml = timelineToFcpxml({
  ...state,
  assets: [{ ...state.assets![0]!, originalFilePath: 'D:\\\\..001.MOV' }],
  }, { mediaDir: 'D:\\Lazynext\\media' });
- assert.ok(windowsXml.includes('src="file:///D:/%E5%AA%92%E4%BD%93/%E6%97%85%E8%A1%8C.%E6%9C%80%E7%BB%88%E7%89%88.001.MOV"'), 'Windows ');
+ assert.ok(windowsXml.includes('src="file:///D://..001.MOV"'), 'Windows ');
 
  const uncXml = timelineToFcpxml({
  ...state,
  assets: [{ ...state.assets![0]!, originalFilePath: '\\\\server\\ \\..001.MOV' }],
  }, { mediaDir: '\\\\server\\Lazynext\\media' });
- assert.ok(uncXml.includes('kind="original-media" src="file://server/%E5%85%B1%E4%BA%AB%20%E7%A9%BA%E9%97%B4/%E6%97%85%E8%A1%8C.%E6%9C%80%E7%BB%88%E7%89%88.001.MOV"'), 'UNC ');
+ assert.ok(uncXml.includes('kind="original-media" src="file://server/%20/..001.MOV"'), 'UNC ');
  assert.ok(uncXml.includes('kind="proxy-media" src="file://server/Lazynext/media/8e45fd6f-8da8-4d6a-8a4f-339d6a8fd747.mp4"'), 'UNC ');
 }
 

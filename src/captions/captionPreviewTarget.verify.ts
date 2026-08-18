@@ -23,7 +23,7 @@ import type { CaptionsData } from './types';
 
 let captions = newManualCaptions();
 const laneId = captions.sourceEntries![0]!.id;
-captions = { ...captions, ...appendManualCue(captions, laneId, '', 1_000, 2_000) };
+captions = { ...captions, ...appendManualCue(captions, laneId, 'Hello', 1_000, 2_000) };
 
 const overriddenCaptions = {
  ...captions,
@@ -37,7 +37,7 @@ const templatePatch = captionTemplatePatch(overriddenCaptions, 'tiktok');
 assert.equal(templatePatch.template, 'tiktok', 'choosing a template writes the selected template');
 assert.equal(templatePatch.styleOverride, undefined, 'choosing a template clears track-level style overrides');
 assert.equal(templatePatch.sourceEntries?.[0]?.style, undefined, 'choosing a template clears lane-level style overrides');
-assert.equal(templatePatch.sourceEntries?.[0]?.words?.[0]?.text, '', 'template changes preserve caption content');
+assert.equal(templatePatch.sourceEntries?.[0]?.words?.[0]?.text, 'Hello', 'template changes preserve caption content');
 
 const karaokePreset = {
  ...effectivePreset(overriddenCaptions),
@@ -130,10 +130,10 @@ assert.deepEqual(
 
 const target = findCaptionPreviewTarget(captions, [], 30, 1_500);
 assert.equal(target?.kind, 'manual', 'manual multi-lane captions expose a preview edit target');
-assert.equal(target?.cue.text, 'ok');
+assert.equal(target?.cue.text, 'Hello');
 
-const textPatch = captionPreviewTextPatch(captions, target!, 'ok');
-assert.equal(textPatch?.sourceEntries?.[0]?.words?.[0]?.text, 'ok');
+const textPatch = captionPreviewTextPatch(captions, target!, 'Hello');
+assert.equal(textPatch?.sourceEntries?.[0]?.words?.[0]?.text, 'Hello');
 
 const stylePatch = captionPreviewStylePatch(captions, target!, { color: '#ff0000' });
 assert.equal(stylePatch.sourceEntries?.[0]?.style?.color, '#ff0000');
@@ -176,7 +176,7 @@ assert.equal(
  'top anchors store upward movement as a negative vertical delta',
 );
 
-const deletePatch = captionPreviewTextPatch(captions, target!, 'ok');
+const deletePatch = captionPreviewTextPatch(captions, target!, '');
 assert.equal(deletePatch?.sourceEntries?.[0]?.words?.length, 0);
 
 // Auto multi-lane (sourceEntries without words[]) must still produce a single-stream
@@ -189,7 +189,7 @@ const autoItem = {
  kind: 'video' as const,
  name: 'clip',
  src: 'x.mp4',
- transcript: [{ text: '', start: 0, end: 1_500 }],
+ transcript: [{ text: 'test cue', start: 0, end: 1_500 }],
 };
 const autoOnly: CaptionsData = {
  enabled: true,

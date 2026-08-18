@@ -77,13 +77,13 @@ try {
   assert.equal(renamed?.sourceFilename, 'Camera Original.MOV', 'display renames preserve the imported basename');
 
   const pushed = await execStockTool('push_asset', {
-    filePath: 'https://cdn.example.test/fallback/private%2F%E6%B5%B7%E6%8A%A5%2001.png?token=secret',
-    name: '',
+    filePath: 'https://cdn.example.test/fallback/private%2Fposter%2001.png?token=secret',
+    name: 'poster.png',
   }, context) as { succeeded: number; results: Array<{ assetId: string }> };
   assert.equal(pushed.succeeded, 1);
   const pushedAsset = draft.getDoc().assets.find((asset) => asset.id === pushed.results[0]?.assetId);
-  assert.equal(pushedAsset?.sourceFilename, '01.png', 'remote fallback keeps only the decoded URL basename');
-  assert.equal(pushedAsset?.name, '');
+  assert.equal(pushedAsset?.sourceFilename, 'poster 01.png', 'remote fallback keeps only the decoded URL basename');
+  assert.equal(pushedAsset?.name, 'poster.png');
   assert.equal(pushedAsset?.originalFilePath, undefined);
 
   const legacy = await execStockTool('import_url_asset', {

@@ -19,8 +19,8 @@ assert.equal(normalizeMediaName('row.PNG'), 'row.png');
 assert.equal(normalizeMediaName('ＡＢＣ.mp4'), 'abc.mp4');
 assert.equal(findMediaNameConflict([{ id: 'a', name: 'row.PNG' }], 'row.png')?.id, 'a');
 assert.equal(isMediaImportCancelled(new MediaImportCancelledError()), true);
-assert.equal(mediaImportErrorMessage(new Error('part 3 failed (503)')), 'upload 3 fail（503）');
-assert.equal(mediaImportErrorMessage(new Error('unexpected internal failure')), 'importassetfail，retry');
+assert.equal(mediaImportErrorMessage(new Error('part 3 failed (503)')), 'Uploading part 3 failed (503)');
+assert.equal(mediaImportErrorMessage(new Error('unexpected internal failure')), 'Video compatibility processing failed; retry');
 
 const oldMaster: MediaAsset = {
   id: 'asset-master',

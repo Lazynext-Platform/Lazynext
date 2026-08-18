@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import type { TimelineState } from '../../editor/types';
 import { closeCaptionTrackGaps, trackClearPlan, trackContextMenuLabels } from './trackContextOperations';
 
-assert.deepEqual(trackContextMenuLabels('video').slice(0, 2), ['insertasset', '']);
-assert.ok(trackContextMenuLabels('audio').includes('auto'));
-assert.ok(trackContextMenuLabels('caption').includes('captionstyle'));
+assert.deepEqual(trackContextMenuLabels('video').slice(0, 2), ['Insert assets', 'Close gaps']);
+assert.ok(trackContextMenuLabels('audio').includes('Auto duck'));
+assert.ok(trackContextMenuLabels('caption').includes('Caption styles'));
 assert.ok(!trackContextMenuLabels('caption').includes('mutetrack'));
 
 const state: TimelineState = {

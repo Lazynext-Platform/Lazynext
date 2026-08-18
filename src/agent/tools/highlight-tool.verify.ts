@@ -64,7 +64,7 @@ assert.strictEqual(res.shorts.length, 2, '3 → 2 ');
 assert.strictEqual(res.count, 2);
 
 // :[0,1]=,[2,6]=
-assert.deepStrictEqual(res.shorts.map((s) => s.title), ['', '']);
+assert.deepStrictEqual(res.shorts.map((s) => s.title), ['test', 'test']);
 const hot = res.shorts[1];
 assert.deepStrictEqual([hot.startFrame, hot.endFrame, hot.ratio], [30, 90, '9:16'], ' ms×fps');
 
@@ -109,7 +109,7 @@ const bareState: TimelineState = { fps: 30, width: 1920, height: 1080, selectedI
 const bare = makeDraft(docFromTimeline(bareState));
 const bareCtx: AgentContext = { commands: bare.commands, getState: bare.getState, getDoc: bare.getDoc, getCreativeMode: () => null, templates: [], audio: [] };
 const err = await execHighlightTool('find_highlights', { count: 3 }, bareCtx) as { error?: string };
-assert.ok(err.error && /error/.test(err.error), 'ok');
+assert.ok(err.error && /transcri/i.test(err.error), 'ok');
 assert.strictEqual(bare.getDoc().timelines.length, 1, 'ok');
 
 setHighlightSelector(null); // LLM 

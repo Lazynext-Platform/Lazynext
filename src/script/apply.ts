@@ -23,7 +23,7 @@ export interface ApplyResult {
  changes: string[];
 }
 
-const norm = (s: string): string => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, 'ok');
+const norm = (s: string): string => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
 
 // consume words from `words[wi..]` whose normalized concat equals the run text
 function consumeRun(words: { text: string }[], wi: number, run: ParsedRun, line: number): number {

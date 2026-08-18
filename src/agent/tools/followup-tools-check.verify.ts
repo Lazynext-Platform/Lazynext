@@ -12,8 +12,8 @@ const ctx = {} as AgentContext; // followup editstate
 // ---- ：single + multi buildFollowupWidget → parseWidgets none ----
 const text = buildFollowupWidget(
   [
-    { id: 'ratio', label: '', type: 'single', options: [{ value: '16:9', display: '16:9' }, { value: '9:16', display: '9:16' }], required: true },
-    { id: 'topics', label: 'dotinner', type: 'multi', options: [{ value: 'a', display: '' }, { value: 'b', display: '' }], allowOther: true },
+    { id: 'ratio', label: 'Aspect ratio', type: 'single', options: [{ value: '16:9', display: '16:9' }, { value: '9:16', display: '9:16' }], required: true },
+    { id: 'topics', label: 'Topics', type: 'multi', options: [{ value: 'a', display: 'Option A' }, { value: 'b', display: 'Option B' }], allowOther: true },
   ],
   'startfrontneedsconfirm：',
 );
@@ -26,7 +26,7 @@ assert.strictEqual(fields.length, 2, '2');
 const [ratio, topics] = fields as [FormSingle, FormMulti];
 assert.strictEqual(ratio.kind, 'single');
 assert.strictEqual(ratio.id, 'ratio');
-assert.strictEqual(ratio.label, '');
+assert.strictEqual(ratio.label, 'Aspect ratio');
 assert.strictEqual(ratio.required, true, 'required');
 assert.deepStrictEqual(ratio.options, [{ value: '16:9', display: '16:9' }, { value: '9:16', display: '9:16' }]);
 assert.strictEqual(topics.kind, 'multi');
@@ -60,13 +60,13 @@ assert.strictEqual(escOpt.display ?? escOpt.value, 'x & y', 'optionnone');
 
 // ---- execFollowupTool ：input __followup，empty fields ----
 assert.ok(FOLLOWUP_TOOL_NAMES.has('ask_followup_questions'));
-const ok = execFollowupTool('ask_followup_questions', { fields: [{ id: 'r', label: '', type: 'single', options: ['16:9', '9:16'] }], prompt: '' }, ctx) as { __followup?: string; note?: string };
+const ok = execFollowupTool('ask_followup_questions', { fields: [{ id: 'r', label: 'Ratio', type: 'single', options: ['16:9', '9:16'] }], prompt: '' }, ctx) as { __followup?: string; note?: string };
 assert.ok(typeof ok.__followup === 'string' && ok.__followup.includes('<widget>'), '__followup widget');
 assert.ok(typeof ok.note === 'string' && ok.note.length > 0, 'note');
 const empty = execFollowupTool('ask_followup_questions', { fields: [] }, ctx) as { error?: string };
 assert.ok(empty.error, 'empty fields');
-const noRenderable = execFollowupTool('ask_followup_questions', { fields: [{ label: '', type: 'single', options: [] }] }, ctx) as { error?: string };
-assert.ok(noRenderable.error, 'nonerender');
+const noRenderable = execFollowupTool('ask_followup_questions', { fields: [{ label: 'Choice', type: 'single', options: [] }] }, ctx) as { error?: string };
+assert.ok(noRenderable.error, 'no renderable fields');
 const badName = execFollowupTool('nope', { fields: [] }, ctx) as { error?: string };
 assert.ok(badName.error, 'tool');
 

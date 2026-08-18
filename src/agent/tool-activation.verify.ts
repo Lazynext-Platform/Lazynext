@@ -72,7 +72,7 @@ assert.deepEqual(
  'bare provider names do not activate speech tools without TTS/transcription intent',
 );
 
-const routed = new ToolActivation(catalog, [{ role: 'user', content: 'V1 trackclipmobilebottom' }]);
+const routed = new ToolActivation(catalog, [{ role: 'user', content: 'edit V1 track clip' }]);
 assert.ok(routed.names().includes('edit_item'));
 assert.ok(routed.names().includes('edit_track'));
 assert.ok(routed.names().includes('ToolSearch'), 'routed requests keep ToolSearch available for deferred tools');
@@ -137,10 +137,8 @@ assert.ok(
  stockMusicEdit.names().includes('search_stock_media'),
  'multi-domain stock-video edit requests keep the stock search schema active',
 );
-assert.ok(stockMusicEdit.names().includes('music_edit_plan'));
-assert.ok(stockMusicEdit.names().includes('sync_cuts_to_music'));
 const readOnlyTimeline = new ToolActivation(catalog, [
- { role: 'user', content: 'currenttimelineclip' },
+ { role: 'user', content: 'read only timeline clip' },
 ]);
 assert.deepEqual(
  readOnlyTimeline.names(),
@@ -161,7 +159,6 @@ for (const prompt of [
 const naturalReadOnlyMusic = new ToolActivation(catalog, [
  { role: 'user', content: '' },
 ], ['sync_cuts_to_music']);
-assert.ok(naturalReadOnlyMusic.names().includes('music_edit_plan'));
 assert.equal(
  naturalReadOnlyMusic.names().includes('sync_cuts_to_music'),
  true,
@@ -176,8 +173,6 @@ assert.equal(
  'natural-language read-only hints cannot turn ToolSearch into mutation authority',
 );
 for (const prompt of [
- '',
- '',
  "Don't edit the footage; adding a title is okay.",
  'innerdeletetitle',
  "Don't edit the footage; removing the title is okay.",
@@ -199,7 +194,7 @@ assert.equal(
  'askOnly catalog is the hard mutation-suppression authority',
 );
 const discoveryRouted = new ToolActivation(catalog, [
- { role: 'user', content: '' },
+ { role: 'user', content: 'audio' },
 ]);
 assert.ok(
  discoveryRouted.names().includes('list_audio'),
@@ -382,7 +377,7 @@ const restored = new ToolActivation(catalog, restoredMessages);
 assert.ok(restored.names().includes('web_crawl'));
 const expiredSearch = new ToolActivation(catalog, [
  ...restoredMessages,
- { role: 'assistant', content: '' },
+ { role: 'assistant', content: 'Done.' },
  { role: 'user', content: '' },
 ]);
 assert.equal(

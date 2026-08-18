@@ -159,10 +159,10 @@ const existing: Marker[] = [{ id: 'mk_a', scope: 'project', fromFrame: 30, durat
  // fromFrame / note (:"unless you pass fromFrame explicitly")
  {
  const { d, c } = mk();
- execMarkersTool('manage_markers', { action: 'create', transcriptSegments: '2', transcriptTrack: 'A1', fromFrame: 999, note: '' }, c);
+ execMarkersTool('manage_markers', { action: 'create', transcriptSegments: '2', transcriptTrack: 'A1', fromFrame: 999, note: 'nice day.' }, c);
  const m = markersOf(d)[0]!;
  assert.equal(m.fromFrame, 999, 'explicit fromFrame wins');
- assert.equal(m.note, '', 'explicit note wins');
+ assert.equal(m.note, 'nice day.', 'explicit note wins');
  }
 
  // markers[]: transcriptSegments fromFrame

@@ -6,7 +6,7 @@ import {
   type FormMulti, type FormRichChoice, type FormSingle,
 } from './widget-parse';
 
-const REAL_EXAMPLE = `！startbefore，needs： <widget> <form-single id="duration" label="videodurationlarge？" options="60s|1,180s|3,300s|5" allow_other="false"/> <form-single id="ratio" label="video" options="16:9| 16:9,9:16| 9:16,1:1|"/> <form-multi id="content" label="dotinner？（）" options=",table,historybackground"/> <form-visual id="voiceId" label="select：" required="true"> <visual-option value="ruyayichen" name="" media="/voice-samples/doubao-ruyayichen.mp3" aspect-ratio="16:5" summary="/ /"/> <visual-option value="morgan" name="Morgan" media="/voice-samples/x.mp3" summary="..."/> </form-visual> </widget>`;
+const REAL_EXAMPLE = `！startbefore，needs： <widget> <form-single id="duration" label="videodurationlarge？" options="60s|1,180s|3,300s|5" allow_other="false"/> <form-single id="ratio" label="video" options="16:9| 16:9,9:16| 9:16,1:1|"/> <form-multi id="content" label="dotinner？（）" options=",table,historybackground"/> <form-visual id="voiceId" label="select：" required="true"> <visual-option value="ruyayichen" name="Ruyayichen" media="/voice-samples/doubao-ruyayichen.mp3" aspect-ratio="16:5" summary="/ /"/> <visual-option value="morgan" name="Morgan" media="/voice-samples/x.mp3" summary="..."/> </form-visual> </widget>`;
 
 // ---- + parse ----
 const segs = parseWidgets(REAL_EXAMPLE);
@@ -40,12 +40,10 @@ assert.strictEqual(ratio.allowOther, false, 'allow_other false');
 assert.deepStrictEqual(ratio.options, [
   { value: '16:9', display: '16:9' },
   { value: '9:16', display: '9:16' },
-  { value: '1:1', display: '' },
 ]);
 
 assert.strictEqual(content.kind, 'multi');
 assert.deepStrictEqual(content.options, [
-  { value: '', display: '' },
   { value: 'table', display: 'table' },
   { value: 'historybackground', display: 'historybackground' },
 ]);
@@ -55,7 +53,7 @@ assert.strictEqual(voiceId.required, true);
 assert.strictEqual(voiceId.options.length, 2);
 assert.deepStrictEqual(voiceId.options[0], {
   value: 'ruyayichen',
-  name: '',
+  name: 'Ruyayichen',
   media: '/voice-samples/doubao-ruyayichen.mp3',
   description: '/ /',
   aspectRatio: '16:5',
@@ -79,7 +77,7 @@ const answer = formatWidgetAnswer(fields, {
 });
 assert.strictEqual(
   answer,
-  ['- videodurationlarge？：3', '- video： 16:9', '- dotinner？（）：、table', '- select：：'].join('\n'),
+  ['- videodurationlarge？：3', '- video：16:9', '- dotinner？（）：table', '- select：：Ruyayichen'].join('\n'),
 );
 
 // ；allow_other

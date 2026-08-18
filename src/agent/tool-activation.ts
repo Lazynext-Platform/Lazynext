@@ -15,8 +15,7 @@ const BOOT_TOOL_NAMES: Record<string, true> = {
 };
 
 const READ_ONLY_TERMS = [
- '', '', '',
- 'read only', 'read-only', 'do not edit', "dont edit", 'without editing',
+ 'read only', 'read-only', 'do not edit', "dont edit", "don't edit", 'without editing',
 ];
 
 /** A natural-language hint may narrow initial routing, but never becomes tool authority. */

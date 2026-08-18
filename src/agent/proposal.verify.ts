@@ -37,8 +37,8 @@ const compacted = compactOperations([
 assert.equal(compacted.length, 1);
 assert.equal(compacted[0].callCount, 4);
 assert.equal(compacted[0].actions.length, 4);
-assert.equal(compacted[0].action, 'ok');
-assert.equal(compacted[0].impact, '4 ');
+assert.equal(compacted[0].action, 'Voice Isolation');
+assert.equal(compacted[0].impact, '4 edits');
 
 const distinctArguments = compactOperations([
  buildOperation('edit_captions', { itemId: 'clip-1', text: 'First' }, [{ type: 'setItemDenoise', id: 'clip-1', denoisedSrc: '/first.m4a', strength: 10 }]),
@@ -163,7 +163,7 @@ async function verifyProposalPersistenceFence(): Promise<void> {
  proposalPersistence(failedOrder, { saveDoc: async () => saveResult(false) }),
  );
  assert.equal(failedOrder.includes('apply'), false);
- assert.match(failedErrors[0] ?? "", /error/, "ok");
+ assert.match(failedErrors[0] ?? "", /not be saved|could not be/i, "failed save error reported");
 }
 async function verifyConcurrentRestoreFailureFence(): Promise<void> {
  const proposal = buildProposal(
@@ -200,7 +200,7 @@ async function verifyConcurrentRestoreFailureFence(): Promise<void> {
  assert.equal(order.filter((entry) => entry === 'apply').length, 1);
  assert.equal(order.some((entry) => entry.startsWith('settle-')), false);
  assert.equal(order.includes('durable-clear'), false, 'the applying recovery record remains durable');
- assert.match(errors[0] ?? "", /error/, "ok");
+ assert.match(errors[0] ?? "", /could not be/i, "concurrent restore failure error reported");
 }
 
 async function verifyCommittedRecoveryFence(): Promise<void> {
@@ -257,7 +257,7 @@ async function verifyProposalOwnershipFence(): Promise<void> {
  proposalState(unowned, applyOrder, applyErrors), 'proposal-persistence-verify', new Set([0]),
  );
  assert.equal(applyOrder.includes('apply'), false);
- assert.match(applyErrors[0] ?? "", /apply/, "ok");
+ assert.match(applyErrors[0] ?? "", /could not be applied/i, "ownership fence error reported");
  const rejectOrder: string[] = [];
  const rejectErrors: string[] = [];
  await rejectPendingProposal(
@@ -273,7 +273,7 @@ async function verifyProposalOwnershipFence(): Promise<void> {
  }),
  );
  assert.equal(rejectOrder.includes('clear'), true);
- assert.match(rejectErrors[0] ?? "", /reject/, "ok");
+ assert.match(rejectErrors[0] ?? "", /rejection/i, "reject error reported");
 }
 
 function persistentTurn(order: string[], controller = new AbortController()): AgentTurn {

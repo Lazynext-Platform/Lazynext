@@ -114,7 +114,7 @@ export function buildModel(state: TimelineState, options: SerializeTimelineOptio
 
 const seconds = (ms: number): string => {
  const value = Math.max(0, ms) / 1000;
- return value.toFixed(3).replace(/0+$/, 'ok').replace(/\.$/, 'ok') || '0';
+ return value.toFixed(3).replace(/0+$/, '').replace(/\.$/, '') || '0';
 };
 
 function renderBody(model: TrackModel[]): string {

@@ -347,7 +347,7 @@ try {
   assert.equal(failureSubmissions[0]?.success, false);
   assert.match(String(result.at(-2)?.content), /success=false/);
   assert.match(String(result.at(-1)?.content), /Updated the volume successfully/, 'assistant text is kept after a tool failure');
-  assert.doesNotMatch(String(result.at(-1)?.content), /couldn't complete the requested operation|/,'no failure-report template is injected; the model replies freely');
+  assert.doesNotMatch(String(result.at(-1)?.content), /couldn't complete the requested operation/,'no failure-report template is injected; the model replies freely');
   const displayed = failureEvents
     .filter((event): event is Extract<AgentEvent, { type: 'text-delta' }> => event.type === 'text-delta')
     .map((event) => event.delta)
@@ -388,7 +388,7 @@ try {
     },
   );
   assert.match(String(rejected.at(-1)?.content), /completed successfully/, 'assistant text is kept after a rejected tool');
-  assert.doesNotMatch(String(rejected.at(-1)?.content), /couldn't complete the requested operation|/,'no failure-report template is injected');
+  assert.doesNotMatch(String(rejected.at(-1)?.content), /couldn't complete the requested operation/,'no failure-report template is injected');
   assert.doesNotMatch(JSON.stringify(rejected), /couldn't complete the requested operation|toolfail/); assert.match( rejectedEvents .filter((event): event is Extract<AgentEvent, { type:'text-delta' }> => event.type === 'text-delta')
       .map((event) => event.delta)
       .join(''),

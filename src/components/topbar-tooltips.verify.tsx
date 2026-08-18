@@ -5,13 +5,13 @@ const exportHistory = await readFile(new URL('./ExportHistory.tsx', import.meta.
 
 assert.match(
   exportHistory,
-  /<TopBarIconButton[\s\S]*?icon="download"[\s\S]*?label=\{t\('exporthistory'\)\}/,
-  'exporthistorybuttonbutton',
+  /<TopBarIconButton[\s\S]*?icon="download"[\s\S]*?label=\{t\('Export History'\)\}/,
+  'export history button uses TopBarIconButton with label',
 );
 assert.doesNotMatch(
   exportHistory,
-  /<button title=\{t\('exporthistory'\)\}/,
-  'exporthistorybuttonstyle title',
+  /<button title=\{t\('Export History'\)\}/,
+  'export history button does not use title attribute',
 );
 
 console.log('top bar immediate tooltips verified');

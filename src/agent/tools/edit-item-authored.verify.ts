@@ -24,7 +24,7 @@ const state = {
 
 const textPlan = validateAuthoredAdd(state, {
   type: 'text',
-  text: '',
+  text: 'Text',
   color: '#ffcc00',
   fontSize: 72,
   align: 'center',
@@ -34,7 +34,7 @@ const textPlan = validateAuthoredAdd(state, {
 });
 assert.equal(textPlan.error, undefined, String(textPlan.error));
 assert.equal(textPlan.plan, 'addText');
-assert.equal(textPlan.text, '');
+assert.equal(textPlan.text, 'Text');
 assert.equal(textPlan.startFrame, 30);
 assert.equal(textPlan.durationInFrames, 120);
 
@@ -63,7 +63,7 @@ const itemId = draft.commands.addTextClip({
 });
 const item = draft.getState().items.find((entry) => entry.id === itemId);
 assert.equal(item?.kind, 'text');
-assert.equal(item?.props?.text, '');
+assert.equal(item?.props?.text, 'Text');
 assert.equal(item?.props?.color, '#ffcc00');
 assert.equal(item?.startFrame, 30);
 

@@ -6,10 +6,10 @@ Object.defineProperty(globalThis, 'window', {
 });
 
 const image = {
-  id: 'image-1', name: '', kind: 'image' as const,
+  id: 'image-1', name: 'asset.png', kind: 'image' as const,
   src: '/media/uploads/cover.png', durationInFrames: 150,
 };
-assert.equal(mediaAssetDownloadName(image), '.png');
+assert.equal(mediaAssetDownloadName(image), 'asset.png');
 
 const mg = {
   id: 'mg-1', name: 'title', kind: 'motion-graphic' as const, src: '',

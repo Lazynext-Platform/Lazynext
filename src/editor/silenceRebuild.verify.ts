@@ -102,7 +102,7 @@ assert.deepEqual(spansToLocalCuts(clip({}), [{ startMs: 0, endMs: 10_000 }], FPS
 }
 
 // ── Gatekeeper: variable speed/zoom/word-level editing/non-audio/video/passive ──
-assert.match(silenceRemovalBlocker(clip({ playbackRate: 2 })) ?? '', /speed/, 'ok');
+assert.match(silenceRemovalBlocker(clip({ playbackRate: 2 })) ?? '', /playbackRate/, 'ok');
 assert.match(silenceRemovalBlocker(clip({ zoom: { kind: 'shape' } as never })) ?? '', /zoom/);
 assert.match(silenceRemovalBlocker(clip({ kind: 'image' })) ?? '', /image/, 'ok');
 assert.match(

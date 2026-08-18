@@ -145,14 +145,14 @@ assert(boundedPayload.messages.length <= 64, 'history plus the current input res
 assert.equal(boundedPayload.messages.at(-1)?.content, 'Continue after a long conversation');
 const multibytePayload = buildServerRunPayload(
   'project-1',
-  ''.repeat(32_000),
+  '你好'.repeat(16_000),
   {},
   {
     history: Array.from({ length: 20 }, (_, index) => ({
       role: index % 2 === 0 ? 'user' as const : 'assistant' as const,
-      content: ''.repeat(32_000),
+      content: '你好'.repeat(16_000),
     })),
-    systemPrompt: ''.repeat(160_000),
+    systemPrompt: '你好'.repeat(80_000),
     cacheMode: 'short',
     maxOutputTokens: 4_096,
   },

@@ -33,7 +33,6 @@ export interface SceneQualityReport {
 }
 
 const GENERIC_PHRASES = [
- '', '', '', '', '', '', '', '',
  'a beautiful', 'stunning', 'amazing', 'incredible', 'modern', 'sleek',
  'cutting-edge', 'professional', 'dynamic', 'vibrant', 'breathtaking',
 ] as const;

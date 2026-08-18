@@ -4,11 +4,11 @@ import { readFile } from 'node:fs/promises';
 const toolbar = await readFile(new URL('./MediaPoolToolbar.tsx', import.meta.url), 'utf8');
 const semantic = await readFile(new URL('./semantic-search/SemanticSearchControls.tsx', import.meta.url), 'utf8');
 
-for (const label of ['uploadasset', 'sort', 'filter', '']) {
-  assert.match(toolbar, new RegExp(`data-tip=\\{t\\('${label}'\\)\\}`), `mediatool“${label}”`);
+for (const label of ['Upload media', 'Sort', 'Filter', 'More actions']) {
+  assert.match(toolbar, new RegExp(`data-tip=\\{t\\('${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}'\\)\\}`), `media tool “${label}”`);
 }
-assert.match(toolbar, /data-tip=\{t\(mediaViewToggleLabel\(props\.view\)\)\}/, '/columntablecurrent');
-assert.match(semantic, /data-tip=\{t\('localsearch'\)\}/, 'localsearch');
+assert.match(toolbar, /data-tip=\{t\(mediaViewToggleLabel\(props\.view\)\)\}/, 'view toggle tooltip');
+assert.match(semantic, /data-tip=\{t\('Local semantic search'\)\}/, 'local search');
 assert.doesNotMatch(toolbar, /className=\{?`?[^\n]*cc-media-icon[^\n]*\stitle=/, 'mediatooldependencydelay title');
 assert.doesNotMatch(semantic, /className=\{?`?[^\n]*cc-media-icon[^\n]*\stitle=/, 'searchdependencydelay title');
 

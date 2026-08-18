@@ -19,8 +19,8 @@ const asset = (id: string, sourceRevision: string, transcriptStale = false): Med
   sourceRevision,
   transcriptStale,
   transcript: [
-    { text: '', start: 1_000, end: 1_350 },
-    { text: '', start: 1_400, end: 1_900 },
+    { text: 'hello', start: 1_000, end: 1_350 },
+    { text: 'world', start: 1_400, end: 1_900 },
   ],
 });
 
@@ -43,7 +43,7 @@ assert.deepEqual(
 );
 assert.ok((visual[0]?.score ?? 0) >= 0 && (visual[0]?.score ?? 0) <= 1);
 
-const spoken = spokenMediaSearchHits('', assets);
+const spoken = spokenMediaSearchHits('helloworld', assets);
 assert.equal(spoken.length, 1, 'stale transcripts do not leak into unified search');
 assert.deepEqual(
   { start: spoken[0]?.sourceStartMs, end: spoken[0]?.sourceEndMs },

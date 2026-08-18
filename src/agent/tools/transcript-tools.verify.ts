@@ -64,9 +64,9 @@ assert.strictEqual(draft.getState().items[0].transcript![0].text, 'hello', 'no m
 // ── manage_transcript action=fix (/)────
 // A/B;durationInFrames 24 ,
 const spWords: TranscriptWord[] = [
- { text: '', start: 0, end: 300, speaker: 'A' },
- { text: '', start: 300, end: 600, speaker: 'B' },
- { text: '', start: 600, end: 900, speaker: 'A' },
+ { text: 'hello', start: 0, end: 300, speaker: 'A' },
+ { text: 'world', start: 300, end: 600, speaker: 'B' },
+ { text: 'again', start: 600, end: 900, speaker: 'A' },
 ];
 const spState = (): TimelineState => ({
  fps: 30, width: 1920, height: 1080, selectedId: null,
@@ -81,17 +81,17 @@ const mkSpCtx = () => {
 // 4) :'A' → ''( A ,B )
 {
  const { d, c } = mkSpCtx();
- const r = await execTranscriptTool('manage_transcript', { action: 'fix', itemId: 'clip', from: 'A', to: '' }, c) as { ok: boolean; from: string; to: string; wordsChanged: number };
+ const r = await execTranscriptTool('manage_transcript', { action: 'fix', itemId: 'clip', from: 'A', to: 'C' }, c) as { ok: boolean; from: string; to: string; wordsChanged: number };
  assert.strictEqual(r.ok, true);
  assert.strictEqual(r.from, 'A');
- assert.strictEqual(r.to, 'ok');
+ assert.strictEqual(r.to, 'C');
  assert.strictEqual(r.wordsChanged, 2, 'both A words changed');
  const t = d.getState().items[0].transcript!;
- assert.strictEqual(t[0].speaker, 'ok');
- assert.strictEqual(t[2].speaker, 'ok');
+ assert.strictEqual(t[0].speaker, 'C');
+ assert.strictEqual(t[2].speaker, 'C');
  assert.strictEqual(t[1].speaker, 'B', 'B speaker untouched');
 // text/timing//
- assert.strictEqual(t[0].text, '', 'text untouched');
+ assert.strictEqual(t[0].text, 'hello', 'text untouched');
  assert.strictEqual(t[0].start, 0, 'start untouched');
  assert.strictEqual(t[2].end, 900, 'end untouched');
  assert.strictEqual(t.length, 3, 'word count unchanged');
@@ -106,7 +106,7 @@ const mkSpCtx = () => {
  assert.strictEqual(r.wordsChanged, 1, 'the one B word merged');
  const t = d.getState().items[0].transcript!;
  assert.ok(t.every((w) => w.speaker === 'A'), 'B collapsed into A → single speaker');
- assert.deepStrictEqual(t.map((w) => w.text), ['', '', ''], 'text untouched by merge');
+ assert.deepStrictEqual(t.map((w) => w.text), ['hello', 'world', 'again'], 'text untouched by merge');
  assert.strictEqual(t.length, 3);
  assert.strictEqual(d.getState().items[0].durationInFrames, 24);
 }

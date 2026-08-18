@@ -135,7 +135,7 @@ async function verifyUnsupportedBrowserReportsPickerError(): Promise<void> {
  await assert.rejects(
  () => chooseExportDestination('clip.mp4'),
  (error) => error instanceof ExportDestinationError
- && error.key === ' ChromeEdge ',
+ && error.key === 'This browser does not support choosing an export folder. Use Chrome, Edge, or the desktop app.',
  );
 }
 
@@ -269,7 +269,7 @@ async function verifyDesktopRestoreAndStreaming(): Promise<void> {
  let suggestedFilename = '';
  installWindow({
  location: { href: 'http://localhost:5199/' },
- openLazynextDesktop: {
+ lazynextDesktop: {
  restoreExportDirectory: async () => grant,
  selectExportDirectory: async () => grant,
  selectExportFile: async (suggested: string) => {

@@ -33,7 +33,7 @@ const doc = {
 // ── parseProjectEnvelope ────────────────────────────────────────────────
 {
   const good = {
-    format: PROJECT_EXPORT_FORMAT, name: '', exportedAt: '2026-07-18T00:00:00Z', doc,
+    format: PROJECT_EXPORT_FORMAT, name: 'My Project', exportedAt: '2026-07-18T00:00:00Z', doc,
     chat: { messages: [], llm: [] },
     creativeMode: 'long-video-to-shorts',
     media: [
@@ -46,7 +46,7 @@ const doc = {
   });
   assert.ok('envelope' in parsed, `:${'error' in parsed ? parsed.error : ''}`);
   if ('envelope' in parsed) {
-    assert.equal(parsed.envelope.name, '', 'trim');
+    assert.equal(parsed.envelope.name, 'My Project', 'trim');
     assert.equal(parsed.envelope.media.length, 1, 'media');
     assert.equal(parsed.envelope.media[0].src, '/media/uploads/v.mp4');
     assert.ok(parsed.envelope.chat, 'chat');
@@ -69,7 +69,7 @@ const doc = {
     assert.ok('error' in withBad, `mediapackage:${JSON.stringify(bad.src)}`);
   }
 
-  assert.deepEqual(parseProjectEnvelope('not json'), { error: 'JSON file' });
+  assert.deepEqual(parseProjectEnvelope('not json'), { error: 'Not a valid JSON file' });
   const wrongFormat = parseProjectEnvelope(JSON.stringify({ ...good, format: 'foreign-project@1' }));
   assert.ok('error' in wrongFormat, 'pluginpackage');
   const badDoc = parseProjectEnvelope(JSON.stringify({ ...good, doc: { timelines: [] } }));

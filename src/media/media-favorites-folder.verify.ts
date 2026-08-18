@@ -6,7 +6,7 @@ const grid = readFileSync(new URL('./MediaPoolGrid.tsx', import.meta.url), 'utf8
 const card = readFileSync(new URL('./MediaPoolCard.tsx', import.meta.url), 'utf8');
 
 assert.match(panel, /setFavoritesOnly\(true\)/, 'mustview');
-assert.match(panel, /favoritesOnly \? ` \/ \$\{t\(''\)\}`/, 'viewmustpackage');
+assert.match(panel, /favoritesOnly \? ` \/ \$\{t\('Favorites'\)\}`/, 'viewmustpackage');
 assert.match(grid, /kind: 'favorites'/, 'assetmustcontaintype');
 assert.match(grid, /cc-folder-card cc-favorites-folder/, 'mustfolder');
 assert.match(card, /className="cc-asset-favorite"/, 'assetmustbutton');

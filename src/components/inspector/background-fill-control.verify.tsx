@@ -13,10 +13,10 @@ const markup = renderToStaticMarkup(
  />,
 );
 
-assert.match(markup, /aria-label=""[^>]*type="range"[^>]*value="75"/);
-assert.match(markup, /aria-label=""/);
+assert.match(markup, /aria-label="Background fill"[^>]*type="range"[^>]*value="75"/);
+assert.match(markup, /aria-label="Background fill"/);
 assert.equal((markup.match(/role="radio"/g) ?? []).length, 4, 'four percentage shortcuts stay visible');
-assert.match(markup, /> 75%<\/small>/, 'quick shortcuts expose their exact percentages');
+assert.match(markup, />Strong 75%<\/small>/, 'quick shortcuts expose their exact percentages');
 assert.match(markup, /aria-checked="true"[^>]*class="selected"/);
 assert.match(markup, /><\/button>/);
 assert.match(markup, /fill/, 'ok');

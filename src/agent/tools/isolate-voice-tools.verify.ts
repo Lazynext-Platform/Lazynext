@@ -100,7 +100,7 @@ const wrongSource = await execIsolateVoiceTool('isolate_voice', {
  action: 'attach', itemId: 'item_interview', sourceAssetId: 'asset_source_other_002',
  denoisedAssetId: 'asset_isolated_voice_004',
 }, ctx) as Record<string, unknown>;
-assert.match(String(wrongSource.error), /error/, 'ok');
+assert.match(String(wrongSource.error), /sourceAssetId does not match/, 'ok');
 assert.equal(history.past.length, 1);
 
 const replacement = await execIsolateVoiceTool('isolate_voice', {
@@ -131,7 +131,7 @@ const clearAgain = await execIsolateVoiceTool('isolate_voice', {
  action: 'clear', itemId: 'item_interview',
 }, ctx) as Record<string, unknown>;
 assert.equal(clearAgain.ok, true);
-assert.match(String(clearAgain.note), /cleared/, 'ok');
+assert.match(String(clearAgain.note), /Voice Isolation/i, 'ok');
 assert.equal(history.past.length, 3);
 
 const originalFetch = globalThis.fetch;

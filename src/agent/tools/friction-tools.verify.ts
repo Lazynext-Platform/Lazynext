@@ -14,16 +14,14 @@ assert.strictEqual(FRICTION_TOOL_SCHEMAS[0]!.name, 'report_user_friction');
 // Memory storage polyfill for Node
 const mem = new Map<string, string>();
 const g = globalThis as typeof globalThis & { localStorage?: Storage };
-if (!g.localStorage) {
-  g.localStorage = {
-    getItem: (k: string) => mem.get(k) ?? null,
-    setItem: (k: string, v: string) => { mem.set(k, v); },
-    removeItem: (k: string) => { mem.delete(k); },
-    clear: () => mem.clear(),
-    key: () => null,
-    length: 0,
-  } as Storage;
-}
+g.localStorage = {
+  getItem: (k: string) => mem.get(k) ?? null,
+  setItem: (k: string, v: string) => { mem.set(k, v); },
+  removeItem: (k: string) => { mem.delete(k); },
+  clear: () => mem.clear(),
+  key: () => null,
+  length: 0,
+} as Storage;
 mem.clear();
 
 const ctx = {

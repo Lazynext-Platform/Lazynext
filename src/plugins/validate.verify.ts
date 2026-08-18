@@ -19,10 +19,10 @@ const goodPack: PluginPack = {
   author: 'tester',
   items: [
     { type: 'mg-template', id: 'title-card', name: 'title', width: 1920, height: 1080, code: 'const T = () => null;' },
-    { type: 'transition', id: 'ink', name: '', frag: TR_FRAG, props: [{ key: 'softness', label: '', default: 0.3, min: 0, max: 1 }] },
+    { type: 'transition', id: 'ink', name: 'Ink', frag: TR_FRAG, props: [{ key: 'softness', label: 'Softness', default: 0.3, min: 0, max: 1 }] },
     { type: 'fx', id: 'vhs', name: 'VHS', frag: FX_FRAG },
     { type: 'lut', id: 'moody', name: 'Moody', cube: CUBE_2 },
-    { type: 'zoom', id: 'elastic', name: '', envelope: [0, 0.6, 1.1, 1], magnification: 1.6 },
+    { type: 'zoom', id: 'elastic', name: 'Elastic', envelope: [0, 0.6, 1.1, 1], magnification: 1.6 },
   ],
 };
 
@@ -79,7 +79,7 @@ console.log(`validatePack: + ${rejects.length} classpackageall OK`);
   assert.equal(lut.props[0].key, 'intensity');
   const tr = transitionDefOf(goodPack, goodPack.items[1] as never);
   assert.equal(tr.id, 'plugin:demo-pack/ink');
-  assert.equal(tr.label, '');
+  assert.equal(tr.label, 'Ink');
   assert.equal(pluginAssetId('a', 'b'), 'plugin:a/b');
   console.log('def map OK');
 }
@@ -120,10 +120,10 @@ console.log(`validatePack: + ${rejects.length} classpackageall OK`);
 {
   const { fxCandidates, transitionCandidates, mgCandidates, buildExportPack } = await import('./export');
   const fx = fxCandidates([
-    { id: 'custom:fx-a', name: '', desc: 'x', frag: FX_FRAG, props: [] },
-    { id: 'plugin:other/b', name: '', desc: 'x', frag: FX_FRAG, props: [] },   // inner
+    { id: 'custom:fx-a', name: 'FX A', desc: 'x', frag: FX_FRAG, props: [] },
+    { id: 'plugin:other/b', name: 'Other B', desc: 'x', frag: FX_FRAG, props: [] },   // inner
     { id: 'builtin:fx-invert', name: 'inner', desc: 'x', frag: FX_FRAG, props: [] }, // inner
-    { id: 'custom:fx-a', name: '', desc: 'x', frag: FX_FRAG, props: [] },        // unique
+    { id: 'custom:fx-a', name: 'FX A', desc: 'x', frag: FX_FRAG, props: [] },        // unique
   ]);
   assert.equal(fx.length, 1, 'fx custom: unique');
   const trs = transitionCandidates(
@@ -136,8 +136,8 @@ console.log(`validatePack: + ${rejects.length} classpackageall OK`);
   );
   assert.equal(trs.length, 2, 'registertable + timeline frag, frag unique,innertransition');
   const mgs = mgCandidates([
-    { id: 'm1', track: 'V1', startFrame: 0, durationInFrames: 60, name: '', kind: 'motion-graphic', code: 'const A = () => null;' },
-    { id: 'm2', track: 'V1', startFrame: 60, durationInFrames: 60, name: '', kind: 'motion-graphic', code: 'const A = () => null;' },
+    { id: 'm1', track: 'V1', startFrame: 0, durationInFrames: 60, name: 'Title Card', kind: 'motion-graphic', code: 'const A = () => null;' },
+    { id: 'm2', track: 'V1', startFrame: 60, durationInFrames: 60, name: 'Lower Third', kind: 'motion-graphic', code: 'const A = () => null;' },
     { id: 'v1', track: 'V1', startFrame: 120, durationInFrames: 60, name: 'video', kind: 'video', src: '/a.mp4' },
   ] as TimelineItem[]);
   assert.equal(mgs.length, 1, 'MG code unique, MG');

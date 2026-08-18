@@ -11,11 +11,11 @@ if (existsSync(controlsUrl)) {
   const html = renderToStaticMarkup(
     <DesktopWindowControlButtons translate={(text: string) => text} onAction={(action: string) => actions.push(action)} />,
   );
-  assert.match(html, /aria-label="window"/);
+  assert.match(html, /aria-label="Window controls"/);
   assert.equal((html.match(/<button/g) ?? []).length, 3, 'macOS control cluster has three buttons');
-  assert.match(html, /aria-label="closewindow"/);
-  assert.match(html, /aria-label="minimizedwindow"/);
-  assert.match(html, /aria-label="scalewindow"/);
+  assert.match(html, /aria-label="Close window"/);
+  assert.match(html, /aria-label="Minimize window"/);
+  assert.match(html, /aria-label="Zoom window"/);
   assert.deepEqual(actions, [], 'rendering controls does not invoke native actions');
 }
 

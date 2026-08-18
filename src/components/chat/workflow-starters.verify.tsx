@@ -85,7 +85,7 @@ assert.equal(
 assert.equal((pickerMarkup.match(/aria-pressed="true"/g) ?? []).length, 1, 'exactly one workflow should expose selected state');
 assert.match(pickerMarkup, /workflow/);
 assert.match(pickerMarkup, /aria-pressed/);
-assert.match(pickerMarkup, /cc-chat/);
+assert.match(pendingComposerMarkup, /cc-chat/);
 assert.match(pendingComposerMarkup, /import-status/, 'pending attachment reason should be visible');
 assert.match(pendingComposerMarkup, /aria-describedby="cc-chat-composer-import-status"/, 'textarea should describe its pending gate');
 const pendingSubmitButton = pendingComposerMarkup.match(/<button[^>]*class="cc-chat-send-btn"[^>]*>/)?.[0];

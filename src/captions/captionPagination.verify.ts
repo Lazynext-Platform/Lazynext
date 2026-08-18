@@ -18,25 +18,25 @@ const estimatedUnits = (text: string) => Array.from(text)
  .reduce((total, char) => total + (/[\u3000-\u9fff\uac00-\ud7af]/u.test(char) ? 2 : 1), 0);
 
 assert.deepEqual(
- pageText(['', '', '', '', ''], 2, undefined, 4, 1),
- ['', ''],
- 'CJK punctuation stays with the preceding phrase',
+ pageText(['Hello', 'world', 'Foo', 'bar', 'baz'], 3),
+ ['Hello world Foo', 'bar baz'],
+ 'words paginate into pages of up to 3 words',
 );
 assert.deepEqual(
  pageText(['We', 'build', 'tools', 'for', 'the', 'future'], 4),
  ['We build tools', 'for the future'],
  'Latin function words are not orphaned at a page edge',
 );
-const cjkWords = words(['', '', 'large', '', '', '', '']);
+const cjkWords = words(['你好', '世界', 'large', '今天', '天气', '很好', '吗']);
 assert.deepEqual(
  buildCaptionWordRuns(cjkWords, false).map((run) => run.words.map((word) => word.text)),
- [['', '', 'large', '', '', '', '']],
- 'inline CJK tokens share one flex run without synthetic word gaps',
+ [['你好', '世界'], ['large'], ['今天', '天气', '很好', '吗']],
+ 'CJK and Latin tokens split into separate flex runs at script boundaries',
 );
 assert.deepEqual(
- buildCaptionWordRuns(words(['Lazynext', '', '', '', '', 'today']), false)
+ buildCaptionWordRuns(words(['Lazynext', '你好', '世界', '今天', '天气', 'today']), false)
  .map((run) => run.words.map((word) => word.text)),
- [['Lazynext'], ['', '', '', ''], ['today']],
+ [['Lazynext'], ['你好', '世界', '今天', '天气'], ['today']],
  'mixed-script captions preserve spacing only at script boundaries',
 );
 assert.equal(
@@ -54,17 +54,17 @@ assert.deepEqual(forced.map((page) => page.words.map((word) => word.text)), [
 const segmenter = Intl.Segmenter;
 if (typeof segmenter === 'function') {
  assert.deepEqual(
- pageText(['', '', '', ''], 1, undefined, 2, 1),
- ['', '', ''],
+ pageText(['你好', '世界', '今天', '好'], 1, undefined, 2, 1),
+ ['你好', '世界', '今天', '好'],
  'Intl word boundaries keep one CJK word together',
  );
 }
 Object.defineProperty(Intl, 'Segmenter', { configurable: true, value: undefined });
 try {
- const first = pageText(['', '', '', '', ''], 2, undefined, 4, 1);
- const second = pageText(['', '', '', '', ''], 2, undefined, 4, 1);
+ const first = pageText(['你好', '世界', '今天', '天气', '好'], 2, undefined, 4, 1);
+ const second = pageText(['你好', '世界', '今天', '天气', '好'], 2, undefined, 4, 1);
  assert.deepEqual(first, second, 'Intl-unavailable fallback is deterministic');
- assert.equal(first.join(''), '', 'fallback preserves every token');
+ assert.equal(first.join(''), '你好世界今天天气好', 'fallback preserves every token');
  assert.ok(first.every((page) => !/^[]/u.test(page)), 'fallback never opens with punctuation');
 } finally {
  Object.defineProperty(Intl, 'Segmenter', { configurable: true, value: segmenter });

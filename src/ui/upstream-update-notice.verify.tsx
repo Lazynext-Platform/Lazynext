@@ -24,7 +24,7 @@ const markup = renderToStaticMarkup(
  </div>,
 );
 
-assert.match(markup, / Lazynext V0\.2\.0/, 'newmustversion');
+assert.match(markup, /Lazynext.*V0\.2\.0/, 'newmustversion');
 assert.match(markup, /><\/button>/, 'desktopnewmustdownload');
 assert.match(markup, /role="status"/, 'state');
 assert.doesNotMatch(markup, /<a\b/, 'updatemustdesktop IPC link');
@@ -32,7 +32,7 @@ assert.match(markup, /top:50%/, 'updateverticalcentered');
 assert.match(markup, /left:50%/, 'updatehorizontalcentered');
 assert.match(markup, /z-index:190/, 'updatemustsettingsbottomsettings');
 assert.match(markup, /transform:translate\(-50%,\s*-50%\)/, 'updatecenterwindowcenter');
-assert.match(markup, /aria-label="window"/, 'desktopwindowmustupdate dashboard chrome centerrender');
+assert.match(markup, /aria-label="Window controls"/, 'desktopwindowmustupdate dashboard chrome centerrender');
 assert.equal((markup.match(/class="cc-window-control /g) ?? []).length, 3, 'macOS titlewindowbutton');
 
 

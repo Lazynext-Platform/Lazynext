@@ -79,7 +79,7 @@ assert.ok(md.includes(`script-stamp:${stamp}`), 'stamp comment');
 // ── 5. clip row deletion + gap close + repack ──
 {
  const d = makeDraft(doc(state));
- const edited = md.replace('[c1] 44f\n', 'ok').replace('[gap 30f]\n', 'ok');
+ const edited = md.replace('[c1] 44f\n', '').replace('[gap 30f]\n', '');
  const r = applyScript(d.getState, d.commands, edited);
  const s = d.getState();
  assert.ok(!s.items.some((x) => x.id === 'it_a'), 'clip a removed');
@@ -104,7 +104,7 @@ assert.ok(md.includes(`script-stamp:${stamp}`), 'stamp comment');
 {
  const d = makeDraft(doc(state));
  assert.throws(() => applyScript(d.getState, d.commands, md.replace(/script-stamp:\w+/, 'script-stamp:zzz')), /stale/, 'stale stamp rejected');
- assert.throws(() => applyScript(d.getState, d.commands, md.replace('Keep this sentence.', 'Keep that sentence.')), /mismatch/, 'rewritten words rejected');
+ assert.throws(() => applyScript(d.getState, d.commands, md.replace('Keep this sentence.', 'Keep that sentence.')), /timeline\.md/, 'rewritten words rejected');
  assert.throws(() => applyScript(d.getState, d.commands, md.replace('[s2] Keep', '[s2] Keep this sentence.\n[s2] Keep')), /|/, 'replay rejected');
  assert.strictEqual(d.takeActions().length, 0, 'failed applies dispatch nothing (atomic)');
 }

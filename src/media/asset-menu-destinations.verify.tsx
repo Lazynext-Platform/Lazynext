@@ -54,7 +54,7 @@ try {
  ['asset-a', 'asset-b'],
  '',
  );
- assert.equal(duplicateAssetName('.mp4', 'copy'), ' copy.mp4');
+ assert.equal(duplicateAssetName('video.mp4', 'copy'), 'video copy.mp4');
  assert.equal(duplicateAssetName('', 'copy'), ' copy');
  assert.deepEqual(
  assetMenuSelectionIds('asset-c', new Set(['asset-a', 'asset-b']), ['asset-a', 'asset-b', 'asset-c']),
@@ -73,12 +73,12 @@ try {
  );
  assert.deepEqual(
  batchAssetRename([
- { id: 'asset-a', name: '.mp4' },
- { id: 'asset-b', name: '.png' },
+ { id: 'asset-a', name: 'clip.mp4' },
+ { id: 'asset-b', name: 'image.png' },
  ], 'ok'),
  [
- { id: 'asset-a', name: '.mp4' },
- { id: 'asset-b', name: ' 2.png' },
+ { id: 'asset-a', name: 'ok.mp4' },
+ { id: 'asset-b', name: 'ok 2.png' },
  ],
  '',
  );
@@ -91,10 +91,10 @@ try {
 
  assert.match(markup, /menu/, 'ok');
  assert.match(markup, /></);
- assert.match(markup, />AI </);
- assert.ok(markup.indexOf('>AI <') < markup.indexOf('><'), 'AI ');
- assert.match(markup, /aria-label=" 77.mp4 "/);
- assert.match(markup, /aria-label=" 77.mp4 AI "/);
+ assert.match(markup, />AI chat</);
+ assert.ok(markup.indexOf('>AI chat<') < markup.indexOf('>Timeline<'), 'AI chat before Timeline');
+ assert.match(markup, /aria-label="Add 77.mp4 to AI chat"/);
+ assert.match(markup, /aria-label="Add 77.mp4 to timeline"/);
 
  const blankMenuMarkup = renderToStaticMarkup(createElement(BlankMediaMenuActions, {
  clipboardCount: 2,
@@ -119,8 +119,8 @@ try {
  assert.match(blankMenuMarkup, /></);
  assert.match(blankMenuMarkup, /></);
  assert.match(blankMenuMarkup, /></);
- assert.match(blankMenuMarkup, /aria-label=""/);
- assert.match(blankMenuMarkup, /aria-label=""/);
+ assert.match(blankMenuMarkup, /aria-label="Sort media"/);
+ assert.match(blankMenuMarkup, /aria-label="Filter media"/);
 
  const overlaySource = await readFile(new URL('./MediaPoolOverlays.tsx', import.meta.url), 'utf8');
  assert.doesNotMatch(overlaySource, /className="cc-asset-menu-backdrop"/, 'ok');

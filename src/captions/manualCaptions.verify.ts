@@ -10,10 +10,10 @@ let captions = newManualCaptions();
 const laneId = captions.sourceEntries![0]!.id;
 assert.equal(captions.sourceEntries!.filter(isManualCaptionEntry).length, 1);
 
-const added = appendManualCue(captions, laneId, '', 1_000, 2_000);
+const added = appendManualCue(captions, laneId, 'Hello', 1_000, 2_000);
 assert.ok(added?.sourceEntries);
 captions = { ...captions, ...added };
-assert.equal(buildLaneGroups(captions, [], 30, 1_500, 6)?.[0]?.lanes[0]?.page.words[0]?.text, '');
+assert.equal(buildLaneGroups(captions, [], 30, 1_500, 6)?.[0]?.lanes[0]?.page.words[0]?.text, 'Hello');
 assert.deepEqual(buildLaneGroups(captions, [], 30, 2_500, 6), [], 'manual cue ends exactly at endMs');
 const originalCueId = captions.sourceEntries![0]!.words![0]!.id;
 
