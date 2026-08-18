@@ -33,9 +33,9 @@ jobs:
           mkdir -p _site
           cp landing/index.html _site/
           cp public/lazynext-icon.png _site/
-      - uses: actions/configure-pages@v7
-      - uses: actions/upload-pages-artifact@v7
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
       - id: deployment
-        uses: actions/deploy-pages@v7
+        uses: actions/deploy-pages@v4
