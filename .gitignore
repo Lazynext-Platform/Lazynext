@@ -90,3 +90,4 @@ public/whisper-cli/
 
 # Local npm cache
 .npm-cache/
+.playwright-mcp/
