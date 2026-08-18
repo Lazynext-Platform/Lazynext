@@ -103,6 +103,9 @@
       display: flex; align-items: center; justify-content: center;
       color: var(--text-dim); font-size: 14px;
     }
+    .screenshot-card img {
+      width: 100%; display: block; border-bottom: 1px solid var(--border);
+    }
     .screenshot-card .caption { padding: 16px; font-size: 14px; color: var(--text-dim); }
 
     /* Code block */
@@ -308,20 +311,20 @@
     <p class="section-sub">A multitrack timeline, transcript-driven editing, AI chat, and caption styling — all in one workspace.</p>
     <div class="screenshot-grid">
       <div class="screenshot-card">
-        <div class="placeholder">Timeline view — multitrack editing with clips, transitions, and waveforms</div>
-        <div class="caption">Multitrack timeline with video, audio, and transcript tracks</div>
+        <img src="screenshots/editor-main.png" alt="Lazynext editor with AI chat and timeline" loading="lazy" />
+        <div class="caption">Editor with AI chat — agent creates title clips and edits the timeline</div>
       </div>
       <div class="screenshot-card">
-        <div class="placeholder">AI chat — conversational agent with proposal-based edits</div>
-        <div class="caption">Chat with the built-in agent to edit your project</div>
+        <img src="screenshots/dashboard.png" alt="Lazynext project dashboard" loading="lazy" />
+        <div class="caption">Project dashboard — manage projects, import, and search</div>
       </div>
       <div class="screenshot-card">
-        <div class="placeholder">Transcript editing — strike words to cut them from the timeline</div>
-        <div class="caption">Text-based editing with word-level precision</div>
+        <img src="screenshots/editor-transcript.png" alt="Lazynext transcript editing view" loading="lazy" />
+        <div class="caption">Transcript view — word-level editing and text-based cuts</div>
       </div>
       <div class="screenshot-card">
-        <div class="placeholder">Caption styling — TikTok, YouTube, and custom presets</div>
-        <div class="caption">Automatic captions with karaoke highlighting</div>
+        <img src="screenshots/editor-captions.png" alt="Lazynext caption styling" loading="lazy" />
+        <div class="caption">Captions view — automatic captions with named styles</div>
       </div>
     </div>
   </div>
