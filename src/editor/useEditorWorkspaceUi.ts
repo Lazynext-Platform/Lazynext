@@ -191,7 +191,7 @@ export function useEditorWorkspaceExportActions(
     focusAgent: () => {
       input.setChatCollapsed(false);
       requestAnimationFrame(() => {
-        document.querySelector<HTMLTextAreaElement>('[data-cc-chat-composer]')?.focus();
+        document.querySelector<HTMLTextAreaElement>('[data-ln-chat-composer]')?.focus();
       });
     },
     selectAll: input.selectAllTimelineContent,

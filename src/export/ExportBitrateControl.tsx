@@ -32,9 +32,9 @@ export function ExportBitrateControl({
 }: ExportBitrateControlProps) {
   const t = useT();
   return (
-    <div className="cc-export-bitrate">
+    <div className="ln-export-bitrate">
       <select
-        className="cc-export-select"
+        className="ln-export-select"
         aria-label={t('Bitrate mode')}
         value={mode}
         disabled={disabled}
@@ -43,7 +43,7 @@ export function ExportBitrateControl({
         {MODES.map((entry) => <option key={entry.value} value={entry.value}>{t(entry.label)}</option>)}
       </select>
       {mode === 'custom' && (
-        <label className="cc-export-bitrate-custom">
+        <label className="ln-export-bitrate-custom">
           <input
             type="number"
             min={MIN_VIDEO_BITRATE_MBPS}

@@ -32,7 +32,7 @@ for (const enabled of [false, true]) {
  <BackgroundFillControlView enabled={enabled} mixed strength={83} strengthMixed
  translate={(key) => key} onChange={() => undefined} onApplyToAll={() => undefined} />,
  );
- assert.match(mixed, /class="cc-bg-fill-apply" disabled=""/,
+ assert.match(mixed, /class="ln-bg-fill-apply" disabled=""/,
  'mixed percentages cannot be silently applied from the primary item');
  assert.doesNotMatch(mixed, /aria-checked="true"/,
  'mixed percentages do not present the primary item as the shared value');

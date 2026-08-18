@@ -80,9 +80,9 @@ export function McpGuideDialog({ onClose }: { onClose: () => void }) {
  whiteSpace: 'pre-wrap', wordBreak: 'break-all', userSelect: 'text',
  };
  return (
- <div className="cc-modal-backdrop" onPointerDown={onClose}>
+ <div className="ln-modal-backdrop" onPointerDown={onClose}>
  <div
- className="cc-modal"
+ className="ln-modal"
  style={{ width: 560, gap: 10, maxHeight: 'calc(100vh - 64px)', overflowY: 'auto' }}
  onPointerDown={(event) => event.stopPropagation()}
  >

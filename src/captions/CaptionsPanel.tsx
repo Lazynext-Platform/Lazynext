@@ -29,8 +29,8 @@ export function CaptionsPanel(props: Props) {
   const set = (next: CaptionsData | null) => onSetCaptions(next, captionTrack ?? undefined);
   const translation = useCaptionTranslation(captions, items, fps, update);
   return (
-    <div className="cc-captions-workspace">
-      <div className="cc-captions-context">
+    <div className="ln-captions-workspace">
+      <div className="ln-captions-context">
         <CaptionTrackBar options={captionTracks} track={captionTrack} onChange={setCaptionTrack} />
       </div>
       <CaptionsControls captionTrackId={captionTrack ?? undefined} captions={captions} sourceVariants={(captions?.sourceItemId ? items.find((item) => item.id === captions.sourceItemId)?.variants : undefined) ?? []} items={items} fps={fps} onSeekMs={(ms) => playerRef.current?.seekTo(msToFrame(ms, fps))} onCreateManual={() => set(newManualCaptions())} getPlayheadMs={() => ((playerRef.current?.getCurrentFrame() ?? 0) / fps) * 1000} onUpdate={update} onRemove={() => set(null)} onTranslate={translation.run} translating={translation.running} translateError={translation.error} />
@@ -41,9 +41,9 @@ export function CaptionsPanel(props: Props) {
 function CaptionTrackBar({ options, track, onChange }: { options: Props['captionTracks']; track: TrackId | null; onChange: (track: TrackId) => void }) {
   const t = useT();
   return (
-    <div className="cc-captions-sourcebar">
-      <label htmlFor="cc-caption-track">{t('Caption track')}</label>
-      <select id="cc-caption-track" className="cc-cap-select" value={track ?? ''} disabled={!options.length} onChange={(event) => onChange(event.target.value)}>
+    <div className="ln-captions-sourcebar">
+      <label htmlFor="ln-caption-track">{t('Caption track')}</label>
+      <select id="ln-caption-track" className="ln-cap-select" value={track ?? ''} disabled={!options.length} onChange={(event) => onChange(event.target.value)}>
         {!options.length && <option value="">{t('Create a caption track first')}</option>}
         {options.map((option) => <option key={option.id} value={option.id}>{trackTitle(option)}</option>)}
       </select>

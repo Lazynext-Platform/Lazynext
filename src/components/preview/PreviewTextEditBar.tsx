@@ -75,14 +75,14 @@ export function PreviewTextEditBar({
 
   return (
     <div
-      className="cc-capedit-bar cc-preview-text-edit-bar"
+      className="ln-capedit-bar ln-preview-text-edit-bar"
       style={{ left, top, transform: 'translate(-50%, calc(-100% - 14px))' }}
       onPointerDown={(event) => event.stopPropagation()}
     >
       {onSeedChat && hasText && (
         <button
           type="button"
-          className="cc-capedit-btn ai"
+          className="ln-capedit-btn ai"
           title={t('Ask AI to rewrite this on-screen text')}
           onClick={() => onSeedChat(t('Improve this on-screen text (keep layout): "{text}"', { text: fields.text || t('(empty)') }))}
         >
@@ -92,10 +92,10 @@ export function PreviewTextEditBar({
 
       {hasText && (
         <>
-          {onSeedChat && <span className="cc-capedit-divider" aria-hidden />}
+          {onSeedChat && <span className="ln-capedit-divider" aria-hidden />}
           <button
             type="button"
-            className={`cc-capedit-btn${editing ? ' on' : ''}`}
+            className={`ln-capedit-btn${editing ? ' on' : ''}`}
             title={t('Edit text')}
             onClick={() => {
               setPop(null);
@@ -113,20 +113,20 @@ export function PreviewTextEditBar({
       {hasColor && (
         <button
           type="button"
-          className={`cc-capedit-btn${pop === 'color' ? ' on' : ''}`}
+          className={`ln-capedit-btn${pop === 'color' ? ' on' : ''}`}
           title={t('Text color')}
           onClick={() => setPop(pop === 'color' ? null : 'color')}
         >
-          <span className="cc-capedit-colordot" style={{ background: fields.color }} />
+          <span className="ln-capedit-colordot" style={{ background: fields.color }} />
         </button>
       )}
 
       {hasSize && (
         <>
-          <span className="cc-capedit-divider" aria-hidden />
+          <span className="ln-capedit-divider" aria-hidden />
           <button
             type="button"
-            className="cc-capedit-btn"
+            className="ln-capedit-btn"
             title={t('Smaller text')}
             onClick={() => fields.fontSizeKey && onPropChange(item.id, fields.fontSizeKey, bumpPreviewFontSize(fields, -1))}
           >
@@ -134,7 +134,7 @@ export function PreviewTextEditBar({
           </button>
           <button
             type="button"
-            className="cc-capedit-btn"
+            className="ln-capedit-btn"
             title={t('Bigger text')}
             onClick={() => fields.fontSizeKey && onPropChange(item.id, fields.fontSizeKey, bumpPreviewFontSize(fields, 1))}
           >
@@ -145,10 +145,10 @@ export function PreviewTextEditBar({
 
       {hasWeight && (
         <>
-          <span className="cc-capedit-divider" aria-hidden />
+          <span className="ln-capedit-divider" aria-hidden />
           <button
             type="button"
-            className="cc-capedit-btn"
+            className="ln-capedit-btn"
             title={t('Weight')}
             onClick={() => onPropChange(item.id, fields.fontWeightKey!, cyclePreviewFontWeight(fields.fontWeight))}
           >
@@ -160,7 +160,7 @@ export function PreviewTextEditBar({
       {hasAlign && (
         <button
           type="button"
-          className="cc-capedit-btn"
+          className="ln-capedit-btn"
           title={t('Align')}
           onClick={() => onPropChange(item.id, fields.alignKey!, cyclePreviewAlign(fields.align))}
         >
@@ -169,7 +169,7 @@ export function PreviewTextEditBar({
       )}
 
       {editing && hasText && (
-        <div className="cc-preview-text-edit-draft" onPointerDown={(event) => event.stopPropagation()}>
+        <div className="ln-preview-text-edit-draft" onPointerDown={(event) => event.stopPropagation()}>
           <textarea
             ref={editorRef}
             value={draft}
@@ -191,12 +191,12 @@ export function PreviewTextEditBar({
       )}
 
       {pop === 'color' && hasColor && (
-        <div className="cc-capedit-pop color">
+        <div className="ln-capedit-pop color">
           {COLOR_SWATCHES.map((hex) => (
             <button
               key={hex}
               type="button"
-              className={`cc-capedit-swatch${fields.color.toLowerCase() === hex.toLowerCase() ? ' on' : ''}`}
+              className={`ln-capedit-swatch${fields.color.toLowerCase() === hex.toLowerCase() ? ' on' : ''}`}
               style={{ background: hex }}
               title={hex}
               onClick={() => {
@@ -205,7 +205,7 @@ export function PreviewTextEditBar({
               }}
             />
           ))}
-          <label className="cc-capedit-custom" title={t('Custom color')}>
+          <label className="ln-capedit-custom" title={t('Custom color')}>
             <input
               type="color"
               defaultValue={/^#[0-9a-fA-F]{6}$/.test(fields.color) ? fields.color : '#ffffff'}

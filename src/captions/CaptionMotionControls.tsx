@@ -11,23 +11,23 @@ export function CaptionMotionControls({ value, onChange }: CaptionMotionControls
   const t = useT();
   const selected = value ?? 'none';
   return (
-    <div className="cc-cap-field">
-      <div className="cc-cap-label">{t('Caption motion')}</div>
-      <div className="cc-cap-pills" role="listbox" aria-label={t('Caption motion')}>
+    <div className="ln-cap-field">
+      <div className="ln-cap-label">{t('Caption motion')}</div>
+      <div className="ln-cap-pills" role="listbox" aria-label={t('Caption motion')}>
         {CAPTION_MOTION_OPTIONS.map((option) => (
           <button
             key={option.id}
             type="button"
             role="option"
             aria-selected={selected === option.id}
-            className={`cc-cap-pill${selected === option.id ? ' selected' : ''}`}
+            className={`ln-cap-pill${selected === option.id ? ' selected' : ''}`}
             onClick={() => onChange(option.id)}
           >
             {t(option.label)}
           </button>
         ))}
       </div>
-      <p className="cc-cap-hint">{t('Motion is timeline-frame driven, so preview and export stay aligned.')}</p>
+      <p className="ln-cap-hint">{t('Motion is timeline-frame driven, so preview and export stay aligned.')}</p>
     </div>
   );
 }

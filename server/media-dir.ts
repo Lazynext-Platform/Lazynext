@@ -353,7 +353,7 @@ export async function checkMediaDir(
   if (!dir) return { ok: false, error: 'Must be an absolute path (can start with ~/)' };
   try {
     await mkdir(dir, { recursive: true });
-    const probe = join(dir, `.cc-dir-probe-${process.pid}`);
+    const probe = join(dir, `.ln-dir-probe-${process.pid}`);
     await writeFile(probe, 'ok');
     await unlink(probe);
     return { ok: true, note: `Directory is writable · ${dir}` };

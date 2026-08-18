@@ -37,11 +37,11 @@ function RangeRow({ label, value, min, max, step, display, onChange }: {
 }) {
   const gesture = useHistoryGesture();
   return (
-    <label className="cc-insp-row cc-caption-style-row">
-      <span className="cc-insp-label">{label}</span>
-      <input className="cc-insp-range" type="range" aria-label={label} min={min} max={max} step={step}
+    <label className="ln-insp-row ln-caption-style-row">
+      <span className="ln-insp-label">{label}</span>
+      <input className="ln-insp-range" type="range" aria-label={label} min={min} max={max} step={step}
         value={value} onChange={(event) => onChange(Number(event.target.value))} {...gesture} />
-      <span className="cc-insp-val">{display}</span>
+      <span className="ln-insp-val">{display}</span>
     </label>
   );
 }
@@ -81,7 +81,7 @@ function CaptionColorInput({ label, value, fallback, onChange }: {
 }) {
   const gesture = useHistoryGesture();
   return (
-    <label className="cc-insp-mg-field">
+    <label className="ln-insp-mg-field">
       <span>{label}</span>
       <input type="color" value={normalizedColor(value, fallback)}
         onChange={(event) => onChange(event.target.value)} {...gesture} />
@@ -134,23 +134,23 @@ export function CaptionInspectorControls({ selection, onUpdate }: CaptionInspect
   const textColor = captionPreviewTextColor(target.preset);
 
   return (
-    <div className="cc-insp-groups" data-caption-inspector="true">
-      <div className="cc-insp-section">{t('Text')}</div>
-      <textarea className="cc-cap-input cc-cap-textarea" value={target.cue.text}
+    <div className="ln-insp-groups" data-caption-inspector="true">
+      <div className="ln-insp-section">{t('Text')}</div>
+      <textarea className="ln-cap-input ln-cap-textarea" value={target.cue.text}
         aria-label={t('Caption text')}
         onChange={(event) => {
           const patch = captionPreviewTextPatch(captions, target, event.target.value);
           if (patch) onUpdate(patch);
         }} />
 
-      <div className="cc-insp-section">
+      <div className="ln-insp-section">
         <span>{t('Styles')}</span>
-        <button type="button" className="cc-insp-group-reset" disabled={styleResetDisabled}
+        <button type="button" className="ln-insp-group-reset" disabled={styleResetDisabled}
           onClick={() => onUpdate(captionPreviewStyleResetPatch(captions, target))}>{t('Reset')}</button>
       </div>
-      <label className="cc-insp-mg-field">
+      <label className="ln-insp-mg-field">
         <span>{t('Fonts')}</span>
-        <select className="cc-insp-select cc-caption-font-select" value={target.preset.fontFamily}
+        <select className="ln-insp-select ln-caption-font-select" value={target.preset.fontFamily}
           onChange={(event) => patchStyle({ fontFamily: event.target.value })}>
           {FONT_CATALOG.map((font) => <option key={font.family} value={font.family}>{font.family}</option>)}
         </select>
@@ -173,7 +173,7 @@ export function CaptionInspectorControls({ selection, onUpdate }: CaptionInspect
         display={`${Math.round(boxBorderRadius)}px`} onChange={(value) => patchStyle({ boxBorderRadius: value })} />
       <RangeRow label={t('Border shadow')} value={boxShadowSize} min={0} max={48} step={1}
         display={`${Math.round(boxShadowSize)}px`} onChange={(value) => patchStyle({ boxShadowSize: value })} />
-      <div className="cc-insp-color-row cc-caption-color-row">
+      <div className="ln-insp-color-row ln-caption-color-row">
         <CaptionColorInput label={t('Text color')} value={textColor} fallback="#ffffff"
           onChange={(value) => patchStyle({ color: value, highlightColor: value })} />
         <CaptionColorInput label={t('Text outline')} value={target.preset.strokeColor} fallback="#000000"
@@ -181,7 +181,7 @@ export function CaptionInspectorControls({ selection, onUpdate }: CaptionInspect
         <CaptionColorInput label={t('Text shadow')} value={shadowColor(target.preset.textShadow)} fallback="#000000"
           onChange={(value) => patchStyle({ textShadow: withShadowColor(target.preset.textShadow, value) })} />
       </div>
-      <div className="cc-insp-color-row cc-caption-color-row">
+      <div className="ln-insp-color-row ln-caption-color-row">
         <CaptionColorInput label={t('Border color')} value={backgroundColor} fallback="#000000"
           onChange={(value) => patchStyle(target.preset.wholeLine ? { background: value } : { highlightBackground: value })} />
         <CaptionColorInput label={t('Border stroke')} value={boxBorderColor} fallback="#000000"
@@ -190,9 +190,9 @@ export function CaptionInspectorControls({ selection, onUpdate }: CaptionInspect
           onChange={(value) => patchStyle({ boxShadow: withShadowColor(boxShadow, value) })} />
       </div>
 
-      <div className="cc-insp-section">
+      <div className="ln-insp-section">
         <span>{t('Transform')}</span>
-        <button type="button" className="cc-insp-group-reset" disabled={transformResetDisabled}
+        <button type="button" className="ln-insp-group-reset" disabled={transformResetDisabled}
           onClick={() => onUpdate(captionPreviewLayoutResetPatch(captions, target))}>{t('Reset')}</button>
       </div>
       <RangeRow label={t('Zoom')} value={scale} min={0.25} max={4} step={0.01}

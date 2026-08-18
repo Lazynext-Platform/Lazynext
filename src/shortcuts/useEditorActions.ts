@@ -28,7 +28,7 @@ const timeline = (ref: RefObject<TimelineShortcutApi | null>) => ref.current;
 function previewCanvasHasKeyboardFocus(): boolean {
   if (typeof document === 'undefined') return false;
   const active = document.activeElement;
-  return active instanceof HTMLElement && !!active.closest('.cc-preview-transform-overlay');
+  return active instanceof HTMLElement && !!active.closest('.ln-preview-transform-overlay');
 }
 
 function nudgeSelectedPreview(deps: EditorActionDeps, direction: PreviewNudgeDirection): boolean {

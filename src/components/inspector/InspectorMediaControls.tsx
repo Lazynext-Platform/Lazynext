@@ -61,7 +61,7 @@ export function IsolateVoiceControl({
       <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
         <button
           type="button"
-          className="cc-insp-btn"
+          className="ln-insp-btn"
           disabled={busy || !canApply}
           title={!canApply ? t('Upload to the media pool first (/media/uploads)') : t('Local ffmpeg spectral denoise; original track kept')}
           style={{ flex: 1, fontSize: 11 }}
@@ -72,7 +72,7 @@ export function IsolateVoiceControl({
         {active && (
           <button
             type="button"
-            className="cc-insp-btn"
+            className="ln-insp-btn"
             disabled={busy}
             style={{ fontSize: 11 }}
             onClick={() => run('clear')}
@@ -81,13 +81,13 @@ export function IsolateVoiceControl({
           </button>
         )}
       </div>
-      <div className="cc-insp-muted" style={{ fontSize: 10, marginTop: 4 }}>
+      <div className="ln-insp-muted" style={{ fontSize: 10, marginTop: 4 }}>
         {active
           ? t('Applied · playback uses isolated audio · master unchanged')
           : t('Open-box ffmpeg denoise (not DeepFilterNet3)')}
       </div>
       {err && (
-        <div style={{ fontSize: 10, color: 'var(--cc-danger, #f66)', marginTop: 4 }}>{err}</div>
+        <div style={{ fontSize: 10, color: 'var(--ln-danger, #f66)', marginTop: 4 }}>{err}</div>
       )}
     </div>
   );
@@ -115,7 +115,7 @@ export function SpeedControl({ item, mixed, onChange }: { item: TimelineItem; mi
           <button
             key={s}
             type="button"
-            className="cc-insp-btn"
+            className="ln-insp-btn"
             style={{
               fontSize: 10,
               padding: '2px 6px',
@@ -128,7 +128,7 @@ export function SpeedControl({ item, mixed, onChange }: { item: TimelineItem; mi
           </button>
         ))}
       </div>
-      <div className="cc-insp-muted" style={{ fontSize: 10, marginTop: 4 }}>
+      <div className="ln-insp-muted" style={{ fontSize: 10, marginTop: 4 }}>
         {t('Pitch-preserving speed (preview/export) · duration scales with rate, ripples later clips')}
       </div>
     </div>
@@ -158,7 +158,7 @@ export function FadeControl({ item, mixed, fps, onChange }: { item: TimelineItem
     );
   };
   return (
-    <div className="cc-insp-stack">
+    <div className="ln-insp-stack">
       {row(t('Fade In'), item.fadeInFrames, 'fadeInFrames')}
       {row(t('Fade Out'), item.fadeOutFrames, 'fadeOutFrames')}
     </div>
@@ -223,10 +223,10 @@ export function ZoomControl({ zoom, mixed, onChange, getLocalFrame, fps, onSetKe
   const localFrame = getLocalFrame();
   const hasKeyframes = !!zoom?.reframeCurve?.keyframes.length;
   return (
-    <div className="cc-insp-stack">
-      <label className="cc-insp-row">
-        <span className="cc-insp-label">{t('Curve')}</span>
-        <select className="cc-insp-select" value={mixed?.shape ? '__mixed' : zoom?.shape ?? ''} onChange={(e) => {
+    <div className="ln-insp-stack">
+      <label className="ln-insp-row">
+        <span className="ln-insp-label">{t('Curve')}</span>
+        <select className="ln-insp-select" value={mixed?.shape ? '__mixed' : zoom?.shape ?? ''} onChange={(e) => {
           const v = e.target.value as ZoomShape | '';
           if (!v) onChange(null);
           else onChange({ shape: v });
@@ -247,16 +247,16 @@ export function ZoomControl({ zoom, mixed, onChange, getLocalFrame, fps, onSetKe
           <SliderRow label={t('Focal Y')} val={zoom.focalPointY ?? 0.5} min={0} max={1} step={0.01} fmt={`${compactNumber((zoom.focalPointY ?? 0.5) * 100)}%`} inputScale={100} mixed={mixed?.focalPointY}
             onReset={() => onChange({ focalPointY: 0.5, reframeCurve: undefined })} resetDisabled={!mixed?.focalPointY && !hasKeyframes && Math.abs((zoom.focalPointY ?? 0.5) - 0.5) < 1e-6}
             onChange={(v) => onChange({ focalPointY: v })} />
-          <div className="cc-insp-actions">
+          <div className="ln-insp-actions">
             <button
               type="button"
               onClick={() => onSetKeyframe(getLocalFrame(), zoom.focalPointX ?? 0.5, zoom.focalPointY ?? 0.5, zoom.magnification ?? 1.5)}
               title={t('Record focal point + magnification as a keyframe at the playhead')}
-              className="cc-insp-btn"
+              className="ln-insp-btn"
             >
               <Icon name="diamond" size={12} />{t('Keyframes')}
             </button>
-            <span className="cc-insp-muted">@ {(localFrame / fps).toFixed(2)}s</span>
+            <span className="ln-insp-muted">@ {(localFrame / fps).toFixed(2)}s</span>
           </div>
           {(zoom.reframeCurve?.keyframes.length ?? 0) > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>

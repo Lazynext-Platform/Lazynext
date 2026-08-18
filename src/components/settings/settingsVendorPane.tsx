@@ -390,7 +390,7 @@ interface TextInputProps {
 }
 
 function TextInput({ field, shown, reveal, configured, stagedClear, onStage }: TextInputProps) {
- const listId = field.kind === 'text' && field.options ? `cc-dl-${field.name}` : undefined;
+ const listId = field.kind === 'text' && field.options ? `ln-dl-${field.name}` : undefined;
  const displayValue = stagedClear ? shown : shown || field.defaultValue || '';
  return (
  <>
@@ -481,7 +481,7 @@ const input: React.CSSProperties = {
  font: 'inherit', fontSize: 12.5, background: theme.panelAlt, color: theme.text,
  border: `0.5px solid ${theme.border}`, borderRadius: 6, padding: '6px 9px', width: '100%', outline: 'none',
 };
-const select: React.CSSProperties = { ...input, cursor: 'pointer', colorScheme: 'var(--cc-color-scheme)' };
+const select: React.CSSProperties = { ...input, cursor: 'pointer', colorScheme: 'var(--ln-color-scheme)' };
 const sourceTag: React.CSSProperties = { fontSize: 10, color: theme.textDim, border: `0.5px solid ${theme.border}`, borderRadius: 4, padding: '0 5px' };
 const clearBtn: React.CSSProperties = {
  font: 'inherit', fontSize: 10.5, background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', flex: '0 0 auto', textDecoration: 'underline',

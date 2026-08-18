@@ -23,7 +23,7 @@ export function WorkflowPickerContent({
 
   return (
     <>
-      <div className="cc-creative-picker-head">
+      <div className="ln-creative-picker-head">
         <span><Icon name="wand" size={15} /></span>
         <div>
           <strong>{t('Choose a creative workflow')}</strong>
@@ -33,19 +33,19 @@ export function WorkflowPickerContent({
       <button
         type="button"
         onClick={() => { onCreativeModeChange(null); onClose(); }}
-        className="cc-creative-mode-row"
+        className="ln-creative-mode-row"
         data-active={!creativeMode}
         aria-pressed={!creativeMode}
       >
-        <span className="cc-creative-mode-icon"><Icon name="sparkles" size={15} /></span>
-        <span className="cc-creative-mode-copy">
+        <span className="ln-creative-mode-icon"><Icon name="sparkles" size={15} /></span>
+        <span className="ln-creative-mode-copy">
           <strong>{t('Freeform')}</strong>
           <small>{t('Work flexibly from the current goal without a fixed workflow.')}</small>
         </span>
-        {!creativeMode && <span className="cc-creative-mode-check"><Icon name="check" size={13} strokeWidth={2.4} /></span>}
+        {!creativeMode && <span className="ln-creative-mode-check"><Icon name="check" size={13} strokeWidth={2.4} /></span>}
       </button>
-      <div className="cc-creative-picker-section">{t('Specialized workflows')}</div>
-      <div className="cc-creative-mode-grid">
+      <div className="ln-creative-picker-section">{t('Specialized workflows')}</div>
+      <div className="ln-creative-mode-grid">
         {allCreativeSkills().map((skill) => (
           <button
             type="button"
@@ -57,20 +57,20 @@ export function WorkflowPickerContent({
               onRequestFocus();
               onClose();
             }}
-            className="cc-creative-mode-row cc-creative-mode-card"
+            className="ln-creative-mode-row ln-creative-mode-card"
             data-active={creativeMode === skill.id}
             aria-pressed={creativeMode === skill.id}
             title={t(skill.summary)}
           >
-            <span className="cc-creative-mode-icon"><Icon name="wand" size={15} /></span>
-            <span className="cc-creative-mode-copy">
-              <span className="cc-creative-mode-title">
+            <span className="ln-creative-mode-icon"><Icon name="wand" size={15} /></span>
+            <span className="ln-creative-mode-copy">
+              <span className="ln-creative-mode-title">
                 <strong>{skillName(skill)}</strong>
                 {!builtinIds.has(skill.id) && <em>{t('Custom')}</em>}
               </span>
               <small>{t(skill.summary)}</small>
             </span>
-            {creativeMode === skill.id && <span className="cc-creative-mode-check"><Icon name="check" size={13} strokeWidth={2.4} /></span>}
+            {creativeMode === skill.id && <span className="ln-creative-mode-check"><Icon name="check" size={13} strokeWidth={2.4} /></span>}
           </button>
         ))}
       </div>

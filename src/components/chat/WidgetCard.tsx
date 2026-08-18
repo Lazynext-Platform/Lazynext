@@ -14,7 +14,7 @@ function MediaPreview({ media, aspectRatio, forceAudio = false, label }: { media
   const safeMedia = safeWidgetMediaUrl(media);
   if (!safeMedia || broken) return null;
   if (forceAudio || isAudioUrl(safeMedia)) {
-    return <audio controls src={safeMedia} aria-label={label} onError={() => setBroken(true)} className="cc-widget-media-audio" />;
+    return <audio controls src={safeMedia} aria-label={label} onError={() => setBroken(true)} className="ln-widget-media-audio" />;
   }
   if (isImageUrl(safeMedia)) {
     return (
@@ -22,7 +22,7 @@ function MediaPreview({ media, aspectRatio, forceAudio = false, label }: { media
         src={safeMedia}
         alt=""
         onError={() => setBroken(true)}
-        className="cc-widget-media-img"
+        className="ln-widget-media-img"
         style={{ aspectRatio: aspectRatio?.replace(':', ' / ') }}
       />
     );
@@ -87,23 +87,23 @@ export function WidgetCard({ fields, title, submitLabel, messagePrefix, persiste
   };
 
   return (
-    <div className={`cc-widget${submitted ? ' submitted' : ''}`}>
-      {title ? <h3 className="cc-widget-title">{title}</h3> : null}
-      <div className="cc-widget-body">
+    <div className={`ln-widget${submitted ? ' submitted' : ''}`}>
+      {title ? <h3 className="ln-widget-title">{title}</h3> : null}
+      <div className="ln-widget-body">
         {fields.map((f, fi) => (
-          <section key={f.id} className={`cc-widget-field${fi === 0 ? ' first' : ''}`}>
-            <header className="cc-widget-field-head">
-              <h4 className="cc-widget-label">{f.label}</h4>
-              {f.required ? <span className="cc-widget-req">{t('Required')}</span> : <span className="cc-widget-opt">{t('Optional')}</span>}
+          <section key={f.id} className={`ln-widget-field${fi === 0 ? ' first' : ''}`}>
+            <header className="ln-widget-field-head">
+              <h4 className="ln-widget-label">{f.label}</h4>
+              {f.required ? <span className="ln-widget-req">{t('Required')}</span> : <span className="ln-widget-opt">{t('Optional')}</span>}
             </header>
-            {f.description ? <p className="cc-widget-description">{f.description}</p> : null}
+            {f.description ? <p className="ln-widget-description">{f.description}</p> : null}
 
             {f.kind === 'single' && (
-              <div className="cc-widget-options" role="radiogroup" aria-label={f.label}>
+              <div className="ln-widget-options" role="radiogroup" aria-label={f.label}>
                 {f.options.map((o) => {
                   const on = !otherFields[f.id] && values[f.id] === o.value;
                   return (
-                    <label key={o.value} className={`cc-widget-option${on ? ' on' : ''}${submitted ? ' disabled' : ''}`}>
+                    <label key={o.value} className={`ln-widget-option${on ? ' on' : ''}${submitted ? ' disabled' : ''}`}>
                       <input
                         type="radio"
                         name={f.id}
@@ -111,13 +111,13 @@ export function WidgetCard({ fields, title, submitLabel, messagePrefix, persiste
                         checked={on}
                         onChange={() => selectSingle(f.id, o.value)}
                       />
-                      <span className="cc-widget-radio" aria-hidden />
-                      <span className="cc-widget-option-text">{o.display}</span>
+                      <span className="ln-widget-radio" aria-hidden />
+                      <span className="ln-widget-option-text">{o.display}</span>
                     </label>
                   );
                 })}
                 {f.allowOther && (
-                  <label className={`cc-widget-option cc-widget-other${otherFields[f.id] ? ' on' : ''}${submitted ? ' disabled' : ''}`}>
+                  <label className={`ln-widget-option ln-widget-other${otherFields[f.id] ? ' on' : ''}${submitted ? ' disabled' : ''}`}>
                     <input
                       type="radio"
                       name={f.id}
@@ -125,12 +125,12 @@ export function WidgetCard({ fields, title, submitLabel, messagePrefix, persiste
                       checked={!!otherFields[f.id]}
                       onChange={() => selectOther(f.id)}
                     />
-                    <span className="cc-widget-radio" aria-hidden />
-                    <span className="cc-widget-option-text">{t('Other…')}</span>
+                    <span className="ln-widget-radio" aria-hidden />
+                    <span className="ln-widget-option-text">{t('Other…')}</span>
                     {otherFields[f.id] && (
                       <input
                         type="text"
-                        className="cc-widget-other-input"
+                        className="ln-widget-other-input"
                         disabled={submitted}
                         autoFocus
                         value={typeof values[f.id] === 'string' ? (values[f.id] as string) : ''}
@@ -145,19 +145,19 @@ export function WidgetCard({ fields, title, submitLabel, messagePrefix, persiste
             )}
 
             {f.kind === 'multi' && (
-              <div className="cc-widget-options" role="group" aria-label={f.label}>
+              <div className="ln-widget-options" role="group" aria-label={f.label}>
                 {f.options.map((o) => {
                   const checked = Array.isArray(values[f.id]) && (values[f.id] as string[]).includes(o.value);
                   return (
-                    <label key={o.value} className={`cc-widget-option${checked ? ' on' : ''}${submitted ? ' disabled' : ''}`}>
+                    <label key={o.value} className={`ln-widget-option${checked ? ' on' : ''}${submitted ? ' disabled' : ''}`}>
                       <input
                         type="checkbox"
                         disabled={submitted}
                         checked={checked}
                         onChange={() => toggleMulti(f.id, o.value)}
                       />
-                      <span className="cc-widget-check" aria-hidden />
-                      <span className="cc-widget-option-text">{o.display}</span>
+                      <span className="ln-widget-check" aria-hidden />
+                      <span className="ln-widget-option-text">{o.display}</span>
                     </label>
                   );
                 })}
@@ -166,7 +166,7 @@ export function WidgetCard({ fields, title, submitLabel, messagePrefix, persiste
 
             {f.kind === 'text' && (
               <textarea
-                className="cc-widget-text-input"
+                className="ln-widget-text-input"
                 aria-label={f.label}
                 disabled={submitted}
                 value={typeof values[f.id] === 'string' ? values[f.id] as string : ''}
@@ -177,7 +177,7 @@ export function WidgetCard({ fields, title, submitLabel, messagePrefix, persiste
             )}
 
             {(f.kind === 'visual' || f.kind === 'voice' || f.kind === 'scenario') && (
-              <div className="cc-widget-visuals" role={f.multiple ? 'group' : 'radiogroup'} aria-label={f.label}>
+              <div className="ln-widget-visuals" role={f.multiple ? 'group' : 'radiogroup'} aria-label={f.label}>
                 {f.options.map((o) => {
                   const on = f.multiple
                     ? Array.isArray(values[f.id]) && (values[f.id] as string[]).includes(o.value)
@@ -189,35 +189,35 @@ export function WidgetCard({ fields, title, submitLabel, messagePrefix, persiste
                       role={f.multiple ? 'checkbox' : 'radio'}
                       aria-checked={on}
                       disabled={submitted}
-                      className={`cc-widget-visual cc-widget-${f.kind}${on ? ' on' : ''}`}
+                      className={`ln-widget-visual ln-widget-${f.kind}${on ? ' on' : ''}`}
                       onClick={() => selectRich(f, o.value)}
                     >
-                      <span className="cc-widget-radio" aria-hidden />
-                      <span className="cc-widget-visual-body">
-                        <span className="cc-widget-visual-name">{o.name}</span>
-                        {o.description ? <span className="cc-widget-visual-summary">{o.description}</span> : null}
+                      <span className="ln-widget-radio" aria-hidden />
+                      <span className="ln-widget-visual-body">
+                        <span className="ln-widget-visual-name">{o.name}</span>
+                        {o.description ? <span className="ln-widget-visual-summary">{o.description}</span> : null}
                         <MediaPreview media={o.media} aspectRatio={o.aspectRatio} forceAudio={f.kind === 'voice'} label={o.name} />
                       </span>
                     </button>
                   );
                 })}
                 {!f.multiple && f.allowOther && (
-                  <div className={`cc-widget-visual cc-widget-other${otherFields[f.id] ? ' on' : ''}`}>
+                  <div className={`ln-widget-visual ln-widget-other${otherFields[f.id] ? ' on' : ''}`}>
                     <button
                       type="button"
                       role="radio"
                       aria-checked={!!otherFields[f.id]}
                       disabled={submitted}
-                      className="cc-widget-other-button"
+                      className="ln-widget-other-button"
                       onClick={() => selectOther(f.id)}
                     >
-                      <span className="cc-widget-radio" aria-hidden />
-                      <span className="cc-widget-visual-name">{t('Other…')}</span>
+                      <span className="ln-widget-radio" aria-hidden />
+                      <span className="ln-widget-visual-name">{t('Other…')}</span>
                     </button>
                     {otherFields[f.id] && (
                       <input
                         type="text"
-                        className="cc-widget-other-input"
+                        className="ln-widget-other-input"
                         disabled={submitted}
                         autoFocus
                         value={typeof values[f.id] === 'string' ? values[f.id] as string : ''}
@@ -233,18 +233,18 @@ export function WidgetCard({ fields, title, submitLabel, messagePrefix, persiste
         ))}
       </div>
 
-      <footer className="cc-widget-foot" aria-live="polite">
+      <footer className="ln-widget-foot" aria-live="polite">
         {submitted ? (
-          <span className="cc-widget-done">
-            <span className="cc-widget-done-dot" />
+          <span className="ln-widget-done">
+            <span className="ln-widget-done-dot" />
             {t('Submitted')}
           </span>
         ) : (
-          <span className="cc-widget-hint">{t('Choose and submit — the Agent continues with your picks')}</span>
+          <span className="ln-widget-hint">{t('Choose and submit — the Agent continues with your picks')}</span>
         )}
         <button
           type="button"
-          className="cc-widget-submit"
+          className="ln-widget-submit"
           onClick={handleSubmit}
           disabled={!canSubmit}
         >

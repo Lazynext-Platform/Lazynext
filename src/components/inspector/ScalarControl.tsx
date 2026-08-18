@@ -70,7 +70,7 @@ export function ScalarControl({
         ref={inputRef}
         aria-label={ariaLabel}
         autoFocus
-        className="cc-insp-number"
+        className="ln-insp-number"
         max={max * inputScale}
         min={min * inputScale}
         step={step * inputScale}
@@ -114,7 +114,7 @@ export function ScalarControl({
   return (
     <button
       aria-label={ariaLabel}
-      className="cc-insp-scalar"
+      className="ln-insp-scalar"
       disabled={disabled}
       title={title}
       type="button"

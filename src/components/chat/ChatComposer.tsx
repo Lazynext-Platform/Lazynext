@@ -334,8 +334,8 @@ export function ChatComposer(props: ChatComposerProps) {
 
  return (
  <div
- className="cc-chat-composer"
- data-cc-shortcut-surface="agent-input"
+ className="ln-chat-composer"
+ data-ln-shortcut-surface="agent-input"
  data-editor-drag-over={editorDragOver ? 'true' : undefined}
  onDragEnter={(event) => {
  if (!hasEditorDrag(event) && !hasExternalFiles(event.dataTransfer)) return;
@@ -384,7 +384,7 @@ export function ChatComposer(props: ChatComposerProps) {
  >
  {/* top edge drag handle pull up to expand, down to shrink */}
  <div
- className="cc-chat-composer-resize"
+ className="ln-chat-composer-resize"
  role="separator"
  aria-orientation="horizontal"
  aria-label={t('Drag to resize the composer')}
@@ -394,7 +394,7 @@ export function ChatComposer(props: ChatComposerProps) {
  onPointerUp={onResizePointerUp}
  onPointerCancel={onResizePointerUp}
  >
- <span className="cc-chat-composer-resize-grip" aria-hidden />
+ <span className="ln-chat-composer-resize-grip" aria-hidden />
  </div>
  {activeSkill && (
  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 4 }} title={t('Current creative workflow, sent with the message')}>
@@ -449,7 +449,7 @@ export function ChatComposer(props: ChatComposerProps) {
  )}
  {(attachmentsPending || pasteError) && (
  <div
- id="cc-chat-composer-import-status"
+ id="ln-chat-composer-import-status"
  role="status"
  aria-live="polite"
  style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, fontSize: 11.5 }}
@@ -474,7 +474,7 @@ export function ChatComposer(props: ChatComposerProps) {
  )}
  <textarea
  ref={taRef}
- data-cc-chat-composer
+ data-ln-chat-composer
  value={value}
  onChange={(e) => onChange(e.target.value)}
  onKeyDown={(event) => {
@@ -538,7 +538,7 @@ export function ChatComposer(props: ChatComposerProps) {
  if (files.length > 0 && onPasteFiles) { e.preventDefault(); onPasteFiles(files); }
  }}
  placeholder={placeholder ?? t('Tell the AI what to change @ to reference assets')}
- aria-describedby={attachmentsPending ? 'cc-chat-composer-import-status' : undefined}
+ aria-describedby={attachmentsPending ? 'ln-chat-composer-import-status' : undefined}
  rows={1}
  style={{
  flex: 1, width: '100%', minHeight: 28, minWidth: 0, resize: 'none',
@@ -582,7 +582,7 @@ export function ChatComposer(props: ChatComposerProps) {
  {pop === 'skill' && (
  <ComposerPopover
  width={WORKFLOW_POPOVER_WIDTH}
- className="cc-chat-popover--workflow"
+ className="ln-chat-popover--workflow"
  ariaLabel={t('Choose a creative workflow')}
  anchor={popAnchor}
  onClose={closePop}
@@ -603,7 +603,7 @@ export function ChatComposer(props: ChatComposerProps) {
  {slashOpen && slashMatchQuery !== null && (
  <ComposerPopover
  width={WORKFLOW_POPOVER_WIDTH}
- className="cc-chat-popover--workflow"
+ className="ln-chat-popover--workflow"
  ariaLabel={t('Skill command completion')}
  anchor={taRef.current}
  onClose={() => { setSlashOpen(false); setSlashIndex(-1); }}

@@ -2,7 +2,7 @@
 // ① remotion serve bundle:uploads symlink to be written into the bundle directory → copy to according to version
 // userData (first startup, the old version directory will be cleared easily);
 // ② chrome-headless-shell: distributed with the package, find the executable file path to render.mjs.
-// Both are passed through environment variables (CC_REMOTION_BUNDLE / CC_BROWSER_EXECUTABLE), dev does not set the old behavior.
+// Both are passed through environment variables (LAZYNEXT_REMOTION_BUNDLE / LAZYNEXT_BROWSER_EXECUTABLE), dev does not set the old behavior.
 import { existsSync, readdirSync, statSync } from 'node:fs';
 import { cp, rm } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -46,7 +46,7 @@ export async function ensureWritableBundle({ resourcesPath, userDataPath, versio
 
 /** One-stop packaged state: set two environment variables. It must be adjusted before the first rendering request (boot adjustment).*/
 export async function preparePackagedRuntime(paths: PackagedPaths): Promise<void> {
-  process.env.CC_REMOTION_BUNDLE = await ensureWritableBundle(paths);
+  process.env.LAZYNEXT_REMOTION_BUNDLE = await ensureWritableBundle(paths);
   const browser = findBundledBrowser(join(paths.resourcesPath, 'chrome-headless-shell'));
-  if (browser) process.env.CC_BROWSER_EXECUTABLE = browser;
+  if (browser) process.env.LAZYNEXT_BROWSER_EXECUTABLE = browser;
 }

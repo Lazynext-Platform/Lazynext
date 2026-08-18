@@ -20,28 +20,28 @@ export function AssetMenuDestinations({
   };
 
   return (
-    <div className="cc-asset-menu-destinations">
+    <div className="ln-asset-menu-destinations">
       <span>{t('Add to:')}</span>
-      <div className="cc-asset-menu-destination-buttons">
+      <div className="ln-asset-menu-destination-buttons">
         <button
           type="button"
-          className="cc-media-menu-item"
+          className="ln-media-menu-item"
           role="menuitem"
           aria-label={t('Add {name} to AI chat', { name: assetName })}
           onClick={() => runAssetDestinationAction('chat', actions)}
         >
-          <span className="cc-media-menu-item-icon" aria-hidden="true"><Icon name="sparkles" size={15} /></span>
-          <span className="cc-media-menu-item-label">{t('AI chat')}</span>
+          <span className="ln-media-menu-item-icon" aria-hidden="true"><Icon name="sparkles" size={15} /></span>
+          <span className="ln-media-menu-item-label">{t('AI chat')}</span>
         </button>
         <button
           type="button"
-          className="cc-media-menu-item"
+          className="ln-media-menu-item"
           role="menuitem"
           aria-label={t('Add {name} to timeline', { name: assetName })}
           onClick={() => runAssetDestinationAction('timeline', actions)}
         >
-          <span className="cc-media-menu-item-icon" aria-hidden="true"><Icon name="film" size={15} /></span>
-          <span className="cc-media-menu-item-label">{t('Timeline')}</span>
+          <span className="ln-media-menu-item-icon" aria-hidden="true"><Icon name="film" size={15} /></span>
+          <span className="ln-media-menu-item-label">{t('Timeline')}</span>
         </button>
       </div>
     </div>

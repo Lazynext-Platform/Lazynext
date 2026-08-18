@@ -45,7 +45,7 @@ function renderLibrary(props: EditorWorkspaceViewProps) {
 
 function renderPreview(props: EditorWorkspaceViewProps) {
   return (
-    <div className="cc-preview-workspace" style={{ gridColumn: 5, gridRow: 2 }}>
+    <div className="ln-preview-workspace" style={{ gridColumn: 5, gridRow: 2 }}>
       <PreviewPanel {...props.previewPanel} />
       {props.inspectorPanel && <InspectorPanel {...props.inspectorPanel} />}
     </div>
@@ -64,7 +64,7 @@ function renderTimeline(props: EditorWorkspaceViewProps) {
 export function EditorWorkspaceView(props: EditorWorkspaceViewProps) {
   return (
     <div
-      className="cc-editor-shell"
+      className="ln-editor-shell"
       style={{
         display: 'grid',
         gridTemplateColumns: props.gridTemplateColumns,

@@ -56,19 +56,19 @@ function normalizeH264Profile(codec, profile) {
 let bundlePromise;
 
 // Desktop packaging version: There is no src/ source code and webpack at runtime, and the serve bundle is pre-packaged during the packaging period.
-// Point in via CC_REMOTION_BUNDLE at startup (writable directory - uploads symlink needs to be written in);
-// Headless browser equivalent CC_BROWSER_EXECUTABLE points to the chrome-headless-shell distributed with the package
+// Point in via LAZYNEXT_REMOTION_BUNDLE at startup (writable directory - uploads symlink needs to be written in);
+// Headless browser equivalent LAZYNEXT_BROWSER_EXECUTABLE points to the chrome-headless-shell distributed with the package
 // (Default undefined = Remotion self-seeking/self-downloading, dev behavior remains unchanged).
 /** Renderer GL backend. Default angle (Metal on macOS, D3D on Windows);
- *  Linux prefers angle-egl (works without X11). CC_RENDER_GL overrides for
+ *  Linux prefers angle-egl (works without X11). LAZYNEXT_RENDER_GL overrides for
  *  diagnosis or GPU-less machines ('swangle' forces software). */
 const RENDER_GL_OVERRIDES = new Set(['angle', 'angle-egl', 'egl', 'vulkan', 'swangle', 'null']);
 function resolveRenderGlBackend() {
-  const override = process.env.CC_RENDER_GL;
+  const override = process.env.LAZYNEXT_RENDER_GL;
   if (override && RENDER_GL_OVERRIDES.has(override)) return override;
   return process.platform === 'linux' ? 'angle-egl' : 'angle';
 }
-const browserExecutable = () => process.env.CC_BROWSER_EXECUTABLE || undefined;
+const browserExecutable = () => process.env.LAZYNEXT_BROWSER_EXECUTABLE || undefined;
 
 export function currentRenderConcurrency() {
   return resolveRenderConcurrency();
@@ -400,7 +400,7 @@ let uploadsLive = false;
 // uploads still render, at the old per-render copy cost.
 async function getServeUrl() {
   if (!bundlePromise) {
-    const prebuilt = process.env.CC_REMOTION_BUNDLE;
+    const prebuilt = process.env.LAZYNEXT_REMOTION_BUNDLE;
     bundlePromise = prebuilt
       ? relinkUploads(prebuilt).then(() => prebuilt)  // Pre-bundle: skip webpack and only take over uploads
       : buildServeUrl();

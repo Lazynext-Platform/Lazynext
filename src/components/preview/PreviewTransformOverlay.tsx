@@ -395,16 +395,16 @@ export function PreviewTransformOverlay({
 
   const edgeMidpoints = selection ? previewEdgeMidpoints(selection.corners) : null;
   const edgeHandles: Array<{ edge: PreviewScaleEdge; label: string; className: string }> = [
-    { edge: 'n', label: t('Crop top edge (drag in to cover the top)'), className: 'cc-preview-transform-crop-n' },
-    { edge: 's', label: t('Crop bottom edge (drag in to cover the bottom)'), className: 'cc-preview-transform-crop-s' },
-    { edge: 'e', label: t('Crop right edge (drag in to cover the right side)'), className: 'cc-preview-transform-crop-e' },
-    { edge: 'w', label: t('Crop left edge (drag in to cover the left side)'), className: 'cc-preview-transform-crop-w' },
+    { edge: 'n', label: t('Crop top edge (drag in to cover the top)'), className: 'ln-preview-transform-crop-n' },
+    { edge: 's', label: t('Crop bottom edge (drag in to cover the bottom)'), className: 'ln-preview-transform-crop-s' },
+    { edge: 'e', label: t('Crop right edge (drag in to cover the right side)'), className: 'ln-preview-transform-crop-e' },
+    { edge: 'w', label: t('Crop left edge (drag in to cover the left side)'), className: 'ln-preview-transform-crop-w' },
   ];
 
   return (
     <div
       ref={rootRef}
-      className="cc-preview-transform-overlay"
+      className="ln-preview-transform-overlay"
       role="group"
       aria-label={t('Preview canvas clip transform')}
       tabIndex={0}
@@ -417,7 +417,7 @@ export function PreviewTransformOverlay({
       {selection && rotateHandle && (
         <>
           <svg
-            className="cc-preview-transform-outline"
+            className="ln-preview-transform-outline"
             viewBox={`0 0 ${state.width} ${state.height}`}
             preserveAspectRatio="none"
             aria-hidden="true"
@@ -426,7 +426,7 @@ export function PreviewTransformOverlay({
               data-preview-selection={selectedCandidate!.item.id}
               points={selection.corners.map((point) => `${point.x},${point.y}`).join(' ')}
               fill="none"
-              stroke="var(--cc-accent)"
+              stroke="var(--ln-accent)"
               strokeWidth="1.5"
               vectorEffect="non-scaling-stroke"
             />
@@ -435,7 +435,7 @@ export function PreviewTransformOverlay({
               y1={rotateHandle.stem.y}
               x2={rotateHandle.handle.x}
               y2={rotateHandle.handle.y}
-              stroke="var(--cc-accent)"
+              stroke="var(--ln-accent)"
               strokeWidth="1.5"
               vectorEffect="non-scaling-stroke"
             />
@@ -444,7 +444,7 @@ export function PreviewTransformOverlay({
             <button
               key={index}
               type="button"
-              className={`cc-preview-transform-handle cc-preview-transform-scale cc-preview-transform-scale-${index}`}
+              className={`ln-preview-transform-handle ln-preview-transform-scale ln-preview-transform-scale-${index}`}
               data-preview-handle={`scale-${index}`}
               aria-label={t('Scale clip proportionally from corner {n}', { n: index + 1 })}
               style={percentPosition(point)}
@@ -454,7 +454,7 @@ export function PreviewTransformOverlay({
             <button
               key={edge}
               type="button"
-              className={`cc-preview-transform-handle cc-preview-transform-crop ${className}`}
+              className={`ln-preview-transform-handle ln-preview-transform-crop ${className}`}
               data-preview-handle={`crop-${edge}`}
               aria-label={label}
               style={percentPosition(edgeMidpoints[edge])}
@@ -462,7 +462,7 @@ export function PreviewTransformOverlay({
           ))}
           <button
             type="button"
-            className="cc-preview-transform-handle cc-preview-transform-rotate"
+            className="ln-preview-transform-handle ln-preview-transform-rotate"
             data-preview-handle="rotate"
             aria-label={t('Rotate clip')}
             style={percentPosition(rotateHandle.handle)}

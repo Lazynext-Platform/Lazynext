@@ -10,7 +10,7 @@ const grid = readFileSync(new URL('./MediaPoolGrid.tsx', import.meta.url), 'utf8
 
 assert.match(card, /onContextMenu/, 'ok');
 assert.match(card, /onOpenMenu/, 'ok');
-assert.match(card, /cc-folder-more/, ' ⋯ ');
+assert.match(card, /ln-folder-more/, ' ⋯ ');
 assert.match(overlays, /export function FolderMenuPortal/, ' portal');
 assert.match(overlays, /FolderMenuPortal/, 'ok');
 assert.match(menus, /FolderMenuPortal/, 'domain-local media menus must mount the folder portal');

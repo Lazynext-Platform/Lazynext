@@ -82,7 +82,7 @@ export function BlankMediaMenuPortal(props: BlankMediaMenuActionsProps & { posit
     return () => document.removeEventListener('pointerdown', closeOutside, true);
   }, [onClose]);
   return createPortal(
-    <div ref={menuRef} className="cc-media-popover cc-media-blank-menu" style={props.position} role="menu" aria-label={t('Media pool background menu')} onClick={(event) => event.stopPropagation()}>
+    <div ref={menuRef} className="ln-media-popover ln-media-blank-menu" style={props.position} role="menu" aria-label={t('Media pool background menu')} onClick={(event) => event.stopPropagation()}>
       <BlankMediaMenuActions {...props} />
     </div>,
     document.body,
@@ -117,7 +117,7 @@ export function AssetMenuPortal(props: AssetMenuPortalProps) {
   return createPortal(
       <div
         ref={menuRef}
-        className="cc-media-popover cc-asset-menu-portal"
+        className="ln-media-popover ln-asset-menu-portal"
         style={props.position}
         role="menu"
         aria-label={t('Manage {name}', { name: props.asset.name })}
@@ -152,7 +152,7 @@ export function FolderMenuPortal(props: FolderMenuPortalProps) {
   return createPortal(
     <div
       ref={menuRef}
-      className="cc-media-popover cc-asset-menu-portal"
+      className="ln-media-popover ln-asset-menu-portal"
       style={position}
       role="menu"
       aria-label={t('Manage folder {name}', { name: folder.name })}
@@ -189,7 +189,7 @@ function AssetMenuActions(props: AssetMenuPortalProps & { asset: MediaAsset }) {
       <button type="button" onClick={props.onRename}>{t('Rename')}</button>
       {props.canRelink && asset.kind !== 'motion-graphic' && <button type="button" onClick={props.onRelink}>{t('Relink file')}</button>}
       {props.canRemove && <button type="button" className="danger" onClick={props.onRemove}>{props.confirmDelete ? t('Confirm Delete') : t('Delete')}</button>}
-      <label className="cc-asset-menu-move">
+      <label className="ln-asset-menu-move">
         <span>{t('Move to')}</span>
         <select aria-label={t('Move {name}', { name: asset.name })} value={asset.folderId ?? ''} onChange={(event) => props.onMove(event.target.value || undefined)}>
           <option value="">Master</option>
@@ -205,7 +205,7 @@ export function MissingMediaBanner({ count, onOpen }: { count: number; onOpen: (
   const t = useT();
   if (count === 0) return null;
   return (
-    <div className="cc-media-missing-banner" style={{
+    <div className="ln-media-missing-banner" style={{
       display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
       margin: '0 10px 8px', padding: '8px 10px', borderRadius: 4,
       background: theme.panelAlt, border: `0.5px solid ${theme.border}`,
@@ -239,8 +239,8 @@ export function RelinkAllDialog(props: RelinkAllDialogProps) {
   const t = useT();
   if (!props.open) return null;
   return (
-    <div className="cc-modal-backdrop" role="dialog" aria-modal="true" aria-label={t('Relink Offline Media')} onClick={props.onClose}>
-      <div className="cc-modal" style={{ width: 'min(420px, 92vw)', maxHeight: '70vh', overflow: 'auto' }} onClick={(event) => event.stopPropagation()}>
+    <div className="ln-modal-backdrop" role="dialog" aria-modal="true" aria-label={t('Relink Offline Media')} onClick={props.onClose}>
+      <div className="ln-modal" style={{ width: 'min(420px, 92vw)', maxHeight: '70vh', overflow: 'auto' }} onClick={(event) => event.stopPropagation()}>
         <strong>{t('Relink Offline Media')}</strong>
         <p style={{ margin: '8px 0 12px', fontSize: 12, color: theme.textMuted, lineHeight: 1.45 }}>{t('Files in this project were moved or renamed. Pick a folder to batch-relink by filename, or relink each asset below.')}</p>
         <input

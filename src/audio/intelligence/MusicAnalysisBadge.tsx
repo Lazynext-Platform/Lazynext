@@ -88,7 +88,7 @@ function TimingPointList({ label, points }: { label: string; points: readonly nu
   const shown = points.slice(0, TIMING_POINT_PREVIEW_LIMIT);
   const remaining = points.length - shown.length;
   return (
-    <div className="cc-music-analysis-timing-row">
+    <div className="ln-music-analysis-timing-row">
       <b>{label}</b>
       <p>{shown.length ? shown.map(preciseTimeLabel).join(' · ') : '—'}</p>
       {remaining > 0 && <small>{t('{count} more timestamps', { count: remaining })}</small>}
@@ -99,7 +99,7 @@ function TimingPointList({ label, points }: { label: string; points: readonly nu
 function RhythmDetails({ analysis }: { analysis: MusicAnalysis }) {
   const t = useT();
   return (
-    <details className="cc-music-analysis-rhythm">
+    <details className="ln-music-analysis-rhythm">
       <summary><span>{t('Rhythm details')}</span><small>{t('{beats} beats · {downbeats} downbeats', {
         beats: analysis.beatsMs.length,
         downbeats: analysis.downbeatsMs.length,
@@ -179,7 +179,7 @@ function usePopoverDismiss(
     document.addEventListener('pointerdown', onPointer);
     document.addEventListener('focusin', onFocus);
     window.addEventListener('keydown', onKey);
-    panelRef.current?.querySelector<HTMLButtonElement>('.cc-music-analysis-close')?.focus();
+    panelRef.current?.querySelector<HTMLButtonElement>('.ln-music-analysis-close')?.focus();
     return () => {
       document.removeEventListener('pointerdown', onPointer);
       document.removeEventListener('focusin', onFocus);
@@ -212,7 +212,7 @@ export function MusicAnalysisBadge({ asset, state }: MusicAnalysisBadgeProps) {
         draggable={false}
         data-music-analysis-control
         data-state={state.state}
-        className="cc-music-analysis-trigger"
+        className="ln-music-analysis-trigger"
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-label={t('Music analysis: {name}, {status}', { name: asset.name, status: text })}
@@ -227,7 +227,7 @@ export function MusicAnalysisBadge({ asset, state }: MusicAnalysisBadgeProps) {
         onContextMenu={(event) => { event.preventDefault(); stopCardInteraction(event); }}
         onDragStart={(event) => { event.preventDefault(); event.stopPropagation(); }}
       >
-        <span className="cc-music-analysis-dot" aria-hidden="true" />
+        <span className="ln-music-analysis-dot" aria-hidden="true" />
         <span aria-live="polite">{text}</span>
       </button>
       {open && typeof document !== 'undefined' && createPortal(
@@ -253,7 +253,7 @@ function MusicAnalysisPopover({ asset, state, panelRef, position, onClose }: Mus
       ref={panelRef}
       role="dialog"
       aria-label={t('Music analysis for {name}', { name: asset.name })}
-      className="cc-music-analysis-popover"
+      className="ln-music-analysis-popover"
       style={position}
       onDragStart={(event) => {
         event.preventDefault();
@@ -272,13 +272,13 @@ function MusicAnalysisPopover({ asset, state, panelRef, position, onClose }: Mus
         }
       }}
     >
-      <header className="cc-music-analysis-head">
-        <div className="cc-music-analysis-title"><strong>{t('Music analysis')}</strong><span title={asset.name}>{asset.name}</span></div>
-        <button type="button" className="cc-music-analysis-close" aria-label={t('Close')} onClick={onClose}><Icon name="x" size={15} /></button>
+      <header className="ln-music-analysis-head">
+        <div className="ln-music-analysis-title"><strong>{t('Music analysis')}</strong><span title={asset.name}>{asset.name}</span></div>
+        <button type="button" className="ln-music-analysis-close" aria-label={t('Close')} onClick={onClose}><Icon name="x" size={15} /></button>
       </header>
       <AnalysisContent state={state} />
       {state.state === 'ready' && state.modelPacksAvailable === false && (
-        <p className="cc-music-analysis-state">{t('Showing the cached result. Install the model packs before analyzing again.')}</p>
+        <p className="ln-music-analysis-state">{t('Showing the cached result. Install the model packs before analyzing again.')}</p>
       )}
       <AnalysisAction asset={asset} state={state} />
     </div>
@@ -298,47 +298,47 @@ function AnalysisAction({ asset, state }: { asset: MediaAsset; state: MusicAnaly
     if (state.state === 'error' || state.state === 'ready') void refreshMusicAnalysis(asset);
     else void enqueueMusicAnalysis(asset);
   };
-  return <div className="cc-music-analysis-actions"><button type="button" className="cc-music-analysis-action" disabled={!canAnalyze} onClick={run}>{label}</button></div>;
+  return <div className="ln-music-analysis-actions"><button type="button" className="ln-music-analysis-action" disabled={!canAnalyze} onClick={run}>{label}</button></div>;
 }
 
 function AnalysisContent({ state }: { state: MusicAnalysisCardState }) {
   const t = useT();
   if (state.state === 'ready') return <ReadyAnalysis analysis={state.analysis} />;
-  if (state.state === 'running') return <p className="cc-music-analysis-state">{phaseLabel(state.phase, t)} · {Math.round(state.progress * 100)}%<progress className="cc-music-analysis-progress" max={1} value={state.progress} /></p>;
-  if (state.state === 'queued') return <p className="cc-music-analysis-state">{t('Added to the local analysis queue.')}</p>;
-  if (state.state === 'error') return <p className="cc-music-analysis-state error">{t('Analysis failed: {message}', { message: state.message })}</p>;
-  if (state.state === 'unavailable') return <p className="cc-music-analysis-state">{t('The required model packs are not installed. Download the rhythm and music semantics models separately in Local AI settings; this control never downloads them automatically.')}</p>;
-  if (state.state === 'checking') return <p className="cc-music-analysis-state">{t('Checking local models…')}</p>;
-  return <p className="cc-music-analysis-state">{t('Analyze rhythm, structure, and music meaning on this device. Audio is never uploaded.')}</p>;
+  if (state.state === 'running') return <p className="ln-music-analysis-state">{phaseLabel(state.phase, t)} · {Math.round(state.progress * 100)}%<progress className="ln-music-analysis-progress" max={1} value={state.progress} /></p>;
+  if (state.state === 'queued') return <p className="ln-music-analysis-state">{t('Added to the local analysis queue.')}</p>;
+  if (state.state === 'error') return <p className="ln-music-analysis-state error">{t('Analysis failed: {message}', { message: state.message })}</p>;
+  if (state.state === 'unavailable') return <p className="ln-music-analysis-state">{t('The required model packs are not installed. Download the rhythm and music semantics models separately in Local AI settings; this control never downloads them automatically.')}</p>;
+  if (state.state === 'checking') return <p className="ln-music-analysis-state">{t('Checking local models…')}</p>;
+  return <p className="ln-music-analysis-state">{t('Analyze rhythm, structure, and music meaning on this device. Audio is never uploaded.')}</p>;
 }
 
 function ReadyAnalysis({ analysis }: { analysis: MusicAnalysis }) {
   const t = useT();
   return (
     <>
-      <div className="cc-music-analysis-metrics">
+      <div className="ln-music-analysis-metrics">
         <Metric label={t('Speed')} value={`${Math.round(analysis.bpm)} BPM`} />
         <Metric label={t('Meter')} value={`${analysis.meter}/4`} />
         <Metric label={t('Confidence')} value={percent(analysis.beatConfidence)} />
       </div>
       <RhythmDetails analysis={analysis} />
-      <h4 className="cc-music-analysis-section-title">{t('Music tags')}</h4>
-      <dl className="cc-music-analysis-tags">
+      <h4 className="ln-music-analysis-section-title">{t('Music tags')}</h4>
+      <dl className="ln-music-analysis-tags">
         {TAG_KINDS.map((kind) => {
           const tag = bestTag(analysis, kind);
           return <div key={kind}><dt>{t(TAG_LABELS[kind])}</dt><dd>{tag ? <><span>{tagText(tag.label, t)}</span><small>{percent(tag.score)}</small></> : '—'}</dd></div>;
         })}
       </dl>
-      <h4 className="cc-music-analysis-section-title">{t('Sections')}</h4>
+      <h4 className="ln-music-analysis-section-title">{t('Sections')}</h4>
       {analysis.sections.length > 0
-        ? <ol className="cc-music-analysis-sections">{analysis.sections.map((section, index) => <li key={`${section.fromMs}:${index}`}><time>{timeLabel(section.fromMs)}–{timeLabel(section.toMs)}</time><b>{t(SECTION_LABELS[section.role])}</b><span className="cc-music-analysis-section-scores"><span>{t('Energy')} {percent(section.energy)}</span><span>{t('Boundary')} {percent(section.boundaryConfidence)}</span></span></li>)}</ol>
-        : <p className="cc-music-analysis-state">{t('No clear sections detected')}</p>}
+        ? <ol className="ln-music-analysis-sections">{analysis.sections.map((section, index) => <li key={`${section.fromMs}:${index}`}><time>{timeLabel(section.fromMs)}–{timeLabel(section.toMs)}</time><b>{t(SECTION_LABELS[section.role])}</b><span className="ln-music-analysis-section-scores"><span>{t('Energy')} {percent(section.energy)}</span><span>{t('Boundary')} {percent(section.boundaryConfidence)}</span></span></li>)}</ol>
+        : <p className="ln-music-analysis-state">{t('No clear sections detected')}</p>}
     </>
   );
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
-  return <div className="cc-music-analysis-metric"><span>{label}</span><strong>{value}</strong></div>;
+  return <div className="ln-music-analysis-metric"><span>{label}</span><strong>{value}</strong></div>;
 }
 
 export function MusicAutoAnalysisPreference() {
@@ -349,18 +349,18 @@ export function MusicAutoAnalysisPreference() {
     getAutoMusicAnalysisEnabled,
   );
   return (
-    <div className="cc-music-analysis-pref" data-music-analysis-control>
+    <div className="ln-music-analysis-pref" data-music-analysis-control>
       <button
         type="button"
         role="switch"
-        className="cc-music-analysis-pref-toggle"
+        className="ln-music-analysis-pref-toggle"
         aria-checked={enabled}
         onClick={() => setAutoMusicAnalysisEnabled(!enabled)}
       >
         <span>{t('Analyze newly imported audio and video')}</span>
-        <span className="cc-music-analysis-switch" aria-hidden="true" />
+        <span className="ln-music-analysis-switch" aria-hidden="true" />
       </button>
-      <p className="cc-music-analysis-pref-note">{t('Download the model packs separately in Local AI settings first. Enabling this never starts a download.')}</p>
+      <p className="ln-music-analysis-pref-note">{t('Download the model packs separately in Local AI settings first. Enabling this never starts a download.')}</p>
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { captionSelectionKey, type CaptionSelectionRef } from './captionSelectio
 
 export const CAPTION_SELECTION_TIMELINE_CLIP_SELECTOR = '[data-timeline-clip]';
 export const CAPTION_SELECTION_TIMELINE_REGION_SELECTOR = '[data-caption-selection-region="timeline"]';
-export const CAPTION_SELECTION_TIMELINE_HEAD_SELECTOR = '.cc-timeline-ruler, .cc-track-head';
+export const CAPTION_SELECTION_TIMELINE_HEAD_SELECTOR = '.ln-timeline-ruler, .ln-track-head';
 export const CAPTION_SELECTION_OWNER_SELECTOR = '[data-caption-selection-owner]';
 
 export function shouldClearCaptionSelectionFromPointer(context: {

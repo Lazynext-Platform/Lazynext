@@ -107,8 +107,8 @@ jobs:
         if: runner.os == 'macOS'
         shell: bash
         env:
-          CC_SMOKE: '1'
-          CC_SMOKE_RENDER: '1'
+          LAZYNEXT_SMOKE: '1'
+          LAZYNEXT_SMOKE_RENDER: '1'
         run: |
           set -euo pipefail
           shopt -s nullglob
@@ -160,9 +160,9 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         env:
-          CC_SMOKE: '1'
-          CC_SMOKE_RENDER: '1'
-          CC_SMOKE_MCP_RECOVERY: '1'
+          LAZYNEXT_SMOKE: '1'
+          LAZYNEXT_SMOKE_RENDER: '1'
+          LAZYNEXT_SMOKE_MCP_RECOVERY: '1'
         run: |
           $ErrorActionPreference = 'Stop'
           $installers = @(Get-ChildItem -LiteralPath release -Filter '*.exe' -File)
@@ -219,8 +219,8 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         env:
-          CC_SMOKE: '1'
-          CC_SMOKE_RENDER: '1'
+          LAZYNEXT_SMOKE: '1'
+          LAZYNEXT_SMOKE_RENDER: '1'
           ELECTRON_DISABLE_SANDBOX: '1'
         run: |
           set -euo pipefail

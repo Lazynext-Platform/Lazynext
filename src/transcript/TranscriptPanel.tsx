@@ -99,7 +99,7 @@ export function TranscriptPanel({
     setFocusItemId(id);
     // when only showing current section, still try scroll after paint
     requestAnimationFrame(() => {
-      document.getElementById(`cc-tx-sec-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      document.getElementById(`ln-tx-sec-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
   };
 
@@ -147,12 +147,12 @@ export function TranscriptPanel({
   const aliasLabel = activeTrack ? trackTitle(activeTrack) : '—';
 
   return (
-    <div className="cc-transcript-panel">
-      <div className="cc-transcript-toolbar">
-        <button type="button" onClick={() => setPauseOpen((v) => !v)} className="cc-tx-btn" disabled={!editable}>
+    <div className="ln-transcript-panel">
+      <div className="ln-transcript-toolbar">
+        <button type="button" onClick={() => setPauseOpen((v) => !v)} className="ln-tx-btn" disabled={!editable}>
           <Icon name="clock" size={13} />{t('Pauses')}
         </button>
-        <select value={view} onChange={(e) => setView(e.target.value as 'paragraph' | 'segment')} className="cc-tx-select">
+        <select value={view} onChange={(e) => setView(e.target.value as 'paragraph' | 'segment')} className="ln-tx-select">
           <option value="paragraph">{t('Paragraph view')}</option>
           <option value="segment">{t('Segment view')}</option>
         </select>
@@ -161,7 +161,7 @@ export function TranscriptPanel({
           onClick={() => setEditMode((v) => !v)}
           disabled={!editable}
           title={editable ? t('Click a word to delete it = cut that audio') : t('Transcribe this track\'s audio first')}
-          className={`cc-tx-btn${editMode ? ' active' : ''}`}
+          className={`ln-tx-btn${editMode ? ' active' : ''}`}
         >
           <Icon name="pencil" size={13} />{t('Edit')}
         </button>
@@ -176,41 +176,41 @@ export function TranscriptPanel({
             if (file) onImportSrt(file);
           }}
         />
-        <button type="button" className="cc-tx-btn" title={t('Import SRT')} onClick={() => srtInputRef.current?.click()}>
+        <button type="button" className="ln-tx-btn" title={t('Import SRT')} onClick={() => srtInputRef.current?.click()}>
           <Icon name="upload" size={13} />{t('Import SRT')}
         </button>
         <button
           type="button"
-          className="cc-tx-btn"
+          className="ln-tx-btn"
           disabled={!onOpenCaptionStyles}
           title={onOpenCaptionStyles ? t('Caption styles') : t('Please create a caption track first')}
           onClick={() => onOpenCaptionStyles?.(transcribed.map((item) => item.id))}
         >
           <Icon name="captions" size={13} />{t('Caption styles')}
         </button>
-        <span className="cc-tx-spacer" />
+        <span className="ln-tx-spacer" />
         {pauseOpen && (
-          <div className="cc-tx-popover">
-            <div className="cc-tx-muted" style={{ marginBottom: 6 }}>{t('Pause length')}</div>
+          <div className="ln-tx-popover">
+            <div className="ln-tx-muted" style={{ marginBottom: 6 }}>{t('Pause length')}</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <input type="range" min={0.1} max={2} step={0.05} value={compressSec}
                 onChange={(e) => setCompressSec(Number(e.target.value))} style={{ flex: 1, accentColor: theme.accentDeep }} />
               <span style={{ fontSize: 12, width: 42, textAlign: 'right' }}>{compressSec.toFixed(2)}s</span>
             </div>
-            <label className="cc-tx-check">
+            <label className="ln-tx-check">
               <input type="checkbox" checked={removeFillers} onChange={(e) => setRemoveFillers(e.target.checked)} />
               {t('Remove filler words (um / uh…)')}
             </label>
             {pauseResult && <div style={{ fontSize: 11, marginBottom: 8 }}>{pauseResult}</div>}
-            <button type="button" onClick={applyPause} disabled={!editable} className="cc-tx-btn primary block">{t('Apply')}</button>
+            <button type="button" onClick={applyPause} disabled={!editable} className="ln-tx-btn primary block">{t('Apply')}</button>
           </div>
         )}
       </div>
 
       {/* Track chips — alias · name, never bare UUID */}
-      <div className="cc-tx-tracks" role="tablist" aria-label={t('Transcription tracks')}>
+      <div className="ln-tx-tracks" role="tablist" aria-label={t('Transcription tracks')}>
         {selectable.length === 0 ? (
-          <span className="cc-tx-muted">{t('No transcribable audio/video tracks on the timeline yet')}</span>
+          <span className="ln-tx-muted">{t('No transcribable audio/video tracks on the timeline yet')}</span>
         ) : (
           selectable.map((t) => {
             const n = mediaOnTrack(items, t.id).length;
@@ -221,13 +221,13 @@ export function TranscriptPanel({
                 type="button"
                 role="tab"
                 aria-selected={track === t.id}
-                className={`cc-tx-track-chip${track === t.id ? ' selected' : ''}`}
+                className={`ln-tx-track-chip${track === t.id ? ' selected' : ''}`}
                 onClick={() => { setTrack(t.id); setFocusItemId(null); setPauseResult(null); }}
                 title={t.id}
               >
-                <span className="cc-tx-track-alias">{t.alias}</span>
-                {t.name ? <span className="cc-tx-track-name">{t.name}</span> : null}
-                <span className="cc-tx-track-count">{speechN || n}</span>
+                <span className="ln-tx-track-alias">{t.alias}</span>
+                {t.name ? <span className="ln-tx-track-name">{t.name}</span> : null}
+                <span className="ln-tx-track-count">{speechN || n}</span>
               </button>
             );
           })
@@ -235,10 +235,10 @@ export function TranscriptPanel({
       </div>
 
       {editMode && editable && focusItem && (
-        <div className="cc-tx-editbar">
+        <div className="ln-tx-editbar">
           <span>{t('Click words to delete/restore (current clip). Deleted')} <b>{focusDeleted.size}</b> {t('words')}</span>
           {focusDeleted.size > 0 && (
-            <button type="button" onClick={() => onClearEdits(focusItem.id)} className="cc-tx-btn sm">{t('Restore all')}</button>
+            <button type="button" onClick={() => onClearEdits(focusItem.id)} className="ln-tx-btn sm">{t('Restore all')}</button>
           )}
         </div>
       )}
@@ -248,55 +248,55 @@ export function TranscriptPanel({
           {t('Selection mode: drag across words to quote them (release to add to chat)')}
         </div>
       )}
-      <div className="cc-tx-body" ref={bodyRef} onMouseUp={pickFromDomSelection} style={pickMode ? { cursor: 'text' } : undefined}>
+      <div className="ln-tx-body" ref={bodyRef} onMouseUp={pickFromDomSelection} style={pickMode ? { cursor: 'text' } : undefined}>
         {!track || selectable.length === 0 ? (
-          <div className="cc-tx-empty-card blank">
-            <div className="cc-tx-empty-icon" aria-hidden><Icon name="mic" size={14} /></div>
-            <div className="cc-tx-empty-title">{t('No transcribable tracks yet')}</div>
-            <p className="cc-tx-muted">{t('Add voiceover / narration or video with speech to the timeline, then open Transcript.')}</p>
+          <div className="ln-tx-empty-card blank">
+            <div className="ln-tx-empty-icon" aria-hidden><Icon name="mic" size={14} /></div>
+            <div className="ln-tx-empty-title">{t('No transcribable tracks yet')}</div>
+            <p className="ln-tx-muted">{t('Add voiceover / narration or video with speech to the timeline, then open Transcript.')}</p>
           </div>
         ) : !trackHasWords ? (
-          <div className="cc-tx-empty-card">
-            <div className="cc-tx-empty-kicker">{aliasLabel}</div>
-            <div className="cc-tx-empty-title">{t('Transcribe word-level transcript')}</div>
-            <p className="cc-tx-muted">
+          <div className="ln-tx-empty-card">
+            <div className="ln-tx-empty-kicker">{aliasLabel}</div>
+            <div className="ln-tx-empty-title">{t('Transcribe word-level transcript')}</div>
+            <p className="ln-tx-muted">
               {localProvider
                 ? t('Word-level Chinese transcription · on-device model · all {n} clips on this track transcribe one by one (free, offline, media stays on this machine). Then click words to cut them (delete a word = cut the audio).', { n: clips.length })
                 : t('Chinese word-level transcription · Speaker diarization · {n} clips on this track will be uploaded one by one. After transcription, click words to delete them (delete a word = cut the audio).', { n: clips.length })}
             </p>
             {skippedMusic > 0 && (
-              <label className="cc-tx-check music">
+              <label className="ln-tx-check music">
                 <input type="checkbox" checked={includeMusic} onChange={(e) => setIncludeMusic(e.target.checked)} />
                 {t('Include likely background music ({n} clips skipped)', { n: skippedMusic })}
               </label>
             )}
-            <ul className="cc-tx-cliplist">
+            <ul className="ln-tx-cliplist">
               {clips.map((c) => (
                 <li key={c.id}>
                   <Icon name={c.kind === 'video' ? 'video' : 'volume'} size={13} />
-                  <span className="cc-tx-clipname">{clipLabel(c)}</span>
-                  <span className="cc-tx-clipdur">{(c.durationInFrames / fps).toFixed(1)}s</span>
+                  <span className="ln-tx-clipname">{clipLabel(c)}</span>
+                  <span className="ln-tx-clipdur">{(c.durationInFrames / fps).toFixed(1)}s</span>
                 </li>
               ))}
             </ul>
             {!clips.length ? (
-              <p className="cc-tx-muted">
+              <p className="ln-tx-muted">
                 {t('This track only has background-music clips. Turn on "Include likely background music" or switch to a voiceover track.')}
               </p>
             ) : (
-              <button type="button" onClick={() => void transcribeTrack()} disabled={busy} className="cc-tx-btn primary lg">
+              <button type="button" onClick={() => void transcribeTrack()} disabled={busy} className="ln-tx-btn primary lg">
                 {busy ? (progressNote ?? t('Transcribing…')) : t('Transcribe {alias} ({n} clips)', { alias: activeTrack?.alias ?? '', n: clips.length })}
               </button>
             )}
-            {status === 'error' && <div className="cc-tx-error">{error}</div>}
+            {status === 'error' && <div className="ln-tx-error">{error}</div>}
           </div>
         ) : (
           <>
             {clips.length > 1 && (
-              <div className="cc-tx-nav">
-                <div className="cc-tx-nav-bar">
+              <div className="ln-tx-nav">
+                <div className="ln-tx-nav-bar">
                   <select
-                    className="cc-tx-nav-select"
+                    className="ln-tx-nav-select"
                     value={focusItem?.id ?? clips[0]?.id ?? ''}
                     onChange={(e) => jumpToClip(e.target.value)}
                     title={t('Jump to clip')}
@@ -311,22 +311,22 @@ export function TranscriptPanel({
                       );
                     })}
                   </select>
-                  <div className="cc-tx-nav-step">
+                  <div className="ln-tx-nav-step">
                     <button
                       type="button"
-                      className="cc-tx-btn sm"
+                      className="ln-tx-btn sm"
                       disabled={focusIndex <= 0}
                       onClick={() => focusIndex > 0 && jumpToClip(clips[focusIndex - 1]!.id)}
                       title={t('Previous clip')}
                     >
                       ‹
                     </button>
-                    <span className="cc-tx-nav-count">
+                    <span className="ln-tx-nav-count">
                       {Math.max(1, focusIndex + 1)}/{clips.length}
                     </span>
                     <button
                       type="button"
-                      className="cc-tx-btn sm"
+                      className="ln-tx-btn sm"
                       disabled={focusIndex < 0 || focusIndex >= clips.length - 1}
                       onClick={() => focusIndex >= 0 && focusIndex < clips.length - 1 && jumpToClip(clips[focusIndex + 1]!.id)}
                       title={t('Next clip')}
@@ -334,12 +334,12 @@ export function TranscriptPanel({
                       ›
                     </button>
                   </div>
-                  <button type="button" className="cc-tx-btn sm" disabled={busy} onClick={() => void transcribeTrack()}>
+                  <button type="button" className="ln-tx-btn sm" disabled={busy} onClick={() => void transcribeTrack()}>
                     {busy ? '…' : t('Re-transcribe')}
                   </button>
                 </div>
                 {clips.length > MANY_CLIPS && (
-                  <label className="cc-tx-nav-mode">
+                  <label className="ln-tx-nav-mode">
                     <input
                       type="checkbox"
                       checked={showAllSections}
@@ -350,7 +350,7 @@ export function TranscriptPanel({
                 )}
               </div>
             )}
-            <div className="cc-tx-sections">
+            <div className="ln-tx-sections">
               {sectionsToShow.map((c) => {
                 const cWords = c.transcript ?? [];
                 const cDel = new Set(c.deletedWordIdx ?? []);
@@ -362,8 +362,8 @@ export function TranscriptPanel({
                 return (
                   <section
                     key={c.id}
-                    id={`cc-tx-sec-${c.id}`}
-                    className={`cc-tx-section${active ? ' active' : ''}${dragOverClipId === c.id ? ' drag-over' : ''}`}
+                    id={`ln-tx-sec-${c.id}`}
+                    className={`ln-tx-section${active ? ' active' : ''}${dragOverClipId === c.id ? ' drag-over' : ''}`}
                     draggable={canDragClip}
                     onClick={() => setFocusItemId(c.id)}
                     onDragStart={(e) => {
@@ -402,24 +402,24 @@ export function TranscriptPanel({
                       setFocusItemId(fromId);
                     }}
                   >
-                    <header className="cc-tx-section-head">
+                    <header className="ln-tx-section-head">
                       <span
-                        className={`cc-tx-section-grip${canDragClip ? ' active' : ''}`}
+                        className={`ln-tx-section-grip${canDragClip ? ' active' : ''}`}
                         title={canDragClip ? t('Drag cards to reorder clips on this track in the timeline') : undefined}
                       >
                         ⋮⋮
                       </span>
-                      <span className="cc-tx-section-title">
+                      <span className="ln-tx-section-title">
                         {clips.length > 1 ? `${idx + 1}. ` : ''}{clipLabel(c, 36)}
                       </span>
-                      <span className="cc-tx-muted">
+                      <span className="ln-tx-muted">
                         {(c.durationInFrames / fps).toFixed(1)}s
                         {cWords.length ? t(' · {n} words', { n: cWords.length }) : t(' · not transcribed')}
                         {c.transcriptStale ? t(' · transcription expired, view only') : c.transcriptPlayOrder?.length ? t(' · speech reordered') : ''}
                       </span>
                     </header>
                     {!cWords.length ? (
-                      <div className="cc-tx-muted" style={{ padding: '4px 0 8px' }}>{t('This clip has not been transcribed yet')}</div>
+                      <div className="ln-tx-muted" style={{ padding: '4px 0 8px' }}>{t('This clip has not been transcribed yet')}</div>
                     ) : (
                       <ScriptView
                         words={cWords}
@@ -458,17 +458,17 @@ export function TranscriptPanel({
                 );
               })}
             </div>
-            {(status === 'error' || error) && <div className="cc-tx-error">{error}</div>}
-            {busy && progressNote && <div className="cc-tx-muted" style={{ marginTop: 8 }}>{progressNote}</div>}
+            {(status === 'error' || error) && <div className="ln-tx-error">{error}</div>}
+            {busy && progressNote && <div className="ln-tx-muted" style={{ marginTop: 8 }}>{progressNote}</div>}
             {!busy && trackHasWords && (
               <>
-                <div className="cc-tx-muted" style={{ marginTop: 10 }}>
+                <div className="ln-tx-muted" style={{ marginTop: 10 }}>
                   {t('Transcribed {done}/{total} clips', { done: transcribed.length, total: clips.length })}
                   {transcribed.length < clips.length ? t(' · click "Re-transcribe" to retry failed clips') : ''}
                   {clips.length > MANY_CLIPS && !showAllSections ? t(' · showing only the current clip') : ''}
                 </div>
                 {localProvider && (
-                  <div className="cc-tx-muted" style={{ marginTop: 4 }}>
+                  <div className="ln-tx-muted" style={{ marginTop: 4 }}>
                     {t('Local transcription does not perform speaker diarization; all content is assigned to the same speaker.')}
                   </div>
                 )}

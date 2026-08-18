@@ -14,7 +14,7 @@ export function Divider({ onResize, orientation = 'vertical' }: { onResize: (del
 
   return (
     <div
-      className="cc-panel-divider"
+      className="ln-panel-divider"
       role="separator"
       tabIndex={0}
       aria-orientation={horiz ? 'horizontal' : 'vertical'}

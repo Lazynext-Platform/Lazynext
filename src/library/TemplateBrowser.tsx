@@ -190,7 +190,7 @@ export const TemplateBrowser = memo(function TemplateBrowser({ templates, onAdd,
       {/* chip row (horizontally scrollable) */}
       <div
         ref={chipScrollRef}
-        className="cc-resource-tertiary-tabs cc-template-category-tabs"
+        className="ln-resource-tertiary-tabs ln-template-category-tabs"
         role="tablist"
         aria-label={t('Motion Graphics')}
         onDragStart={(event) => event.preventDefault()}
@@ -272,7 +272,7 @@ export const TemplateBrowser = memo(function TemplateBrowser({ templates, onAdd,
         /* Fixed-size rows keep scroll geometry stable while only viewport rows are mounted. */
         <div
           ref={virtualGrid.containerRef}
-          className="cc-template-virtual-grid"
+          className="ln-template-virtual-grid"
           style={{ position: 'relative', height: virtualGrid.totalHeight }}
         >
           {virtualGrid.rows.map((row) => (
@@ -315,13 +315,13 @@ export const TemplateBrowser = memo(function TemplateBrowser({ templates, onAdd,
       {menuTpl && menuPos && createPortal(
         <>
           <div
-            className="cc-asset-menu-backdrop"
+            className="ln-asset-menu-backdrop"
             onClick={closeMenu}
             onContextMenu={(e) => { e.preventDefault(); closeMenu(); }}
           />
           <div
             role="menu"
-            className="cc-media-popover cc-asset-menu-portal"
+            className="ln-media-popover ln-asset-menu-portal"
             style={{
               top: menuPos.top,
               left: menuPos.left,
@@ -414,7 +414,7 @@ const TemplateCard = memo(function TemplateCard({
   const portrait = (template.height ?? 0) > (template.width ?? 1);
   return (
     <div
-      className={`cc-template-card${favorite ? ' favorite' : ''}${menuOpen ? ' menu-open' : ''}`}
+      className={`ln-template-card${favorite ? ' favorite' : ''}${menuOpen ? ' menu-open' : ''}`}
       draggable
       onDragStart={(event) => {
         onDragChange(template.id);
@@ -437,15 +437,15 @@ const TemplateCard = memo(function TemplateCard({
       }}
     >
       <div
-        className="cc-template-add"
+        className="ln-template-add"
         title={t('Drag to the timeline, or use the add button: {name}', { name: template.name })}
       >
-        <div className="cc-template-thumb">
+        <div className="ln-template-thumb">
           {template.thumb ? (
             <>
               {portrait && (
                 <img
-                  className="cc-template-thumb-backdrop"
+                  className="ln-template-thumb-backdrop"
                   src={template.thumb}
                   alt=""
                   aria-hidden
@@ -454,7 +454,7 @@ const TemplateCard = memo(function TemplateCard({
                 />
               )}
               <img
-                className={`cc-template-thumb-image${portrait ? ' portrait' : ''}`}
+                className={`ln-template-thumb-image${portrait ? ' portrait' : ''}`}
                 src={template.thumb}
                 alt={tData(template.name)}
                 loading="lazy"
@@ -462,17 +462,17 @@ const TemplateCard = memo(function TemplateCard({
               />
             </>
           ) : (
-            <span className="cc-template-thumb-missing">＋</span>
+            <span className="ln-template-thumb-missing">＋</span>
           )}
         </div>
-        <div className="cc-template-meta">
-          <span className="cc-template-name">{tData(template.name)}</span>
-          <span className="cc-template-ratio">{ratioLabel(template.width, template.height)}</span>
+        <div className="ln-template-meta">
+          <span className="ln-template-name">{tData(template.name)}</span>
+          <span className="ln-template-ratio">{ratioLabel(template.width, template.height)}</span>
         </div>
       </div>
       <button
         type="button"
-        className="cc-template-favorite"
+        className="ln-template-favorite"
         onClick={(event) => {
           event.stopPropagation();
           onToggleFavorite(template.id);
@@ -483,7 +483,7 @@ const TemplateCard = memo(function TemplateCard({
       </button>
       <button
         type="button"
-        className="cc-template-more"
+        className="ln-template-more"
         onClick={(event) => {
           event.stopPropagation();
           onAdd(template);
@@ -495,7 +495,7 @@ const TemplateCard = memo(function TemplateCard({
       </button>
       <button
         type="button"
-        className="cc-template-more"
+        className="ln-template-more"
         style={{ top: 32 }}
         onClick={(event) => {
           event.stopPropagation();

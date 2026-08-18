@@ -109,37 +109,37 @@ export function CaptionStyleMenu({ state, commands, trackId, pos, error, onError
 
   const backToParent = onBack ?? onClose;
   if (translateOpen) return (
-    <div className="cc-caption-style-menu" style={{ position: 'fixed', left: pos.left, top: pos.top }} onPointerDown={(e) => e.stopPropagation()}>
+    <div className="ln-caption-style-menu" style={{ position: 'fixed', left: pos.left, top: pos.top }} onPointerDown={(e) => e.stopPropagation()}>
       <MenuDrillHeader title={t('translation')} onBack={() => initialTranslateOpen ? backToParent() : setTranslateOpen(false)} />
-      <div className="cc-caption-language-menu is-drill">
+      <div className="ln-caption-language-menu is-drill">
         {CAPTION_LANGS.map((lang) => <button type="button" key={lang} disabled={busy} onClick={() => void translate(lang)}>{lang}</button>)}
       </div>
-      {busy && <div className="cc-caption-style-status">{t('Translating...')}</div>}
-      {error && <div className="cc-caption-style-error">{error}</div>}
+      {busy && <div className="ln-caption-style-status">{t('Translating...')}</div>}
+      {error && <div className="ln-caption-style-error">{error}</div>}
     </div>
   );
 
   return (
-    <div className="cc-caption-style-menu" style={{ position: 'fixed', left: pos.left, top: pos.top }} onPointerDown={(e) => e.stopPropagation()}>
+    <div className="ln-caption-style-menu" style={{ position: 'fixed', left: pos.left, top: pos.top }} onPointerDown={(e) => e.stopPropagation()}>
       <MenuDrillHeader title={t('Caption styles')} onBack={backToParent} />
-      <div className="cc-caption-style-list">
+      <div className="ln-caption-style-list">
         {CAPTION_STYLES.map((style) => {
           return (
             <button type="button" key={style.id} className={current?.template === style.id ? 'active' : ''} onClick={() => applyStyle(style.id)}>
-              <span className="cc-caption-style-swatch" style={{ background: style.highlightBackground ?? '#292929', color: style.highlightBackground ? style.highlightColor : style.color, fontFamily: style.fontFamily, WebkitTextStroke: style.strokeWidth ? `${Math.min(1, style.strokeWidth)}px ${style.strokeColor}` : undefined }}>Aa</span>
+              <span className="ln-caption-style-swatch" style={{ background: style.highlightBackground ?? '#292929', color: style.highlightBackground ? style.highlightColor : style.color, fontFamily: style.fontFamily, WebkitTextStroke: style.strokeWidth ? `${Math.min(1, style.strokeWidth)}px ${style.strokeColor}` : undefined }}>Aa</span>
               <span>{t(style.labelZh)}</span>
             </button>
           );
         })}
         {presets.length > 0 && (
           <>
-            <div className="cc-caption-style-title" style={{ marginTop: 4 }}>{t('My styles')}</div>
+            <div className="ln-caption-style-title" style={{ marginTop: 4 }}>{t('My styles')}</div>
             {presets.map((p) => (
               <button key={p.id} type="button" onClick={() => applyPreset(p)}>
-                <span className="cc-caption-style-swatch" style={{ background: '#292929', color: '#fff' }}>★</span>
+                <span className="ln-caption-style-swatch" style={{ background: '#292929', color: '#fff' }}>★</span>
                 <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
                 <span
-                  className="cc-caption-preset-del"
+                  className="ln-caption-preset-del"
                   role="button"
                   title={t('Delete this preset')}
                   onClick={(e) => { e.stopPropagation(); void removePreset(p.id); }}
@@ -150,7 +150,7 @@ export function CaptionStyleMenu({ state, commands, trackId, pos, error, onError
         )}
       </div>
       {nameDraft !== null ? (
-        <div className="cc-caption-preset-name-row">
+        <div className="ln-caption-preset-name-row">
           <input
             autoFocus
             value={nameDraft}
@@ -167,7 +167,7 @@ export function CaptionStyleMenu({ state, commands, trackId, pos, error, onError
       ) : (
         <button
           type="button"
-          className="cc-caption-style-save"
+          className="ln-caption-style-save"
           disabled={!current}
           title={current ? t('Save the current template/style override as a user preset') : t('Enable captions first')}
           onClick={() => setNameDraft(`My styles ${new Date().toLocaleDateString()}`)}
@@ -175,12 +175,12 @@ export function CaptionStyleMenu({ state, commands, trackId, pos, error, onError
           {t('＋ Save current style...')}
         </button>
       )}
-      <div className="cc-caption-translate-wrap">
-        <button type="button" className="cc-caption-translate" disabled={busy} onClick={() => setTranslateOpen(true)} aria-expanded={translateOpen}>
+      <div className="ln-caption-translate-wrap">
+        <button type="button" className="ln-caption-translate" disabled={busy} onClick={() => setTranslateOpen(true)} aria-expanded={translateOpen}>
           <span>{t('Aa')}</span><span>{busy ? t('Translating...') : t('Translate captions')}</span><span>›</span>
         </button>
       </div>
-      {error && <div className="cc-caption-style-error">{error}</div>}
+      {error && <div className="ln-caption-style-error">{error}</div>}
     </div>
   );
 }

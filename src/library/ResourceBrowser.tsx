@@ -93,7 +93,7 @@ function resourceCardTitle(item: ResourceItem, clickable: boolean, canDrag: bool
 const ResourceCard = memo(function ResourceCard(props: ResourceCardProps) {
   const { item, active, clickable, canDrag, renderThumb, thumb, onApply, onDragStart } = props;
   const src = renderThumb ? '' : (thumb?.(item.id) ?? '');
-  const classes = `cc-resource-card${clickable ? '' : ' disabled'}${active ? ' hovered' : ''}${canDrag ? ' draggable' : ''}`;
+  const classes = `ln-resource-card${clickable ? '' : ' disabled'}${active ? ' hovered' : ''}${canDrag ? ' draggable' : ''}`;
   return (
     <button
       type="button"
@@ -109,14 +109,14 @@ const ResourceCard = memo(function ResourceCard(props: ResourceCardProps) {
       onFocus={() => props.onFocusChange(item.id)}
       onBlur={() => props.onFocusChange(null)}
     >
-      <div className="cc-resource-thumb">
+      <div className="ln-resource-thumb">
         {renderThumb
           ? renderThumb(item.id, active)
           : src
             ? <img src={src} alt="" draggable={false} loading="lazy" decoding="async" />
-            : <span className="cc-resource-thumb-placeholder" />}
+            : <span className="ln-resource-thumb-placeholder" />}
       </div>
-      <div className="cc-resource-name">{props.t(item.name)}</div>
+      <div className="ln-resource-name">{props.t(item.name)}</div>
     </button>
   );
 });
@@ -150,11 +150,11 @@ function ResourceGrid({ items, activeId, draggedId, ...cardProps }: ResourceGrid
     }
   }, [activeId, items, onPointerChange, virtualGrid.visibleEndIndex, virtualGrid.visibleStartIndex]);
   return (
-    <div ref={virtualGrid.containerRef} className="cc-resource-grid" style={{ height: virtualGrid.totalHeight }}>
+    <div ref={virtualGrid.containerRef} className="ln-resource-grid" style={{ height: virtualGrid.totalHeight }}>
       {virtualGrid.rows.map((row) => (
         <div
           key={row.rowIndex}
-          className="cc-resource-virtual-row"
+          className="ln-resource-virtual-row"
           style={{
             top: row.top,
             height: virtualGrid.rowHeight,
@@ -188,7 +188,7 @@ const ResourceListItem = memo(function ResourceListItem({ item, clickable, canDr
     : canDrag ? t('Drag to timeline: {name}', { name: item.name }) : undefined;
   return (
     <button
-      className="cc-resource-list-item"
+      className="ln-resource-list-item"
       type="button"
       aria-disabled={!clickable}
       draggable={canDrag}
@@ -270,9 +270,9 @@ export function ResourceBrowser({
   }, [canDrag, dragKind]);
   return (
     <PreviewCleanupContext.Provider value={registerCleanup}>
-      <div className={layout === 'grid' ? 'cc-resource-browser' : undefined}
+      <div className={layout === 'grid' ? 'ln-resource-browser' : undefined}
         style={layout === 'list' ? { display: 'flex', flexDirection: 'column', gap: 8 } : undefined}>
-        <div className={layout === 'grid' ? 'cc-resource-hint' : undefined}
+        <div className={layout === 'grid' ? 'ln-resource-hint' : undefined}
           style={{ color: disabledNote ? theme.accent : theme.textDim }}>
           {hintText}
         </div>

@@ -72,7 +72,7 @@ export function useTimelineTrackMenus({ state, commands, t }: UseTimelineTrackMe
     const close = (event: PointerEvent) => {
       if (!(event.target instanceof Element)) return;
       const target = event.target;
-      if (!target.closest('.cc-caption-style-menu') && !target.closest('[data-caption-menu-trigger]')) {
+      if (!target.closest('.ln-caption-style-menu') && !target.closest('[data-caption-menu-trigger]')) {
         setCaptionMenu(null);
         setTrackMenuReturn(null);
       }
@@ -87,7 +87,7 @@ export function useTimelineTrackMenus({ state, commands, t }: UseTimelineTrackMe
     const close = (event: PointerEvent) => {
       if (!(event.target instanceof Element)) return;
       const target = event.target;
-      if (!target.closest('.cc-duck-menu') && !target.closest('[data-duck-menu-trigger]')) {
+      if (!target.closest('.ln-duck-menu') && !target.closest('[data-duck-menu-trigger]')) {
         setDuckMenu(null);
         setTrackMenuReturn(null);
       }

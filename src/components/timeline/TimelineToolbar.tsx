@@ -17,16 +17,16 @@ import { TrackCreateControl } from './TrackCreateControl';
 
 // Group spacing between toolbar clusters uses gaps without a visible divider.
 function ToolSep() {
-  return <span className="cc-timeline-tool-separator" aria-hidden="true" />;
+  return <span className="ln-timeline-tool-separator" aria-hidden="true" />;
 }
 
 // One icon toolbar button: monochrome line glyphs, active = accent.
-// Prompt to use cc-tip real-time tooltip (native title has ~1s inherent delay); tipRight = right-aligned near the right edge
+// Prompt to use ln-tip real-time tooltip (native title has ~1s inherent delay); tipRight = right-aligned near the right edge
 function TB({ icon, title, onClick, active, disabled, tipRight }: {
   icon: IconName; title: string; onClick?: () => void; active?: boolean; disabled?: boolean; tipRight?: boolean;
 }) {
   return (
-    <button className={`cc-tip${tipRight ? ' cc-tip-r' : ''}`} data-tip={title} aria-label={title} onClick={onClick} disabled={disabled}
+    <button className={`ln-tip${tipRight ? ' ln-tip-r' : ''}`} data-tip={title} aria-label={title} onClick={onClick} disabled={disabled}
       style={{ width: 24, height: 24, background: 'none', border: 'none', cursor: disabled ? 'default' : 'pointer', padding: 0, borderRadius: 4, display: 'grid', placeItems: 'center', lineHeight: 0, color: disabled ? theme.textDim : active ? theme.accent : theme.textMuted, opacity: disabled ? 0.4 : 1 }}
       onMouseEnter={(e) => { if (!disabled && !active) e.currentTarget.style.background = theme.panelAlt; }}
       onMouseLeave={(e) => { e.currentTarget.style.background = 'none'; }}>
@@ -67,7 +67,7 @@ function TimelineMoreControl(props: {
         const details = event.currentTarget;
         if (details.open) requestAnimationFrame(() => details.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus());
       }}
-      className="cc-track-create cc-timeline-more"
+      className="ln-track-create ln-timeline-more"
       onKeyDown={(event) => {
         if (event.key !== 'Escape' || !event.currentTarget.open) return;
         event.preventDefault();
@@ -79,14 +79,14 @@ function TimelineMoreControl(props: {
       }}
     >
       <summary aria-label={t('More actions')} title={t('More actions')}><Icon name="more" size={16} /></summary>
-      <div className="cc-track-create-menu cc-timeline-more-menu">
+      <div className="ln-track-create-menu ln-timeline-more-menu">
         <button disabled={!props.sceneEnabled} onClick={(event) => runMenuAction(event, () => props.onScene(restoreFocus), false)}>
           <Icon name="sparkles" size={15} />{t('Scene detection')}
         </button>
         <button disabled={!props.trackingEnabled} onClick={(event) => runMenuAction(event, () => props.onTracking(restoreFocus), false)}>
           <Icon name="tracking" size={15} />{t('Motion tracking')}
         </button>
-        <div className="cc-track-create-separator" />
+        <div className="ln-track-create-separator" />
         <button className={props.placeMode === 'insert' ? 'selected' : ''} onClick={(event) => runMenuAction(event, () => props.onPlaceMode('insert'))}>
           <Icon name="insert" size={15} />{t('Insert placement')}
         </button>
@@ -143,8 +143,8 @@ export function TimelineToolbar({
   const hasCaptions = captionTracks.length > 0 || textClipCount > 0;
   return (
     <>
-      <div className="cc-timeline-toolbar">
-      <div className="cc-timeline-tool-group">
+      <div className="ln-timeline-toolbar">
+      <div className="ln-timeline-tool-group">
         <TrackCreateControl commands={commands} />
         <ToolSep />
         <TB icon="cursor" title={t('Selection mode (V): drag to move / trim edges')} active={editMode === 'selection'} onClick={() => invokeAction('interaction-mode-selection', undefined, 'toolbar')} />
@@ -181,34 +181,34 @@ export function TimelineToolbar({
           onPlaceMode={setPlaceMode}
         />
         <ToolSep />
-        <span className="cc-mic-group">
+        <span className="ln-mic-group">
           <TB icon="mic" active={recorder.recording}
             title={recorder.recording ? t('● Recording, click to stop') : recorder.error ? t('Recording failed: {error}', { error: recorder.error }) : t('Record voiceover (microphone → audio track)')}
             disabled={!canRecord} onClick={recorder.toggle} />
           <Icon name="chevronDown" size={13} />
         </span>
-        {recorder.recording && <span title={t('Recording')} style={{ width: 8, height: 8, borderRadius: '50%', background: theme.accent, animation: 'cc-rec-pulse 1.2s ease-out infinite', flexShrink: 0 }} />}
+        {recorder.recording && <span title={t('Recording')} style={{ width: 8, height: 8, borderRadius: '50%', background: theme.accent, animation: 'ln-rec-pulse 1.2s ease-out infinite', flexShrink: 0 }} />}
         <TimelineSpeedControl
           item={speedItem}
           onChange={(rate) => { if (speedItem) commands.setItemSpeed(speedItem.id, rate); }}
         />
       </div>
-      <div className="cc-timeline-transport">
+      <div className="ln-timeline-transport">
       <TB
         icon={playing ? 'pause' : 'play'}
         title={playing ? t('Pause (Space)') : t('Play (Space)')}
         active={playing}
         onClick={() => invokeAction('play-pause', undefined, 'toolbar')}
       />
-      <span ref={timecodeRef} className="cc-timeline-timecode">{fmt(playheadFrame, state.fps)} / {fmt(total, state.fps)}</span>
+      <span ref={timecodeRef} className="ln-timeline-timecode">{fmt(playheadFrame, state.fps)} / {fmt(total, state.fps)}</span>
       </div>
-      <div className="cc-timeline-view-controls">
+      <div className="ln-timeline-view-controls">
       <TB icon="zoomOut" title={t('Zoom out timeline (⌘−)')} tipRight onClick={() => invokeAction('zoom-out', undefined, 'toolbar')} />
       <input type="range" min={MIN_TIME_ZOOM} max={6} step={0.01} value={zoom} onChange={(e) => setZoom(Number(e.target.value))}
-        title={t('Zoom timeline')} className="cc-timeline-zoom" />
+        title={t('Zoom timeline')} className="ln-timeline-zoom" />
       <TB icon="zoomIn" title={t('Zoom in timeline (⌘＋)')} tipRight onClick={() => invokeAction('zoom-in', undefined, 'toolbar')} />
       <TB icon="fit" title={t('Fit to view (⇧Z)')} tipRight onClick={() => invokeAction('zoom-fit', undefined, 'toolbar')} />
-      <label className="cc-aspect-select cc-tip cc-tip-r" data-tip={t('Aspect ratio')}>
+      <label className="ln-aspect-select ln-tip ln-tip-r" data-tip={t('Aspect ratio')}>
         <Icon name="aspect" size={16} />
         <select aria-label={t('Aspect ratio')} value={ASPECT_PRESETS.find((preset) => preset.width === state.width && preset.height === state.height)?.label ?? ''}
           onChange={(event) => {
@@ -223,7 +223,7 @@ export function TimelineToolbar({
           <optgroup label={t('Content fit')}><option value="__contain__">{t('Letterbox')}</option><option value="__cover__">{t('Crop')}</option></optgroup>
         </select>
       </label>
-      <button className={`cc-caption-toggle cc-tip cc-tip-r${captionsVisible ? ' active' : ''}`} data-tip={hasCaptions
+      <button className={`ln-caption-toggle ln-tip ln-tip-r${captionsVisible ? ' active' : ''}`} data-tip={hasCaptions
         ? captionTracks.length
           ? t('Captions')
           : t('Captions ({n} text clips on canvas, no caption track data; hiding will also hide them)', { n: textClipCount })

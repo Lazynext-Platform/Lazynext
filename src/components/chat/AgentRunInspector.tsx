@@ -62,7 +62,7 @@ function usePopoverBox(open: boolean, anchor: HTMLElement | null): PopoverBox | 
     if (!open || !anchor) { setBox(null); return; }
     const place = () => {
       const trigger = anchor.getBoundingClientRect();
-      const boundary = anchor.closest<HTMLElement>('[data-cc-chat-popover-boundary]')?.getBoundingClientRect();
+      const boundary = anchor.closest<HTMLElement>('[data-ln-chat-popover-boundary]')?.getBoundingClientRect();
       const margin = 8;
       const availableWidth = Math.max(240, (boundary?.width ?? window.innerWidth) - margin * 2);
       const width = Math.min(380, availableWidth, window.innerWidth - margin * 2);
@@ -351,19 +351,19 @@ export function AgentRunInspector({ projectId }: { projectId: string }) {
   }, [box, open]);
   const latest = sidecar?.runs[0];
   return <>
-    <button ref={triggerRef} type="button" aria-haspopup="dialog" aria-expanded={open} aria-controls="cc-agent-run-inspector"
+    <button ref={triggerRef} type="button" aria-haspopup="dialog" aria-expanded={open} aria-controls="ln-agent-run-inspector"
       title={t('Agent Run Inspector')} aria-label={t('Agent Run Inspector')} onClick={() => setOpen((value) => !value)}
-      className="cc-header-btn" style={trigger}>
+      className="ln-header-btn" style={trigger}>
       <Icon name="list" size={14} />
       {latest && <span aria-hidden style={{ ...triggerDot, background: statusColor(latest.status) }} />}
     </button>
     {open && box && createPortal(
       <div role="presentation" onPointerDown={close} style={backdrop}>
-        <section id="cc-agent-run-inspector" role="dialog" aria-label={t('Agent Run Inspector')}
+        <section id="ln-agent-run-inspector" role="dialog" aria-label={t('Agent Run Inspector')}
           onPointerDown={(event) => event.stopPropagation()} style={{ ...popover, ...box }}>
           <header style={header}>
             <div><strong style={{ fontSize: 13 }}>{t('Agent Run Inspector')}</strong><div style={subtle}>{t('Read-only diagnostics. No operation will be executed or resumed.')}</div></div>
-            <button ref={closeRef} type="button" onClick={close} aria-label={t('Close')} title={t('Close')} className="cc-header-btn" style={closeButton}><Icon name="x" size={14} /></button>
+            <button ref={closeRef} type="button" onClick={close} aria-label={t('Close')} title={t('Close')} className="ln-header-btn" style={closeButton}><Icon name="x" size={14} /></button>
           </header>
           <div style={scroll}><InspectorContent sidecar={sidecar} loading={loading} failed={failed} t={t} /></div>
         </section>

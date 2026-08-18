@@ -71,33 +71,33 @@ export function SkillsTabPanel({
           <div style={{ fontSize: 11, color: theme.textDim, marginTop: 1 }}>{t('Click to exit creative mode and return to freeform')}</div>
         </button>
       )}
-      <div className="cc-creative-picker-section">{t('Specialized workflows')}</div>
+      <div className="ln-creative-picker-section">{t('Specialized workflows')}</div>
       {filtered.length === 0 && (
         <div style={{ fontSize: 12, color: theme.textDim, padding: '14px 4px' }}>{t('No matching skills')}</div>
       )}
-      <div className="cc-creative-mode-grid">
+      <div className="ln-creative-mode-grid">
         {filtered.map((skill) => (
-          <div key={skill.id} className="cc-skill-card-wrap">
+          <div key={skill.id} className="ln-skill-card-wrap">
             <button
               type="button"
               onClick={() => onCreativeModeChange(creativeMode === skill.id ? null : skill.id)}
-              className="cc-creative-mode-row cc-creative-mode-card"
+              className="ln-creative-mode-row ln-creative-mode-card"
               data-active={creativeMode === skill.id}
               aria-pressed={creativeMode === skill.id}
               title={t(skill.summary)}
             >
-              <span className="cc-creative-mode-icon"><IconWand /></span>
-              <span className="cc-creative-mode-copy">
-                <span className="cc-creative-mode-title">
+              <span className="ln-creative-mode-icon"><IconWand /></span>
+              <span className="ln-creative-mode-copy">
+                <span className="ln-creative-mode-title">
                   <strong>{skillName(skill)}</strong>
                   {!BUILTIN_IDS.has(skill.slug) && <em>{t('Custom')}</em>}
                 </span>
                 <small>{t(skill.summary)}</small>
               </span>
-              {creativeMode === skill.id && <span className="cc-creative-mode-check">✓</span>}
+              {creativeMode === skill.id && <span className="ln-creative-mode-check">✓</span>}
             </button>
             {!BUILTIN_IDS.has(skill.slug) && (
-              <span className="cc-skill-actions">
+              <span className="ln-skill-actions">
                 <button
                   type="button"
                   title={t('Edit skill')}
@@ -114,7 +114,7 @@ export function SkillsTabPanel({
                   type="button"
                   title={t('Delete skill')}
                   aria-label={t('Delete skill')}
-                  className={confirmingDelete === skill.id ? 'cc-skill-delete-confirm' : undefined}
+                  className={confirmingDelete === skill.id ? 'ln-skill-delete-confirm' : undefined}
                   onClick={(event) => {
                     event.stopPropagation();
                     if (confirmingDelete !== skill.id) { setConfirmingDelete(skill.id); return; }
@@ -174,9 +174,9 @@ function SkillEditDialog({
   };
 
   return (
-    <div className="cc-modal-backdrop" onPointerDown={onClose}>
+    <div className="ln-modal-backdrop" onPointerDown={onClose}>
       <div
-        className="cc-modal"
+        className="ln-modal"
         style={{ width: 640, gap: 10, maxHeight: 'calc(100vh - 64px)', overflowY: 'auto' }}
         onPointerDown={(event) => event.stopPropagation()}
       >

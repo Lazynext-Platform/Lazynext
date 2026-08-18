@@ -43,14 +43,14 @@ function VideoSettings({ video, busy, qualityMode, setQualityMode }: VideoSettin
           onChange={setQualityMode}
         />
       </Row>
-      <p className="cc-export-footnote">
+      <p className="ln-export-footnote">
         {qualityMode === 'master'
           ? t('High-quality preview first; export defaults to high bitrate and never optimizes imports for size.')
           : t('Balance smoothness and size; preview may use lightweight copies and export uses automatic bitrate.')}
       </p>
       <Row label={t('Format / codec')}>
         <select
-          className="cc-export-select"
+          className="ln-export-select"
           value={video.codec}
           onChange={(event) => video.setCodec(event.target.value as 'h264' | 'vp8' | 'prores')}
           disabled={busy}
@@ -61,7 +61,7 @@ function VideoSettings({ video, busy, qualityMode, setQualityMode }: VideoSettin
         </select>
       </Row>
       {video.codec === 'prores' && (
-        <p className="cc-export-footnote">
+        <p className="ln-export-footnote">
           {t('ProRes mezzanine files are large and server-rendered only. Use them for grading or Resolve handoff; use H.264 for web delivery.')}
         </p>
       )}
@@ -98,7 +98,7 @@ function QaSettings({ enabled, busy, qa, onToggle }: QaSettingsProps) {
   const t = useT();
   return (
     <>
-      <label className="cc-export-toggle cc-export-qa-toggle">
+      <label className="ln-export-toggle ln-export-qa-toggle">
         <span>
           <strong>{t('Automatically quality-check after export')}</strong>
           <small>{t('Checks video, audio, edit points, and caption safe areas; transient failures are retried up to three times.')}</small>
@@ -147,7 +147,7 @@ function SubtitlesTab({ state, subtitles }: { state: TimelineState; subtitles: E
         <InfoCard icon="captions" title={t('Caption track is off')} text={t('Turn captions on and confirm the content before downloading the caption file.')} />
       )}
       <Row label={t('Caption track')}>
-        <select className="cc-export-select" value={subtitles.trackId} disabled={!subtitles.tracks.length} onChange={(event) => subtitles.setTrackId(event.target.value)}>
+        <select className="ln-export-select" value={subtitles.trackId} disabled={!subtitles.tracks.length} onChange={(event) => subtitles.setTrackId(event.target.value)}>
           {!subtitles.tracks.length && <option value="">—</option>}
           {subtitles.tracks.map((entry) => <option key={entry.id} value={entry.id}>{trackAlias(state, entry.id)}</option>)}
         </select>
@@ -194,11 +194,11 @@ function XmlTab({ state, nleFormat, includeMg, mgCount, setNleFormat, setInclude
           onChange={setNleFormat}
         />
       </Row>
-      <label className="cc-export-toggle">
+      <label className="ln-export-toggle">
         <span><strong>{t('Bundle motion layers')}</strong><small>{t('Also creates alpha ProRes 4444 MOV files.')}</small></span>
         <input type="checkbox" checked={includeMg} onChange={(event) => setIncludeMg(event.target.checked)} disabled={mgCount === 0} />
       </label>
-      <p className="cc-export-footnote">{t('After importing, point your NLE at the original media folder to relink offline clips.')}</p>
+      <p className="ln-export-footnote">{t('After importing, point your NLE at the original media folder to relink offline clips.')}</p>
     </>
   );
 }

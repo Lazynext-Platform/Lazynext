@@ -15,7 +15,7 @@ export function TopBarIconButton({ icon, label, onClick, disabled = false, badge
   return (
     <button
       type="button"
-      className="cc-tip cc-tip-r"
+      className="ln-tip ln-tip-r"
       data-tip={label}
       aria-label={label}
       onClick={onClick}

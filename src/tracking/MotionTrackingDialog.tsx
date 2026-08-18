@@ -60,8 +60,8 @@ function useTrackingAnalysis(state: TimelineState, item: TimelineItem, region: T
 
 function TrackingHeader({ item, close }: { item: TimelineItem; close: () => void }) {
   const t = useT();
-  return <header className="cc-tracking-header">
-    <div><h2 id="cc-tracking-title">{t('Motion tracking')} <em>{t('Experimental')}</em></h2><p>{item.name} · {t('Analyzed locally — media is not uploaded')}</p></div>
+  return <header className="ln-tracking-header">
+    <div><h2 id="ln-tracking-title">{t('Motion tracking')} <em>{t('Experimental')}</em></h2><p>{item.name} · {t('Analyzed locally — media is not uploaded')}</p></div>
     <button type="button" autoFocus onClick={close} aria-label={t('Close')}><Icon name="x" size={17} /></button>
   </header>;
 }
@@ -80,15 +80,15 @@ function TrackingSettings(props: TrackingSettingsProps) {
       {props.targets.map((target) => <option key={target.id} value={target.id}>{t('Make “{name}” follow the target', { name: target.name })}</option>)}
     </select></label>
     <label><span>{t('Minimum confidence')}</span><strong>{props.minConfidence.toFixed(2)}</strong><input type="range" min={0.5} max={0.9} step={0.01} value={props.minConfidence} disabled={props.running} onChange={(event) => props.onConfidence(Number(event.target.value))} /></label>
-    <div className="cc-tracking-progress"><div><span>{props.running ? t('Tracking frames…') : props.result ? t('Tracking complete') : t('Waiting for target selection')}</span><strong>{props.percent}%</strong></div><i><b style={{ transform: `scaleX(${props.percent / 100})` }} /></i></div>
-    {props.result && <div className={`cc-tracking-result${props.result.stoppedBecauseLost ? ' warning' : ''}`}>
+    <div className="ln-tracking-progress"><div><span>{props.running ? t('Tracking frames…') : props.result ? t('Tracking complete') : t('Waiting for target selection')}</span><strong>{props.percent}%</strong></div><i><b style={{ transform: `scaleX(${props.percent / 100})` }} /></i></div>
+    {props.result && <div className={`ln-tracking-result${props.result.stoppedBecauseLost ? ' warning' : ''}`}>
       <strong>{t('{n} valid tracking points', { n: props.result.points.length })}</strong>
       <span>{t('Average confidence {value}', { value: props.result.averageConfidence.toFixed(2) })}</span>
       {props.result.stoppedBecauseLost && <small>{t('The target was repeatedly lost, so tracking stopped early. Low-confidence frames will not become keyframes.')}</small>}
     </div>}
-    {props.locked && <p className="cc-tracking-error">{t('The target track is locked')}</p>}
-    {props.error && <p className="cc-tracking-error">{props.error}</p>}
-    <p className="cc-tracking-note">{t('Applying replaces the target’s existing X/Y keyframes. You can refine them manually under Transform.')}</p>
+    {props.locked && <p className="ln-tracking-error">{t('The target track is locked')}</p>}
+    {props.error && <p className="ln-tracking-error">{props.error}</p>}
+    <p className="ln-tracking-note">{t('Applying replaces the target’s existing X/Y keyframes. You can refine them manually under Transform.')}</p>
   </aside>;
 }
 
@@ -126,10 +126,10 @@ export function MotionTrackingDialog({ state, commands, item, onClose }: MotionT
   const changeRegion = (next: TrackingRegion) => { setRegion(next); analysis.reset(); setApplied(false); };
   const changeTarget = (id: string) => { setTargetId(id); setApplied(false); };
   const changeConfidence = (value: number) => { setMinConfidence(value); analysis.reset(); setApplied(false); };
-  return createPortal(<div className="cc-tracking-overlay" role="dialog" aria-modal="true" aria-labelledby="cc-tracking-title" onClick={analysis.running ? undefined : close}>
-    <section className="cc-tracking-dialog" onClick={(event) => event.stopPropagation()}>
+  return createPortal(<div className="ln-tracking-overlay" role="dialog" aria-modal="true" aria-labelledby="ln-tracking-title" onClick={analysis.running ? undefined : close}>
+    <section className="ln-tracking-dialog" onClick={(event) => event.stopPropagation()}>
       <TrackingHeader item={item} close={close} />
-      <div className="cc-tracking-body"><main>
+      <div className="ln-tracking-body"><main>
         <TrackingRegionPicker item={item} fps={state.fps} region={region} points={analysis.result?.points ?? []} disabled={analysis.running} onChange={changeRegion} />
         <p>{t('Drag around a clearly textured target in the first frame. Hold Ctrl/⌘ and scroll to zoom the preview. Its path appears after analysis.')}</p>
       </main><TrackingSettings targets={targets} targetId={targetId} running={analysis.running} minConfidence={minConfidence} percent={percent} result={analysis.result} locked={locked} error={analysis.error} onTarget={changeTarget} onConfidence={changeConfidence} /></div>

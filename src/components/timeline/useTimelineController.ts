@@ -205,7 +205,7 @@ export function useTimelineController({
  }),
  ];
  for (const reference of references) emitSelectionRef(reference);
- requestAnimationFrame(() => document.querySelector<HTMLTextAreaElement>('[data-cc-chat-composer]')?.focus());
+ requestAnimationFrame(() => document.querySelector<HTMLTextAreaElement>('[data-ln-chat-composer]')?.focus());
  };
  const [viewport, setViewport] = useState({ scrollLeft: 0, clientWidth: 0 });
  // content is at least as wide as the panel, so track rows/ruler never stop
@@ -295,7 +295,7 @@ export function useTimelineController({
  playheadRef, scrollRef, frameFromClientX, trackFromClientY, selectionInMarquee,
  selectedCaptions, onMarqueeCaptionSelect,
  isOverChatComposer: (clientX, clientY) => {
- const composer = document.querySelector<HTMLElement>('[data-cc-chat-composer]');
+ const composer = document.querySelector<HTMLElement>('[data-ln-chat-composer]');
  return composer ? isTimelineDragOverChat(clientX, clientY, composer.getBoundingClientRect()) : false;
  },
  onDropSelectionToChat: (selection) => {
@@ -388,7 +388,7 @@ export function useTimelineController({
  }, [playing, drag, marquee, pickDrag]);
  const startSeekGesture = (event: ReactPointerEvent<HTMLDivElement>) => {
  const target = event.target instanceof Element ? event.target : null;
- if (!target?.closest('[data-timeline-track-lane], .cc-caption-track-lane')) return;
+ if (!target?.closest('[data-timeline-track-lane], .ln-caption-track-lane')) return;
  seekGestureRef.current = {
  pointerId: event.pointerId,
  button: event.button,

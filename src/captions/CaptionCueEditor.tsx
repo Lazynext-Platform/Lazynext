@@ -37,33 +37,33 @@ export function CaptionCueEditor({ captions, items, fps, onUpdate, onSeekMs }: C
   };
 
   return (
-    <div className="cc-cap-bilingual">
-      <button type="button" className="cc-cap-bilingual-toggle" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
+    <div className="ln-cap-bilingual">
+      <button type="button" className="ln-cap-bilingual-toggle" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
         <span>{t('Edit lines')}{rows.length > 0 ? t(' ({n} lines)', { n: rows.length }) : ''}</span>
-        <span className="cc-cap-hint">{open ? t('Collapse') : t('Expand')}</span>
+        <span className="ln-cap-hint">{open ? t('Collapse') : t('Expand')}</span>
       </button>
       {open && multiLane && (
-        <p className="cc-cap-hint">{t('Edit transcript-driven lanes in chat; manual lanes can be edited directly in “Manual captions” above.')}</p>
+        <p className="ln-cap-hint">{t('Edit transcript-driven lanes in chat; manual lanes can be edited directly in “Manual captions” above.')}</p>
       )}
       {open && !multiLane && rows.length === 0 && (
-        <p className="cc-cap-hint">{t('No caption lines to edit yet (transcribe and generate captions first).')}</p>
+        <p className="ln-cap-hint">{t('No caption lines to edit yet (transcribe and generate captions first).')}</p>
       )}
       {open && !multiLane && rows.length > 0 && (
-        <div className="cc-cap-cues">
-          <p className="cc-cap-hint">{t('Click a timecode to jump there; click the text to edit it. Clearing the text removes the line. Undo with ⌘Z.')}</p>
-          <div className="cc-cap-cue-list">
+        <div className="ln-cap-cues">
+          <p className="ln-cap-hint">{t('Click a timecode to jump there; click the text to edit it. Clearing the text removes the line. Undo with ⌘Z.')}</p>
+          <div className="ln-cap-cue-list">
             {rows.map((cue, k) => (
-              <div key={`${cue.start}_${k}`} className="cc-cap-cue-row">
+              <div key={`${cue.start}_${k}`} className="ln-cap-cue-row">
                 <button
                   type="button"
                   onClick={() => onSeekMs?.(cue.start)}
                   title={t('Jump to this line')}
-                  className="cc-cap-cue-time"
+                  className="ln-cap-cue-time"
                 >
                   {fmtCueMs(cue.start)}
                 </button>
                 {editIdx === k ? (
-                  <div className="cc-cap-cue-edit">
+                  <div className="ln-cap-cue-edit">
                     <textarea
                       value={draft}
                       autoFocus
@@ -73,14 +73,14 @@ export function CaptionCueEditor({ captions, items, fps, onUpdate, onSeekMs }: C
                         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); save(k, draft); }
                         if (e.key === 'Escape') setEditIdx(null);
                       }}
-                      className="cc-cap-input cc-cap-textarea active"
+                      className="ln-cap-input ln-cap-textarea active"
                     />
-                    <div className="cc-cap-cue-actions">
-                      <button type="button" className="cc-cap-btn primary sm" onClick={() => save(k, draft)}>{t('Save')}</button>
-                      <button type="button" className="cc-cap-btn sm" onClick={() => setEditIdx(null)}>{t('Cancel')}</button>
+                    <div className="ln-cap-cue-actions">
+                      <button type="button" className="ln-cap-btn primary sm" onClick={() => save(k, draft)}>{t('Save')}</button>
+                      <button type="button" className="ln-cap-btn sm" onClick={() => setEditIdx(null)}>{t('Cancel')}</button>
                       <button
                         type="button"
-                        className="cc-cap-btn sm ghost"
+                        className="ln-cap-btn sm ghost"
                         title={t('Hide this line (transcript words and timeline stay untouched)')}
                         onClick={() => save(k, '')}
                       >
@@ -91,7 +91,7 @@ export function CaptionCueEditor({ captions, items, fps, onUpdate, onSeekMs }: C
                 ) : (
                   <button
                     type="button"
-                    className="cc-cap-cue-text"
+                    className="ln-cap-cue-text"
                     title={t('Click to edit this caption line')}
                     onClick={() => { setEditIdx(k); setDraft(cue.text); }}
                   >

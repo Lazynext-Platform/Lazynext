@@ -265,7 +265,7 @@ async function buildFilmstrip(file: string, probeResult: Probe, out: string, sig
   const cellWidth = Math.max(24, Math.min(160, Math.round(STRIP_HEIGHT * aspect))) & ~1;
   const desiredFrames = Math.max(MIN_STRIP_FRAMES, Math.min(MAX_STRIP_FRAMES, Math.round(seconds / SECONDS_PER_STRIP_FRAME)));
   const frameCount = Math.min(desiredFrames, Math.floor(MAX_STRIP_WIDTH / cellWidth));
-  const work = await mkdtemp(join(tmpdir(), 'cc-strip-'));
+  const work = await mkdtemp(join(tmpdir(), 'ln-strip-'));
   try {
     const cells = Array.from({ length: frameCount }, (_, index) => ({
       time: ((index + 0.5) / frameCount) * seconds,

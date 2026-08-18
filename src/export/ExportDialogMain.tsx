@@ -18,14 +18,14 @@ function RenderBadge({ tab, renderEngine, engine, reason }: {
     : engine ? t(engine.label)
       : renderEngine === 'checking' ? t('Checking this device') : t('Adaptive local');
   const accelerated = tab !== 'video' || engine?.hardware;
-  return <span className={`cc-export-local-badge${accelerated ? ' accelerated' : ''}`} title={reason ? t(reason) : undefined}><i />{label}</span>;
+  return <span className={`ln-export-local-badge${accelerated ? ' accelerated' : ''}`} title={reason ? t(reason) : undefined}><i />{label}</span>;
 }
 
 function ExportMainHeader({ model }: { model: ExportDialogModel }) {
   const t = useT();
   const activeTab = EXPORT_TABS.find((entry) => entry.key === model.tab) ?? EXPORT_TABS[0];
   return (
-    <div className="cc-export-main-header">
+    <div className="ln-export-main-header">
       <div><h3>{t(activeTab.label)}</h3><p>{activeTab.summary}</p></div>
       <RenderBadge tab={model.tab} renderEngine={model.workflow.renderEngine}
         engine={model.workflow.engineInfo} reason={model.workflow.engineReason} />
@@ -38,8 +38,8 @@ function BackgroundExportJobs({ model }: { model: ExportDialogModel }) {
   const { jobs, selectedJobId, viewJob, cancelJob } = model.workflow;
   if (jobs.length === 0) return null;
   return (
-    <section className="cc-export-progress" aria-label={t('Background export tasks')}>
-      <div className="cc-export-progress-head">
+    <section className="ln-export-progress" aria-label={t('Background export tasks')}>
+      <div className="ln-export-progress-head">
         <strong>{t('Background export')}</strong>
         <span>{jobs.length}</span>
       </div>
@@ -48,7 +48,7 @@ function BackgroundExportJobs({ model }: { model: ExportDialogModel }) {
           || job.progress.phase === 'failed'
           || job.progress.phase === 'cancelled';
         return (
-          <div className="cc-export-progress-meta" key={job.id}>
+          <div className="ln-export-progress-meta" key={job.id}>
             <button type="button" onClick={() => viewJob(job.id)}
               aria-pressed={selectedJobId === job.id}>
               {job.label} · {job.progress.phase} · {job.progress.percent}%
@@ -66,10 +66,10 @@ function BackgroundExportJobs({ model }: { model: ExportDialogModel }) {
 function StructuredExportFailure({ model }: { model: ExportDialogModel }) {
   const failure = model.workflow.failure;
   if (!failure) return model.workflow.error
-    ? <p className="cc-export-error">{model.workflow.error}</p>
+    ? <p className="ln-export-error">{model.workflow.error}</p>
     : null;
   return (
-    <div className="cc-export-error" role="alert">
+    <div className="ln-export-error" role="alert">
       <strong>{failure.message}</strong>
       <div>{failure.stage} · {failure.code} · {failure.retryable ? 'retryable' : 'not retryable'}</div>
       <div>cleanup: {failure.cleanupStatus}</div>
@@ -90,10 +90,10 @@ function StructuredExportFailure({ model }: { model: ExportDialogModel }) {
 export function ExportDialogMain({ state, model }: { state: TimelineState; model: ExportDialogModel }) {
   const { workflow } = model;
   return (
-    <main className="cc-export-main">
+    <main className="ln-export-main">
       <ExportMainHeader model={model} />
-      <div className="cc-export-content" role="tabpanel" id={`cc-export-content-${model.tab}`}
-        aria-labelledby={`cc-export-tab-${model.tab}`}>
+      <div className="ln-export-content" role="tabpanel" id={`ln-export-content-${model.tab}`}
+        aria-labelledby={`ln-export-tab-${model.tab}`}>
         <ExportTabContent
           tab={model.tab} state={state} video={model.video} subtitles={model.subtitles}
           busy={!!workflow.busy} enabled={workflow.autoQaEnabled} qa={workflow.qa}

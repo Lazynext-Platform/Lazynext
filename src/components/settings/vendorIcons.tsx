@@ -110,12 +110,12 @@ export function VendorIcon({ vendor, size = 18 }: VendorIconProps) {
  const icon = SVG_ICONS[vendor];
  if (icon) {
  const style: CSSProperties = {
- // lobe SVG is 1em×1em → fontSize is the size; simple-icons are normalized by .cc-vendor-icon CSS
+ // lobe SVG is 1em×1em → fontSize is the size; simple-icons are normalized by .ln-vendor-icon CSS
  fontSize: size, width: size, height: size, color: icon.tint,
  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flex: '0 0 auto',
  };
  // Static codebase assets, non-user input - inline to inherit size and currentColor
- return <span aria-hidden className="cc-vendor-icon" style={style} dangerouslySetInnerHTML={{ __html: icon.svg }} />;
+ return <span aria-hidden className="ln-vendor-icon" style={style} dangerouslySetInnerHTML={{ __html: icon.svg }} />;
  }
  const brand = MONOGRAMS[vendor] ?? { bg: '#555', mono: '?' };
  const style: CSSProperties = {

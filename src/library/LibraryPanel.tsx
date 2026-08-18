@@ -192,11 +192,11 @@ export function LibraryPanel({ semanticScopeId, templates, onAddTemplate, onAddA
   };
 
   return (
-    <section className="cc-library-panel">
-      <div className="cc-main-tabs">
+    <section className="ln-library-panel">
+      <div className="ln-main-tabs">
         {MAIN_TABS.map((tab) => (
           <button key={tab} onClick={() => { setExtensionOpen(false); setMainTab(tab); }}
-            className={`cc-main-tab${mainTab === tab ? ' selected' : ''}`}>{t(tab)}</button>
+            className={`ln-main-tab${mainTab === tab ? ' selected' : ''}`}>{t(tab)}</button>
         ))}
       </div>
       {extensionOpen ? (
@@ -208,11 +208,11 @@ export function LibraryPanel({ semanticScopeId, templates, onAddTemplate, onAddA
           <TranscriptPanel playerRef={playerRef} fps={fps} items={items} trackOptions={trackOptions} onSetItemTranscript={onSetItemTranscript} onToggleWord={onToggleWord} onCleanScript={onCleanScript} onSetGapCap={onSetGapCap} onSetTranscriptPlayOrder={onSetTranscriptPlayOrder} onReorderTrackItems={onReorderTrackItems} onClearEdits={onClearEdits} onImportSrt={(file) => { void importSrt(file); }} onOpenCaptionStyles={openCaptionStyles} />
         </div>
       ) : isSequences ? (
-        <div className="cc-sequence-panel">
-          <div className="cc-sequence-hint">
+        <div className="ln-sequence-panel">
+          <div className="ln-sequence-hint">
             {t('Click to add the sequence as a reference instance to the current timeline; modifying a sub-sequence syncs to all instances.')}
           </div>
-          <div className="cc-sequence-list">
+          <div className="ln-sequence-list">
             {sequenceOptions.map((option) => (
               <button
                 key={option.id}
@@ -220,10 +220,10 @@ export function LibraryPanel({ semanticScopeId, templates, onAddTemplate, onAddA
                 disabled={!!option.disabledReason}
                 title={option.disabledReason}
                 onClick={() => onAddSequence(option.id)}
-                className="cc-sequence-row"
+                className="ln-sequence-row"
               >
-                <span className="cc-sequence-name">{localizeDefaultSequenceName(option.name, t)}</span>
-                <span className="cc-sequence-duration">{(option.durationInFrames / fps).toFixed(1)}s</span>
+                <span className="ln-sequence-name">{localizeDefaultSequenceName(option.name, t)}</span>
+                <span className="ln-sequence-duration">{(option.durationInFrames / fps).toFixed(1)}s</span>
               </button>
             ))}
           </div>
@@ -279,7 +279,7 @@ export function LibraryPanel({ semanticScopeId, templates, onAddTemplate, onAddA
         ) : showSfx ? (
           <SoundBrowser fps={fps} onAdd={onAddAudio} />
         ) : subTab === 'Transitions' ? (
-          <div className="cc-transition-browser">
+          <div className="ln-transition-browser">
             {/* Audio crossfade — trAudioCrossFade; highlighting available when audio clip is selected*/}
             <div style={{ marginBottom: 14 }}>
               <div style={{ fontSize: 11, color: theme.textDim, margin: '0 4px 8px', letterSpacing: 0.3 }}>

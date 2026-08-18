@@ -62,21 +62,21 @@ export function CaptionsControls({
   }, [captions?.translationLang]);
 
   return (
-    <div className="cc-cap-panel open standalone">
+    <div className="ln-cap-panel open standalone">
       {!captions && (
-        <div className="cc-cap-empty">
-          <div className="cc-cap-empty-actions">
-            <button type="button" className="cc-cap-btn primary" onClick={onCreateManual}>{t('Add captions manually')}</button>
+        <div className="ln-cap-empty">
+          <div className="ln-cap-empty-actions">
+            <button type="button" className="ln-cap-btn primary" onClick={onCreateManual}>{t('Add captions manually')}</button>
           </div>
-          <p className="cc-cap-hint">{t('Open "Caption styles" from Transcript, or add independent captions manually here.')}</p>
+          <p className="ln-cap-hint">{t('Open "Caption styles" from Transcript, or add independent captions manually here.')}</p>
         </div>
       )}
 
       {captions && (
-        <div className="cc-cap-body">
+        <div className="ln-cap-body">
           {/* Show / Hide - most visible */}
-          <div className="cc-cap-row main">
-            <label className="cc-cap-toggle">
+          <div className="ln-cap-row main">
+            <label className="ln-cap-toggle">
               <input
                 type="checkbox"
                 checked={captions.enabled}
@@ -84,21 +84,21 @@ export function CaptionsControls({
               />
               <span>{captions.enabled ? t('Captions showing in preview') : t('Captions hidden')}</span>
             </label>
-            <div className="cc-cap-row-actions">
+            <div className="ln-cap-row-actions">
               {!captions.enabled && (
-                <button type="button" className="cc-cap-btn sm" onClick={() => onUpdate({ enabled: true })}>
+                <button type="button" className="ln-cap-btn sm" onClick={() => onUpdate({ enabled: true })}>
                   {t('Show')}
                 </button>
               )}
               {captions.enabled && (
-                <button type="button" className="cc-cap-btn sm" onClick={() => onUpdate({ enabled: false })}>
+                <button type="button" className="ln-cap-btn sm" onClick={() => onUpdate({ enabled: false })}>
                   {t('Hide')}
                 </button>
               )}
               {onRemove && (
                 <button
                   type="button"
-                  className="cc-cap-btn sm ghost"
+                  className="ln-cap-btn sm ghost"
                   title={t('Remove captions from the project')}
                   onClick={onRemove}
                 >
@@ -108,13 +108,13 @@ export function CaptionsControls({
             </div>
           </div>
           {!captions.enabled && (
-            <p className="cc-cap-hint warn">{t('Captions are off — neither preview nor export will burn them in. Click "Show" or tick the box to bring them back.')}</p>
+            <p className="ln-cap-hint warn">{t('Captions are off — neither preview nor export will burn them in. Click "Show" or tick the box to bring them back.')}</p>
           )}
 
           {/* Style: color block + Chinese name */}
-          <div className="cc-cap-field">
-            <div className="cc-cap-label">{t('Style')}</div>
-            <div className="cc-cap-styles" role="listbox" aria-label={t('Caption styles')}>
+          <div className="ln-cap-field">
+            <div className="ln-cap-label">{t('Style')}</div>
+            <div className="ln-cap-styles" role="listbox" aria-label={t('Caption styles')}>
               {CAPTION_STYLES.map((s) => {
                 const active = captions.template === s.id;
                 return (
@@ -123,7 +123,7 @@ export function CaptionsControls({
                     type="button"
                     role="option"
                     aria-selected={active}
-                    className={`cc-cap-style${active ? ' selected' : ''}`}
+                    className={`ln-cap-style${active ? ' selected' : ''}`}
                     title={`${t(s.labelZh)} — ${t(s.hint)} · ${t('Drag onto the preview to create a caption anywhere')}`}
                     onClick={() => onUpdate(captionTemplatePatch(captions, s.id as CaptionTemplate))}
                     onPointerDown={(event) => {
@@ -132,7 +132,7 @@ export function CaptionsControls({
                     }}
                   >
                     <span
-                      className="cc-cap-swatch"
+                      className="ln-cap-swatch"
                       style={{
                         color: s.color,
                         background: s.highlightBackground ?? '#1a1a1a',
@@ -141,30 +141,30 @@ export function CaptionsControls({
                     >
                       {t('C')}
                     </span>
-                    <span className="cc-cap-style-name">{t(s.labelZh)}</span>
+                    <span className="ln-cap-style-name">{t(s.labelZh)}</span>
                   </button>
                 );
               })}
             </div>
-            {style && <p className="cc-cap-hint">{t(style.labelZh)}：{t(style.hint)} · {t('Drag onto the preview to create and edit a caption anywhere')}</p>}
+            {style && <p className="ln-cap-hint">{t(style.labelZh)}：{t(style.hint)} · {t('Drag onto the preview to create and edit a caption anywhere')}</p>}
           </div>
 
           {/* Rhythm*/}
-          <div className="cc-cap-field">
-            <div className="cc-cap-label">{t('Pacing')}</div>
-            <div className="cc-cap-pills">
+          <div className="ln-cap-field">
+            <div className="ln-cap-label">{t('Pacing')}</div>
+            <div className="ln-cap-pills">
               {PACINGS.map((p) => (
                 <button
                   key={p.v}
                   type="button"
-                  className={`cc-cap-pill${captions.pacing === p.v ? ' selected' : ''}`}
+                  className={`ln-cap-pill${captions.pacing === p.v ? ' selected' : ''}`}
                   onClick={() => onUpdate({ pacing: p.v })}
                 >
                   {t(p.label)}
                 </button>
               ))}
             </div>
-            <p className="cc-cap-hint">{t(pacingMeta.hint)}</p>
+            <p className="ln-cap-hint">{t(pacingMeta.hint)}</p>
           </div>
 
           <CaptionMotionControls
@@ -177,44 +177,44 @@ export function CaptionsControls({
           {/* caption language (text variant): Change the main caption line to a translation/correction variant, leaving the timeline unchanged.
 Variants are generated by Agent's manage_transcript translate. Here you only select which one to display.*/}
           {sourceVariants.length > 0 && (
-            <div className="cc-cap-field">
-              <div className="cc-cap-label">{t('Caption language (text variant)')}</div>
+            <div className="ln-cap-field">
+              <div className="ln-cap-label">{t('Caption language (text variant)')}</div>
               <select
                 value={captions.captionVariantId ?? ''}
                 onChange={(e) => onUpdate({ captionVariantId: e.target.value || undefined })}
-                className="cc-cap-select"
+                className="ln-cap-select"
               >
                 <option value="">{t('Original (source)')}</option>
                 {sourceVariants.map((v) => (
                   <option key={v.id} value={v.id}>{v.label}</option>
                 ))}
               </select>
-              <p className="cc-cap-hint">{t('Switch the language of the main caption line. Translations swap text only — word timing/frames still come from the source.')}</p>
+              <p className="ln-cap-hint">{t('Switch the language of the main caption line. Translations swap text only — word timing/frames still come from the source.')}</p>
             </div>
           )}
 
           {/* Bilingual: folded, translated into English by default*/}
-          <div className="cc-cap-bilingual">
+          <div className="ln-cap-bilingual">
             <button
               type="button"
-              className="cc-cap-bilingual-toggle"
+              className="ln-cap-bilingual-toggle"
               onClick={() => setBilingualOpen((v) => !v)}
               aria-expanded={bilingualOpen}
             >
               <span>{t('Bilingual second line (optional)')}</span>
-              <span className="cc-cap-hint">{bilingualOpen ? t('Collapse') : t('Expand')}</span>
+              <span className="ln-cap-hint">{bilingualOpen ? t('Collapse') : t('Expand')}</span>
             </button>
             {bilingualOpen && (
-              <div className="cc-cap-bilingual-body">
-                <p className="cc-cap-hint">
+              <div className="ln-cap-bilingual-body">
+                <p className="ln-cap-hint">
                   {t('The first line stays the original (Chinese voiceover). The second line is a ')}<strong>{t('translation')}</strong>{t(' — pick a target language (not Chinese).')}
                 </p>
-                <div className="cc-cap-translate-row">
+                <div className="ln-cap-translate-row">
                   <select
                     value={translateLang}
                     disabled={translating}
                     onChange={(e) => onTranslate(e.target.value)}
-                    className="cc-cap-select"
+                    className="ln-cap-select"
                   >
                     {TRANSLATE_TO.map((l) => (
                       <option key={l.id} value={l.id}>{t(l.label)}（{l.id}）</option>
@@ -222,7 +222,7 @@ Variants are generated by Agent's manage_transcript translate. Here you only sel
                   </select>
                   <button
                     type="button"
-                    className="cc-cap-btn primary sm"
+                    className="ln-cap-btn primary sm"
                     disabled={translating}
                     onClick={() => onTranslate(translateLang)}
                   >
@@ -230,7 +230,7 @@ Variants are generated by Agent's manage_transcript translate. Here you only sel
                   </button>
                 </div>
                 {captions.translation && (
-                  <label className="cc-cap-toggle">
+                  <label className="ln-cap-toggle">
                     <input
                       type="checkbox"
                       checked={!!captions.bilingual}
@@ -239,7 +239,7 @@ Variants are generated by Agent's manage_transcript translate. Here you only sel
                     <span>{t('Show translated second line ({lang})', { lang: captions.translationLang ?? translateLang })}</span>
                   </label>
                 )}
-                {translateError && <div className="cc-cap-error">{translateError}</div>}
+                {translateError && <div className="ln-cap-error">{translateError}</div>}
               </div>
             )}
           </div>

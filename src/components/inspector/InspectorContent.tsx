@@ -71,11 +71,11 @@ export function InspectorContent(props: InspectorContentProps) {
       <InspectorTabBar id={tabGroupId} activeTab={visibleTab} available={available} onChange={onTabChange} />
       <div
         id={`${tabGroupId}-panel`}
-        className="cc-insp-body"
+        className="ln-insp-body"
         role="tabpanel"
         aria-labelledby={`${tabGroupId}-${visibleTab}-tab`}
       >
-        <div className="cc-insp-groups">
+        <div className="ln-insp-groups">
           <InspectorHint item={item} count={panel.selectedItems.length} />
           <InspectorTabContent {...props} activeTab={visibleTab} />
         </div>
@@ -99,7 +99,7 @@ function InspectorTabBar({ id, activeTab, available, onChange }: {
     requestAnimationFrame(() => document.getElementById(`${id}-${next}-tab`)?.focus());
   };
   return (
-    <div className="cc-insp-tabs" role="tablist" aria-label={t('Property categories')}>
+    <div className="ln-insp-tabs" role="tablist" aria-label={t('Property categories')}>
       {TAB_DEFS.map((tab) => <button
         id={`${id}-${tab.id}-tab`}
         key={tab.id}
@@ -189,7 +189,7 @@ function VideoTab({ panel, item }: InspectorContentProps) {
         saturate: isMixed(panel, (entry) => entry.filters?.saturate ?? 1),
         blur: isMixed(panel, (entry) => entry.filters?.blur ?? 0),
       }} onChange={panel.onItemFiltersChange} autoGrade={panel.autoGrade} />
-      {(item.kind === 'video' || item.kind === 'image') && panel.selectedItems.every((entry) => entry.kind === 'video' || entry.kind === 'image') && <><SectionLabel>{t('Effects')}</SectionLabel>{effectsMixed ? <div className="cc-insp-muted">{t('Selected clips have different effect stacks; unify the stacks before batch editing.')}</div> : <EffectsControl item={item} onChange={panel.onItemEffectsChange} previewStatus={panel.selectedPreviewStatuses?.find((status) => status.kind === 'effect' && status.targetId === item.id)} />}</>}
+      {(item.kind === 'video' || item.kind === 'image') && panel.selectedItems.every((entry) => entry.kind === 'video' || entry.kind === 'image') && <><SectionLabel>{t('Effects')}</SectionLabel>{effectsMixed ? <div className="ln-insp-muted">{t('Selected clips have different effect stacks; unify the stacks before batch editing.')}</div> : <EffectsControl item={item} onChange={panel.onItemEffectsChange} previewStatus={panel.selectedPreviewStatuses?.find((status) => status.kind === 'effect' && status.targetId === item.id)} />}</>}
     </>
   );
 }
@@ -235,7 +235,7 @@ function SolidColorField({ item, mixed, onChange }: { item: TimelineItem; mixed?
   return (
     <>
       <SectionLabel>{t('Solid')}</SectionLabel>
-      <label className="cc-insp-mg-field">
+      <label className="ln-insp-mg-field">
         <span>{t('Fill Color')}{mixed ? ' —' : ''}</span>
         <input type="color" value={String(item.props?.color ?? '#1a1a1a')} onChange={(event) => onChange('color', event.target.value)} />
       </label>
@@ -250,11 +250,11 @@ function MotionGraphicFields({ item, schema, mixed, onChange }: {
   onChange: (key: string, value: unknown) => void;
 }) {
   const t = useT();
-  if (schema.length === 0) return <div className="cc-insp-muted">{t('This template has no editable properties.')}</div>;
+  if (schema.length === 0) return <div className="ln-insp-muted">{t('This template has no editable properties.')}</div>;
   return (
-    <div className="cc-insp-mg-grid">
+    <div className="ln-insp-mg-grid">
       {groupInspectorPropSchema(schema).map((group, groupIndex) => group.kind === 'color-row'
-        ? <div className="cc-insp-color-row" key={`color-row:${groupIndex}`}>
+        ? <div className="ln-insp-color-row" key={`color-row:${groupIndex}`}>
           {group.fields.map((field) => <PropSchemaField
             key={field.key}
             spec={field}
@@ -289,9 +289,9 @@ function InspectorHint({ item, count }: { item: TimelineItem; count: number }) {
   };
   const sourceBacked = ['audio', 'video', 'image', 'gif', 'svg'].includes(item.kind);
   return (
-    <div className="cc-insp-scope">
+    <div className="ln-insp-scope">
       {count > 1 && <strong>{t('{n} clips selected', { n: count })}</strong>}
-      <span className="cc-insp-scope-kind">{t(labels[item.kind] ?? 'Clip')}</span>
+      <span className="ln-insp-scope-kind">{t(labels[item.kind] ?? 'Clip')}</span>
       <span>{sourceBacked
         ? t('Affects only this timeline clip; the source file in the media pool is unchanged.')
         : t('Affects only this timeline clip.')}</span>

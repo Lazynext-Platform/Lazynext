@@ -9,7 +9,7 @@ for (const label of ['Upload media', 'Sort', 'Filter', 'More actions']) {
 }
 assert.match(toolbar, /data-tip=\{t\(mediaViewToggleLabel\(props\.view\)\)\}/, 'view toggle tooltip');
 assert.match(semantic, /data-tip=\{t\('Local semantic search'\)\}/, 'local search');
-assert.doesNotMatch(toolbar, /className=\{?`?[^\n]*cc-media-icon[^\n]*\stitle=/, 'mediatooldependencydelay title');
-assert.doesNotMatch(semantic, /className=\{?`?[^\n]*cc-media-icon[^\n]*\stitle=/, 'searchdependencydelay title');
+assert.doesNotMatch(toolbar, /className=\{?`?[^\n]*ln-media-icon[^\n]*\stitle=/, 'mediatooldependencydelay title');
+assert.doesNotMatch(semantic, /className=\{?`?[^\n]*ln-media-icon[^\n]*\stitle=/, 'searchdependencydelay title');
 
 console.log('media toolbar immediate tooltips verified');

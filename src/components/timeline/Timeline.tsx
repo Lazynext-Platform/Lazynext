@@ -57,8 +57,8 @@ export function Timeline(props: TimelineProps) {
 
  return (
  <section
- className="cc-timeline"
- data-cc-shortcut-surface="timeline"
+ className="ln-timeline"
+ data-ln-shortcut-surface="timeline"
  tabIndex={-1}
  onPointerDownCapture={(event) => {
  if (!(event.target as HTMLElement).closest('button, input, select, textarea, [contenteditable=true]')) {
@@ -143,7 +143,7 @@ The playhead line/triangle is pointerEvents:none, click it to click the ruler - 
  const customName = config.name || undefined;
  const deletePlan = trackDeletePlan(state, trackId);
  return (
- <div key={trackId} className="cc-track-row" style={{ height: rowHeightOf(trackId), background: isDropTarget ? `color-mix(in srgb, ${theme.success} 15%, ${theme.bg})` : undefined }}>
+ <div key={trackId} className="ln-track-row" style={{ height: rowHeightOf(trackId), background: isDropTarget ? `color-mix(in srgb, ${theme.success} 15%, ${theme.bg})` : undefined }}>
  <TrackHead
  trackId={trackId} kind={meta.kind} trackName={titleName} customName={customName} config={headConfig}
  deleteBlockedReason={deletePlan.blockedReason}
@@ -191,7 +191,7 @@ The playhead line/triangle is pointerEvents:none, click it to click the ruler - 
  onDropExternalFiles={onDropExternalFiles}
  frameFromClientX={frameFromClientX}
  isOverChatComposer={(clientX, clientY) => {
- const composer = document.querySelector<HTMLElement>('[data-cc-chat-composer]');
+ const composer = document.querySelector<HTMLElement>('[data-ln-chat-composer]');
  return composer ? isTimelineDragOverChat(clientX, clientY, composer.getBoundingClientRect()) : false;
  }}
  onAddSelectionToChat={(selection) => {
@@ -245,13 +245,13 @@ The playhead line/triangle is pointerEvents:none, click it to click the ruler - 
 
  {/* snap guide appears while a drag edge is locked onto a target */}
  {drag && drag.snapAt !== null && (
- <div className="cc-snap-guide" style={{ position: 'absolute', top: 0, left: HEADER_W + drag.snapAt * px, height: RULER_H + tracksHeight }} />
+ <div className="ln-snap-guide" style={{ position: 'absolute', top: 0, left: HEADER_W + drag.snapAt * px, height: RULER_H + tracksHeight }} />
  )}
 
  {hoverPreviewFrame !== null && (
  <div
  aria-hidden
- className="cc-timeline-hover-guide"
+ className="ln-timeline-hover-guide"
  style={{ left: HEADER_W + hoverPreviewFrame * px, height: RULER_H + tracksHeight }}
  />
  )}
@@ -271,7 +271,7 @@ The playhead line/triangle is pointerEvents:none, click it to click the ruler - 
  {/* playhead GPU layer + rAF-coalesced updates for smoother scrub/play */}
  <div
  ref={playheadLineRef}
- className="cc-playhead"
+ className="ln-playhead"
  style={{
  position: 'absolute', top: 0, left: 0,
  transform: `translate3d(${HEADER_W + playheadRef.current * px}px,0,0)`,
@@ -281,7 +281,7 @@ The playhead line/triangle is pointerEvents:none, click it to click the ruler - 
  zIndex: 30,
  }}
  >
- <div className="cc-playhead-handle" style={{ transform: 'translateX(-6px)', width: 13, height: 11, clipPath: 'polygon(0 0, 100% 0, 50% 100%)' }} />
+ <div className="ln-playhead-handle" style={{ transform: 'translateX(-6px)', width: 13, height: 11, clipPath: 'polygon(0 0, 100% 0, 50% 100%)' }} />
  </div>
  </div>
  </div>

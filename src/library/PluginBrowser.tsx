@@ -74,13 +74,13 @@ export function EnvelopeThumb({
 
   return (
     <div
-      className={`cc-live-thumb${active ? ' is-playing' : ''}`}
+      className={`ln-live-thumb${active ? ' is-playing' : ''}`}
       onPointerEnter={() => setLocalHover(true)}
       onPointerLeave={() => setLocalHover(false)}
     >
       <canvas
         ref={canvasRef}
-        className="cc-live-thumb-canvas always-on"
+        className="ln-live-thumb-canvas always-on"
         width={SAMPLE_W}
         height={SAMPLE_H}
         aria-hidden

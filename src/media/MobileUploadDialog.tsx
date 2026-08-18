@@ -43,14 +43,14 @@ function SessionBody({ session, imported }: { session: MobileUploadSession; impo
     void navigator.clipboard.writeText(selectedUrl)
       .catch(() => { window.prompt(t('Copy failed. Copy the link manually.'), selectedUrl); });
   };
-  return <div className="cc-mobile-upload-body">
-    <div className="cc-mobile-upload-qr">{qrDataUrl ? <img src={qrDataUrl} alt={t('Phone upload QR code')} /> : <span>{t(qrError ? 'Could not generate the QR code. Copy the link instead.' : 'Generating QR code…')}</span>}</div>
-    <div className="cc-mobile-upload-instructions">
+  return <div className="ln-mobile-upload-body">
+    <div className="ln-mobile-upload-qr">{qrDataUrl ? <img src={qrDataUrl} alt={t('Phone upload QR code')} /> : <span>{t(qrError ? 'Could not generate the QR code. Copy the link instead.' : 'Generating QR code…')}</span>}</div>
+    <div className="ln-mobile-upload-instructions">
       <ol><li>{t('Connect your phone and computer to the same Wi-Fi')}</li><li>{t('Scan the QR code with your phone camera')}</li><li>{t('Choose media; completed uploads appear in the media pool automatically')}</li></ol>
       {session.urls.length > 1 && <label>{t('Local network address')}<select value={selectedUrl} onChange={(event) => setSelectedUrl(event.target.value)}>{session.urls.map((url) => <option key={url} value={url}>{new URL(url).host}</option>)}</select></label>}
-      <div className="cc-mobile-upload-link"><code>{selectedUrl}</code><button type="button" onClick={copyLink}>{t('Copy link')}</button></div>
+      <div className="ln-mobile-upload-link"><code>{selectedUrl}</code><button type="button" onClick={copyLink}>{t('Copy link')}</button></div>
       <p>{seconds > 0 ? t('Channel closes in {seconds} seconds', { seconds }) : t('The upload channel expired. Close and try again.')}</p>
-      <div className="cc-mobile-upload-count"><span className="cc-mobile-upload-live" />{t('{n} media files received and imported', { n: imported })}</div>
+      <div className="ln-mobile-upload-count"><span className="ln-mobile-upload-live" />{t('{n} media files received and imported', { n: imported })}</div>
     </div>
   </div>;
 }
@@ -69,12 +69,12 @@ export function MobileUploadDialog({ onClose, onImport }: MobileUploadDialogProp
     setClosing(true);
     void finish().finally(onClose);
   };
-  return <div className="cc-modal-backdrop" role="dialog" aria-modal="true" aria-label={t('Upload from phone')} onClick={close}>
-    <div className="cc-mobile-upload-dialog" onClick={(event) => event.stopPropagation()}>
+  return <div className="ln-modal-backdrop" role="dialog" aria-modal="true" aria-label={t('Upload from phone')} onClick={close}>
+    <div className="ln-mobile-upload-dialog" onClick={(event) => event.stopPropagation()}>
       <DialogHeader close={close} />
-      {!session && !error && <div className="cc-mobile-upload-loading">{t('Opening a local network upload channel…')}</div>}
+      {!session && !error && <div className="ln-mobile-upload-loading">{t('Opening a local network upload channel…')}</div>}
       {session && <SessionBody session={session} imported={imported} />}
-      {error && <div className="cc-mobile-upload-error">{t('Phone upload unavailable: {error}', { error })}</div>}
+      {error && <div className="ln-mobile-upload-error">{t('Phone upload unavailable: {error}', { error })}</div>}
       <footer><span>{t('Only media upload is temporarily available for this session. The editor and API keys remain private.')}</span><button type="button" disabled={closing} onClick={close}>{closing ? t('Finishing imports…') : t('Done')}</button></footer>
     </div>
   </div>;

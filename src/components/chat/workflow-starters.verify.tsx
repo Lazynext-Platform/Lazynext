@@ -76,19 +76,19 @@ try {
  await vite.close();
 }
 
-assert.match(pickerMarkup, /<div class="cc-creative-mode-grid">/, 'professional workflows should use the dedicated two-column grid');
+assert.match(pickerMarkup, /<div class="ln-creative-mode-grid">/, 'professional workflows should use the dedicated two-column grid');
 assert.equal(
- (pickerMarkup.match(/class="cc-creative-mode-row cc-creative-mode-card"/g) ?? []).length,
+ (pickerMarkup.match(/class="ln-creative-mode-row ln-creative-mode-card"/g) ?? []).length,
  10,
  'every built-in workflow should render as an independently bordered card',
 );
 assert.equal((pickerMarkup.match(/aria-pressed="true"/g) ?? []).length, 1, 'exactly one workflow should expose selected state');
 assert.match(pickerMarkup, /workflow/);
 assert.match(pickerMarkup, /aria-pressed/);
-assert.match(pendingComposerMarkup, /cc-chat/);
+assert.match(pendingComposerMarkup, /ln-chat/);
 assert.match(pendingComposerMarkup, /import-status/, 'pending attachment reason should be visible');
-assert.match(pendingComposerMarkup, /aria-describedby="cc-chat-composer-import-status"/, 'textarea should describe its pending gate');
-const pendingSubmitButton = pendingComposerMarkup.match(/<button[^>]*class="cc-chat-send-btn"[^>]*>/)?.[0];
+assert.match(pendingComposerMarkup, /aria-describedby="ln-chat-composer-import-status"/, 'textarea should describe its pending gate');
+const pendingSubmitButton = pendingComposerMarkup.match(/<button[^>]*class="ln-chat-send-btn"[^>]*>/)?.[0];
 assert.ok(pendingSubmitButton, 'pending composer should render the submit button');
 assert.match(pendingSubmitButton, /\bdisabled(?:=""|(?=[\s>]))/, 'pending attachments should disable the submit button');
 

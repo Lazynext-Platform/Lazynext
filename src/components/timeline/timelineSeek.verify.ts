@@ -146,7 +146,7 @@ const timelineSource = readFileSync(new URL('./Timeline.tsx', import.meta.url), 
 assert.match(timelineSource, /onPointerDownCapture=\{startSeekGesture\}/);
 const controllerSource = readFileSync(new URL('./useTimelineController.ts', import.meta.url), 'utf8');
 assert.match(controllerSource, /onHoverPreviewFrameChange\?\.\(frame\)/);
-assert.match(timelineSource, /className="cc-timeline-hover-guide"/);
+assert.match(timelineSource, /className="ln-timeline-hover-guide"/);
 
 const previewSource = readFileSync(new URL('../PreviewPanel.tsx', import.meta.url), 'utf8');
 assert.match(previewSource, /hoverPreviewFrame !== null/);

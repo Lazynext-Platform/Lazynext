@@ -28,7 +28,7 @@ export function ComposerPopover({
 
   useLayoutEffect(() => {
     if (!anchor) return;
-    const boundary = anchor.closest<HTMLElement>('[data-cc-chat-popover-boundary]');
+    const boundary = anchor.closest<HTMLElement>('[data-ln-chat-popover-boundary]');
     const place = () => {
       setBox(placeChatPopover({
         anchor: anchor.getBoundingClientRect(),
@@ -61,9 +61,9 @@ export function ComposerPopover({
   if (!box) return null;
   return (
     <>
-      <div className="cc-chat-popover-backdrop" onPointerDown={onClose} />
+      <div className="ln-chat-popover-backdrop" onPointerDown={onClose} />
       <div
-        className={`cc-chat-popover${className ? ` ${className}` : ''}`}
+        className={`ln-chat-popover${className ? ` ${className}` : ''}`}
         role="menu"
         aria-label={ariaLabel}
         style={{

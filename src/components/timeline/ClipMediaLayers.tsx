@@ -45,7 +45,7 @@ function WaveLayer({ geometry, height, path, strip, video }: {
   return (
     <svg
       aria-hidden
-      className={`cc-clip-wave${video ? ' on-video' : ''}`}
+      className={`ln-clip-wave${video ? ' on-video' : ''}`}
       viewBox={`0 0 ${geometry.widthPx.toFixed(1)} ${height.toFixed(1)}`}
       preserveAspectRatio="none"
       style={{

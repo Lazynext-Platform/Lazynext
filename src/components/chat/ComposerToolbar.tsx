@@ -59,14 +59,14 @@ export function ComposerToolbar({
   const secondaryActive = selecting || !!activeSkillName
     || pop === 'settings' || pop === 'assets' || pop === 'skill' || pop === 'templates';
   return (
-    <div className="cc-chat-composer-bar">
-      <div className="cc-chat-composer-bar-tools">
+    <div className="ln-chat-composer-bar">
+      <div className="ln-chat-composer-bar-tools">
         <button title={t('Mode')} onClick={(event) => onTogglePop('mode', event.currentTarget)}
-          className="cc-chat-mode-btn"
+          className="ln-chat-mode-btn"
           style={{ height: 28, display: 'flex', alignItems: 'center', gap: 3, padding: '0 3px', border: 0, borderRadius: 6, background: pop === 'mode' ? theme.panelAlt : 'transparent', color: theme.text, cursor: 'pointer', fontSize: 12, flexShrink: 0 }}>
-          <Icon name="sparkles" size={15} /><span className="cc-chat-mode-label">{mode === 'agent' ? 'Agent' : 'Q&A'}</span><Icon name="chevronDown" size={11} />
+          <Icon name="sparkles" size={15} /><span className="ln-chat-mode-label">{mode === 'agent' ? 'Agent' : 'Q&A'}</span><Icon name="chevronDown" size={11} />
         </button>
-        <button type="button" className="cc-chat-model-btn"
+        <button type="button" className="ln-chat-model-btn"
           disabled={running}
           title={activeModel
             ? `${t('Current model: {name}', { name: `${activeModel.providerLabel} · ${activeModel.model}` })} · ${contextTitle}`
@@ -78,7 +78,7 @@ export function ComposerToolbar({
           {contextLabel && <span style={{ fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap', fontSize: 10 }}>{contextLabel}</span>}
           <Icon name="chevronDown" size={10} />
         </button>
-        <span className="cc-composer-secondary">
+        <span className="ln-composer-secondary">
           <BarBtn icon="sliders" title={t('Settings')} active={pop === 'settings'} onClick={(event) => onTogglePop('settings', event.currentTarget)} />
           <BarBtn icon="cursor" title={t('Selection mode: click clips / drag canvas / select transcript as references')} active={selecting} onClick={onToggleSelecting} />
           <BarBtn icon="plus" title={t('Reference media-pool assets')} active={pop === 'assets'} onClick={(event) => onTogglePop('assets', event.currentTarget)} />
@@ -86,18 +86,18 @@ export function ComposerToolbar({
           <BarBtn icon="bookOpen" title={t('Reference template library')} active={pop === 'templates'} onClick={(event) => onTogglePop('templates', event.currentTarget)} />
           <BarBtn icon="sparkles" title={enhancing ? t('Enhancing…') : t('Enhance prompt')} disabled={!canEnhance} onClick={onEnhance} />
         </span>
-        <BarBtn icon="more" title={t('More tools')} className="cc-composer-more-btn"
+        <BarBtn icon="more" title={t('More tools')} className="ln-composer-more-btn"
           active={pop === 'more' || secondaryActive}
           expanded={pop === 'more'} hasPopup
           onClick={(event) => onTogglePop('more', event.currentTarget)} />
       </div>
       {running ? (
-        <button title={t('Stop')} onClick={onStop} className="cc-chat-send-btn"
+        <button title={t('Stop')} onClick={onStop} className="ln-chat-send-btn"
           style={{ width: 28, height: 28, borderRadius: '50%', border: 'none', background: theme.accent, cursor: 'pointer', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
           <span style={{ width: 10, height: 10, background: theme.onAccent, borderRadius: 2 }} />
         </button>
       ) : (
-        <button title={sendTitle} onClick={onSubmit} disabled={!canSend} className="cc-chat-send-btn"
+        <button title={sendTitle} onClick={onSubmit} disabled={!canSend} className="ln-chat-send-btn"
           style={{ width: 28, height: 28, borderRadius: '50%', border: 'none', background: canSend ? theme.accent : theme.border, color: canSend ? theme.onAccent : theme.textDim, cursor: canSend ? 'pointer' : 'default', display: 'grid', placeItems: 'center', lineHeight: 0, flexShrink: 0 }}>
           <Icon name="arrowUp" size={16} strokeWidth={2.2} />
         </button>
@@ -121,7 +121,7 @@ function MoreItem({ icon, label, active, disabled, onClick }: {
   icon: IconName; label: string; active?: boolean; disabled?: boolean; onClick: () => void;
 }) {
   return (
-    <button type="button" role="menuitem" className="cc-composer-more-item" disabled={disabled} onClick={onClick}>
+    <button type="button" role="menuitem" className="ln-composer-more-item" disabled={disabled} onClick={onClick}>
       <Icon name={icon} size={15} />
       <span>{label}</span>
       {active && <Icon name="check" size={12} />}
@@ -136,7 +136,7 @@ export function ComposerMoreMenu({
   const t = useT();
   const run = (action: () => void) => { onClose(); action(); };
   return (
-    <div className="cc-composer-more-menu" role="menu">
+    <div className="ln-composer-more-menu" role="menu">
       <MoreItem icon="sliders" label={t('Settings')} onClick={() => onChoosePopover('settings')} />
       <MoreItem icon="cursor" label={t('Select reference')} active={selecting} onClick={() => run(onToggleSelecting)} />
       <MoreItem icon="plus" label={t('Reference media-pool assets')} onClick={() => onChoosePopover('assets')} />

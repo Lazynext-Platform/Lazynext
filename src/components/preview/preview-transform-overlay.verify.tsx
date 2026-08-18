@@ -87,7 +87,7 @@ assert.match(
   assert.equal((markup.match(/data-preview-handle="scale-[0-3]"/g) ?? []).length, 4, 'scale');
   assert.equal((markup.match(/data-preview-handle="crop-[nsew]"/g) ?? []).length, 4, 'centerdot');
   assert.equal((markup.match(/data-preview-handle="rotate"/g) ?? []).length, 1, 'rotate');
-  assert.match(markup, /var\(--cc-accent\)/, 'colorcurrentcolor grading');
+  assert.match(markup, /var\(--ln-accent\)/, 'colorcurrentcolor grading');
 }
 
 // Locked and hidden tracks can never expose writable controls.

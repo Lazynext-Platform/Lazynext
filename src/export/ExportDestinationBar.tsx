@@ -19,9 +19,9 @@ export function ExportDestinationBar({
   const downloads = destination.type === 'downloads';
   const file = destination.type === 'browser-file' || destination.type === 'desktop-file';
   return (
-    <div className="cc-export-destination">
-      <span className="cc-export-destination-icon"><Icon name="folder" size={16} /></span>
-      <span className="cc-export-destination-copy">
+    <div className="ln-export-destination">
+      <span className="ln-export-destination-icon"><Icon name="folder" size={16} /></span>
+      <span className="ln-export-destination-copy">
         <small>{t('Save to')}</small>
         <strong title={destination.label}>{downloads ? t('Browser downloads') : destination.label}</strong>
         {!file && (

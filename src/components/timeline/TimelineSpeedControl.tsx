@@ -59,7 +59,7 @@ export function TimelineSpeedControl({
   return (
     <div data-testid="timeline-speed-control" onBlur={handleBlur} style={{ position: 'relative', flexShrink: 0 }}>
       <button type="button" disabled={!item} aria-expanded={open} aria-label={t('Speed')}
-        className="cc-tip" data-tip={t('Speed')} onClick={() => setOpen((value) => !value)}
+        className="ln-tip" data-tip={t('Speed')} onClick={() => setOpen((value) => !value)}
         style={{
           height: 24, minWidth: 45, padding: '0 6px',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,

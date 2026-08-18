@@ -35,23 +35,23 @@ function CollapsedPanel({ controller }: { controller: ChatPanelController }) {
   const { props, t } = controller;
   return <>
     <ChangeLogPortal controller={controller} />
-    <aside className="cc-chat-panel collapsed" data-cc-shortcut-surface="agent-chat" tabIndex={-1}
+    <aside className="ln-chat-panel collapsed" data-ln-shortcut-surface="agent-chat" tabIndex={-1}
       style={{ gridColumn: 1, gridRow: '2 / 5', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '10px 0', borderRight: `0.5px solid ${theme.border}`, background: theme.panel }}>
       <button type="button" onClick={props.onToggleCollapse} title={t('Expand Lazynext Agent')}
         style={{ background: 'none', border: 'none', color: theme.textDim, cursor: 'pointer', fontSize: 14 }}>
         <span style={{ transform: 'rotate(-90deg)', display: 'inline-flex' }}><Icon name="chevronDown" size={14} /></span>
       </button>
-      <div className="cc-chat-collapsed-brand">Lazynext</div>
+      <div className="ln-chat-collapsed-brand">Lazynext</div>
     </aside>
   </>;
 }
 
 function ChatHeader({ controller }: { controller: ChatPanelController }) {
   const { props, t, agent } = controller;
-  return <div className="cc-chat-header">
-    <div className="cc-chat-brand">
+  return <div className="ln-chat-header">
+    <div className="ln-chat-brand">
       <BrandMark size={20} />
-      <span className="cc-chat-brand-copy">
+      <span className="ln-chat-brand-copy">
         <LazynextWordmark width={102} />
         <small>{t('Agent workspace')}</small>
       </span>
@@ -70,21 +70,21 @@ function ChatHeader({ controller }: { controller: ChatPanelController }) {
 
 function ChatOnboarding({ controller }: { controller: ChatPanelController }) {
   const { composer, t } = controller;
-  return <div className="cc-chat-onboarding">
-    <div className="cc-chat-onboarding-kicker">{t('Start here')}</div>
+  return <div className="ln-chat-onboarding">
+    <div className="ln-chat-onboarding-kicker">{t('Start here')}</div>
     <h2>{t('Start with an editing goal')}</h2>
     <p>{t('Choose a workflow, or describe the finished video you want.')}</p>
-    <div className="cc-chat-starter-list">
+    <div className="ln-chat-starter-list">
       {EMPTY_PROJECT_STARTERS.map((starter) => (
         <button type="button" key={starter.label} onClick={() => {
           composer.setInput(t(starter.prompt));
           requestAnimationFrame(() => composer.taRef.current?.focus());
         }}>
-          <span className="cc-chat-starter-icon"><Icon name={starter.icon} size={16} /></span>
-          <span className="cc-chat-starter-copy">
+          <span className="ln-chat-starter-icon"><Icon name={starter.icon} size={16} /></span>
+          <span className="ln-chat-starter-copy">
             <strong>{t(starter.label)}</strong><small>{t(starter.description)}</small>
           </span>
-          <span className="cc-chat-starter-arrow" aria-hidden="true">→</span>
+          <span className="ln-chat-starter-arrow" aria-hidden="true">→</span>
         </button>
       ))}
     </div>
@@ -158,10 +158,10 @@ function ScrollNavigation({ controller }: { controller: ChatPanelController }) {
   const target = scroll.target;
   if (!target) return null;
   const label = t(target === 'top' ? 'Jump to top' : 'Jump to bottom');
-  return <div className={`cc-chat-scroll-navigation cc-chat-scroll-navigation--${target}`}
+  return <div className={`ln-chat-scroll-navigation ln-chat-scroll-navigation--${target}`}
     aria-label={t('Chat scroll shortcuts')}>
     <button type="button"
-      className={`cc-chat-scroll-navigation-button cc-tip${target === 'bottom' ? ' cc-chat-scroll-navigation-button--bottom cc-tip-up' : ''}`}
+      className={`ln-chat-scroll-navigation-button ln-tip${target === 'bottom' ? ' ln-chat-scroll-navigation-button--bottom ln-tip-up' : ''}`}
       data-tip={label} aria-label={label} onClick={() => scroll.scrollTo(target)}>
       <Icon name="arrowUp" size={14} />
     </button>
@@ -170,9 +170,9 @@ function ScrollNavigation({ controller }: { controller: ChatPanelController }) {
 
 function MessageWorkspace({ controller }: { controller: ChatPanelController }) {
   const { agent, scroll } = controller;
-  return <div className="cc-chat-messages-shell">
+  return <div className="ln-chat-messages-shell">
     <div ref={scroll.scrollRef} onScroll={scroll.onScroll}
-      className={`cc-chat-messages${agent.messages.length === 0 ? ' empty' : ''}`}>
+      className={`ln-chat-messages${agent.messages.length === 0 ? ' empty' : ''}`}>
       {agent.messages.length === 0 && <ChatOnboarding controller={controller} />}
       <EarlierMessagesButton controller={controller} />
       <MessageEntries controller={controller} />
@@ -234,7 +234,7 @@ function ExpandedPanel({ controller }: { controller: ChatPanelController }) {
   const { scroll } = controller;
   return <>
     <ChangeLogPortal controller={controller} />
-    <aside className="cc-chat-panel" data-cc-chat-popover-boundary data-cc-shortcut-surface="agent-chat"
+    <aside className="ln-chat-panel" data-ln-chat-popover-boundary data-ln-shortcut-surface="agent-chat"
       tabIndex={-1} onKeyDown={scroll.onKeyDown}
       onPointerDownCapture={(event) => {
         if (!(event.target instanceof HTMLElement)) return;

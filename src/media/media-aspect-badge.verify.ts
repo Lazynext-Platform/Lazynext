@@ -13,17 +13,17 @@ const cssSource = readFileSync(new URL('../index.css', import.meta.url), 'utf8')
 
 assert.match(
   cardSource,
-  /const aspectLabel = mediaRatioLabel\(asset\.width, asset\.height\);[\s\S]*?className="cc-asset-ratio"/,
+  /const aspectLabel = mediaRatioLabel\(asset\.width, asset\.height\);[\s\S]*?className="ln-asset-ratio"/,
   'assetwidehighrender',
 );
 assert.match(
   cssSource,
-  /\.cc-asset-ratio\s*\{[^}]*position:\s*absolute;[^}]*left:\s*4px;[^}]*bottom:\s*4px;/s,
+  /\.ln-asset-ratio\s*\{[^}]*position:\s*absolute;[^}]*left:\s*4px;[^}]*bottom:\s*4px;/s,
   'assetleftbottom',
 );
 assert.match(
   cssSource,
-  /\.cc-media-grid\.list[\s\S]*?\.cc-asset-ratio[\s\S]*?display:\s*none;/,
+  /\.ln-media-grid\.list[\s\S]*?\.ln-asset-ratio[\s\S]*?display:\s*none;/,
   'columntablemodehidden',
 );
 

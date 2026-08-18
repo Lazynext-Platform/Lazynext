@@ -375,7 +375,7 @@ function usePanelEffects(props: ChatPanelProps, agent: AgentController, composer
 
 function useChangeLogSlot(): HTMLElement | null {
   const [slot, setSlot] = useState<HTMLElement | null>(null);
-  useEffect(() => setSlot(document.getElementById('cc-agent-change-log-slot')), []);
+  useEffect(() => setSlot(document.getElementById('ln-agent-change-log-slot')), []);
   return slot;
 }
 

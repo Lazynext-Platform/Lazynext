@@ -45,7 +45,7 @@ export function DashboardHeaderLinks() {
         aria-controls={CONTACT_POPOVER_ID}
         aria-haspopup="dialog"
         data-tip={t('Contact author')}
-        className="cc-header-btn cc-tip cc-tip-r"
+        className="ln-header-btn ln-tip ln-tip-r"
         style={iconButton}
       >
         <Icon name="mail" size={16} />
@@ -56,8 +56,8 @@ export function DashboardHeaderLinks() {
         rel="noopener noreferrer"
         aria-label={t('Website')}
         data-tip={t('Website')}
-        data-cc-titlebar-control="true"
-        className="cc-header-btn cc-tip cc-tip-r"
+        data-ln-titlebar-control="true"
+        className="ln-header-btn ln-tip ln-tip-r"
         style={githubLink}
       >
         <Icon name="github" size={16} />
@@ -65,7 +65,7 @@ export function DashboardHeaderLinks() {
       {contactOpen && (
         <div id={CONTACT_POPOVER_ID} role="dialog" aria-label={t('Contact author')} style={contactPopover}>
           <span style={contactLabel}>{t('Contact author')}</span>
-          <a href={`mailto:${AUTHOR_EMAIL}`} data-cc-titlebar-control="true" style={contactEmail}>
+          <a href={`mailto:${AUTHOR_EMAIL}`} data-ln-titlebar-control="true" style={contactEmail}>
             {AUTHOR_EMAIL}
           </a>
         </div>
@@ -86,7 +86,7 @@ const contactPopover: CSSProperties = {
   position: 'absolute', top: 34, right: 0, zIndex: 20, width: 220, maxWidth: 'calc(100vw - 32px)',
   display: 'flex', flexDirection: 'column', gap: 5, padding: '10px 12px',
   border: `0.5px solid ${theme.border}`, borderRadius: 6, background: theme.panelAlt,
-  boxShadow: '0 6px 18px rgba(var(--cc-shadow-rgb), 0.24)',
+  boxShadow: '0 6px 18px rgba(var(--ln-shadow-rgb), 0.24)',
 };
 const contactLabel: CSSProperties = { color: theme.textDim, fontSize: 11 };
 const contactEmail: CSSProperties = {

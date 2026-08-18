@@ -121,20 +121,20 @@ export function SceneDetectionDialog({ state, commands, item, onClose }: SceneDe
   } as const)[job.status] : t('Not started');
 
   return createPortal(
-    <div className="cc-scene-overlay" role="dialog" aria-modal="true" aria-labelledby="cc-scene-title" onClick={running ? undefined : close}>
-      <section className="cc-scene-dialog" onClick={(event) => event.stopPropagation()}>
-        <header className="cc-scene-header">
+    <div className="ln-scene-overlay" role="dialog" aria-modal="true" aria-labelledby="ln-scene-title" onClick={running ? undefined : close}>
+      <section className="ln-scene-dialog" onClick={(event) => event.stopPropagation()}>
+        <header className="ln-scene-header">
           <div>
-            <h2 id="cc-scene-title">{t('Scene detection')}</h2>
+            <h2 id="ln-scene-title">{t('Scene detection')}</h2>
             <p>{item.name} · {t('Analyzed locally — media is not uploaded')}</p>
           </div>
-          <button type="button" autoFocus className="cc-scene-icon-button" onClick={close} aria-label={t('Close')}>
+          <button type="button" autoFocus className="ln-scene-icon-button" onClick={close} aria-label={t('Close')}>
             <Icon name="x" size={17} />
           </button>
         </header>
 
-        <div className="cc-scene-body">
-          <aside className="cc-scene-options">
+        <div className="ln-scene-body">
+          <aside className="ln-scene-options">
             <label>
               <span>{t('Detection sensitivity')}</span>
               <strong>{threshold.toFixed(2)}</strong>
@@ -150,28 +150,28 @@ export function SceneDetectionDialog({ state, commands, item, onClose }: SceneDe
             </label>
             <label>
               <span>{t('Maximum cuts')}</span>
-              <input className="cc-scene-number" type="number" min={1} max={500} value={maxScenes} disabled={running}
+              <input className="ln-scene-number" type="number" min={1} max={500} value={maxScenes} disabled={running}
                 onChange={(event) => setMaxScenes(Math.max(1, Math.min(500, Number(event.target.value) || 1)))} />
             </label>
 
-            <div className="cc-scene-progress-card">
+            <div className="ln-scene-progress-card">
               <div><span>{phase}</span><strong>{Math.round((job?.progress ?? 0) * 100)}%</strong></div>
-              <div className="cc-scene-progress-track"><i style={{ transform: `scaleX(${job?.progress ?? 0})` }} /></div>
+              <div className="ln-scene-progress-track"><i style={{ transform: `scaleX(${job?.progress ?? 0})` }} /></div>
               {job?.status === 'detecting' && job.result === null && (
                 <small>{t('Analyzed through {time}', { time: formatTime(job.processedMs) })}</small>
               )}
             </div>
 
             {running ? (
-              <button type="button" className="cc-scene-button secondary" onClick={() => void cancel()}>{t('Cancel detection')}</button>
+              <button type="button" className="ln-scene-button secondary" onClick={() => void cancel()}>{t('Cancel detection')}</button>
             ) : (
-              <button type="button" className="cc-scene-button primary" onClick={() => void start()}>{job ? t('Run again') : t('Start detection')}</button>
+              <button type="button" className="ln-scene-button primary" onClick={() => void start()}>{job ? t('Run again') : t('Start detection')}</button>
             )}
-            {error && <p className="cc-scene-error">{error}</p>}
+            {error && <p className="ln-scene-error">{error}</p>}
           </aside>
 
-          <main className="cc-scene-results">
-            <div className="cc-scene-results-header">
+          <main className="ln-scene-results">
+            <div className="ln-scene-results-header">
               <div>
                 <h3>{t('Cut evidence')}</h3>
                 <p>{job?.status === 'completed'
@@ -181,29 +181,29 @@ export function SceneDetectionDialog({ state, commands, item, onClose }: SceneDe
               {job?.result && <span>{job.result.sampleFps.toFixed(1)} fps</span>}
             </div>
 
-            <div className="cc-scene-list">
+            <div className="ln-scene-list">
               {job?.status !== 'completed' && (
-                <div className="cc-scene-empty"><Icon name="film" size={28} /><span>{running ? t('Analyzing visual changes…') : t('Adjust the settings, then start detection')}</span></div>
+                <div className="ln-scene-empty"><Icon name="film" size={28} /><span>{running ? t('Analyzing visual changes…') : t('Adjust the settings, then start detection')}</span></div>
               )}
               {job?.status === 'completed' && evidence.length === 0 && (
-                <div className="cc-scene-empty"><Icon name="check" size={28} /><span>{t('No scene changes matched these settings')}</span></div>
+                <div className="ln-scene-empty"><Icon name="check" size={28} /><span>{t('No scene changes matched these settings')}</span></div>
               )}
               {evidence.map((scene, index) => {
                 const applicable = mappedTimes.has(scene.timeMs);
                 return (
-                  <article className={`cc-scene-row${applicable ? '' : ' outside'}`} key={`${scene.timeMs}-${index}`}>
-                    <div className="cc-scene-row-meta">
+                  <article className={`ln-scene-row${applicable ? '' : ' outside'}`} key={`${scene.timeMs}-${index}`}>
+                    <div className="ln-scene-row-meta">
                       <strong>#{index + 1}</strong>
                       <span>{formatTime(scene.timeMs)}</span>
                       <em>{scene.kind === 'cut' ? t('Cut') : t('Transition')}</em>
                       <small>{scene.score.toFixed(3)}</small>
                     </div>
-                    <div className="cc-scene-evidence">
+                    <div className="ln-scene-evidence">
                       <figure><img src={scene.beforeThumbnailUrl} alt={t('Frame before the cut')} loading="lazy" /><figcaption>{t('Before')}</figcaption></figure>
                       <i><Icon name="next" size={16} /></i>
                       <figure><img src={scene.afterThumbnailUrl} alt={t('Frame after the cut')} loading="lazy" /><figcaption>{t('After')}</figcaption></figure>
                     </div>
-                    {!applicable && <span className="cc-scene-outside">{t('Outside the current trim range')}</span>}
+                    {!applicable && <span className="ln-scene-outside">{t('Outside the current trim range')}</span>}
                   </article>
                 );
               })}
@@ -211,11 +211,11 @@ export function SceneDetectionDialog({ state, commands, item, onClose }: SceneDe
           </main>
         </div>
 
-        <footer className="cc-scene-footer">
+        <footer className="ln-scene-footer">
           <span>{applied === 'markers' ? t('Scene markers added') : applied === 'split' ? t('Clip split at scene changes') : locked ? t('Track locked') : ''}</span>
           <div>
-            <button type="button" className="cc-scene-button secondary" disabled={!mapped.length || !!applied || locked} onClick={() => apply('markers')}>{t('Add scene markers')}</button>
-            <button type="button" className="cc-scene-button primary" disabled={!mapped.length || !!applied || locked} onClick={() => apply('split')}>{t('Split at scene changes')}</button>
+            <button type="button" className="ln-scene-button secondary" disabled={!mapped.length || !!applied || locked} onClick={() => apply('markers')}>{t('Add scene markers')}</button>
+            <button type="button" className="ln-scene-button primary" disabled={!mapped.length || !!applied || locked} onClick={() => apply('split')}>{t('Split at scene changes')}</button>
           </div>
         </footer>
       </section>

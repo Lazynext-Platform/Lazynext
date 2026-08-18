@@ -1,11 +1,11 @@
 // Skinning engine: skin = a set of design token values. The tokens of theme.ts are all
-// var(--cc-*) indirect reference, the true value is the SKINS registry here; when booting, initSkins() puts all
-// The skin is generated into a <style> and injected into the head, switch = change an attribute of <html data-cc-skin>,
+// var(--ln-*) indirect reference, the true value is the SKINS registry here; when booting, initSkins() puts all
+// The skin is generated into a <style> and injected into the head, switch = change an attribute of <html data-ln-skin>,
 // Hundreds of inline styles with zero changes and zero re-rendering. Persistence localStorage('cc.skin').
 // Security boundary (audited): The theme token is not consumed in synthesis/GL/canvas, and export and burning are not affected by the skin;
 // Full position without hex splicing (`${theme.x}22`) and SVG attribute bit (fill= attribute does not parse var).
-// Translucent "ink" (--cc-ink-rgb) and accent glow (--cc-accent-rgb) with R,G,B bare triples
-// Stored for use by rgba(var(--cc-ink-rgb), α) of index.css - white ink for dark skin and black ink for light skin.
+// Translucent "ink" (--ln-ink-rgb) and accent glow (--ln-accent-rgb) with R,G,B bare triples
+// Stored for use by rgba(var(--ln-ink-rgb), α) of index.css - white ink for dark skin and black ink for light skin.
 
 export interface SkinTokens {
   bg: string;          // Editor void/timeline bottom
@@ -145,19 +145,19 @@ const kebab = (name: string): string => name.replace(/[A-Z]/g, (c) => `-${c.toLo
 
 function skinBlock(tokens: SkinTokens): string {
   return (Object.entries(tokens) as [string, string][])
-    .map(([name, value]) => `  --cc-${kebab(name)}: ${value};`)
+    .map(([name, value]) => `  --ln-${kebab(name)}: ${value};`)
     .join('\n');
 }
 
-/** CSS text of all skins::root = default skin, the rest are covered by data-cc-skin.*/
+/** CSS text of all skins::root = default skin, the rest are covered by data-ln-skin.*/
 export function buildSkinsCss(): string {
   const base = SKINS.find((s) => s.id === DEFAULT_SKIN) ?? SKINS[0];
   const overrides = SKINS.filter((s) => s.id !== base.id)
-    .map((s) => `html[data-cc-skin='${s.id}'] {\n${skinBlock(s.tokens)}\n}`)
+    .map((s) => `html[data-ln-skin='${s.id}'] {\n${skinBlock(s.tokens)}\n}`)
     .join('\n');
   return `:root {\n${skinBlock(base.tokens)}\n}\n${overrides}\n` +
     // The body follows the skin background color + the color direction of the native control (the select/scroll bar goes light under light skin)
-    'body { background: var(--cc-bg); color-scheme: var(--cc-color-scheme); }\n';
+    'body { background: var(--ln-bg); color-scheme: var(--ln-color-scheme); }\n';
 }
 
 export function getSkin(): string {
@@ -170,16 +170,16 @@ export function getSkin(): string {
 
 export function applySkin(id: string): void {
   const skin = SKINS.some((s) => s.id === id) ? id : DEFAULT_SKIN;
-  if (skin === DEFAULT_SKIN) delete document.documentElement.dataset.ccSkin;
-  else document.documentElement.dataset.ccSkin = skin;
+  if (skin === DEFAULT_SKIN) delete document.documentElement.dataset.lnSkin;
+  else document.documentElement.dataset.lnSkin = skin;
   try { localStorage.setItem(STORAGE_KEY, skin); } catch { /* neglect*/ }
 }
 
 /** Boot injection (main.tsx rendering pre-tuning): Create a style sheet + apply persistent skin to avoid flashing default colors.*/
 export function initSkins(): void {
-  if (!document.getElementById('cc-skins')) {
+  if (!document.getElementById('ln-skins')) {
     const style = document.createElement('style');
-    style.id = 'cc-skins';
+    style.id = 'ln-skins';
     style.textContent = buildSkinsCss();
     document.head.appendChild(style);
   }

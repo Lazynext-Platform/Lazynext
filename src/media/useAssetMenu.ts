@@ -48,7 +48,7 @@ export function useAssetMenu(): AssetMenuControl {
     }
     anchorRef.current = anchor;
     const rect = anchor.getBoundingClientRect();
-    const panel = anchor.closest('.cc-media-pool')?.getBoundingClientRect();
+    const panel = anchor.closest('.ln-media-pool')?.getBoundingClientRect();
     const menuWidth = 152;
     const anchorX = point?.x ?? rect.left;
     const anchorTop = point?.y ?? rect.top;

@@ -116,7 +116,7 @@ function AssetPreview({ asset, fps, active, onLoadError, onLoadSuccess }: AssetP
       <>
         {media}
         {preview.proxy.status === 'failed' && (
-          <span className="cc-asset-preview-failed" title={preview.proxy.error}>!</span>
+          <span className="ln-asset-preview-failed" title={preview.proxy.error}>!</span>
         )}
       </>
     );
@@ -133,8 +133,8 @@ export const MediaAssetCard = memo(function MediaAssetCard(props: MediaAssetCard
   const { asset, missing, onFocusChange, onPointerChange, view } = props;
   return (
     <div
-      data-cc-media-asset-id={asset.id}
-      className={`cc-asset-card${props.selected ? ' selected' : ''}${missing ? ' missing' : ''}`}
+      data-ln-media-asset-id={asset.id}
+      className={`ln-asset-card${props.selected ? ' selected' : ''}${missing ? ' missing' : ''}`}
       draggable={!missing}
       onDragStart={(event) => {
         if (missing) return;
@@ -144,7 +144,7 @@ export const MediaAssetCard = memo(function MediaAssetCard(props: MediaAssetCard
       onDragEnd={() => props.onDragChange(null)}
       onClickCapture={(event) => {
         const target = event.target instanceof Element ? event.target : null;
-        if (target?.closest('[data-music-analysis-control], .cc-asset-favorite, .cc-asset-more, .cc-asset-transcribe, .cc-asset-transcribe-status')) return;
+        if (target?.closest('[data-music-analysis-control], .ln-asset-favorite, .ln-asset-more, .ln-asset-transcribe, .ln-asset-transcribe-status')) return;
         // Plain click selects and opens the asset menu beside the card;
         // Ctrl/Shift/meta toggles extra items. Clicking the selected card
         // again deselects it. Double-click adds to the timeline.
@@ -184,7 +184,7 @@ export const MediaAssetCard = memo(function MediaAssetCard(props: MediaAssetCard
       }}
     >
       <AssetThumbArea {...props} />
-      <button className="cc-asset-name" title={asset.name} tabIndex={-1}>{asset.name}</button>
+      <button className="ln-asset-name" title={asset.name} tabIndex={-1}>{asset.name}</button>
       {!missing && props.musicAnalysis && <MusicAnalysisBadge asset={asset} state={props.musicAnalysis} />}
     </div>
   );
@@ -194,9 +194,9 @@ function AssetThumbArea(props: MediaAssetCardProps) {
   const { asset, active, missing } = props;
   const t = useT();
   return (
-    <div className="cc-asset-thumb-wrap">
+    <div className="ln-asset-thumb-wrap">
       <button
-        className="cc-asset-thumb"
+        className="ln-asset-thumb"
         title={missing ? t('Click to relink') : t('Click to select, double-click to add to the timeline, or drag to a specific track: {name}', { name: asset.name })}
         style={missing ? undefined : { cursor: 'grab' }}
         onClick={() => { if (missing && props.canRelink) props.onRelink(asset.id); }}
@@ -239,14 +239,14 @@ function AssetBadges(props: MediaAssetCardProps) {
   const aspectLabel = mediaRatioLabel(asset.width, asset.height);
   return (
     <>
-      {asset.kind === 'audio' && <span className="cc-asset-audio-mark"><Icon name="volume" size={13} strokeWidth={1.4} /></span>}
-      {(asset.kind === 'gif' || asset.kind === 'svg') && <span className="cc-asset-audio-mark cc-asset-kind-mark">{asset.kind.toUpperCase()}</span>}
-      {props.used && <span className="cc-asset-used-dot" title={t('Used on a timeline')} aria-label={t('Used on a timeline')} />}
-      {aspectLabel && <span className="cc-asset-ratio">{aspectLabel}</span>}
-      <span className="cc-asset-duration">{durationLabel(asset.durationInFrames, props.fps)}</span>
+      {asset.kind === 'audio' && <span className="ln-asset-audio-mark"><Icon name="volume" size={13} strokeWidth={1.4} /></span>}
+      {(asset.kind === 'gif' || asset.kind === 'svg') && <span className="ln-asset-audio-mark ln-asset-kind-mark">{asset.kind.toUpperCase()}</span>}
+      {props.used && <span className="ln-asset-used-dot" title={t('Used on a timeline')} aria-label={t('Used on a timeline')} />}
+      {aspectLabel && <span className="ln-asset-ratio">{aspectLabel}</span>}
+      <span className="ln-asset-duration">{durationLabel(asset.durationInFrames, props.fps)}</span>
       <button
         type="button"
-        className="cc-asset-favorite"
+        className="ln-asset-favorite"
         aria-pressed={!!asset.favorite}
         aria-label={`${asset.favorite ? t('Unfavorite') : t('Favorite')}：${asset.name}`}
         title={asset.favorite ? t('Unfavorite') : t('Favorite')}
@@ -255,12 +255,12 @@ function AssetBadges(props: MediaAssetCardProps) {
           props.onSetFavorite(asset.id, !asset.favorite);
         }}
       ><Icon name="star" size={14} strokeWidth={1.35} filled={!!asset.favorite} /></button>
-      <button className="cc-asset-more" aria-label={t('Manage {name}', { name: asset.name })} onClick={(event) => {
+      <button className="ln-asset-more" aria-label={t('Manage {name}', { name: asset.name })} onClick={(event) => {
         event.stopPropagation();
         props.onOpenMenu(asset.id, event.currentTarget);
       }}><Icon name="more" size={17} /></button>
       {props.onTranscribe && assetCanTranscribe(asset.kind, asset.transcribeStatus) && <button
-        className="cc-asset-transcribe"
+        className="ln-asset-transcribe"
         aria-label={asset.transcribeStatus === 'failed' ? t('Retranscribe: {name}', { name: asset.name }) : t('Transcribe: {name}', { name: asset.name })}
         title={asset.transcribeStatus === 'failed' ? t('Re-transcribe') : t('Transcript')}
         onClick={(event) => {
@@ -268,9 +268,9 @@ function AssetBadges(props: MediaAssetCardProps) {
           props.onTranscribe?.(asset.id);
         }}
       ><Icon name="mic" size={14} strokeWidth={1.5} /></button>}
-      {asset.transcribeStatus === 'running' && <span className="cc-asset-transcribe-status" title={t('Transcribing…')}><span className="cc-asset-transcribe-spinner" /></span>}
+      {asset.transcribeStatus === 'running' && <span className="ln-asset-transcribe-status" title={t('Transcribing…')}><span className="ln-asset-transcribe-spinner" /></span>}
       {asset.transcribeStatus === 'done' && <button
-        className="cc-asset-transcribe-status cc-asset-transcribe-done"
+        className="ln-asset-transcribe-status ln-asset-transcribe-done"
         aria-label={t('View transcript: {name}', { name: asset.name })}
         title={props.onOpenTranscript ? t('View transcript') : t('Transcribed')}
         onClick={(event) => {
@@ -278,7 +278,7 @@ function AssetBadges(props: MediaAssetCardProps) {
           props.onOpenTranscript?.(asset.id);
         }}
       ><Icon name="check" size={14} strokeWidth={2.2} /></button>}
-      {asset.transcribeStatus === 'failed' && <span className="cc-asset-transcribe-status cc-asset-transcribe-failed" title={asset.transcribeError ?? t('Transcription failed')}>!</span>}
+      {asset.transcribeStatus === 'failed' && <span className="ln-asset-transcribe-status ln-asset-transcribe-failed" title={asset.transcribeError ?? t('Transcription failed')}>!</span>}
     </>
   );
 }
@@ -321,9 +321,9 @@ function FolderDropTarget({
     <div
       role="button"
       tabIndex={0}
-      className={className ?? 'cc-folder-card'}
+      className={className ?? 'ln-folder-card'}
       aria-label={ariaLabel}
-      data-cc-media-folder-id={targetFolderId}
+      data-ln-media-folder-id={targetFolderId}
       onClick={onActivate}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
@@ -369,12 +369,12 @@ function FolderDropTarget({
         else ids.forEach((id) => onMoveAsset(id, targetFolderId));
       }}
     >
-      <span className="cc-media-entry-thumb"><Icon name={icon} size={28} strokeWidth={1.4} /></span>
-      <strong className="cc-media-entry-name">{label}</strong>
+      <span className="ln-media-entry-thumb"><Icon name={icon} size={28} strokeWidth={1.4} /></span>
+      <strong className="ln-media-entry-name">{label}</strong>
       {onOpenMenu && (
         <button
           type="button"
-          className="cc-asset-more cc-folder-more"
+          className="ln-asset-more ln-folder-more"
           aria-label={t('Folder menu')}
           onClick={(event) => {
             event.preventDefault();
@@ -429,7 +429,7 @@ export const MediaParentFolderCard = memo(function MediaParentFolderCard({
     <FolderDropTarget
       label={t('Up one level')}
       ariaLabel={t('Back to {name} (drop assets here to move them up)', { name: parentName })}
-      className="cc-folder-card cc-parent-folder"
+      className="ln-folder-card ln-parent-folder"
       icon="prev"
       targetFolderId={parentId}
       onActivate={onOpen}

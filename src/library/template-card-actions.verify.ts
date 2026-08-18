@@ -6,7 +6,7 @@ const source = await readFile(new URL('./TemplateBrowser.tsx', import.meta.url),
 assert.match(source, /onContextMenu=\{\(event\) =>/);
 assert.match(source, /aria-label=\{t\('Add to timeline: \{name\}', \{ name: template\.name \}\)/);
 assert.match(source, /<Icon name="plus"/);
-assert.doesNotMatch(source, /className="cc-template-add"\s+onClick=/);
+assert.doesNotMatch(source, /className="ln-template-add"\s+onClick=/);
 assert.match(source, /title=\{t\('Add to timeline: \{name\}', \{ name: template\.name \}\)\}/, 'the visible menu button should remain keyboard accessible');
 
 console.log('template-card-actions.verify: template cards separate drag, add, and management actions');

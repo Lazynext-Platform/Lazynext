@@ -26,7 +26,7 @@ const FIELD_STYLE: CSSProperties = {
 export function PropSchemaField(props: PropSchemaFieldProps) {
   const label = props.spec.label ?? props.spec.key;
   return (
-    <label className="cc-insp-mg-field">
+    <label className="ln-insp-mg-field">
       <span title={props.spec.key}>{label}{props.mixed ? ' —' : ''}</span>
       <PropControl {...props} />
     </label>
@@ -40,7 +40,7 @@ function PropControl({ spec, value, onChange }: PropSchemaFieldProps): ReactNode
   if (spec.type === 'font') return <FontField spec={spec} value={value} onChange={onChange} />;
   if (spec.type === 'select') return <SelectField spec={spec} value={value} onChange={onChange} />;
   if (spec.type === 'image' || spec.type === 'asset' || spec.type === 'video') return <MediaField spec={spec} value={value} onChange={onChange} />;
-  if (spec.type === 'text') return <textarea className="cc-insp-textarea" rows={resolveInspectorTextAreaRows(value)} value={String(value ?? '')} onChange={(event) => onChange(event.target.value)} style={{ ...FIELD_STYLE, resize: 'vertical', fontFamily: 'inherit' }} />;
+  if (spec.type === 'text') return <textarea className="ln-insp-textarea" rows={resolveInspectorTextAreaRows(value)} value={String(value ?? '')} onChange={(event) => onChange(event.target.value)} style={{ ...FIELD_STYLE, resize: 'vertical', fontFamily: 'inherit' }} />;
   return <input type="text" value={String(value ?? '')} onChange={(event) => onChange(event.target.value)} style={FIELD_STYLE} />;
 }
 

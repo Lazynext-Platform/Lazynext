@@ -97,7 +97,7 @@ export function MediaPoolGrid(props: MediaPoolGridProps) {
   const updateMarquee = (state: MarqueeState, end: MarqueePoint) => {
     const grid = gridRef.current;
     if (!grid) return;
-    const cards = Array.from(grid.querySelectorAll<HTMLElement>('[data-cc-media-asset-id]')).flatMap((card) => {
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>('[data-ln-media-asset-id]')).flatMap((card) => {
       const id = card.dataset.ccMediaAssetId;
       if (!id) return [];
       const rect = card.getBoundingClientRect();
@@ -108,8 +108,8 @@ export function MediaPoolGrid(props: MediaPoolGridProps) {
   const startMarquee = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return;
     const target = event.target as HTMLElement;
-    // Include .cc-folder-card: folders are div[role=button] (for HTML5 drop), not <button>.
-    if (target.closest('[data-cc-media-asset-id], .cc-folder-card, button, input, select, textarea')) return;
+    // Include .ln-folder-card: folders are div[role=button] (for HTML5 drop), not <button>.
+    if (target.closest('[data-ln-media-asset-id], .ln-folder-card, button, input, select, textarea')) return;
     const state: MarqueeState = {
       pointerId: event.pointerId,
       start: { x: event.clientX, y: event.clientY },
@@ -149,15 +149,15 @@ export function MediaPoolGrid(props: MediaPoolGridProps) {
   return (
     <div
       ref={gridRef}
-      className={`cc-media-grid ${props.view}${marquee ? ' is-marquee-selecting' : ''}`}
+      className={`ln-media-grid ${props.view}${marquee ? ' is-marquee-selecting' : ''}`}
       onPointerDown={startMarquee}
       onPointerMove={moveMarquee}
       onPointerUp={finishMarquee}
       onPointerCancel={finishMarquee}
     >
-      {marqueeStyle && <div className="cc-media-marquee" aria-hidden="true" style={marqueeStyle} />}
+      {marqueeStyle && <div className="ln-media-marquee" aria-hidden="true" style={marqueeStyle} />}
       <MediaVirtualRows {...props} {...windowState} />
-      {props.entries.length === 0 && <div className="cc-media-empty">
+      {props.entries.length === 0 && <div className="ln-media-empty">
         {props.assetsCount === 0
           ? <><Icon name="folder" size={28} /><strong>{t('This folder is empty')}</strong><span>{t('Import media or drag files here.')}</span></>
           : <span>{t('No assets match the current filter')}</span>}
@@ -169,10 +169,10 @@ export function MediaPoolGrid(props: MediaPoolGridProps) {
 function MediaVirtualRows(props: MediaPoolGridProps & ReturnType<typeof useMediaGridWindow>) {
   const t = useT();
   return (
-    <div ref={props.grid.containerRef} className="cc-media-virtual-canvas" style={{ height: props.grid.totalHeight }}>
+    <div ref={props.grid.containerRef} className="ln-media-virtual-canvas" style={{ height: props.grid.totalHeight }}>
       {props.grid.rows.map((row) => <div
         key={row.rowIndex}
-        className="cc-media-virtual-row"
+        className="ln-media-virtual-row"
         style={{
           top: row.top,
           height: props.grid.rowHeight,
@@ -183,9 +183,9 @@ function MediaVirtualRows(props: MediaPoolGridProps & ReturnType<typeof useMedia
         {props.entries.slice(row.startIndex, row.endIndex).map((entry) => entry.kind === 'solid'
           ? <AddSolidCanvasCard key="solid" label={t('Add solid background/canvas')} onAdd={() => props.onAddSolid?.()} />
           : entry.kind === 'favorites'
-            ? <button key="favorites" type="button" className="cc-folder-card cc-favorites-folder" onClick={props.onOpenFavorites}>
-                <span className="cc-media-entry-thumb"><Icon name="star" size={20} strokeWidth={1.4} /></span>
-                <strong className="cc-media-entry-name">{t('Favorites')}</strong>
+            ? <button key="favorites" type="button" className="ln-folder-card ln-favorites-folder" onClick={props.onOpenFavorites}>
+                <span className="ln-media-entry-thumb"><Icon name="star" size={20} strokeWidth={1.4} /></span>
+                <strong className="ln-media-entry-name">{t('Favorites')}</strong>
               </button>
             : entry.kind === 'parent'
               ? <MediaParentFolderCard

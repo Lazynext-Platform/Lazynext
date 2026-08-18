@@ -22,21 +22,21 @@ export function TrackCreateControl({ commands }: { commands: EditorCommands }) {
     if (ref.current) ref.current.open = false;
   };
   return (
-    <details ref={ref} className="cc-track-create" onBlur={(event) => {
+    <details ref={ref} className="ln-track-create" onBlur={(event) => {
       if (!event.currentTarget.contains(event.relatedTarget as Node | null)) event.currentTarget.open = false;
     }}>
-      <summary className="cc-tip" data-tip={t('New track')} aria-label={t('New track')}>
+      <summary className="ln-tip" data-tip={t('New track')} aria-label={t('New track')}>
         <Icon name="plus" size={16} />
       </summary>
-      <div className="cc-track-create-menu">
-        <div className="cc-track-create-title">{t('New track')}</div>
+      <div className="ln-track-create-menu">
+        <div className="ln-track-create-title">{t('New track')}</div>
         {OPTIONS.map((option) => (
             <button key={option.kind} onClick={() => create(option.kind)}>
               <Icon name={option.icon} size={14} />
               <span>{t(option.label)}</span>
             </button>
         ))}
-        <div className="cc-track-create-separator" />
+        <div className="ln-track-create-separator" />
         <button onClick={createTimeline}>
           <Icon name="plus" size={14} />
           <span>{t('New sequence')}</span>

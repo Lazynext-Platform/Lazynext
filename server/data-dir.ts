@@ -61,7 +61,7 @@ export async function checkDataDir(raw: string, currentDir: string): Promise<Dat
   if (!dir) return { ok: false, error: 'Must be an absolute path (can start with ~/)' };
   try {
     await mkdir(dir, { recursive: true });
-    const probe = join(dir, `.cc-data-probe-${process.pid}`);
+    const probe = join(dir, `.ln-data-probe-${process.pid}`);
     await writeFile(probe, 'ok');
     await unlink(probe);
     return { ok: true, note: `Directory is writable · ${dir}` };

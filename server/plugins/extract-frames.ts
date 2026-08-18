@@ -209,7 +209,7 @@ export function extractFramesPlugin(): Plugin {
           sendJson(res, 405, { error: 'method not allowed — use POST' });
           return;
         }
-        const work = await mkdtemp(join(tmpdir(), 'cc-frames-'));
+        const work = await mkdtemp(join(tmpdir(), 'ln-frames-'));
         try {
           const body = (await readJson(req)) as {
             src?: string;

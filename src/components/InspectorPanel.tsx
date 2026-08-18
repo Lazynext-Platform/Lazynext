@@ -47,15 +47,15 @@ function InspectorHeader({ panel }: { panel: InspectorPanelProps }) {
       type="button"
       onClick={() => panel.onCollapsedChange(!panel.collapsed)}
       title={panel.collapsed ? t('Expand properties') : t('Collapse properties')}
-      className="cc-insp-header"
+      className="ln-insp-header"
     >
-      <span className={`cc-insp-chevron${panel.collapsed ? ' closed' : ''}`}><Icon name="chevronDown" size={12} /></span>
-      <span className="cc-insp-heading">
-        <span className="cc-insp-title">{caption ? t('Caption properties') : t('Clip properties')}</span>
-        {caption ? <span className="cc-insp-title-name" title={caption.target.cue.text}>{caption.target.cue.text}</span>
-          : item && <span className="cc-insp-title-name" title={item.name}>{count > 1 ? t('{n} clips', { n: count }) : item.name}</span>}
+      <span className={`ln-insp-chevron${panel.collapsed ? ' closed' : ''}`}><Icon name="chevronDown" size={12} /></span>
+      <span className="ln-insp-heading">
+        <span className="ln-insp-title">{caption ? t('Caption properties') : t('Clip properties')}</span>
+        {caption ? <span className="ln-insp-title-name" title={caption.target.cue.text}>{caption.target.cue.text}</span>
+          : item && <span className="ln-insp-title-name" title={item.name}>{count > 1 ? t('{n} clips', { n: count }) : item.name}</span>}
       </span>
-      {item?.denoisedSrc && <span className="cc-insp-pill">{t('Voice Isolation')}</span>}
+      {item?.denoisedSrc && <span className="ln-insp-pill">{t('Voice Isolation')}</span>}
     </button>
   );
 }
@@ -74,8 +74,8 @@ export function InspectorPanel(panel: InspectorPanelProps) {
   return (
     <HistoryGestureProvider value={panel.historyGesture}>
       <section
-        className={`cc-inspector${panel.collapsed ? ' collapsed' : ''}`}
-        data-cc-shortcut-surface="inspector"
+        className={`ln-inspector${panel.collapsed ? ' collapsed' : ''}`}
+        data-ln-shortcut-surface="inspector"
         tabIndex={-1}
         onPointerDownCapture={(event) => {
           if (!(event.target as HTMLElement).closest('button, input, select, textarea, [contenteditable="true"]')) {
@@ -87,7 +87,7 @@ export function InspectorPanel(panel: InspectorPanelProps) {
         {!panel.collapsed && (panel.selectedCaption && panel.onCaptionUpdate
           ? <CaptionInspectorControls selection={panel.selectedCaption} onUpdate={panel.onCaptionUpdate} />
           : item ? <InspectorContent panel={panel} item={item} schema={schema} playheadLocal={playheadLocal} activeTab={activeTab} onTabChange={setActiveTab} />
-          : <div className="cc-insp-body"><div className="cc-insp-muted">{t('Select a clip on the timeline to edit its properties.')}</div></div>)}
+          : <div className="ln-insp-body"><div className="ln-insp-muted">{t('Select a clip on the timeline to edit its properties.')}</div></div>)}
       </section>
     </HistoryGestureProvider>
   );

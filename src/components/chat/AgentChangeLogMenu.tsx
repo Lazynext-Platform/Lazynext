@@ -53,7 +53,7 @@ export function AgentChangeLogMenu({
                 <Icon name="x" size={15} />
               </button>
             </div>
-            <div className="cc-agent-change-log-list" style={list}>
+            <div className="ln-agent-change-log-list" style={list}>
               {[...changeLog].reverse().map((session) => {
                 const current = canRollback(session.id);
                 const disabled = running || !session.rollbackable;

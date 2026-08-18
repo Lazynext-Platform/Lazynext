@@ -31,18 +31,18 @@ function MenuItem({ label, icon, checked, disabled, danger, onClick }: {
     <button
       type="button"
       role="menuitem"
-      className={`cc-caption-cue-menu-item${danger ? ' danger' : ''}`}
+      className={`ln-caption-cue-menu-item${danger ? ' danger' : ''}`}
       disabled={disabled}
       onClick={onClick}
     >
-      <span className="cc-caption-cue-menu-icon" aria-hidden><Icon name={icon} size={15} /></span>
-      <span className="cc-caption-cue-menu-label">{label}</span>
-      {checked && <span className="cc-track-context-menu-check" aria-hidden><Icon name="check" size={13} /></span>}
+      <span className="ln-caption-cue-menu-icon" aria-hidden><Icon name={icon} size={15} /></span>
+      <span className="ln-caption-cue-menu-label">{label}</span>
+      {checked && <span className="ln-track-context-menu-check" aria-hidden><Icon name="check" size={13} /></span>}
     </button>
   );
 }
 
-const Separator = () => <div className="cc-caption-cue-menu-separator" role="separator" />;
+const Separator = () => <div className="ln-caption-cue-menu-separator" role="separator" />;
 
 /** Right-click menu on a transition badge. Until now the badge only selected the
  *  incoming clip, so removing a transition meant finding it in the neighbouring
@@ -82,13 +82,13 @@ export function TransitionContextMenu({
   return (
     <div
       ref={ref}
-      className="cc-caption-cue-menu cc-track-context-menu"
+      className="ln-caption-cue-menu ln-track-context-menu"
       role="menu"
       aria-label={t('Transition menu')}
       style={{ left: pos.left, top: pos.top }}
       onPointerDown={(event) => event.stopPropagation()}
     >
-      <div className="cc-transition-menu-title">{label}</div>
+      <div className="ln-transition-menu-title">{label}</div>
       <Separator />
       {TRANSITION_DURATION_PRESETS.map((seconds) => (
         <MenuItem

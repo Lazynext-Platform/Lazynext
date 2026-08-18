@@ -41,19 +41,19 @@ export function InspectorSlipControl({ item, plan, onSlip }: InspectorSlipContro
  const displayedRate = plan.sourceDomain === 'edited-stream' ? 1 : (item.playbackRate ?? 1);
 
  return (
- <div className="cc-insp-stack">
- <div className="cc-insp-row">
- <span className="cc-insp-label">{t(plan.sourceDomain === 'edited-stream' ? '' : '')}</span>
- <span className="cc-insp-muted" style={{ fontVariantNumeric: 'tabular-nums' }}>
+ <div className="ln-insp-stack">
+ <div className="ln-insp-row">
+ <span className="ln-insp-label">{t(plan.sourceDomain === 'edited-stream' ? '' : '')}</span>
+ <span className="ln-insp-muted" style={{ fontVariantNumeric: 'tabular-nums' }}>
  {sourceFrame(plan.sourceWindow.startFrame)}–{sourceFrame(sourceOutFrame)}f
  </span>
- <span className="cc-insp-val">{displayedRate.toFixed(2)}×</span>
+ <span className="ln-insp-val">{displayedRate.toFixed(2)}×</span>
  </div>
- <div className="cc-insp-row">
- <label className="cc-insp-label" htmlFor={`slip-step-${item.id}`}>{t('Step size')}</label>
+ <div className="ln-insp-row">
+ <label className="ln-insp-label" htmlFor={`slip-step-${item.id}`}>{t('Step size')}</label>
  <input
  id={`slip-step-${item.id}`}
- className="cc-insp-number"
+ className="ln-insp-number"
  type="number"
  min={1}
  step={1}
@@ -64,12 +64,12 @@ export function InspectorSlipControl({ item, plan, onSlip }: InspectorSlipContro
  }}
  aria-describedby={`slip-help-${item.id}`}
  />
- <span className="cc-insp-val">{t('Timeline frames')}</span>
+ <span className="ln-insp-val">{t('Timeline frames')}</span>
  </div>
- <div className="cc-insp-actions">
+ <div className="ln-insp-actions">
  <button
  type="button"
- className="cc-insp-btn"
+ className="ln-insp-btn"
  disabled={!canEarlier}
  onClick={() => run(-1)}
  title={t('Slip the source range forward; timeline position and duration stay unchanged')}
@@ -78,7 +78,7 @@ export function InspectorSlipControl({ item, plan, onSlip }: InspectorSlipContro
  </button>
  <button
  type="button"
- className="cc-insp-btn"
+ className="ln-insp-btn"
  disabled={!canLater}
  onClick={() => run(1)}
  title={t('Slip the source range backward; timeline position and duration stay unchanged')}
@@ -86,7 +86,7 @@ export function InspectorSlipControl({ item, plan, onSlip }: InspectorSlipContro
  {t('Backward')}<Icon name="next" size={11} />
  </button>
  </div>
- <div id={`slip-help-${item.id}`} className="cc-insp-muted" style={{ fontSize: 10 }}>
+ <div id={`slip-help-${item.id}`} className="ln-insp-muted" style={{ fontSize: 10 }}>
  {notice ?? t('Enter slips backward · Shift+Enter slips forward; only the source in-point changes.')}
  </div>
  </div>

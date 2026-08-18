@@ -80,10 +80,10 @@ export function TrackingRegionPicker({ item, fps, region, points, disabled, onCh
   };
   const path = points.map((point) => `${point.x * 100},${point.y * 100}`).join(' ');
   return (
-    <div ref={pickerRef} className="cc-tracking-picker" style={{ aspectRatio }}>
-      <div className="cc-tracking-zoom" style={{ transform: `scale(${zoom})`, transformOrigin: `${origin.x * 100}% ${origin.y * 100}%` }}>
+    <div ref={pickerRef} className="ln-tracking-picker" style={{ aspectRatio }}>
+      <div className="ln-tracking-zoom" style={{ transform: `scale(${zoom})`, transformOrigin: `${origin.x * 100}% ${origin.y * 100}%` }}>
         <video ref={videoRef} src={item.src} muted playsInline preload="auto" onLoadedMetadata={seekToStart} />
-        <div className={`cc-tracking-hit-area${disabled ? ' disabled' : ''}`}
+        <div className={`ln-tracking-hit-area${disabled ? ' disabled' : ''}`}
           onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp}>
           {!!path && <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
             <polyline points={path} vectorEffect="non-scaling-stroke" />

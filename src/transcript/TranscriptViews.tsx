@@ -24,7 +24,7 @@ function WordRow({ words, deleted, editMode, onWord }: WordRowProps) {
   const t = useT();
   const cjk = isCjkText(words.map((w) => w.text).join(''));
   return (
-    <span className="cc-tx-words" style={{ color: theme.text }}>
+    <span className="ln-tx-words" style={{ color: theme.text }}>
       {words.map((w, i) => {
         const isDel = deleted.has(w.gi);
         const prev = words[i - 1];
@@ -33,7 +33,7 @@ function WordRow({ words, deleted, editMode, onWord }: WordRowProps) {
           <span key={w.gi}>
             {needSpace ? ' ' : null}
             <span
-              className={`cc-tx-word${isDel ? ' del' : ''}${editMode ? ' editable' : ''}`}
+              className={`ln-tx-word${isDel ? ' del' : ''}${editMode ? ' editable' : ''}`}
               data-gi={w.gi}
               onClick={() => onWord(w)}
               title={editMode ? (isDel ? t('Restore this word') : t('Delete this word')) : `${(w.start / 1000).toFixed(2)}s`}
@@ -58,17 +58,17 @@ interface ViewProps {
 export function ParagraphView({ groups, deleted, editMode, onWord }: ViewProps) {
   const t = useT();
   if (!groups.length) {
-    return <div className="cc-tx-muted">{t('This clip has no transcript text yet.')}</div>;
+    return <div className="ln-tx-muted">{t('This clip has no transcript text yet.')}</div>;
   }
   return (
-    <div className="cc-tx-script">
+    <div className="ln-tx-script">
       {groups.map((p, i) => (
-        <div key={i} className="cc-tx-speech">
-          <div className="cc-tx-speech-label" style={{ color: speakerColor(p.speaker) }}>
+        <div key={i} className="ln-tx-speech">
+          <div className="ln-tx-speech-label" style={{ color: speakerColor(p.speaker) }}>
             {speakerLabel(p.speaker)}
           </div>
-          <div className="cc-tx-speech-body">
-            <span className="cc-tx-grip" aria-hidden>⋮⋮</span>
+          <div className="ln-tx-speech-body">
+            <span className="ln-tx-grip" aria-hidden>⋮⋮</span>
             <WordRow words={p.words} deleted={deleted} editMode={editMode} onWord={onWord} />
           </div>
         </div>
@@ -107,7 +107,7 @@ export function ScriptView({
   const [dragOverSpeech, setDragOverSpeech] = useState<number | null>(null);
 
   if (!rows.length) {
-    return <div className="cc-tx-muted">{t('This clip has no transcript text yet.')}</div>;
+    return <div className="ln-tx-muted">{t('This clip has no transcript text yet.')}</div>;
   }
 
   // Speech blocks only (for reorder) — indices into `rows`
@@ -130,7 +130,7 @@ export function ScriptView({
   let speechOrdinal = -1;
 
   return (
-    <div className="cc-tx-script">
+    <div className="ln-tx-script">
       {rows.map((row, i) => {
         if (row.kind === 'speech') {
           speechOrdinal += 1;
@@ -139,7 +139,7 @@ export function ScriptView({
           return (
             <div
               key={`s-${i}-${row.words[0]?.gi}`}
-              className={`cc-tx-speech${dragOverSpeech === sOrd ? ' drag-over' : ''}`}
+              className={`ln-tx-speech${dragOverSpeech === sOrd ? ' drag-over' : ''}`}
               draggable={canDrag}
               onDragStart={(e) => {
                 if (!canDrag) return;
@@ -169,12 +169,12 @@ export function ScriptView({
                 applySpeechReorder(from, sOrd);
               }}
             >
-              <div className="cc-tx-speech-label" style={{ color: speakerColor(row.speaker) }}>
+              <div className="ln-tx-speech-label" style={{ color: speakerColor(row.speaker) }}>
                 {speakerLabel(row.speaker)}
               </div>
-              <div className="cc-tx-speech-body">
+              <div className="ln-tx-speech-body">
                 <span
-                  className={`cc-tx-grip${canDrag ? ' active' : ''}`}
+                  className={`ln-tx-grip${canDrag ? ' active' : ''}`}
                   title={canDrag ? t('Drag to reorder speech blocks (playback order follows)') : t('Only one block — nothing to reorder')}
                 >
                   ⋮⋮
@@ -187,11 +187,11 @@ export function ScriptView({
         const displayMs = row.removed ? 0 : row.appliedMs;
         const open = adjustGi === row.afterWordGi;
         return (
-          <div key={`g-${row.afterWordGi}`} className={`cc-tx-gap-wrap${row.removed ? ' removed' : ''}`}>
-            <div className="cc-tx-gap" role="group" aria-label={t('Gap {clock}', { clock: formatGapClock(row.gapMs) })}>
+          <div key={`g-${row.afterWordGi}`} className={`ln-tx-gap-wrap${row.removed ? ' removed' : ''}`}>
+            <div className="ln-tx-gap" role="group" aria-label={t('Gap {clock}', { clock: formatGapClock(row.gapMs) })}>
               <button
                 type="button"
-                className="cc-tx-gap-main"
+                className="ln-tx-gap-main"
                 onClick={() => setAdjustGi(open ? null : row.afterWordGi)}
                 title={t('Click to adjust this gap')}
               >
@@ -201,7 +201,7 @@ export function ScriptView({
               {!row.removed ? (
                 <button
                   type="button"
-                  className="cc-tx-gap-del"
+                  className="ln-tx-gap-del"
                   title={t('Delete this gap (squeeze out the silence)')}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -213,7 +213,7 @@ export function ScriptView({
               ) : (
                 <button
                   type="button"
-                  className="cc-tx-gap-del"
+                  className="ln-tx-gap-del"
                   title={t('Restore the original gap')}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -225,12 +225,12 @@ export function ScriptView({
               )}
             </div>
             {open && !row.removed && (
-              <div className="cc-tx-gap-adjust">
-                <span className="cc-tx-muted">{t('Original {clock}', { clock: formatGapClock(row.gapMs) })}</span>
-                <button type="button" className="cc-tx-btn sm" onClick={() => onCapGap(row.afterWordGi, 200)}>{t('Cap at 0.2s')}</button>
-                <button type="button" className="cc-tx-btn sm" onClick={() => onCapGap(row.afterWordGi, 500)}>{t('Cap at 0.5s')}</button>
-                <button type="button" className="cc-tx-btn sm" onClick={() => onDeleteGap(row.afterWordGi)}>{t('Delete gap')}</button>
-                <button type="button" className="cc-tx-btn sm ghost" onClick={() => onCapGap(row.afterWordGi, null)}>{t('Reset')}</button>
+              <div className="ln-tx-gap-adjust">
+                <span className="ln-tx-muted">{t('Original {clock}', { clock: formatGapClock(row.gapMs) })}</span>
+                <button type="button" className="ln-tx-btn sm" onClick={() => onCapGap(row.afterWordGi, 200)}>{t('Cap at 0.2s')}</button>
+                <button type="button" className="ln-tx-btn sm" onClick={() => onCapGap(row.afterWordGi, 500)}>{t('Cap at 0.5s')}</button>
+                <button type="button" className="ln-tx-btn sm" onClick={() => onDeleteGap(row.afterWordGi)}>{t('Delete gap')}</button>
+                <button type="button" className="ln-tx-btn sm ghost" onClick={() => onCapGap(row.afterWordGi, null)}>{t('Reset')}</button>
               </div>
             )}
           </div>
@@ -243,17 +243,17 @@ export function ScriptView({
 /** @deprecated prefer ScriptView */
 export function SegmentView({ groups, deleted, editMode, onWord, fps }: ViewProps & { fps: number }) {
   return (
-    <div className="cc-tx-script">
+    <div className="ln-tx-script">
       {groups.map((s, i) => (
-        <div key={i} className="cc-tx-speech">
-          <div className="cc-tx-speech-label" style={{ color: speakerColor(s.speaker) }}>
+        <div key={i} className="ln-tx-speech">
+          <div className="ln-tx-speech-label" style={{ color: speakerColor(s.speaker) }}>
             {speakerLabel(s.speaker)}
-            <span className="cc-tx-muted" style={{ marginLeft: 8, fontWeight: 400 }}>
+            <span className="ln-tx-muted" style={{ marginLeft: 8, fontWeight: 400 }}>
               {msToFrame(s.words[0]!.start, fps)}f
             </span>
           </div>
-          <div className="cc-tx-speech-body">
-            <span className="cc-tx-grip" aria-hidden>⋮⋮</span>
+          <div className="ln-tx-speech-body">
+            <span className="ln-tx-grip" aria-hidden>⋮⋮</span>
             <WordRow words={s.words} deleted={deleted} editMode={editMode} onWord={onWord} />
           </div>
         </div>

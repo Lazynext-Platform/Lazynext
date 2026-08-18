@@ -8,7 +8,7 @@ const markup = renderToStaticMarkup(
 
 assert.match(
  markup,
- /class="cc-add-solid-canvas-card"/,
+ /class="ln-add-solid-canvas-card"/,
  'assetshould provideaddbackground/',
 );
 assert.match(markup, /addbackground\//, 'name');

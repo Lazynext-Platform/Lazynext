@@ -33,13 +33,13 @@ function BackgroundFillStrengthSlider({
 }) {
  const gesture = useHistoryGesture();
  return (
- <div className="cc-insp-row">
- <span className="cc-insp-label">{translate('Intensity')}</span>
- <input aria-label={translate('Background fill')} className="cc-insp-range"
- style={{ '--cc-insp-range-fill': `${strength}%` } as CSSProperties}
+ <div className="ln-insp-row">
+ <span className="ln-insp-label">{translate('Intensity')}</span>
+ <input aria-label={translate('Background fill')} className="ln-insp-range"
+ style={{ '--ln-insp-range-fill': `${strength}%` } as CSSProperties}
  type="range" min={0} max={100} step="any" value={strength} disabled={mixed}
  onChange={(event) => onChange(Math.round(Number(event.target.value)))} {...gesture} />
- <span className="cc-insp-val">
+ <span className="ln-insp-val">
  <ScalarControl ariaLabel={translate('Background fill')} formatValue={`${Math.round(strength)}%`}
  mixed={mixed} min={0} max={100} step={1} value={strength}
  onChange={(value) => onChange(Math.round(value))}
@@ -59,25 +59,25 @@ function BackgroundFillStrengthPicker({
  translate: Translate;
 }) {
  return (
- <div className="cc-bg-fill-body">
+ <div className="ln-bg-fill-body">
  <BackgroundFillStrengthSlider
  strength={strength}
  mixed={mixed}
  onChange={onChange}
  translate={translate}
  />
- <div className="cc-bg-fill-presets" role="radiogroup" aria-label={translate('Background fill')}>
+ <div className="ln-bg-fill-presets" role="radiogroup" aria-label={translate('Background fill')}>
  {STRENGTH_PRESETS.map(({ value, label, preview }) => (
  <button key={value} type="button" role="radio"
  aria-checked={!mixed && strength === value}
  className={!mixed && strength === value ? 'selected' : ''}
  onClick={() => onChange(value)}>
- <span className={`cc-bg-fill-preview ${preview}`} aria-hidden />
+ <span className={`ln-bg-fill-preview ${preview}`} aria-hidden />
  <small>{translate(label)} {value}%</small>
  </button>
  ))}
  </div>
- {mixed && <div className="cc-insp-muted">{translate('Selected clips use different background intensities')}</div>}
+ {mixed && <div className="ln-insp-muted">{translate('Selected clips use different background intensities')}</div>}
  </div>
  );
 }
@@ -88,8 +88,8 @@ export function BackgroundFillControlView({
  const [expanded, setExpanded] = useState(true);
  const active = enabled || mixed;
  return (
- <div className="cc-bg-fill-control">
- <div className="cc-bg-fill-head">
+ <div className="ln-bg-fill-control">
+ <div className="ln-bg-fill-head">
  <label>
  <input ref={(element) => { if (element) element.indeterminate = mixed; }}
  type="checkbox" checked={enabled}
@@ -101,9 +101,9 @@ export function BackgroundFillControlView({
  <span><strong>{translate('Background fill')}</strong><small>{translate('Fill empty canvas areas with a copy of the clip')}</small></span>
  </label>
  <div>
- {onApplyToAll && <button type="button" className="cc-bg-fill-apply"
+ {onApplyToAll && <button type="button" className="ln-bg-fill-apply"
  disabled={!active || strengthMixed} onClick={() => onApplyToAll(strength)}>{translate('Apply to all')}</button>}
- <button type="button" className="cc-bg-fill-disclosure" disabled={!active}
+ <button type="button" className="ln-bg-fill-disclosure" disabled={!active}
  aria-expanded={active && expanded}
  aria-label={expanded ? translate('Background fill') : translate('Background fill')}
  onClick={() => setExpanded((value) => !value)}>

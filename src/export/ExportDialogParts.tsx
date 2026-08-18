@@ -6,7 +6,7 @@ import type { ExportQaUiState } from './useExportWorkflow';
 
 export function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="cc-export-field">
+    <div className="ln-export-field">
       <span>{label}</span>
       {children}
     </div>
@@ -15,7 +15,7 @@ export function Row({ label, children }: { label: string; children: ReactNode })
 
 export function InfoCard({ icon, title, text }: { icon: IconName; title: string; text: string }) {
   return (
-    <div className="cc-export-info">
+    <div className="ln-export-info">
       <span><Icon name={icon} size={19} /></span>
       <div>
         <strong>{title}</strong>
@@ -49,11 +49,11 @@ function qaIssueLabel(issue: ExportQaIssue, translate: ReturnType<typeof useT>):
 export function ExportQaCard({ qa }: { qa: ExportQaUiState }) {
   const t = useT();
   if (qa.status === 'running') {
-    return <div className="cc-export-qa-card running"><strong>{t('Automatically checking the exported video…')}</strong></div>;
+    return <div className="ln-export-qa-card running"><strong>{t('Automatically checking the exported video…')}</strong></div>;
   }
   if (qa.status === 'error') {
     return (
-      <div className="cc-export-qa-card error">
+      <div className="ln-export-qa-card error">
         <strong>{t('Automatic quality check did not finish')}</strong>
         <p>{t('The video will still download normally; export it again later to recheck it.')} {qa.message}</p>
       </div>
@@ -61,8 +61,8 @@ export function ExportQaCard({ qa }: { qa: ExportQaUiState }) {
   }
   const report = qa.report!;
   return (
-    <div className={`cc-export-qa-card ${qa.status}`}>
-      <div className="cc-export-qa-summary">
+    <div className={`ln-export-qa-card ${qa.status}`}>
+      <div className="ln-export-qa-summary">
         <strong>{qa.status === 'passed' ? t('Automatic quality check passed') : t('Automatic quality check found issues')}</strong>
         <span>{t('{errors} errors · {warnings} warnings', {
           errors: report.summary.errors,
@@ -96,12 +96,12 @@ export function Segmented<T extends string | number>({ options, value, onChange 
 }) {
   const t = useT();
   return (
-    <div className="cc-export-segmented">
+    <div className="ln-export-segmented">
       {options.map((option) => (
         <button
           type="button"
           key={String(option.value)}
-          className={`cc-export-seg${option.value === value ? ' active' : ''}`}
+          className={`ln-export-seg${option.value === value ? ' active' : ''}`}
           aria-pressed={option.value === value}
           onClick={() => onChange(option.value)}
         >

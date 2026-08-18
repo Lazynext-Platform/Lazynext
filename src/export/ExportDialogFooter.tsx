@@ -39,15 +39,15 @@ function ExportProgressView({ progress, clock }: { progress: ExportProgress; clo
   const elapsedMs = (progress.finishedAt ?? clock) - progress.startedAt;
   const etaMs = exportEta(progress, elapsedMs);
   return (
-    <div className={`cc-export-progress ${progress.phase}`} role="progressbar" aria-label={label}
+    <div className={`ln-export-progress ${progress.phase}`} role="progressbar" aria-label={label}
       aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress.percent}>
-      <div className="cc-export-progress-head">
+      <div className="ln-export-progress-head">
         <strong>{label}</strong><span>{progress.percent}%</span>
       </div>
-      <div className="cc-export-progress-track" aria-hidden="true">
+      <div className="ln-export-progress-track" aria-hidden="true">
         <i style={{ transform: `scaleX(${progress.percent / 100})` }} />
       </div>
-      <div className="cc-export-progress-meta">
+      <div className="ln-export-progress-meta">
         {progress.processedFrames !== undefined && progress.totalFrames !== undefined && (
           <span>{t('Rendered {done}/{total} frames', { done: progress.processedFrames, total: progress.totalFrames })}</span>
         )}
@@ -79,17 +79,17 @@ export function ExportFooter({ tab, outputName, videoSummary, disabled, workflow
   const cancellable = !!busy && cancellablePhase
     && (renderEngine === 'checking' || renderEngine === 'browser' || renderEngine === 'server');
   return (
-    <footer className={`cc-export-footer${progress ? ' has-progress' : ''}`}>
+    <footer className={`ln-export-footer${progress ? ' has-progress' : ''}`}>
       {progress && <ExportProgressView progress={progress} clock={clock} />}
-      <div className="cc-export-output">
+      <div className="ln-export-output">
         <span>{progress?.phase === 'completed' ? t('Created') : tab === 'video' ? t('Output settings') : t('Output')}</span>
         <strong>{tab === 'video' ? videoSummary : outputName}</strong>
         {tab === 'video' && <small title={outputName}>{outputName}</small>}
       </div>
       {cancellable && (
-        <button type="button" className="cc-export-cancel" onClick={cancelExport}>{t('Cancel')}</button>
+        <button type="button" className="ln-export-cancel" onClick={cancelExport}>{t('Cancel')}</button>
       )}
-      <button type="button" className="cc-export-cta" onClick={() => void run()} disabled={disabled}>
+      <button type="button" className="ln-export-cta" onClick={() => void run()} disabled={disabled}>
         {!busy && <Icon name={progress?.phase === 'completed' ? 'check' : 'download'} size={17} />}
         {busy ? `${progress?.percent ?? 0}%` : progress?.phase === 'completed' ? t('Done')
           : progress?.phase === 'failed' ? t('Retry') : t(EXPORT_ACTION_LABELS[tab])}

@@ -369,9 +369,9 @@ export function transcriptSelectionRef(
   };
 }
 
-/** Native DOM text selection over `.cc-tx-word[data-gi]` spans → transcript
+/** Native DOM text selection over `.ln-tx-word[data-gi]` spans → transcript
  * reference for the section (clip) the selection started in (sections carry
- * id="cc-tx-sec-{itemId}"). Clears the DOM selection on success. */
+ * id="ln-tx-sec-{itemId}"). Clears the DOM selection on success. */
 export function transcriptRefFromDomSelection(
   root: HTMLElement,
   clips: TimelineItem[],
@@ -380,11 +380,11 @@ export function transcriptRefFromDomSelection(
   const domSel = window.getSelection();
   if (!domSel || domSel.isCollapsed || domSel.rangeCount === 0) return null;
   const range = domSel.getRangeAt(0);
-  const spans = Array.from(root.querySelectorAll<HTMLElement>('.cc-tx-word[data-gi]'))
+  const spans = Array.from(root.querySelectorAll<HTMLElement>('.ln-tx-word[data-gi]'))
     .filter((el) => range.intersectsNode(el));
   if (!spans.length) return null;
-  const section = spans[0]!.closest('section[id^="cc-tx-sec-"]');
-  const clipId = section?.id.slice('cc-tx-sec-'.length);
+  const section = spans[0]!.closest('section[id^="ln-tx-sec-"]');
+  const clipId = section?.id.slice('ln-tx-sec-'.length);
   const clip = clipId ? clips.find((c) => c.id === clipId) : undefined;
   if (!clip) return null;
   const wordIdxs = spans

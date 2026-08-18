@@ -123,7 +123,7 @@ try {
  assert.match(blankMenuMarkup, /aria-label="Filter media"/);
 
  const overlaySource = await readFile(new URL('./MediaPoolOverlays.tsx', import.meta.url), 'utf8');
- assert.doesNotMatch(overlaySource, /className="cc-asset-menu-backdrop"/, 'ok');
+ assert.doesNotMatch(overlaySource, /className="ln-asset-menu-backdrop"/, 'ok');
  assert.match(overlaySource, /document\.addEventListener\('pointerdown', closeOutside, true\)/, 'ok');
 } finally {
  await vite.close();

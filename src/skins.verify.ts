@@ -68,10 +68,10 @@ const css = buildSkinsCss();
 assert.ok(css.includes(':root {'), ':root');
 for (const s of SKINS) {
   if (s.id === DEFAULT_SKIN) continue;
-  assert.ok(css.includes(`html[data-cc-skin='${s.id}']`), `${s.id}`);
+  assert.ok(css.includes(`html[data-ln-skin='${s.id}']`), `${s.id}`);
 }
-assert.ok(css.includes('--cc-on-accent:'), 'on-accent variableoutput');
-assert.ok(css.includes('--cc-shadow-rgb:'), 'shadow-rgb variableoutput');
-assert.ok(css.includes('body { background: var(--cc-bg)'), 'body');
+assert.ok(css.includes('--ln-on-accent:'), 'on-accent variableoutput');
+assert.ok(css.includes('--ln-shadow-rgb:'), 'shadow-rgb variableoutput');
+assert.ok(css.includes('body { background: var(--ln-bg)'), 'body');
 
 process.stdout.write(`skins.verify: ok (${SKINS.length} skins, contrastall)\n`);

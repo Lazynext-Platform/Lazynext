@@ -272,7 +272,7 @@ export const PreviewPanel = memo(function PreviewPanel({
   }));
   return (
     <section style={{ display: 'flex', flex: 1, flexDirection: 'column', background: theme.panel, minHeight: 0, minWidth: 0, overflow: 'hidden' }}>
-      <div className="cc-preview-header" style={{ height: 30, padding: '0 12px', display: 'flex', alignItems: 'center', borderBottom: `0.5px solid ${theme.border}`, flexShrink: 0 }}>
+      <div className="ln-preview-header" style={{ height: 30, padding: '0 12px', display: 'flex', alignItems: 'center', borderBottom: `0.5px solid ${theme.border}`, flexShrink: 0 }}>
         <span style={{ fontSize: 12, color: theme.text }}>{t('Preview')}</span>
         {pickMode && (
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginLeft: 10, fontSize: 11, color: theme.accent }}>
@@ -280,7 +280,7 @@ export const PreviewPanel = memo(function PreviewPanel({
             {t('Select mode: drag a box on the frame to use the region as a reference')}
           </span>
         )}
-        <div className="cc-preview-header-actions" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div className="ln-preview-header-actions" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
           <ReviewCommentsButton
             projectId={projectId}
             timelineId={timelineId}
@@ -317,7 +317,7 @@ export const PreviewPanel = memo(function PreviewPanel({
           )}
         </div>
       </div>
-      <div ref={stageRef} className="cc-preview-stage"
+      <div ref={stageRef} className="ln-preview-stage"
         // Suppress the browser's native <video> context menu (download / picture-in-picture
         // / loop) because the preview is a canvas, not an exposed HTML5 video element.
         onContextMenu={(event) => event.preventDefault()}
@@ -326,7 +326,7 @@ export const PreviewPanel = memo(function PreviewPanel({
         {state.items.length === 0 ? (
           <>
             <input ref={inputRef} type="file" accept="video/*,image/*,audio/*" multiple hidden onChange={(event) => { if (event.target.files) void importFiles(event.target.files); event.target.value = ''; }} />
-            <button className="cc-preview-empty" disabled={busy} onClick={() => inputRef.current?.click()}>
+            <button className="ln-preview-empty" disabled={busy} onClick={() => inputRef.current?.click()}>
               <Icon name="upload" size={24} />
               <span>{busy ? t('Importing media…') : t('Drop media here')}</span>
             </button>
@@ -334,7 +334,7 @@ export const PreviewPanel = memo(function PreviewPanel({
         ) : (
           // Wrapper carries the sizing so the safe-zone overlay lines up exactly
           // on the video rect (Player fills the wrapper).
-          <div ref={videoBoxRef} className="cc-preview-canvas" style={{
+          <div ref={videoBoxRef} className="ln-preview-canvas" style={{
             position: 'relative',
             width: previewCanvasSize.width || (state.width >= state.height ? '100%' : 'auto'),
             height: previewCanvasSize.height || (state.width >= state.height ? 'auto' : '100%'),
@@ -371,7 +371,7 @@ export const PreviewPanel = memo(function PreviewPanel({
               // Restart by pressing play again.
             />
             {!fullscreen && hoverPreviewFrame !== null && (
-              <div className="cc-preview-hover-frame" aria-label={t('Timeline hover preview')}>
+              <div className="ln-preview-hover-frame" aria-label={t('Timeline hover preview')}>
                 <Thumbnail
                   component={TimelineComposition}
                   inputProps={thumbnailInputProps}

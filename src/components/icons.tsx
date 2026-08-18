@@ -155,7 +155,7 @@ export function LazynextWordmark({ width = 126 }: { width?: number }) {
         fontFamily="Inter, Geist, system-ui, sans-serif"
         dominantBaseline="alphabetic"
       >
-        <tspan x="46" y="78" textAnchor="middle" fill="var(--cc-panel)" fontSize="52" fontWeight="850" letterSpacing="-0.04em">
+        <tspan x="46" y="78" textAnchor="middle" fill="var(--ln-panel)" fontSize="52" fontWeight="850" letterSpacing="-0.04em">
           L
         </tspan>
         <tspan x="112" y="79" fill="currentColor" fontSize="58" fontWeight="720" letterSpacing="-0.04em">

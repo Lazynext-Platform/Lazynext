@@ -23,11 +23,11 @@ export function SectionLabel({
 }) {
   const t = useT();
   return (
-    <div className="cc-insp-section">
+    <div className="ln-insp-section">
       <span>{children}</span>
       {onReset && (
         <button
-          className="cc-insp-group-reset"
+          className="ln-insp-group-reset"
           disabled={resetDisabled}
           title={t('Reset the entire group')}
           type="button"
@@ -50,30 +50,30 @@ export function FilterControl({ item, mixed, onChange, autoGrade }: {
   const t = useT();
   const fl: ClipFilters = { ...item.filters, ...(autoGrade?.selectedPreview?.filters ?? {}) };
   return (
-    <div className="cc-insp-stack">
+    <div className="ln-insp-stack">
       {autoGrade && (
-        <div className={`cc-auto-grade${autoGrade.previewCount ? ' previewing' : ''}`}>
-          <div className="cc-auto-grade-head">
+        <div className={`ln-auto-grade${autoGrade.previewCount ? ' previewing' : ''}`}>
+          <div className="ln-auto-grade-head">
             <div>
               <strong>{t('Auto Color')}</strong>
               <span>{t('Conservative technical correction')}</span>
             </div>
             <button
               type="button"
-              className="cc-insp-btn"
+              className="ln-insp-btn"
               disabled={autoGrade.busy || autoGrade.targetCount === 0}
               onClick={() => void autoGrade.onAnalyze()}
             >
               {autoGrade.busy ? t('Analyzing…') : t('Analyze selected clips')}
             </button>
           </div>
-          <div className="cc-auto-grade-note">
+          <div className="ln-auto-grade-note">
             {autoGrade.targetCount === 0
               ? t('Select video, image, or GIF clips imported into the media pool')
               : t('Samples media locally and makes only small brightness, contrast, and saturation corrections. No creative LUT is added.')}
           </div>
           {autoGrade.previewCount > 0 && (
-            <div className="cc-auto-grade-result">
+            <div className="ln-auto-grade-result">
               <div>
                 <b>{t('Previewing · {n} clip(s)', { n: autoGrade.previewCount })}</b>
                 {autoGrade.failedCount > 0 && <span>{t(' · {n} failed', { n: autoGrade.failedCount })}</span>}
@@ -84,9 +84,9 @@ export function FilterControl({ item, mixed, onChange, autoGrade }: {
                   </span>
                 )}
               </div>
-              <div className="cc-insp-actions">
-                <button type="button" className="cc-insp-btn primary" onClick={autoGrade.onApply}>{t('Apply correction')}</button>
-                <button type="button" className="cc-insp-btn" onClick={autoGrade.onCancel}>{t('Cancel preview')}</button>
+              <div className="ln-insp-actions">
+                <button type="button" className="ln-insp-btn primary" onClick={autoGrade.onApply}>{t('Apply correction')}</button>
+                <button type="button" className="ln-insp-btn" onClick={autoGrade.onCancel}>{t('Cancel preview')}</button>
               </div>
             </div>
           )}

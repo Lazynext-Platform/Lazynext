@@ -64,10 +64,10 @@ const PRELOAD_PATH = join(dirname(fileURLToPath(import.meta.url)), 'preload.cjs'
 // (issue #40). Must run before app 'ready'; js-flags apply to every V8 instance.
 app.commandLine.appendSwitch('js-flags', '--max-old-space-size=6144');
 
-// CC_SMOKE=1: No window smoke - start the embedded server, load the page, explore /api/keys, and return the code 0/1 according to the result.
-// CC_SMOKE_RENDER=1 adds a true rendering probe (packaged version acceptance: pre-bundled + full browser link included in the package).
-const SMOKE = process.env.CC_SMOKE === '1';
-const SMOKE_RENDER = process.env.CC_SMOKE_RENDER === '1';
+// LAZYNEXT_SMOKE=1: No window smoke - start the embedded server, load the page, explore /api/keys, and return the code 0/1 according to the result.
+// LAZYNEXT_SMOKE_RENDER=1 adds a true rendering probe (packaged version acceptance: pre-bundled + full browser link included in the package).
+const SMOKE = process.env.LAZYNEXT_SMOKE === '1';
+const SMOKE_RENDER = process.env.LAZYNEXT_SMOKE_RENDER === '1';
 const SMOKE_TIMEOUT_MS = SMOKE_RENDER ? 240_000 : 90_000;
 let mainWindow: BrowserWindow | null = null;
 
@@ -419,7 +419,7 @@ async function boot(): Promise<void> {
     });
   }
   const devOrigin = resolveDesktopDevOrigin({
-    configuredDevUrl: process.env.CC_DESKTOP_DEV_URL,
+    configuredDevUrl: process.env.LAZYNEXT_DESKTOP_DEV_URL,
     packaged: app.isPackaged,
     smoke: SMOKE,
   });

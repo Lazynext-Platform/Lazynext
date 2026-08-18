@@ -49,7 +49,7 @@ export function TimelineRuler({
     : null;
   return (
     <div
-      className="cc-timeline-ruler"
+      className="ln-timeline-ruler"
       onPointerDown={(e) => {
         if (pickMode) { startPick(e, 'ruler'); return; }
         if (e.button !== 0) return;
@@ -61,7 +61,7 @@ export function TimelineRuler({
       onPointerUp={(e) => { e.currentTarget.style.cursor = ''; }}
       style={{ display: 'flex', height: RULER_H, borderBottom: `0.5px solid ${theme.border}`, fontSize: 10, color: theme.textDim, cursor: pickMode ? 'crosshair' : 'pointer', userSelect: 'none' }}
     >
-      <div className="cc-ruler-head" style={{ width: HEADER_W }}><span ref={rulerTimecodeRef}>{fmtClock(playheadFrame, state.fps)}</span></div>
+      <div className="ln-ruler-head" style={{ width: HEADER_W }}><span ref={rulerTimecodeRef}>{fmtClock(playheadFrame, state.fps)}</span></div>
       <div style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
         {empty
           ? Array.from({ length: 5 }).map((_, i) => (

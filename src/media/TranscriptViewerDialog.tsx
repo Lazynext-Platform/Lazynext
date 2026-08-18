@@ -90,34 +90,34 @@ export function TranscriptViewerDialog({ asset, entries, onClose, onStep }: Tran
   return (
     <div
       ref={panelRef}
-      className="cc-transcript-viewer-panel"
+      className="ln-transcript-viewer-panel"
       style={position ? { left: position.left, top: position.top, right: 'auto', bottom: 'auto' } : undefined}
       role="region"
       aria-label={t('Transcript: {name}', { name: asset.name })}
       onClick={stop}
     >
       <div
-        className="cc-transcript-viewer-head"
+        className="ln-transcript-viewer-head"
         onPointerDown={onHeaderPointerDown}
         onPointerMove={onHeaderPointerMove}
         onPointerUp={onHeaderPointerUp}
         onPointerCancel={onHeaderPointerUp}
       >
         <strong title={asset.name}>{asset.name}</strong>
-        <div className="cc-transcript-viewer-actions">
+        <div className="ln-transcript-viewer-actions">
           <button type="button" className="primary" onClick={() => void copy()}>{copied ? t('Copied') : t('Copy full text')}</button>
           <button type="button" disabled={entries.length < 2} onClick={() => onStep(-1)} aria-label={t('Previous')} title={t('Previous')}><Icon name="prev" size={15} /></button>
-          <span className="cc-transcript-viewer-count">{index >= 0 ? `${index + 1} / ${entries.length}` : '1 / 1'}</span>
+          <span className="ln-transcript-viewer-count">{index >= 0 ? `${index + 1} / ${entries.length}` : '1 / 1'}</span>
           <button type="button" disabled={entries.length < 2} onClick={() => onStep(1)} aria-label={t('Next')} title={t('Next')}><Icon name="next" size={15} /></button>
           <button type="button" onClick={onClose} aria-label={t('Close')}><Icon name="x" size={15} /></button>
         </div>
       </div>
-      <div className="cc-transcript-viewer-body">
+      <div className="ln-transcript-viewer-body">
         {paragraphs.length === 0
-          ? <p className="cc-transcript-viewer-empty">{t('No transcript yet')}</p>
+          ? <p className="ln-transcript-viewer-empty">{t('No transcript yet')}</p>
           : paragraphs.map((paragraph, i) => (
-            <p key={`${paragraph.start}-${i}`} className="cc-transcript-viewer-paragraph">
-              <span className="cc-transcript-viewer-time">{transcriptTimestamp(paragraph.start)}</span>
+            <p key={`${paragraph.start}-${i}`} className="ln-transcript-viewer-paragraph">
+              <span className="ln-transcript-viewer-time">{transcriptTimestamp(paragraph.start)}</span>
               {paragraph.text}
             </p>
           ))}

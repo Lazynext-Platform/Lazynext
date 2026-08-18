@@ -33,7 +33,7 @@ assert.match(markup, /left:50%/, 'updatehorizontalcentered');
 assert.match(markup, /z-index:190/, 'updatemustsettingsbottomsettings');
 assert.match(markup, /transform:translate\(-50%,\s*-50%\)/, 'updatecenterwindowcenter');
 assert.match(markup, /aria-label="Window controls"/, 'desktopwindowmustupdate dashboard chrome centerrender');
-assert.equal((markup.match(/class="cc-window-control /g) ?? []).length, 3, 'macOS titlewindowbutton');
+assert.equal((markup.match(/class="ln-window-control /g) ?? []).length, 3, 'macOS titlewindowbutton');
 
 
 console.log('upstream-update-notice.verify: dashboard-only centered upstream update notice OK');

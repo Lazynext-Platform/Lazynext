@@ -25,8 +25,8 @@ function SourceFrame({ src, frame, fps, label, audio }: SourceFrameProps) {
   useEffect(seek, [seek]);
 
   return (
-    <figure className="cc-slip-two-up-frame">
-      <div className="cc-slip-two-up-media">
+    <figure className="ln-slip-two-up-frame">
+      <div className="ln-slip-two-up-media">
         {!audio && (
           <video
             ref={ref}
@@ -38,7 +38,7 @@ function SourceFrame({ src, frame, fps, label, audio }: SourceFrameProps) {
             onLoadedMetadata={seek}
           />
         )}
-        {audio && <span className="cc-slip-two-up-audio" aria-hidden="true">⌁⌁⌁</span>}
+        {audio && <span className="ln-slip-two-up-audio" aria-hidden="true">⌁⌁⌁</span>}
       </div>
       <figcaption>
         <span>{label}</span>
@@ -53,13 +53,13 @@ export function SlipTwoUpPreview({ preview }: { preview: SlipPreview }) {
   const t = useT();
   const { plan } = preview;
   return (
-    <aside className="cc-slip-two-up" role="status" aria-live="off" aria-label={t('Slip preview')}>
-      <div className="cc-slip-two-up-head">
+    <aside className="ln-slip-two-up" role="status" aria-live="off" aria-label={t('Slip preview')}>
+      <div className="ln-slip-two-up-head">
         <strong>{t('Slip')}</strong>
         <span title={preview.itemName}>{preview.itemName}</span>
         <b>{plan.appliedDeltaInFrames >= 0 ? '+' : ''}{plan.appliedDeltaInFrames.toFixed(2)}f</b>
       </div>
-      <div className="cc-slip-two-up-grid">
+      <div className="ln-slip-two-up-grid">
         <SourceFrame
           src={preview.src}
           frame={preview.sourceInFrame}
@@ -75,7 +75,7 @@ export function SlipTwoUpPreview({ preview }: { preview: SlipPreview }) {
           audio={preview.kind === 'audio'}
         />
       </div>
-      {plan.clamped && <div className="cc-slip-two-up-limit">{t('Reached the source media boundary')}</div>}
+      {plan.clamped && <div className="ln-slip-two-up-limit">{t('Reached the source media boundary')}</div>}
     </aside>
   );
 }

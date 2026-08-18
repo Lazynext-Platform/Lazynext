@@ -15,8 +15,8 @@ interface BuilderConfig {
 }
 
 async function configFor(target: string): Promise<BuilderConfig> {
-  // Query isolation is intentional: the config reads CC_EB_TARGET once at module evaluation.
-  process.env.CC_EB_TARGET = target;
+  // Query isolation is intentional: the config reads LAZYNEXT_EB_TARGET once at module evaluation.
+  process.env.LAZYNEXT_EB_TARGET = target;
   const moduleUrl = new URL(`../config/electron-builder.config.mjs?target=${target}`, import.meta.url);
   const loaded = await import(moduleUrl.href) as { default: BuilderConfig };
   return loaded.default;
@@ -109,7 +109,7 @@ assert.match(
 );
 assert.match(
   windowsDistScript,
-  /env:\{\.\.\.process\.env,CC_EB_TARGET:'win32-x64'\}/,
+  /env:\{\.\.\.process\.env,LAZYNEXT_EB_TARGET:'win32-x64'\}/,
   'Windows packaging must explicitly select win32-x64 filters on every host',
 );
 assert.doesNotMatch(
@@ -163,18 +163,18 @@ assert.doesNotMatch(
   'desktop smoke tests must never launch unpacked electron-builder output',
 );
 assert.equal(
-  workflow.match(/CC_SMOKE: '1'/g)?.length,
+  workflow.match(/LAZYNEXT_SMOKE: '1'/g)?.length,
   3,
   'every shipped desktop artifact must run the application smoke contract',
 );
 assert.equal(
-  workflow.match(/CC_SMOKE_RENDER: '1'/g)?.length,
+  workflow.match(/LAZYNEXT_SMOKE_RENDER: '1'/g)?.length,
   3,
   'every shipped desktop artifact must run the render smoke contract',
 );
 assert.match(
   workflow,
-  /Smoke test Windows installer[\s\S]*?CC_SMOKE_MCP_RECOVERY: '1'[\s\S]*?Start-Process -FilePath \$installedExe/,
+  /Smoke test Windows installer[\s\S]*?LAZYNEXT_SMOKE_MCP_RECOVERY: '1'[\s\S]*?Start-Process -FilePath \$installedExe/,
   'the installed Windows application must exercise MCP checkpoint recovery',
 );
 assert.match(workflow, /hdiutil attach[\s\S]*?"\$\{dmgs\[0\]\}"/, 'macOS smoke must mount the generated DMG');

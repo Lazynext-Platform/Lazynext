@@ -64,11 +64,11 @@ export function TrackHead({
  : config.role === 'follower' ? `${trackName} - ${t('Follower (ducking)')}`
  : trackName;
  return (
- <div className="cc-track-head" style={{ width, ...(menuElevated ? { zIndex: 40 } : {}) }}>
- <div className="cc-track-head-controls">
- <span className="cc-track-name" title={t('{name}{id}', { name: nameTitle, id: trackId })} style={{ background: tagColor }}>
- <span className="cc-track-name-title">{trackName}</span>
- {customName && <span className="cc-track-name-custom">{customName}</span>}
+ <div className="ln-track-head" style={{ width, ...(menuElevated ? { zIndex: 40 } : {}) }}>
+ <div className="ln-track-head-controls">
+ <span className="ln-track-name" title={t('{name}{id}', { name: nameTitle, id: trackId })} style={{ background: tagColor }}>
+ <span className="ln-track-name-title">{trackName}</span>
+ {customName && <span className="ln-track-name-custom">{customName}</span>}
  </span>
  <button style={flagBtn(hidden)} title={hidden ? t('Show track') : t('Hide track')} onClick={isCaption ? onToggleCaptions : () => commands.toggleTrackFlag(trackId, 'hidden')}><Icon name={hidden ? 'eyeOff' : 'eye'} size={14} /></button>
  {!isCaption && <button style={flagBtn(muted)} title={muted ? t('Unmute') : t('Mute track')} onClick={() => commands.toggleTrackFlag(trackId, 'muted')}><Icon name={muted ? 'volumeOff' : 'volume'} size={14} /></button>}
@@ -77,7 +77,7 @@ export function TrackHead({
  {!isCaption && <button data-duck-menu-trigger style={{ ...flagBtn(false), color: config.role === 'anchor' || config.role === 'follower' ? theme.gold : theme.textMuted }} title={t('Auto-ducking (mix roles: anchor speech / follower music)')} onClick={(e) => onToggleDuckMenu(e.currentTarget.getBoundingClientRect())}><Icon name="sliders" size={13} /></button>}
  <button
  type="button"
- className="cc-track-fixed-action"
+ className="ln-track-fixed-action"
  disabled={deleteBlockedReason !== null}
  title={deleteTitle}
  onClick={onDelete}
@@ -106,9 +106,9 @@ function DuckMenu({ trackId, config, pos, commands, onClose, onBack }: {
 }) {
  const t = useT();
  return (
- <div className="cc-caption-style-menu cc-duck-menu" style={{ position: 'fixed', left: pos.left, top: pos.top }} onPointerDown={(e) => e.stopPropagation()}>
+ <div className="ln-caption-style-menu ln-duck-menu" style={{ position: 'fixed', left: pos.left, top: pos.top }} onPointerDown={(e) => e.stopPropagation()}>
  <MenuDrillHeader title={t('Auto duck')} onBack={onBack} />
- <div className="cc-caption-style-list">
+ <div className="ln-caption-style-list">
  {([
  { role: null, label: 'Close', hint: 'Not part of auto-ducking' },
  { role: 'anchor', label: 'Anchor - Speech', hint: 'Speech ducks the other tracks' },

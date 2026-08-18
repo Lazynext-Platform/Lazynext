@@ -92,9 +92,9 @@ function ClipEffectBadges({
   }
   if (!chips.length) return null;
   return (
-    <div className="cc-clip-badges" aria-hidden>
+    <div className="ln-clip-badges" aria-hidden>
       {chips.map((c) => (
-        <span key={c.key} className={`cc-clip-badge ${c.className}`} title={c.title}>{c.label}</span>
+        <span key={c.key} className={`ln-clip-badge ${c.className}`} title={c.title}>{c.label}</span>
       ))}
     </div>
   );
@@ -171,7 +171,7 @@ export function TrackLane({
   return (
     <div
       data-timeline-track-lane
-      className="cc-track-lane"
+      className="ln-track-lane"
       data-caption-selection-region="timeline"
       style={{
         // locked lane: slightly dimmed (the background color of the locked lane is dimmed; the lock icon is highlighted at the same time)
@@ -187,7 +187,7 @@ export function TrackLane({
       }}
       onContextMenu={(e) => {
         const target = e.target instanceof Element ? e.target : null;
-        if (target?.closest('[data-timeline-clip], .cc-transition-marker')) return;
+        if (target?.closest('[data-timeline-clip], .ln-transition-marker')) return;
         e.preventDefault();
         e.stopPropagation();
         onTrackContextMenu({ trackId, x: e.clientX, y: e.clientY, frame: frameFromClientX(e.clientX) });
@@ -289,7 +289,7 @@ export function TrackLane({
         return (
           <div
             key={it.id}
-            className={`cc-timeline-clip${selected ? ' is-selected' : ''}${isLibOver ? ' is-library-over' : ''}${audioMuted ? ' is-audio-muted' : ''}`}
+            className={`ln-timeline-clip${selected ? ' is-selected' : ''}${isLibOver ? ' is-library-over' : ''}${audioMuted ? ' is-audio-muted' : ''}`}
             data-timeline-clip
             title={clipTitle}
             data-clip-kind={it.kind}
@@ -382,7 +382,7 @@ export function TrackLane({
             {overlapSpans.map((span) => (
               <span
                 key={`${span.startFrame}:${span.endFrame}`}
-                className="cc-clip-overlap-region"
+                className="ln-clip-overlap-region"
                 aria-hidden="true"
                 style={{
                   left: (span.startFrame - start) * px,
@@ -391,7 +391,7 @@ export function TrackLane({
               />
             ))}
             {audioMuted && (
-              <span className="cc-clip-muted-indicator" title={t('Track muted')} aria-label={t('Track muted')}>
+              <span className="ln-clip-muted-indicator" title={t('Track muted')} aria-label={t('Track muted')}>
                 <Icon name="volumeOff" size={11} />
               </span>
             )}
@@ -399,13 +399,13 @@ export function TrackLane({
               const left = (mediaIntersection.startFrame - start) * px + 3;
               const width = Math.max(1, (mediaIntersection.endFrame - mediaIntersection.startFrame) * px - 6);
               return (
-                <svg className="cc-audio-waveform" viewBox={`0 0 ${width} 24`}
+                <svg className="ln-audio-waveform" viewBox={`0 0 ${width} 24`}
                   preserveAspectRatio="none" aria-hidden style={{ left, width }}>
                   <path d={waveformPath(`${it.id}:${it.name}:${mediaIntersection.startFrame}`, width)} />
                 </svg>
               );
             })()}
-            <span className="cc-clip-duration" data-cc-live-duration={dur}>{fmt(dur, state.fps)}</span>
+            <span className="ln-clip-duration" data-ln-live-duration={dur}>{fmt(dur, state.fps)}</span>
             <ClipEffectBadges item={it} inTransition={indexes.transitionByIncomingId.get(it.id) ?? null} />
             {/* pen mode: keyframe rubber band on the selected clip (vertical = value; audio = volume 0..2, rest = transparency 0..1)*/}
             {editMode === 'pen' && selected && (() => {
@@ -456,7 +456,7 @@ export function TrackLane({
             {/* trim handles (hidden in blade / pen / selection-pick modes) */}
             {showHandles && <div onPointerDown={(e) => startDrag(e, it.id, 'trim-left', it.startFrame, it.durationInFrames, it.track, it.srcInFrame ?? 0)}
               style={{ position: 'absolute', left: 0, top: 0, width: 8, height: '100%', cursor: 'ew-resize', background: editMode === 'trim' || editMode === 'rate-stretch' ? themeAlpha.accent(0.5) : selected ? themeAlpha.shadow(0.25) : 'transparent' }} />}
-            <span className={`cc-clip-label${it.kind === 'audio' ? ' audio' : ''}`}>{it.name}</span>
+            <span className={`ln-clip-label${it.kind === 'audio' ? ' audio' : ''}`}>{it.name}</span>
             {showHandles && <div onPointerDown={(e) => startDrag(e, it.id, 'trim-right', it.startFrame, it.durationInFrames, it.track, it.srcInFrame ?? 0)}
               style={{ position: 'absolute', right: 0, top: 0, width: 8, height: '100%', cursor: 'ew-resize', background: editMode === 'trim' || editMode === 'rate-stretch' ? themeAlpha.accent(0.5) : selected ? themeAlpha.shadow(0.25) : 'transparent' }} />}
           </div>
@@ -477,7 +477,7 @@ export function TrackLane({
               event.stopPropagation();
               onTransitionContextMenu({ id: tn.id, x: event.clientX, y: event.clientY });
             }}
-            className="cc-transition-marker"
+            className="ln-transition-marker"
             style={{ position: 'absolute', top: '50%', left: inItem.startFrame * px, transform: 'translate(-50%, -50%)', zIndex: 3 }}>
             <Icon name="swap" size={10} />
           </div>

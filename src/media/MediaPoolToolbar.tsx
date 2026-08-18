@@ -130,15 +130,15 @@ export function MediaPoolToolbar(props: MediaPoolToolbarProps) {
   const t = useT();
   const lifecycle = useToolbarMenuLifecycle(props.menu, props.onMenuChange);
   return (
-    <div className="cc-media-toolbar">
-      <label className="cc-media-search">
+    <div className="ln-media-toolbar">
+      <label className="ln-media-search">
         <Icon name="search" size={16} />
         <input aria-label={t('Search media')} value={props.query} onChange={(event) => props.onQueryChange(event.target.value)} placeholder={t('Search')} />
       </label>
       <SemanticSearchControls scopeId={props.scopeId} assets={props.assets} onResultsChange={props.onSemanticResults} openRequest={props.semanticOpenRequest} />
-      <button className="cc-media-icon cc-tip" aria-label={t('Upload media')} data-tip={t('Upload media')} disabled={props.busy} onClick={props.onUpload}><Icon name="upload" size={19} /></button>
-      {props.busy && props.uploadRatio != null && <span className="cc-media-upload-pct" title={t('Uploading')}>{Math.round(props.uploadRatio * 100)}%</span>}
-      <button className="cc-media-icon cc-tip" aria-label={t(mediaViewToggleLabel(props.view))} data-tip={t(mediaViewToggleLabel(props.view))} onClick={props.onViewChange}><Icon name={props.view === 'grid' ? 'list' : 'grid'} size={19} /></button>
+      <button className="ln-media-icon ln-tip" aria-label={t('Upload media')} data-tip={t('Upload media')} disabled={props.busy} onClick={props.onUpload}><Icon name="upload" size={19} /></button>
+      {props.busy && props.uploadRatio != null && <span className="ln-media-upload-pct" title={t('Uploading')}>{Math.round(props.uploadRatio * 100)}%</span>}
+      <button className="ln-media-icon ln-tip" aria-label={t(mediaViewToggleLabel(props.view))} data-tip={t(mediaViewToggleLabel(props.view))} onClick={props.onViewChange}><Icon name={props.view === 'grid' ? 'list' : 'grid'} size={19} /></button>
       <SortMenu {...props} lifecycle={lifecycle} />
       <FilterMenu {...props} lifecycle={lifecycle} />
       <ActionsMenu {...props} lifecycle={lifecycle} />
@@ -159,14 +159,14 @@ function SortMenu(props: MenuProps) {
     ref={props.lifecycle.menuRef}
     role="dialog"
     aria-label={t('Sort media')}
-    className="cc-media-popover cc-media-sort-menu cc-media-toolbar-menu-fixed"
+    className="ln-media-popover ln-media-sort-menu ln-media-toolbar-menu-fixed"
     style={props.lifecycle.actionsStyle}
   >
     {SORT_OPTIONS.map(([value, label]) => <button aria-pressed={props.sort === value} key={value} className={props.sort === value ? 'selected' : ''} onClick={() => { props.onSortChange(value); props.lifecycle.close(true); }}>{t(label)}</button>)}
   </div>;
   return (
-    <div className="cc-media-menu-anchor">
-      <button className={`cc-media-icon cc-tip${open ? ' active' : ''}`} aria-label={t('Sort media')} data-tip={t('Sort')} aria-haspopup="dialog" aria-expanded={open} onClick={(event) => props.lifecycle.toggle('sort', event.currentTarget)}><Icon name="sort" size={19} /></button>
+    <div className="ln-media-menu-anchor">
+      <button className={`ln-media-icon ln-tip${open ? ' active' : ''}`} aria-label={t('Sort media')} data-tip={t('Sort')} aria-haspopup="dialog" aria-expanded={open} onClick={(event) => props.lifecycle.toggle('sort', event.currentTarget)}><Icon name="sort" size={19} /></button>
       {portalToolbarPopover(popover)}
     </div>
   );
@@ -179,15 +179,15 @@ function FilterMenu(props: MenuProps) {
     ref={props.lifecycle.menuRef}
     role="dialog"
     aria-label={t('Filter media')}
-    className="cc-media-popover cc-media-filter-menu cc-media-toolbar-menu-fixed"
+    className="ln-media-popover ln-media-filter-menu ln-media-toolbar-menu-fixed"
     style={props.lifecycle.actionsStyle}
   >
     {FILTER_OPTIONS.map(([value, label]) => <button aria-pressed={props.type === value} key={value} className={props.type === value ? 'selected' : ''} onClick={() => props.onTypeChange(value)}>{t(label)}</button>)}
-    <button aria-pressed={props.favoritesOnly} className={props.favoritesOnly ? 'selected' : ''} onClick={props.onFavoritesChange}><span className="cc-media-menu-label"><Icon name="star" size={13} filled={props.favoritesOnly} /> {t('Favorite')}</span></button>
+    <button aria-pressed={props.favoritesOnly} className={props.favoritesOnly ? 'selected' : ''} onClick={props.onFavoritesChange}><span className="ln-media-menu-label"><Icon name="star" size={13} filled={props.favoritesOnly} /> {t('Favorite')}</span></button>
   </div>;
   return (
-    <div className="cc-media-menu-anchor">
-      <button className={`cc-media-icon cc-tip${open || props.type !== 'all' || props.favoritesOnly ? ' active' : ''}`} aria-label={t('Filter media')} data-tip={t('Filter')} aria-haspopup="dialog" aria-expanded={open} onClick={(event) => props.lifecycle.toggle('filter', event.currentTarget)}><Icon name="filter" size={19} /></button>
+    <div className="ln-media-menu-anchor">
+      <button className={`ln-media-icon ln-tip${open || props.type !== 'all' || props.favoritesOnly ? ' active' : ''}`} aria-label={t('Filter media')} data-tip={t('Filter')} aria-haspopup="dialog" aria-expanded={open} onClick={(event) => props.lifecycle.toggle('filter', event.currentTarget)}><Icon name="filter" size={19} /></button>
       {portalToolbarPopover(popover)}
     </div>
   );
@@ -204,9 +204,9 @@ function ActionsMenu(props: MenuProps) {
     action(props.lifecycle.restoreFocus);
     props.lifecycle.close();
   };
-  const popover = open && <div ref={props.lifecycle.menuRef} role="dialog" aria-label={t('More actions')} className="cc-media-popover cc-media-actions-menu cc-media-toolbar-menu-fixed" style={props.lifecycle.actionsStyle}>
+  const popover = open && <div ref={props.lifecycle.menuRef} role="dialog" aria-label={t('More actions')} className="ln-media-popover ln-media-actions-menu ln-media-toolbar-menu-fixed" style={props.lifecycle.actionsStyle}>
     <button onClick={() => runModal(props.onMobileUpload)}><Icon name="qrCode" size={15} />{t('Upload from phone')}</button>
-    {props.canAddSolid && <button onClick={() => run(props.onAddSolid, true)}><span className="cc-media-solid-icon">{t('C')}</span>{t('Add solid color')}</button>}
+    {props.canAddSolid && <button onClick={() => run(props.onAddSolid, true)}><span className="ln-media-solid-icon">{t('C')}</span>{t('Add solid color')}</button>}
     <button onClick={() => runModal(props.onCreateFolder)}><Icon name="folderPlus" size={16} />{t('New folder')}</button>
     <DirectoryImportActions
       onPickFolder={props.onPickFolder}
@@ -219,8 +219,8 @@ function ActionsMenu(props: MenuProps) {
     <MusicAutoAnalysisPreference />
   </div>;
   return (
-    <div className="cc-media-menu-anchor">
-      <button className={`cc-media-icon cc-tip cc-tip-r${open ? ' active' : ''}`} aria-label={t('More actions')} data-tip={t('More actions')} aria-haspopup="dialog" aria-expanded={open} onClick={(event) => props.lifecycle.toggle('actions', event.currentTarget)}><Icon name="more" size={19} /></button>
+    <div className="ln-media-menu-anchor">
+      <button className={`ln-media-icon ln-tip ln-tip-r${open ? ' active' : ''}`} aria-label={t('More actions')} data-tip={t('More actions')} aria-haspopup="dialog" aria-expanded={open} onClick={(event) => props.lifecycle.toggle('actions', event.currentTarget)}><Icon name="more" size={19} /></button>
       {portalToolbarPopover(popover)}
     </div>
   );

@@ -29,7 +29,7 @@ const browserSource = readFileSync(new URL('./SoundBrowser.tsx', import.meta.url
 assert.match(browserSource, /\{t\(g\.name\)\}/, 'sound group chips must render through the active locale');
 assert.match(browserSource, /tData\(s\.name\)/, 'sound names must participate in search');
 assert.match(browserSource, /const displayName = tData\(sound\.name\)/, 'sound rows must derive a localized display name');
-assert.match(browserSource, /cc-sound-name[^>]*>\{displayName\}/, 'sound rows must render the localized display name');
+assert.match(browserSource, /ln-sound-name[^>]*>\{displayName\}/, 'sound rows must render the localized display name');
 assert.match(browserSource, /\{ n: list\.length \}/, 'the footer must report the active search/category result count');
 assert.doesNotMatch(
   browserSource,

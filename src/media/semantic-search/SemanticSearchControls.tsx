@@ -42,8 +42,8 @@ export function SemanticSearchControls({ scopeId, assets, onResultsChange, openR
   useEffect(() => {
     if (openRequest > 0) setOpen(true);
   }, [openRequest]);
-  return <div ref={anchorRef} className="cc-semantic-anchor">
-    <button type="button" className={`cc-media-icon cc-semantic-trigger cc-tip${open || searchedQuery ? ' active' : ''}`}
+  return <div ref={anchorRef} className="ln-semantic-anchor">
+    <button type="button" className={`ln-media-icon ln-semantic-trigger ln-tip${open || searchedQuery ? ' active' : ''}`}
       aria-label={t('Semantic search')} data-tip={t('Local semantic search')} aria-haspopup="dialog" aria-expanded={open}
       onClick={() => setOpen((value) => !value)}>
       <Icon name="sparkles" size={17} />
@@ -100,7 +100,7 @@ function useSemanticPanelPosition(
       const panel = panelRef.current;
       if (!anchor || !panel) return;
       const anchorRect = anchor.getBoundingClientRect();
-      const bounds = anchor.closest('.cc-library-panel')?.getBoundingClientRect()
+      const bounds = anchor.closest('.ln-library-panel')?.getBoundingClientRect()
         ?? document.documentElement.getBoundingClientRect();
       setPosition(resolveSemanticPanelRect(
         anchorRect, bounds, { width: window.innerWidth, height: window.innerHeight }, panel.offsetHeight,
@@ -140,7 +140,7 @@ function SemanticPanel(props: SemanticPanelProps & {
     props.setSearchedQuery('');
     semantic.cancel();
   };
-  return <section ref={props.panelRef} style={props.style} className="cc-semantic-panel" role="dialog" aria-label={t('Local semantic search')}>
+  return <section ref={props.panelRef} style={props.style} className="ln-semantic-panel" role="dialog" aria-label={t('Local semantic search')}>
     <PanelHeader onClose={props.onClose} t={t} />
     {semantic.state.status === 'idle' || semantic.state.status === 'error'
       ? <EnableView state={semantic.state} onEnable={() => void semantic.enable()}
@@ -168,13 +168,13 @@ function EnableView({ state, onEnable, onInstall, t }: ViewProps & {
 }) {
   const packAbsent = state.pack === 'absent' || state.pack === 'error';
   const packDownloading = state.pack === 'downloading';
-  return <div className="cc-semantic-empty">
-    <span className="cc-semantic-empty-icon"><Icon name="sparkles" size={18} /></span>
+  return <div className="ln-semantic-empty">
+    <span className="ln-semantic-empty-icon"><Icon name="sparkles" size={18} /></span>
     <div><strong>{t('Search by visual content')}</strong>
       <p>{t('Indexing and search run entirely on this machine — assets never upload, and the editor is unaffected until you enable it.')}</p>
     </div>
     {packAbsent && (
-      <div className="cc-semantic-pack-missing">
+      <div className="ln-semantic-pack-missing">
         <p>{state.pack === 'error'
           ? t('Model pack download failed — retry in Settings → Local models.')
           : t('First use requires downloading an optional model pack (~178 MB). The model runs locally; assets never leave this machine.')}</p>
@@ -184,12 +184,12 @@ function EnableView({ state, onEnable, onInstall, t }: ViewProps & {
       </div>
     )}
     {packDownloading && (
-      <div className="cc-semantic-pack-missing">
+      <div className="ln-semantic-pack-missing">
         <p>{t('Downloading the visual-semantics pack… {n}%', { n: state.packProgress })}</p>
       </div>
     )}
     {!packAbsent && !packDownloading && <>
-      {state.error && <span className="cc-semantic-error">{t('Semantic search is unavailable. Please try again.')}</span>}
+      {state.error && <span className="ln-semantic-error">{t('Semantic search is unavailable. Please try again.')}</span>}
       <button type="button" className="primary" onClick={onEnable}><Icon name="sparkles" size={13} />{t('Enable local model')}</button>
     </>}
   </div>;
@@ -208,7 +208,7 @@ function ReadyView(props: ReadyViewProps) {
   const { state, t } = props;
   if (state.status === 'loading') return <LoadingView state={state} cancel={props.cancel} t={t} />;
   const busy = state.status === 'indexing' || state.status === 'searching';
-  return <div className="cc-semantic-ready">
+  return <div className="ln-semantic-ready">
     <form onSubmit={(event) => { event.preventDefault(); props.runSearch(); }}>
       <Icon name="search" size={15} />
       <input value={props.query} maxLength={MAX_SEMANTIC_QUERY_LENGTH} onChange={(event) => props.setQuery(event.target.value)} placeholder={t('For example: seaside sunset, city at night')} disabled={busy} />
@@ -224,7 +224,7 @@ function ReadyView(props: ReadyViewProps) {
 }
 
 function LoadingView({ state, cancel, t }: ViewProps & { cancel: () => void }) {
-  return <div className="cc-semantic-loading">
+  return <div className="ln-semantic-loading">
     <strong>{t('Preparing the local model…')}</strong>
     <progress max={100} value={state.modelProgress} />
     <span>{Math.round(state.modelProgress)}% · {state.device === 'webgpu' ? t('GPU accelerated') : t('CPU mode')}</span>
@@ -236,7 +236,7 @@ function IndexStatus(props: ReadyViewProps) {
   const { assets, state, t } = props;
   const indexing = state.status === 'indexing';
   const allIndexed = assets.length > 0 && state.indexedAssets >= assets.length;
-  return <div className="cc-semantic-index-status">
+  return <div className="ln-semantic-index-status">
     <div><strong>{indexing ? t('Building index…') : t('Local index')}</strong><span>{indexing
       ? t('Processed {done} / {total}', { done: state.indexedAssets, total: state.totalAssets })
       : t('Indexed {done} / {total} visual assets', { done: Math.min(state.indexedAssets, assets.length), total: assets.length })}</span></div>
@@ -251,7 +251,7 @@ function IndexStatus(props: ReadyViewProps) {
 
 function SearchResults({ state, names, t }: ViewProps & { names: Map<string, string> }) {
   if (state.matches.length === 0) return null;
-  return <div className="cc-semantic-results">
+  return <div className="ln-semantic-results">
     <strong>{t('{n} semantic results', { n: state.matches.length })}</strong>
     {state.matches.slice(0, 5).map((match) => <span key={`${match.assetId}:${match.sampleTime}`}>
       <b>{names.get(match.assetId) ?? match.assetId}</b>
@@ -273,7 +273,7 @@ function describeTextHit(ref: string): string {
 
 function TextResults({ state, t }: ViewProps & { names: Map<string, string> }) {
   if (state.textHits.length === 0) return null;
-  return <div className="cc-semantic-results">
+  return <div className="ln-semantic-results">
     <strong>{t('Related text ({n})', { n: state.textHits.length })}</strong>
     {state.textHits.slice(0, 5).map((hit) => <span key={`${hit.kind}:${hit.ref}`}>
       <b>{describeTextHit(hit.ref)}</b>
@@ -284,7 +284,7 @@ function TextResults({ state, t }: ViewProps & { names: Map<string, string> }) {
 
 function DuplicateResults({ state, names, t }: ViewProps & { names: Map<string, string> }) {
   if (state.duplicates.length === 0) return null;
-  return <div className="cc-semantic-results">
+  return <div className="ln-semantic-results">
     <strong>{t('Possible duplicate media')}</strong>
     {state.duplicates.slice(0, 3).map((match) => <span key={`${match.leftAssetId}:${match.rightAssetId}`}>
       <b>{names.get(match.leftAssetId)} ↔ {names.get(match.rightAssetId)}</b>
@@ -314,9 +314,9 @@ function SamplingSettings({ t }: { t: Translate }) {
     setDraft(DEFAULT_SAMPLING_CONFIG);
     showAppToast(t('Sampling settings reset. Rebuild the index for changes to apply.'));
   };
-  return <details className="cc-semantic-sampling">
+  return <details className="ln-semantic-sampling">
     <summary>{t('Sampling settings')}</summary>
-    <p className="cc-semantic-sampling-note">{t('Index frame sampling and search parameters; applies to web and desktop. Rebuild the index for indexing-related changes to take effect.')}</p>
+    <p className="ln-semantic-sampling-note">{t('Index frame sampling and search parameters; applies to web and desktop. Rebuild the index for indexing-related changes to take effect.')}</p>
     <label>
       <span>{t('Fallback interval (s)')}</span>
       <input type="number" min={1} max={300} value={draft.intervalSeconds}
@@ -352,7 +352,7 @@ function SamplingSettings({ t }: { t: Translate }) {
       <input type="number" min={10} max={600} value={draft.longVideoSeconds}
         onChange={update('longVideoSeconds')} />
     </label>
-    <div className="cc-semantic-sampling-actions">
+    <div className="ln-semantic-sampling-actions">
       <button type="button" onClick={save}>{t('Save')}</button>
       <button type="button" onClick={reset}>{t('Restore default')}</button>
     </div>

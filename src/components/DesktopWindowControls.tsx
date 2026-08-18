@@ -12,33 +12,33 @@ export function DesktopWindowControlButtons({
   onAction,
 }: DesktopWindowControlButtonsProps) {
   return (
-    <div className="cc-window-controls" aria-label={translate('Window controls')}>
+    <div className="ln-window-controls" aria-label={translate('Window controls')}>
       <button
         type="button"
-        className="cc-window-control cc-window-control--close cc-tip"
+        className="ln-window-control ln-window-control--close ln-tip"
         aria-label={translate('Close window')}
         data-tip={translate('Close window')}
         onClick={() => onAction('close')}
       >
-        <span className="cc-window-control-glyph" aria-hidden="true">×</span>
+        <span className="ln-window-control-glyph" aria-hidden="true">×</span>
       </button>
       <button
         type="button"
-        className="cc-window-control cc-window-control--minimize cc-tip"
+        className="ln-window-control ln-window-control--minimize ln-tip"
         aria-label={translate('Minimize window')}
         data-tip={translate('Minimize window')}
         onClick={() => onAction('minimize')}
       >
-        <span className="cc-window-control-glyph" aria-hidden="true">−</span>
+        <span className="ln-window-control-glyph" aria-hidden="true">−</span>
       </button>
       <button
         type="button"
-        className="cc-window-control cc-window-control--maximize cc-tip"
+        className="ln-window-control ln-window-control--maximize ln-tip"
         aria-label={translate('Zoom window')}
         data-tip={translate('Zoom window')}
         onClick={() => onAction('toggle-maximize')}
       >
-        <span className="cc-window-control-glyph" aria-hidden="true">+</span>
+        <span className="ln-window-control-glyph" aria-hidden="true">+</span>
       </button>
     </div>
   );

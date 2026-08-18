@@ -270,7 +270,7 @@ export async function tileContactSheet(cells: GridCell[], opts: TileOptions = {}
   const cellH = Math.max(2, Math.round(cellWidth * 9 / 16)) & ~1;
   const backend = detectLabelBackend();
 
-  const dir = await mkdtemp(join(tmpdir(), 'cc-grid-'));
+  const dir = await mkdtemp(join(tmpdir(), 'ln-grid-'));
   try {
     const prepared: string[] = [];
     for (let i = 0; i < n; i += 1) {

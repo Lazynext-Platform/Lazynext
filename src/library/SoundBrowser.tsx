@@ -148,11 +148,11 @@ export const SoundBrowser = memo(function SoundBrowser({ fps, onAdd }: SoundBrow
   }, [fps, onAdd]);
 
   return (
-    <div className="cc-sound-browser">
-      <label className="cc-sound-search" htmlFor="cc-sound-library-search">
+    <div className="ln-sound-browser">
+      <label className="ln-sound-search" htmlFor="ln-sound-library-search">
         <Icon name="search" size={13} />
         <input
-          id="cc-sound-library-search"
+          id="ln-sound-library-search"
           type="search"
           placeholder={t('Search sounds')}
           value={query}
@@ -161,18 +161,18 @@ export const SoundBrowser = memo(function SoundBrowser({ fps, onAdd }: SoundBrow
           spellCheck={false}
         />
         {query ? (
-          <button type="button" className="cc-sound-search-clear" onClick={() => setQuery('')} aria-label={t('Clear')}>
+          <button type="button" className="ln-sound-search-clear" onClick={() => setQuery('')} aria-label={t('Clear')}>
             <Icon name="x" size={12} />
           </button>
         ) : null}
       </label>
 
-      <div className="cc-sound-chips" role="tablist" aria-label={t('Sound groups')}>
+      <div className="ln-sound-chips" role="tablist" aria-label={t('Sound groups')}>
         <button
           type="button"
           role="tab"
           aria-selected={chip === POPULAR}
-          className={`cc-sound-chip${chip === POPULAR ? ' selected' : ''}`}
+          className={`ln-sound-chip${chip === POPULAR ? ' selected' : ''}`}
           onClick={() => setChip(POPULAR)}
         >
           {t('Popular')}
@@ -183,7 +183,7 @@ export const SoundBrowser = memo(function SoundBrowser({ fps, onAdd }: SoundBrow
             type="button"
             role="tab"
             aria-selected={chip === g.id}
-            className={`cc-sound-chip${chip === g.id ? ' selected' : ''}`}
+            className={`ln-sound-chip${chip === g.id ? ' selected' : ''}`}
             onClick={() => setChip(g.id)}
           >
             {t(g.name)}
@@ -192,11 +192,11 @@ export const SoundBrowser = memo(function SoundBrowser({ fps, onAdd }: SoundBrow
       </div>
 
       {list.length === 0 ? (
-        <div className="cc-sound-empty">{t('No sounds in this group')}{query ? t(' (nothing matches "{query}")', { query }) : ''}</div>
+        <div className="ln-sound-empty">{t('No sounds in this group')}{query ? t(' (nothing matches "{query}")', { query }) : ''}</div>
       ) : (
         <div
           ref={virtualList.containerRef}
-          className="cc-sound-list"
+          className="ln-sound-list"
           role="listbox"
           aria-label={t('Sound list')}
           style={{ height: virtualList.totalHeight }}
@@ -230,7 +230,7 @@ export const SoundBrowser = memo(function SoundBrowser({ fps, onAdd }: SoundBrow
         </div>
       )}
 
-      <div className="cc-sound-hint">{t('Click to preview · Double-click / + / drag onto an audio track · {n} sounds total', { n: list.length })}</div>
+      <div className="ln-sound-hint">{t('Click to preview · Double-click / + / drag onto an audio track · {n} sounds total', { n: list.length })}</div>
     </div>
   );
 });
@@ -261,12 +261,12 @@ const SoundRow = memo(function SoundRow({
     () => peaksToPath(resamplePeaks(sound.peaks, WAVE_BINS), WAVE_W, WAVE_H),
     [sound.peaks],
   );
-  const clipId = `cc-sfx-clip-${sound.id}`;
+  const clipId = `ln-sfx-clip-${sound.id}`;
   return (
     <div
       role="option"
       aria-selected={playing}
-      className={`cc-sound-row${playing ? ' active' : ''}`}
+      className={`ln-sound-row${playing ? ' active' : ''}`}
       title={t('{desc} · Drag onto a timeline audio track', { desc: sound.desc })}
       draggable
       onDragStart={(event) => {
@@ -289,7 +289,7 @@ const SoundRow = memo(function SoundRow({
     >
       <button
         type="button"
-        className="cc-sound-glyph"
+        className="ln-sound-glyph"
         style={{ backgroundColor: tone.bg, color: tone.ink }}
         onClick={(event) => {
           event.stopPropagation();
@@ -299,22 +299,22 @@ const SoundRow = memo(function SoundRow({
       >
         <Icon name={playing ? 'pause' : 'play'} size={12} />
       </button>
-      <div className="cc-sound-meta">
-        <div className="cc-sound-name">{displayName}</div>
+      <div className="ln-sound-meta">
+        <div className="ln-sound-name">{displayName}</div>
       </div>
-      <div className="cc-sound-wave" aria-hidden>
+      <div className="ln-sound-wave" aria-hidden>
         <svg viewBox={`0 0 ${WAVE_W} ${WAVE_H}`} preserveAspectRatio="none">
-          <path d={path} className="cc-sound-wave-base" />
+          <path d={path} className="ln-sound-wave-base" />
           <clipPath id={clipId}>
             <rect x={0} y={0} width={progress * WAVE_W} height={WAVE_H} />
           </clipPath>
-          <path d={path} className="cc-sound-wave-prog" clipPath={`url(#${clipId})`} style={{ fill: tone.glyph }} />
+          <path d={path} className="ln-sound-wave-prog" clipPath={`url(#${clipId})`} style={{ fill: tone.glyph }} />
         </svg>
       </div>
-      <span className="cc-sound-dur">{formatSoundDuration(sound.seconds)}</span>
+      <span className="ln-sound-dur">{formatSoundDuration(sound.seconds)}</span>
       <button
         type="button"
-        className="cc-sound-add"
+        className="ln-sound-add"
         title={t('Add to timeline: {name}', { name: displayName })}
         aria-label={t('Add {name}', { name: displayName })}
         onClick={(event) => {

@@ -199,7 +199,7 @@ export function MediaPoolPanel({
     closeAssetMenu();
     setBlankMenuPos(null);
     const rect = anchor.getBoundingClientRect();
-    const panel = anchor.closest('.cc-media-pool')?.getBoundingClientRect();
+    const panel = anchor.closest('.ln-media-pool')?.getBoundingClientRect();
     const menuWidth = 152;
     const anchorX = point?.x ?? rect.left;
     const anchorTop = point?.y ?? rect.top;
@@ -327,8 +327,8 @@ export function MediaPoolPanel({
 
   return (
     <div
-      className="cc-media-pool"
-      data-cc-shortcut-surface="media-pool"
+      className="ln-media-pool"
+      data-ln-shortcut-surface="media-pool"
       tabIndex={-1}
       onKeyDown={handleMediaPoolKeyDown}
       onPointerDownCapture={(event) => {
@@ -340,7 +340,7 @@ export function MediaPoolPanel({
       onDrop={(event) => { event.preventDefault(); void handleDrop(event.dataTransfer, currentFolderId); }}
       onContextMenuCapture={(event) => {
         const target = event.target as HTMLElement;
-        if (target.closest('[data-cc-media-asset-id], .cc-folder-card, button, input, select, textarea, label, [data-music-analysis-control]')) return;
+        if (target.closest('[data-ln-media-asset-id], .ln-folder-card, button, input, select, textarea, label, [data-music-analysis-control]')) return;
         event.preventDefault();
         setSelected(new Set());
         setBlankMenuPos({
@@ -382,7 +382,7 @@ export function MediaPoolPanel({
 
       <MissingMediaBanner count={missingList.length} onOpen={() => setShowRelinkAll(true)} />
 
-      {(currentFolder || favoritesOnly || childFolders.length > 0) && <div className="cc-media-breadcrumb">
+      {(currentFolder || favoritesOnly || childFolders.length > 0) && <div className="ln-media-breadcrumb">
         <button aria-label={t('Back to parent folder')} disabled={!currentFolder && !favoritesOnly} onClick={() => {
           if (favoritesOnly) setFavoritesOnly(false);
           else setCurrentFolderId(currentFolder?.parentId);
@@ -391,9 +391,9 @@ export function MediaPoolPanel({
         {currentFolder && <button aria-label={t('Rename folder')} onClick={renameFolder}>{t('Rename')}</button>}
         {currentFolder && <button aria-label={t('Delete empty folder')} disabled={assets.some((asset) => asset.folderId === currentFolder.id) || folders.some((folder) => folder.parentId === currentFolder.id)} onClick={deleteFolder}>{t('Delete')}</button>}
       </div>}
-      {(error ?? directoryImportError) && <div className="cc-media-error">{error ?? directoryImportError}</div>}
-      {busy && <div className="cc-media-status">{t('Importing media…')}</div>}
-      {assets.length > 0 && <div className="cc-media-export-guide">{t('Open the top-right menu: download original image, video, and audio files, or export MG as a transparent MOV.')}</div>}
+      {(error ?? directoryImportError) && <div className="ln-media-error">{error ?? directoryImportError}</div>}
+      {busy && <div className="ln-media-status">{t('Importing media…')}</div>}
+      {assets.length > 0 && <div className="ln-media-export-guide">{t('Open the top-right menu: download original image, video, and audio files, or export MG as a transparent MOV.')}</div>}
 
       <MediaPoolGrid
         entries={gridEntries}

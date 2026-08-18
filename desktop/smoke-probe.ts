@@ -33,7 +33,7 @@ export async function runDesktopSmokeProbe(
     throw new Error(`/api/external-mcp/mcp → HTTP ${mcp.status}`);
   }
   console.log('[smoke] external MCP endpoint ok');
-  if (process.env.CC_SMOKE_MCP_RECOVERY === '1') {
+  if (process.env.LAZYNEXT_SMOKE_MCP_RECOVERY === '1') {
     await runDesktopMcpRecoverySmoke(origin, externalMcpToken());
   }
   const pickerType = await win.webContents.executeJavaScript(

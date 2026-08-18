@@ -64,12 +64,12 @@ export function DashboardTitlebarContent({ model }: { model: DashboardModel }) {
       <span style={{ color: theme.textDim, fontSize: 13 }}>{t('· My Projects')}</span>
       <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 2 }}>
         <DashboardHeaderLinks />
-        <button onClick={() => model.setDialog('mcp', true)} data-tip={t('External agents (MCP)')} aria-label={t('External agents (MCP)')} className="cc-header-btn cc-tip cc-tip-r" style={settingsBtn}><Icon name="plug" size={16} /></button>
-        <button onClick={() => model.setDialog('shortcuts', true)} data-tip={t('Edit keyboard shortcuts')} aria-label={t('Edit keyboard shortcuts')} className="cc-header-btn cc-tip cc-tip-r" style={settingsBtn}><Icon name="keyboard" size={16} /></button>
+        <button onClick={() => model.setDialog('mcp', true)} data-tip={t('External agents (MCP)')} aria-label={t('External agents (MCP)')} className="ln-header-btn ln-tip ln-tip-r" style={settingsBtn}><Icon name="plug" size={16} /></button>
+        <button onClick={() => model.setDialog('shortcuts', true)} data-tip={t('Edit keyboard shortcuts')} aria-label={t('Edit keyboard shortcuts')} className="ln-header-btn ln-tip ln-tip-r" style={settingsBtn}><Icon name="keyboard" size={16} /></button>
         <LocaleToggle />
         <SkinPicker />
-        <button onClick={() => model.setDialog('storage', true)} data-tip={t('Data storage')} aria-label={t('Data storage')} className="cc-header-btn cc-tip cc-tip-r" style={settingsBtn}><Icon name="database" size={16} /></button>
-        <button onClick={() => model.setDialog('settings', true)} data-tip={t('Settings · API Keys')} aria-label={t('Settings · API Keys')} className="cc-header-btn cc-tip cc-tip-r" style={settingsBtn}><Icon name="sliders" size={16} /></button>
+        <button onClick={() => model.setDialog('storage', true)} data-tip={t('Data storage')} aria-label={t('Data storage')} className="ln-header-btn ln-tip ln-tip-r" style={settingsBtn}><Icon name="database" size={16} /></button>
+        <button onClick={() => model.setDialog('settings', true)} data-tip={t('Settings · API Keys')} aria-label={t('Settings · API Keys')} className="ln-header-btn ln-tip ln-tip-r" style={settingsBtn}><Icon name="sliders" size={16} /></button>
       </span>
     </>
   );

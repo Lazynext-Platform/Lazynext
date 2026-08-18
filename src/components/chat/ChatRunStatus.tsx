@@ -32,7 +32,7 @@ export function ChatRunStatus({
   return <>
     {running && liveTool && (
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 9, margin: '9px 0', color: theme.textDim, fontSize: 12.5 }}>
-        <span style={{ width: 7, height: 7, borderRadius: '50%', background: theme.accent, flexShrink: 0, marginTop: 5, animation: 'cc-rec-pulse 1.2s ease-out infinite' }} />
+        <span style={{ width: 7, height: 7, borderRadius: '50%', background: theme.accent, flexShrink: 0, marginTop: 5, animation: 'ln-rec-pulse 1.2s ease-out infinite' }} />
         <span style={{ minWidth: 0, lineHeight: 1.45 }}>
           <span style={{ fontFamily: 'Geist Mono, ui-monospace, SFMono-Regular, Menlo, monospace', letterSpacing: 0.2 }}>{liveTool.name}</span>
           {liveTool.partial
@@ -47,11 +47,11 @@ export function ChatRunStatus({
     )}
     {running && (
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: theme.textDim, fontSize: 12.5, margin: '10px 0' }}>
-        <span style={{ width: 8, height: 8, borderRadius: '50%', background: theme.accent, animation: 'cc-rec-pulse 1.2s ease-out infinite', flexShrink: 0 }} />
+        <span style={{ width: 8, height: 8, borderRadius: '50%', background: theme.accent, animation: 'ln-rec-pulse 1.2s ease-out infinite', flexShrink: 0 }} />
         {streamingThinking ? (
           <>
-            <style>{'@keyframes cc-think-glow{0%,100%{opacity:.4}50%{opacity:1}}'}</style>
-            <span style={{ animation: 'cc-think-glow 1.4s ease-in-out infinite' }}>{t('Thinking…')}</span>
+            <style>{'@keyframes ln-think-glow{0%,100%{opacity:.4}50%{opacity:1}}'}</style>
+            <span style={{ animation: 'ln-think-glow 1.4s ease-in-out infinite' }}>{t('Thinking…')}</span>
           </>
         ) : <>{t(thinkingPhrase(phraseSeed))}…</>}
         <ElapsedTimer startedAt={startedAt} />

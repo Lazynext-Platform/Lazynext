@@ -15,7 +15,7 @@ assert.doesNotMatch(
   /title=\{t\('Generation Tasks'\)\}/,
   'button uses label not title',
 );
-assert.match(topBarButton, /className="cc-tip cc-tip-r"/, 'button tooltip');
+assert.match(topBarButton, /className="ln-tip ln-tip-r"/, 'button tooltip');
 assert.match(topBarButton, /data-tip=\{label\}/, 'buttonlocallabel tooltip');
 assert.match(topBarButton, /onMouseEnter=/, 'buttonshould provide hover');
 assert.match(topBarButton, /onMouseLeave=/, 'button hover backrecoverstyle');

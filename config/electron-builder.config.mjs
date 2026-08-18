@@ -4,7 +4,7 @@
 // Notes:
 // - files includes only the main-process bundle; electron-builder collects production node_modules automatically.
 //   @remotion/renderer is required at runtime, while @remotion/bundler is used only during prebuild.
-//   Keep only the CC_EB_TARGET compositor package because each one is about 180 MB.
+//   Keep only the LAZYNEXT_EB_TARGET compositor package because each one is about 180 MB.
 // - asar stays disabled because @remotion/renderer chmods and spawns the compositor at its resolved path.
 //   Even when unpacked, an asar path still points inside the archive and chmod fails with ENOTDIR.
 //   Expanding real files avoids that failure at the cost of extra small-file I/O during startup.
@@ -25,7 +25,7 @@ const ONNX_RUNTIME_TARGETS = [
   'darwin/arm64', 'darwin/x64', 'win32/arm64', 'win32/x64', 'linux/arm64', 'linux/x64',
 ];
 const TARGET_COMPOSITOR = { 'darwin-arm64': 'darwin-arm64', 'darwin-x64': 'darwin-x64', 'win32-x64': 'win32-x64-msvc', 'linux-x64': 'linux-x64-gnu' };
-const target = process.env.CC_EB_TARGET ?? `${process.platform}-${process.arch}`;
+const target = process.env.LAZYNEXT_EB_TARGET ?? `${process.platform}-${process.arch}`;
 const keep = TARGET_COMPOSITOR[target] ?? target;
 const nativeInferenceSupported = target.startsWith('darwin-') || target.startsWith('win32-');
 const keepOnnxRuntime = nativeInferenceSupported ? target.replace('-', '/').replace('-msvc', '') : null;

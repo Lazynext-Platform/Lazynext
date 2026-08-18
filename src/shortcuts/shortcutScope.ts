@@ -21,7 +21,7 @@ export function shortcutAllowedForSurface(actionId: string, surface: ShortcutSur
 
 export function shortcutSurfaceFromTarget(target: EventTarget | null): ShortcutSurface {
   if (!(target instanceof Element)) return 'other';
-  const surface = target.closest<HTMLElement>('[data-cc-shortcut-surface]')?.dataset.ccShortcutSurface;
+  const surface = target.closest<HTMLElement>('[data-ln-shortcut-surface]')?.dataset.lnShortcutSurface;
   if (
     surface === 'media-pool'
     || surface === 'timeline'

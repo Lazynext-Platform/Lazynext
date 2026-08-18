@@ -25,7 +25,7 @@ import { captionPreviewOutsideClickAction } from './captionPreviewToolbar';
 // The hit box is a transparent copy of the text in the same font (same layout as true rendering). Single stream text changes
 // cueTextPatch, the manual lane is directly changed to correspond to the cue; the style/font size/color/position are all updated with updateCaptions, which can be revoked.
 // Drag and drop: press and hold the caption to move → let go and submit the layout offset at once (one step undo); display the entity during dragging
-// The ghost follows the hand, and the synthetic layer falls to the same position after letting go. All styles use cc-capedit-* classes (tokens, with skins).
+// The ghost follows the hand, and the synthetic layer falls to the same position after letting go. All styles use ln-capedit-* classes (tokens, with skins).
 
 interface CaptionPreviewEditorProps {
   trackId: TrackId;
@@ -265,14 +265,14 @@ export function CaptionPreviewEditor({ trackId, state, captions, playerRef, onUp
               }}
               style={{
                 ...textCss, background: '#000000d9', color: currentTextColor,
-                width: 'max(220px, 100%)', border: '1.5px solid var(--cc-accent)',
+                width: 'max(220px, 100%)', border: '1.5px solid var(--ln-accent)',
                 outline: 'none', resize: 'none',
               }}
             />
           ) : (
             // Hitbox: A copy of the same layout text. Normally transparent (the real captions are on the composite layer), they will appear during dragging when the ghost follows your hand.
             <div
-              className="cc-capedit-hit"
+              className="ln-capedit-hit"
               role="button"
               tabIndex={0}
               title={t('Click to select; drag to reposition; double-click to edit the text')}
@@ -291,22 +291,22 @@ export function CaptionPreviewEditor({ trackId, state, captions, playerRef, onUp
             </div>
           )}
           {selected && !editing && !drag && (
-            <div className="cc-capedit-frame" aria-hidden />
+            <div className="ln-capedit-frame" aria-hidden />
           )}
 
           {/* Floating toolbar (AI editing | text/style/color | font size | delete)*/}
           {selected && !drag && (
-            <div ref={toolbarRef} className="cc-capedit-bar" onPointerDown={(e) => e.stopPropagation()}>
+            <div ref={toolbarRef} className="ln-capedit-bar" onPointerDown={(e) => e.stopPropagation()}>
               {onSeedChat && (
                 <>
-                  <button type="button" className="cc-capedit-btn ai" title={t('Ask AI to rewrite this line')}
+                  <button type="button" className="ln-capedit-btn ai" title={t('Ask AI to rewrite this line')}
                     onClick={() => onSeedChat(t('Improve this caption line (at {time}, keep its timing): "{text}"', { time: fmtCueMs(cue.start), text: cue.text }))}>
                     <Icon name="sparkles" size={12} />{t('AI edit')}
                   </button>
-                  <span className="cc-capedit-divider" aria-hidden />
+                  <span className="ln-capedit-divider" aria-hidden />
                 </>
               )}
-              <button type="button" className="cc-capedit-btn" title={t('Edit text')} onClick={() => {
+              <button type="button" className="ln-capedit-btn" title={t('Edit text')} onClick={() => {
                 setPop(null);
                 if (!editing) {
                   setEditing(true);
@@ -315,23 +315,23 @@ export function CaptionPreviewEditor({ trackId, state, captions, playerRef, onUp
               }}>
                 <Icon name="pencil" size={12} />{t('Text')}
               </button>
-              <button type="button" className={`cc-capedit-btn${pop === 'styles' ? ' on' : ''}`} title={t('Caption styles')} onClick={() => setPop(pop === 'styles' ? null : 'styles')}>Aa</button>
-              <button type="button" className={`cc-capedit-btn${pop === 'color' ? ' on' : ''}`} title={t('Text color')} onClick={() => setPop(pop === 'color' ? null : 'color')}>
-                <span className="cc-capedit-colordot" style={{ background: curColor }} />
+              <button type="button" className={`ln-capedit-btn${pop === 'styles' ? ' on' : ''}`} title={t('Caption styles')} onClick={() => setPop(pop === 'styles' ? null : 'styles')}>Aa</button>
+              <button type="button" className={`ln-capedit-btn${pop === 'color' ? ' on' : ''}`} title={t('Text color')} onClick={() => setPop(pop === 'color' ? null : 'color')}>
+                <span className="ln-capedit-colordot" style={{ background: curColor }} />
               </button>
-              <span className="cc-capedit-divider" aria-hidden />
-              <button type="button" className="cc-capedit-btn" title={t('Smaller text')} onClick={() => bumpFont(-1)}>A−</button>
-              <button type="button" className="cc-capedit-btn" title={t('Bigger text')} onClick={() => bumpFont(1)}>A+</button>
-              <span className="cc-capedit-divider" aria-hidden />
-              <button type="button" className="cc-capedit-btn danger" title={t('Remove line')} onClick={() => saveText('')}>
+              <span className="ln-capedit-divider" aria-hidden />
+              <button type="button" className="ln-capedit-btn" title={t('Smaller text')} onClick={() => bumpFont(-1)}>A−</button>
+              <button type="button" className="ln-capedit-btn" title={t('Bigger text')} onClick={() => bumpFont(1)}>A+</button>
+              <span className="ln-capedit-divider" aria-hidden />
+              <button type="button" className="ln-capedit-btn danger" title={t('Remove line')} onClick={() => saveText('')}>
                 <Icon name="trash" size={12} />
               </button>
 
               {pop === 'styles' && (
-                <div className="cc-capedit-pop styles">
+                <div className="ln-capedit-pop styles">
                   {CAPTION_STYLES.map((st) => (
                     <button key={st.id} type="button"
-                      className={`cc-capedit-styleitem${st.id === captions.template ? ' on' : ''}`}
+                      className={`ln-capedit-styleitem${st.id === captions.template ? ' on' : ''}`}
                       onClick={() => { onUpdateCaptions(captionTemplatePatch(captions, st.id)); setPop(null); }}>
                       {t(st.labelZh)}
                     </button>
@@ -339,15 +339,15 @@ export function CaptionPreviewEditor({ trackId, state, captions, playerRef, onUp
                 </div>
               )}
               {pop === 'color' && (
-                <div className="cc-capedit-pop color">
+                <div className="ln-capedit-pop color">
                   {COLOR_SWATCHES.map((hex) => (
                     <button key={hex} type="button"
-                      className={`cc-capedit-swatch${curColor.toLowerCase() === hex.toLowerCase() ? ' on' : ''}`}
+                      className={`ln-capedit-swatch${curColor.toLowerCase() === hex.toLowerCase() ? ' on' : ''}`}
                       style={{ background: hex }}
                       title={hex}
                       onClick={() => { setColor(hex); setPop(null); }} />
                   ))}
-                  <label className="cc-capedit-custom" title={t('Custom color')}>
+                  <label className="ln-capedit-custom" title={t('Custom color')}>
                     <input
                       type="color"
                       defaultValue={/^#[0-9a-fA-F]{6}$/.test(curColor) ? curColor : '#ffffff'}

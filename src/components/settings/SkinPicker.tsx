@@ -1,5 +1,5 @@
 // Skin selector: brush button + drop-down card, row = three-color point (bottom/panel/accent)
-// Preview + name + check mark. The switch takes effect immediately (applySkin changes to <html data-cc-skin>),
+// Preview + name + check mark. The switch takes effect immediately (applySkin changes to <html data-ln-skin>),
 // localStorage is persistent; TopBar is shared with Dashboard header.
 import { useState } from 'react';
 import { theme, themeAlpha } from '../../theme';
@@ -16,7 +16,7 @@ export function SkinPicker() {
   return (
     <div style={{ position: 'relative', display: 'inline-flex' }}>
       <button type="button" data-tip={t('Skin')} aria-label={t('Skin')}
-        aria-haspopup="menu" aria-expanded={open} className="cc-header-btn cc-tip cc-tip-r" onClick={() => setOpen((o) => !o)}
+        aria-haspopup="menu" aria-expanded={open} className="ln-header-btn ln-tip ln-tip-r" onClick={() => setOpen((o) => !o)}
         style={{ ...trigger, color: open ? theme.text : theme.textDim, background: open ? theme.panelAlt : 'none' }}>
         <Icon name="brush" size={16} />
       </button>

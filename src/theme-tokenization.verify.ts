@@ -2,43 +2,43 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const RAW_COLOR = /(?<![\w-])#[\da-f]{3,8}\b|rgba?\([^)]*\)/gi;
-const TOKENIZED_CHANNEL = 'var(--cc-';
+const TOKENIZED_CHANNEL = 'var(--ln-';
 
 const CONTENT_COLOR_SELECTORS = new Set([
-  '.cc-export-qa-card img',
-  '.cc-audio-waveform path',
-  '.cc-clip-wave path',
-  '.cc-clip-label',
-  '.cc-clip-label.audio',
-  '.cc-clip-badge',
-  '.cc-clip-badge.fx',
-  '.cc-clip-badge.lut',
-  '.cc-clip-badge.zoom',
-  '.cc-clip-badge.iso',
-  '.cc-clip-badge.tr',
-  '.cc-transition-marker',
-  '.cc-transition-marker:hover',
-  '.cc-capedit-colordot',
+  '.ln-export-qa-card img',
+  '.ln-audio-waveform path',
+  '.ln-clip-wave path',
+  '.ln-clip-label',
+  '.ln-clip-label.audio',
+  '.ln-clip-badge',
+  '.ln-clip-badge.fx',
+  '.ln-clip-badge.lut',
+  '.ln-clip-badge.zoom',
+  '.ln-clip-badge.iso',
+  '.ln-clip-badge.tr',
+  '.ln-transition-marker',
+  '.ln-transition-marker:hover',
+  '.ln-capedit-colordot',
   // The functional status color must maintain the original semantics and not change color following the skin.
-  '.cc-media-error',
-  '.cc-asset-menu-portal button.danger',
-  '.cc-asset-menu-portal button.danger:hover',
-  '.cc-modal button.danger',
-  '.cc-export-qa-card.issues,.cc-export-qa-card.error',
-  '.cc-export-qa-card li.error',
-  '.cc-export-progress.verifying .cc-export-progress-track i',
-  '.cc-export-progress.failed .cc-export-progress-track i',
-  '.cc-caption-style-error',
-  '.cc-tx-error',
-  '.cc-tx-section.drag-over',
-  '.cc-tx-speech.drag-over',
-  '.cc-tx-word.editable:hover',
-  '.cc-tx-gap-del:hover',
-  '.cc-cap-error',
-  '.cc-insp-range',
-  '.cc-audiofx-strength input',
-  '.cc-audiofx-note.err',
-  '.cc-capedit-btn.danger:hover',
+  '.ln-media-error',
+  '.ln-asset-menu-portal button.danger',
+  '.ln-asset-menu-portal button.danger:hover',
+  '.ln-modal button.danger',
+  '.ln-export-qa-card.issues,.ln-export-qa-card.error',
+  '.ln-export-qa-card li.error',
+  '.ln-export-progress.verifying .ln-export-progress-track i',
+  '.ln-export-progress.failed .ln-export-progress-track i',
+  '.ln-caption-style-error',
+  '.ln-tx-error',
+  '.ln-tx-section.drag-over',
+  '.ln-tx-speech.drag-over',
+  '.ln-tx-word.editable:hover',
+  '.ln-tx-gap-del:hover',
+  '.ln-cap-error',
+  '.ln-insp-range',
+  '.ln-audiofx-strength input',
+  '.ln-audiofx-note.err',
+  '.ln-capedit-btn.danger:hover',
 ]);
 
 const CHROME_FILES = [
@@ -110,7 +110,7 @@ for (const match of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
   const selector = lastSelectorLine(match[1]);
   assert.ok(
     CONTENT_COLOR_SELECTORS.has(selector),
-    `${selector}: UI chrome must use --cc-* tokens (${colors.join(', ')})`,
+    `${selector}: UI chrome must use --ln-* tokens (${colors.join(', ')})`,
   );
 }
 
@@ -122,10 +122,10 @@ for (const file of CHROME_FILES) {
   assert.deepEqual(unexpected, [], `${file}: fixed colors found (${unexpected.join(', ')})`);
 }
 
-for (const selector of ['.cc-mic-group', '.cc-timeline-timecode', '.cc-ruler-head span', '.cc-track-name']) {
+for (const selector of ['.ln-mic-group', '.ln-timeline-timecode', '.ln-ruler-head span', '.ln-track-name']) {
   const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const body = css.match(new RegExp(`${escaped}\\s*\\{([^}]*)\\}`))?.[1] ?? '';
-  assert.ok(body.includes('var(--cc-'), `${selector}: missing a skin token`);
+  assert.ok(body.includes('var(--ln-'), `${selector}: missing a skin token`);
   assert.deepEqual(rawColors(body), [], `${selector}: fixed color found`);
 }
 

@@ -405,7 +405,7 @@ function CaptionCueBlock({
   const durationFrames = Math.max(2, Math.round((endMs - startMs) * fps / 1000));
   const text = cueText(page.words);
   const handle = (edge: ManualCueEdge) => target && !locked ? <div
-    className={`cc-caption-track-trim ${edge === 'start' ? 'left' : 'right'}`}
+    className={`ln-caption-track-trim ${edge === 'start' ? 'left' : 'right'}`}
     role="separator" aria-orientation="vertical" tabIndex={0}
     aria-label={t(edge === 'start' ? 'Drag to adjust caption start' : 'Drag to adjust caption end')}
     aria-valuenow={Math.round(edge === 'start' ? startMs : endMs)}
@@ -421,7 +421,7 @@ function CaptionCueBlock({
     }}
   /> : null;
   return (
-    <div className={`cc-caption-track-cue${selected ? ' selected' : ''}`} data-caption-selection-owner="timeline-cue"
+    <div className={`ln-caption-track-cue${selected ? ' selected' : ''}`} data-caption-selection-owner="timeline-cue"
       title={text} tabIndex={selectionRef && !locked ? 0 : undefined}
       style={{ left: startFrame * px, width: Math.max(18, durationFrames * px),
         transform: move.drag?.key === key && moveOffsetY ? `translate3d(0, ${moveOffsetY}px, 0)` : undefined,
@@ -625,7 +625,7 @@ export function CaptionTrackLane({
     }
   };
   return (
-    <div className="cc-caption-track-lane" data-caption-selection-region="timeline" style={{
+    <div className="ln-caption-track-lane" data-caption-selection-region="timeline" style={{
       background: locked ? `color-mix(in srgb, ${theme.bg} 70%, ${themeAlpha.shadow(1)})` : theme.bg,
       opacity: hidden ? 0.4 : locked ? 0.75 : 1,
       overflow: move.drag || selectionMove.drag ? 'visible' : undefined,
@@ -650,7 +650,7 @@ export function CaptionTrackLane({
         event.stopPropagation();
         onTrackContextMenu({ trackId, x: event.clientX, y: event.clientY, frame: frameFromClientX(event.clientX) });
       }}>
-      {!pages.length && <span className="cc-caption-track-empty">{t('Caption track is empty')}</span>}
+      {!pages.length && <span className="ln-caption-track-empty">{t('Caption track is empty')}</span>}
       {pages.map((page, index) => {
         const target = page.words.length === 1 && page.words[0]?.id ? targets.get(page.words[0].id) : undefined;
         const cueId = target ? page.words[0]?.id : undefined;
@@ -679,7 +679,7 @@ export function CaptionTrackLane({
             });
           }} />;
       })}
-      {menu && <div className="cc-caption-cue-menu" data-caption-selection-owner="cue-menu" role="menu"
+      {menu && <div className="ln-caption-cue-menu" data-caption-selection-owner="cue-menu" role="menu"
         style={{ left: menu.x, top: menu.y }} onPointerDown={(event) => event.stopPropagation()}>
         {translationOpen ? <>
           <button type="button" role="menuitem" onClick={() => setTranslationOpen(false)}>{t('translation')}</button>

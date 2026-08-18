@@ -97,17 +97,17 @@ export function FxThumb({ assetId, playing = false }: FxThumbProps) {
   const staticUrl = useFxStill(def, playing);
   const liveReady = useFxAnimation(def, playing && !!staticUrl, canvasRef);
 
-  if (!def) return <span className="cc-resource-thumb-placeholder" />;
+  if (!def) return <span className="ln-resource-thumb-placeholder" />;
 
   return (
-    <div className={`cc-live-thumb${liveReady ? ' is-playing' : ''}`}>
+    <div className={`ln-live-thumb${liveReady ? ' is-playing' : ''}`}>
       {staticUrl
-        ? <img className="cc-live-thumb-still" src={staticUrl} alt="" draggable={false} loading="lazy" decoding="async" />
-        : <span className="cc-resource-thumb-placeholder" />}
+        ? <img className="ln-live-thumb-still" src={staticUrl} alt="" draggable={false} loading="lazy" decoding="async" />
+        : <span className="ln-resource-thumb-placeholder" />}
       {playing ? (
         <canvas
           ref={canvasRef}
-          className="cc-live-thumb-canvas"
+          className="ln-live-thumb-canvas"
           width={FX_THUMB_W}
           height={FX_THUMB_H}
           aria-hidden
