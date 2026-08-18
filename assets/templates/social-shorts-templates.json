@@ -1,0 +1,916 @@
+[
+  {
+    "id": "ss-keyword-pop",
+    "name": "Vertical · Keyword Pop",
+    "category": "social-shorts",
+    "description": "Talking head keyword pop-up zoom, suitable for TikTok/Shorts emphasizing key quote words.",
+    "tags": [
+      "Vertical",
+      "9:16",
+      "Social media",
+      "Text overlay",
+      "Talking head"
+    ],
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "durationInFrames": 90,
+    "props": {
+      "keyword": "The key is persistence",
+      "subText": "A little progress every day",
+      "accentColor": "#ff4d6d",
+      "textColor": "#ffffff",
+      "fontSize": 96
+    },
+    "propSchema": [
+      {
+        "key": "keyword",
+        "type": "text",
+        "defaultValue": "The key is persistence",
+        "label": "Keyword"
+      },
+      {
+        "key": "subText",
+        "type": "text",
+        "defaultValue": "A little progress every day",
+        "label": "Sub-text"
+      },
+      {
+        "key": "accentColor",
+        "type": "color",
+        "defaultValue": "#ff4d6d",
+        "label": "Accent color"
+      },
+      {
+        "key": "textColor",
+        "type": "color",
+        "defaultValue": "#ffffff",
+        "label": "Text color"
+      },
+      {
+        "key": "fontSize",
+        "type": "number",
+        "defaultValue": 96,
+        "label": "Font size",
+        "min": 48,
+        "max": 140,
+        "step": 2
+      }
+    ],
+    "thumb": "/thumbnails/ss-keyword-pop.jpg",
+    "code": "const ShortsKeywordPop = ({ item }) => {\n  const frame = useCurrentFrame();\n  const { fps, durationInFrames } = useVideoConfig();\n  const p = item.props || {};\n  const keyword = p.keyword || 'The key is persistence';\n  const subText = p.subText || '';\n  const accent = p.accentColor || '#ff4d6d';\n  const textColor = p.textColor || '#ffffff';\n  const fontSize = Number(p.fontSize) || 96;\n  const enter = spring({ frame, fps, config: { damping: 14, stiffness: 120 } });\n  const pop = spring({ frame: frame - 4, fps, config: { damping: 12, stiffness: 160 } });\n  const exit = interpolate(frame, [durationInFrames - 12, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });\n  const scale = 0.85 + enter * 0.2;\n  return (\n    <AbsoluteFill style={{ backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center' }}>\n      <div style={{\n        opacity: enter * exit,\n        transform: `scale(${scale * (0.95 + pop * 0.05)})`,\n        textAlign: 'center',\n        padding: '0 64px',\n        maxWidth: 980,\n      }}>\n        <div style={{\n          fontSize,\n          fontWeight: 900,\n          color: textColor,\n          lineHeight: 1.15,\n          letterSpacing: 2,\n          textShadow: `0 0 40px ${accent}99, 0 8px 24px #000a`,\n          WebkitTextStroke: `2px ${accent}`,\n        }}>{keyword}</div>\n        {subText ? (\n          <div style={{\n            marginTop: 28,\n            fontSize: 36,\n            fontWeight: 600,\n            color: textColor,\n            opacity: 0.85 * pop,\n          }}>{subText}</div>\n        ) : null}\n        <div style={{\n          margin: '36px auto 0',\n          width: 120 * pop,\n          height: 8,\n          borderRadius: 99,\n          background: accent,\n          boxShadow: `0 0 24px ${accent}`,\n        }} />\n      </div>\n    </AbsoluteFill>\n  );\n};"
+  },
+  {
+    "id": "ss-big-caption",
+    "name": "Vertical · Big Caption",
+    "category": "social-shorts",
+    "description": "Bottom safe-area large caption bar, suitable for synchronized talking head narration display.",
+    "tags": [
+      "Vertical",
+      "9:16",
+      "Social media",
+      "Caption",
+      "Talking head"
+    ],
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "durationInFrames": 90,
+    "props": {
+      "caption": "Conclusion first, then method",
+      "bgColor": "rgba(0,0,0,0.72)",
+      "textColor": "#ffffff",
+      "accentColor": "#38bdf8",
+      "fontSize": 44
+    },
+    "propSchema": [
+      {
+        "key": "caption",
+        "type": "text",
+        "defaultValue": "Conclusion first, then method",
+        "label": "Caption"
+      },
+      {
+        "key": "bgColor",
+        "type": "color",
+        "defaultValue": "rgba(0,0,0,0.72)",
+        "label": "Background color"
+      },
+      {
+        "key": "textColor",
+        "type": "color",
+        "defaultValue": "#ffffff",
+        "label": "Text color"
+      },
+      {
+        "key": "accentColor",
+        "type": "color",
+        "defaultValue": "#38bdf8",
+        "label": "Left bar"
+      },
+      {
+        "key": "fontSize",
+        "type": "number",
+        "defaultValue": 44,
+        "label": "Font size",
+        "min": 28,
+        "max": 72,
+        "step": 1
+      }
+    ],
+    "thumb": "/thumbnails/ss-big-caption.jpg",
+    "code": "const ShortsBigCaption = ({ item }) => {\n  const frame = useCurrentFrame();\n  const { fps, durationInFrames } = useVideoConfig();\n  const p = item.props || {};\n  const caption = p.caption || '';\n  const bg = p.bgColor || 'rgba(0,0,0,0.72)';\n  const textColor = p.textColor || '#fff';\n  const accent = p.accentColor || '#38bdf8';\n  const fontSize = Number(p.fontSize) || 44;\n  const enter = spring({ frame, fps, config: { damping: 18, stiffness: 100 } });\n  const exit = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });\n  return (\n    <AbsoluteFill style={{ backgroundColor: 'transparent' }}>\n      <div style={{\n        position: 'absolute',\n        left: 48,\n        right: 48,\n        bottom: 220,\n        opacity: enter * exit,\n        transform: `translateY(${(1 - enter) * 40}px)`,\n        background: bg,\n        borderRadius: 20,\n        padding: '28px 32px 28px 40px',\n        borderLeft: `8px solid ${accent}`,\n        boxShadow: '0 12px 40px #0008',\n      }}>\n        <div style={{\n          color: textColor,\n          fontSize,\n          fontWeight: 700,\n          lineHeight: 1.35,\n          letterSpacing: 0.5,\n        }}>{caption}</div>\n      </div>\n    </AbsoluteFill>\n  );\n};"
+  },
+  {
+    "id": "ss-quote-card",
+    "name": "Vertical · Quote Card",
+    "category": "social-shorts",
+    "description": "Centered large-text quote card, suitable for opinion talking head and Xiaohongshu quotes.",
+    "tags": [
+      "Vertical",
+      "9:16",
+      "Social media",
+      "Quote",
+      "Citation"
+    ],
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "durationInFrames": 90,
+    "props": {
+      "quote": "What truly creates gaps is not talent, it is compound interest.",
+      "author": "— Creator Notes",
+      "cardColor": "#0f172aee",
+      "textColor": "#f8fafc",
+      "accentColor": "#a78bfa"
+    },
+    "propSchema": [
+      {
+        "key": "quote",
+        "type": "text",
+        "defaultValue": "What truly creates gaps is not talent, it is compound interest.",
+        "label": "Quote"
+      },
+      {
+        "key": "author",
+        "type": "text",
+        "defaultValue": "— Creator Notes",
+        "label": "Author"
+      },
+      {
+        "key": "cardColor",
+        "type": "color",
+        "defaultValue": "#0f172aee",
+        "label": "Card color"
+      },
+      {
+        "key": "textColor",
+        "type": "color",
+        "defaultValue": "#f8fafc",
+        "label": "Text color"
+      },
+      {
+        "key": "accentColor",
+        "type": "color",
+        "defaultValue": "#a78bfa",
+        "label": "Decoration color"
+      }
+    ],
+    "thumb": "/thumbnails/ss-quote-card.jpg",
+    "code": "const ShortsQuoteCard = ({ item }) => {\n  const frame = useCurrentFrame();\n  const { fps, durationInFrames } = useVideoConfig();\n  const p = item.props || {};\n  const quote = p.quote || '';\n  const author = p.author || '';\n  const card = p.cardColor || '#0f172aee';\n  const textColor = p.textColor || '#f8fafc';\n  const accent = p.accentColor || '#a78bfa';\n  const enter = spring({ frame, fps, config: { damping: 16, stiffness: 90 } });\n  const exit = interpolate(frame, [durationInFrames - 12, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });\n  return (\n    <AbsoluteFill style={{ backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center' }}>\n      <div style={{\n        width: 900,\n        opacity: enter * exit,\n        transform: `scale(${0.92 + enter * 0.08})`,\n        background: card,\n        borderRadius: 32,\n        padding: '64px 56px',\n        border: `1px solid ${accent}55`,\n        boxShadow: `0 24px 80px #000a, 0 0 0 1px ${accent}22`,\n      }}>\n        <div style={{ fontSize: 72, color: accent, lineHeight: 1, marginBottom: 24, fontWeight: 800 }}>\"</div>\n        <div style={{\n          fontSize: 48,\n          fontWeight: 700,\n          color: textColor,\n          lineHeight: 1.45,\n          letterSpacing: 1,\n        }}>{quote}</div>\n        {author ? (\n          <div style={{ marginTop: 40, fontSize: 28, color: textColor, opacity: 0.65, textAlign: 'right' }}>{author}</div>\n        ) : null}\n      </div>\n    </AbsoluteFill>\n  );\n};"
+  },
+  {
+    "id": "ss-name-bar",
+    "name": "Vertical · Name Bar",
+    "category": "social-shorts",
+    "description": "Vertical short lower-third: name + role, does not block the face.",
+    "tags": [
+      "Vertical",
+      "9:16",
+      "Social media",
+      "Name bar",
+      "Talking head"
+    ],
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "durationInFrames": 90,
+    "props": {
+      "nameText": "Li Ming",
+      "titleText": "Product Manager · Sharing growth methodology",
+      "accentColor": "#22d3ee",
+      "bgColor": "rgba(15,23,42,0.88)",
+      "textColor": "#f1f5f9"
+    },
+    "propSchema": [
+      {
+        "key": "nameText",
+        "type": "text",
+        "defaultValue": "Li Ming",
+        "label": "Name"
+      },
+      {
+        "key": "titleText",
+        "type": "text",
+        "defaultValue": "Product Manager · Sharing growth methodology",
+        "label": "Role"
+      },
+      {
+        "key": "accentColor",
+        "type": "color",
+        "defaultValue": "#22d3ee",
+        "label": "Accent color"
+      },
+      {
+        "key": "bgColor",
+        "type": "color",
+        "defaultValue": "rgba(15,23,42,0.88)",
+        "label": "Background color"
+      },
+      {
+        "key": "textColor",
+        "type": "color",
+        "defaultValue": "#f1f5f9",
+        "label": "Text color"
+      }
+    ],
+    "thumb": "/thumbnails/ss-name-bar.jpg",
+    "code": "const ShortsNameBar = ({ item }) => {\n  const frame = useCurrentFrame();\n  const { fps, durationInFrames } = useVideoConfig();\n  const p = item.props || {};\n  const nameText = p.nameText || '';\n  const titleText = p.titleText || '';\n  const accent = p.accentColor || '#22d3ee';\n  const bg = p.bgColor || 'rgba(15,23,42,0.88)';\n  const textColor = p.textColor || '#f1f5f9';\n  const enter = spring({ frame, fps, config: { damping: 16, stiffness: 110 } });\n  const exit = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });\n  return (\n    <AbsoluteFill style={{ backgroundColor: 'transparent' }}>\n      <div style={{\n        position: 'absolute',\n        left: 48,\n        bottom: 360,\n        opacity: enter * exit,\n        transform: `translateX(${(1 - enter) * -80}px)`,\n        display: 'flex',\n        alignItems: 'stretch',\n        maxWidth: 720,\n        borderRadius: 16,\n        overflow: 'hidden',\n        boxShadow: '0 12px 40px #0007',\n      }}>\n        <div style={{ width: 10, background: accent }} />\n        <div style={{ background: bg, padding: '22px 28px' }}>\n          <div style={{ fontSize: 40, fontWeight: 800, color: textColor, letterSpacing: 1 }}>{nameText}</div>\n          <div style={{ marginTop: 8, fontSize: 26, color: textColor, opacity: 0.75 }}>{titleText}</div>\n        </div>\n      </div>\n    </AbsoluteFill>\n  );\n};"
+  },
+  {
+    "id": "ss-cta-follow",
+    "name": "Vertical · Follow CTA",
+    "category": "social-shorts",
+    "description": "End-card follow CTA: avatar placeholder + follow text.",
+    "tags": [
+      "Vertical",
+      "9:16",
+      "Social media",
+      "CTA",
+      "Follow"
+    ],
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "durationInFrames": 90,
+    "props": {
+      "handle": "@yourchannel",
+      "ctaText": "Double-tap to follow, next episode will be even better",
+      "buttonText": "Follow",
+      "accentColor": "#fb7185",
+      "textColor": "#ffffff"
+    },
+    "propSchema": [
+      {
+        "key": "handle",
+        "type": "text",
+        "defaultValue": "@yourchannel",
+        "label": "Account"
+      },
+      {
+        "key": "ctaText",
+        "type": "text",
+        "defaultValue": "Double-tap to follow, next episode will be even better",
+        "label": "CTA text"
+      },
+      {
+        "key": "buttonText",
+        "type": "text",
+        "defaultValue": "Follow",
+        "label": "Button"
+      },
+      {
+        "key": "accentColor",
+        "type": "color",
+        "defaultValue": "#fb7185",
+        "label": "Button color"
+      },
+      {
+        "key": "textColor",
+        "type": "color",
+        "defaultValue": "#ffffff",
+        "label": "Text color"
+      }
+    ],
+    "thumb": "/thumbnails/ss-cta-follow.jpg",
+    "code": "const ShortsCtaFollow = ({ item }) => {\n  const frame = useCurrentFrame();\n  const { fps, durationInFrames } = useVideoConfig();\n  const p = item.props || {};\n  const handle = p.handle || '@channel';\n  const ctaText = p.ctaText || '';\n  const buttonText = p.buttonText || 'Follow';\n  const accent = p.accentColor || '#fb7185';\n  const textColor = p.textColor || '#fff';\n  const enter = spring({ frame, fps, config: { damping: 14, stiffness: 100 } });\n  const pulse = 1 + Math.sin(frame / 6) * 0.03;\n  const exit = interpolate(frame, [durationInFrames - 12, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });\n  return (\n    <AbsoluteFill style={{ backgroundColor: 'transparent', justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 280 }}>\n      <div style={{\n        opacity: enter * exit,\n        transform: `translateY(${(1 - enter) * 60}px) scale(${pulse})`,\n        alignItems: 'center',\n        display: 'flex',\n        flexDirection: 'column',\n        gap: 20,\n      }}>\n        <div style={{\n          width: 140, height: 140, borderRadius: 999,\n          background: `linear-gradient(135deg, ${accent}, #6366f1)`,\n          border: '4px solid #fff',\n          boxShadow: '0 12px 40px #0008',\n        }} />\n        <div style={{ fontSize: 36, fontWeight: 800, color: textColor }}>{handle}</div>\n        <div style={{ fontSize: 28, color: textColor, opacity: 0.85 }}>{ctaText}</div>\n        <div style={{\n          marginTop: 8,\n          padding: '16px 48px',\n          borderRadius: 999,\n          background: accent,\n          color: '#fff',\n          fontSize: 32,\n          fontWeight: 800,\n          boxShadow: `0 8px 32px ${accent}88`,\n        }}>{buttonText}</div>\n      </div>\n    </AbsoluteFill>\n  );\n};"
+  },
+  {
+    "id": "ss-step-list",
+    "name": "Vertical · Step List",
+    "category": "social-shorts",
+    "description": "Three-step vertical step list, suitable for tutorial content.",
+    "tags": [
+      "Vertical",
+      "9:16",
+      "Social media",
+      "Tutorial",
+      "Steps"
+    ],
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "durationInFrames": 90,
+    "props": {
+      "title": "Done in 3 steps",
+      "step1": "Find the core problem",
+      "step2": "Break into actionable steps",
+      "step3": "Review once daily",
+      "accentColor": "#2dd4bf",
+      "textColor": "#ecfdf5",
+      "cardColor": "rgba(15,23,42,0.82)"
+    },
+    "propSchema": [
+      {
+        "key": "title",
+        "type": "text",
+        "defaultValue": "Done in 3 steps",
+        "label": "Title"
+      },
+      {
+        "key": "step1",
+        "type": "text",
+        "defaultValue": "Find the core problem",
+        "label": "Step 1"
+      },
+      {
+        "key": "step2",
+        "type": "text",
+        "defaultValue": "Break into actionable steps",
+        "label": "Step 2"
+      },
+      {
+        "key": "step3",
+        "type": "text",
+        "defaultValue": "Review once daily",
+        "label": "Step 3"
+      },
+      {
+        "key": "accentColor",
+        "type": "color",
+        "defaultValue": "#2dd4bf",
+        "label": "Accent color"
+      },
+      {
+        "key": "textColor",
+        "type": "color",
+        "defaultValue": "#ecfdf5",
+        "label": "Text color"
+      },
+      {
+        "key": "cardColor",
+        "type": "color",
+        "defaultValue": "rgba(15,23,42,0.82)",
+        "label": "Card color"
+      }
+    ],
+    "thumb": "/thumbnails/ss-step-list.jpg",
+    "code": "const ShortsStepList = ({ item }) => {\n  const frame = useCurrentFrame();\n  const { fps, durationInFrames } = useVideoConfig();\n  const p = item.props || {};\n  const title = p.title || '';\n  const steps = [p.step1 || '', p.step2 || '', p.step3 || ''];\n  const accent = p.accentColor || '#2dd4bf';\n  const textColor = p.textColor || '#ecfdf5';\n  const card = p.cardColor || 'rgba(15,23,42,0.82)';\n  const exit = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });\n  const titleEnter = spring({ frame, fps, config: { damping: 16, stiffness: 100 } });\n  return (\n    <AbsoluteFill style={{ backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center' }}>\n      <div style={{ width: 920, opacity: exit }}>\n        <div style={{\n          fontSize: 44, fontWeight: 900, color: textColor, marginBottom: 36,\n          opacity: titleEnter, transform: `translateY(${(1 - titleEnter) * 20}px)`,\n        }}>{title}</div>\n        {steps.map((s, i) => {\n          const enter = spring({ frame: frame - i * 8, fps, config: { damping: 15, stiffness: 110 } });\n          return (\n            <div key={i} style={{\n              display: 'flex', alignItems: 'center', gap: 24,\n              marginBottom: 22,\n              opacity: enter,\n              transform: `translateX(${(1 - enter) * 40}px)`,\n              background: card,\n              borderRadius: 20,\n              padding: '26px 28px',\n              border: `1px solid ${accent}33`,\n            }}>\n              <div style={{\n                width: 56, height: 56, borderRadius: 999,\n                background: accent, color: '#0f172a',\n                display: 'flex', alignItems: 'center', justifyContent: 'center',\n                fontWeight: 900, fontSize: 28, flexShrink: 0,\n              }}>{i + 1}</div>\n              <div style={{ fontSize: 34, fontWeight: 700, color: textColor, lineHeight: 1.3 }}>{s}</div>\n            </div>\n          );\n        })}\n      </div>\n    </AbsoluteFill>\n  );\n};"
+  },
+  {
+    "id": "ss-big-number",
+    "name": "Vertical · Big Number",
+    "category": "social-shorts",
+    "description": "Extra-large number + description, suitable for follower growth, conversion, and data points.",
+    "tags": [
+      "Vertical",
+      "9:16",
+      "Social media",
+      "Data",
+      "Number"
+    ],
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "durationInFrames": 90,
+    "props": {
+      "numberText": "3.2x",
+      "label": "Completion rate increase",
+      "hint": "After changing the first 3 seconds",
+      "accentColor": "#60a5fa",
+      "textColor": "#f8fafc"
+    },
+    "propSchema": [
+      {
+        "key": "numberText",
+        "type": "text",
+        "defaultValue": "3.2x",
+        "label": "Number"
+      },
+      {
+        "key": "label",
+        "type": "text",
+        "defaultValue": "Completion rate increase",
+        "label": "Main label"
+      },
+      {
+        "key": "hint",
+        "type": "text",
+        "defaultValue": "After changing the first 3 seconds",
+        "label": "Sub label"
+      },
+      {
+        "key": "accentColor",
+        "type": "color",
+        "defaultValue": "#60a5fa",
+        "label": "Accent color"
+      },
+      {
+        "key": "textColor",
+        "type": "color",
+        "defaultValue": "#f8fafc",
+        "label": "Text color"
+      }
+    ],
+    "thumb": "/thumbnails/ss-big-number.jpg",
+    "code": "const ShortsBigNumber = ({ item }) => {\n  const frame = useCurrentFrame();\n  const { fps, durationInFrames } = useVideoConfig();\n  const p = item.props || {};\n  const numberText = p.numberText || '0';\n  const label = p.label || '';\n  const hint = p.hint || '';\n  const accent = p.accentColor || '#60a5fa';\n  const textColor = p.textColor || '#f8fafc';\n  const enter = spring({ frame, fps, config: { damping: 12, stiffness: 90 } });\n  const exit = interpolate(frame, [durationInFrames - 12, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });\n  return (\n    <AbsoluteFill style={{ backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center' }}>\n      <div style={{\n        textAlign: 'center', opacity: enter * exit,\n        transform: `scale(${0.8 + enter * 0.2})`,\n      }}>\n        <div style={{\n          fontSize: 180, fontWeight: 900, color: accent,\n          lineHeight: 1, letterSpacing: -2,\n          textShadow: `0 0 60px ${accent}66`,\n        }}>{numberText}</div>\n        <div style={{ marginTop: 24, fontSize: 48, fontWeight: 800, color: textColor }}>{label}</div>\n        {hint ? <div style={{ marginTop: 16, fontSize: 30, color: textColor, opacity: 0.7 }}>{hint}</div> : null}\n      </div>\n    </AbsoluteFill>\n  );\n};"
+  },
+  {
+    "id": "ss-chapter",
+    "name": "Vertical · Chapter Progress",
+    "category": "social-shorts",
+    "description": "Top chapter bar: Point N + progress feel.",
+    "tags": [
+      "Vertical",
+      "9:16",
+      "Social media",
+      "Chapter",
+      "Structure"
+    ],
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "durationInFrames": 90,
+    "props": {
+      "chapter": "03",
+      "title": "Why most people cannot stick with it",
+      "total": "05",
+      "accentColor": "#818cf8",
+      "textColor": "#eef2ff",
+      "bgColor": "rgba(15,23,42,0.86)"
+    },
+    "propSchema": [
+      {
+        "key": "chapter",
+        "type": "text",
+        "defaultValue": "03",
+        "label": "Current chapter"
+      },
+      {
+        "key": "total",
+        "type": "text",
+        "defaultValue": "05",
+        "label": "Total chapters"
+      },
+      {
+        "key": "title",
+        "type": "text",
+        "defaultValue": "Why most people cannot stick with it",
+        "label": "Chapter title"
+      },
+      {
+        "key": "accentColor",
+        "type": "color",
+        "defaultValue": "#818cf8",
+        "label": "Accent color"
+      },
+      {
+        "key": "textColor",
+        "type": "color",
+        "defaultValue": "#eef2ff",
+        "label": "Text color"
+      },
+      {
+        "key": "bgColor",
+        "type": "color",
+        "defaultValue": "rgba(15,23,42,0.86)",
+        "label": "Background color"
+      }
+    ],
+    "thumb": "/thumbnails/ss-chapter.jpg",
+    "code": "const ShortsChapter = ({ item }) => {\n  const frame = useCurrentFrame();\n  const { fps, durationInFrames } = useVideoConfig();\n  const p = item.props || {};\n  const chapter = p.chapter || '01';\n  const total = p.total || '05';\n  const title = p.title || '';\n  const accent = p.accentColor || '#818cf8';\n  const textColor = p.textColor || '#eef2ff';\n  const bg = p.bgColor || 'rgba(15,23,42,0.86)';\n  const enter = spring({ frame, fps, config: { damping: 16, stiffness: 100 } });\n  const exit = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });\n  const progress = Math.min(1, Number(chapter) / Math.max(1, Number(total) || 1));\n  return (\n    <AbsoluteFill style={{ backgroundColor: 'transparent' }}>\n      <div style={{\n        position: 'absolute', top: 120, left: 48, right: 48,\n        opacity: enter * exit,\n        transform: `translateY(${(1 - enter) * -30}px)`,\n        background: bg, borderRadius: 24, padding: '28px 32px',\n        boxShadow: '0 12px 40px #0006',\n      }}>\n        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>\n          <div style={{ fontSize: 28, fontWeight: 800, color: accent }}>Point {chapter}</div>\n          <div style={{ fontSize: 24, color: textColor, opacity: 0.6 }}>{chapter} / {total}</div>\n        </div>\n        <div style={{ fontSize: 36, fontWeight: 800, color: textColor, lineHeight: 1.35 }}>{title}</div>\n        <div style={{ marginTop: 22, height: 8, borderRadius: 99, background: '#ffffff22', overflow: 'hidden' }}>\n          <div style={{ width: `${progress * 100}%`, height: '100%', background: accent, borderRadius: 99 }} />\n        </div>\n      </div>\n    </AbsoluteFill>\n  );\n};"
+  },
+  {
+    "id": "ss-price-tag",
+    "name": "Vertical · Price Tag",
+    "category": "social-shorts",
+    "description": "Price + strikethrough original price, suitable for commerce talking head.",
+    "tags": [
+      "Vertical",
+      "9:16",
+      "Social media",
+      "Commerce",
+      "Price"
+    ],
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "durationInFrames": 90,
+    "props": {
+      "price": "¥99",
+      "original": "¥299",
+      "badge": "Limited time",
+      "accentColor": "#fb923c",
+      "textColor": "#fff7ed"
+    },
+    "propSchema": [
+      {
+        "key": "price",
+        "type": "text",
+        "defaultValue": "¥99",
+        "label": "Current price"
+      },
+      {
+        "key": "original",
+        "type": "text",
+        "defaultValue": "¥299",
+        "label": "Original price"
+      },
+      {
+        "key": "badge",
+        "type": "text",
+        "defaultValue": "Limited time",
+        "label": "Badge"
+      },
+      {
+        "key": "accentColor",
+        "type": "color",
+        "defaultValue": "#fb923c",
+        "label": "Accent color"
+      },
+      {
+        "key": "textColor",
+        "type": "color",
+        "defaultValue": "#fff7ed",
+        "label": "Text color"
+      }
+    ],
+    "thumb": "/thumbnails/ss-price-tag.jpg",
+    "code": "const ShortsPriceTag = ({ item }) => {\n  const frame = useCurrentFrame();\n  const { fps, durationInFrames } = useVideoConfig();\n  const p = item.props || {};\n  const price = p.price || '';\n  const original = p.original || '';\n  const badge = p.badge || '';\n  const accent = p.accentColor || '#fb923c';\n  const textColor = p.textColor || '#fff7ed';\n  const enter = spring({ frame, fps, config: { damping: 12, stiffness: 130 } });\n  const exit = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });\n  return (\n    <AbsoluteFill style={{ backgroundColor: 'transparent' }}>\n      <div style={{\n        position: 'absolute', right: 48, top: 420,\n        opacity: enter * exit,\n        transform: `scale(${0.85 + enter * 0.15}) rotate(${(1 - enter) * -8}deg)`,\n      }}>\n        {badge ? (\n          <div style={{\n            position: 'absolute', top: -18, right: -10,\n            background: accent, color: '#1c1917',\n            fontWeight: 900, fontSize: 24, padding: '6px 14px', borderRadius: 10,\n          }}>{badge}</div>\n        ) : null}\n        <div style={{\n          background: 'rgba(28,25,23,0.92)',\n          border: `3px solid ${accent}`,\n          borderRadius: 28,\n          padding: '28px 36px',\n          minWidth: 280,\n          boxShadow: `0 16px 48px #0008, 0 0 0 1px ${accent}44`,\n        }}>\n          <div style={{ fontSize: 64, fontWeight: 900, color: accent, lineHeight: 1 }}>{price}</div>\n          {original ? (\n            <div style={{ marginTop: 10, fontSize: 28, color: textColor, opacity: 0.55, textDecoration: 'line-through' }}>{original}</div>\n          ) : null}\n        </div>\n      </div>\n    </AbsoluteFill>\n  );\n};"
+  },
+  {
+    "id": "ss-cover-title",
+    "name": "Vertical · Cover Title",
+    "category": "social-shorts",
+    "description": "Vertical cover title, suitable for 1-2 second intro or Xiaohongshu cover feel.",
+    "tags": [
+      "Vertical",
+      "9:16",
+      "Social media",
+      "Cover",
+      "Title"
+    ],
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "durationInFrames": 90,
+    "props": {
+      "title": "Stop working hard blindly",
+      "subtitle": "These 3 methods actually work",
+      "accentColor": "#f43f5e",
+      "textColor": "#fafafa"
+    },
+    "propSchema": [
+      {
+        "key": "title",
+        "type": "text",
+        "defaultValue": "Stop working hard blindly",
+        "label": "Main title"
+      },
+      {
+        "key": "subtitle",
+        "type": "text",
+        "defaultValue": "These 3 methods actually work",
+        "label": "Subtitle"
+      },
+      {
+        "key": "accentColor",
+        "type": "color",
+        "defaultValue": "#f43f5e",
+        "label": "Decoration color"
+      },
+      {
+        "key": "textColor",
+        "type": "color",
+        "defaultValue": "#fafafa",
+        "label": "Text color"
+      }
+    ],
+    "thumb": "/thumbnails/ss-cover-title.jpg",
+    "code": "const ShortsCoverTitle = ({ item }) => {\n  const frame = useCurrentFrame();\n  const { fps, durationInFrames } = useVideoConfig();\n  const p = item.props || {};\n  const title = p.title || '';\n  const subtitle = p.subtitle || '';\n  const accent = p.accentColor || '#f43f5e';\n  const textColor = p.textColor || '#fafafa';\n  const a = spring({ frame, fps, config: { damping: 14, stiffness: 100 } });\n  const b = spring({ frame: frame - 6, fps, config: { damping: 16, stiffness: 100 } });\n  const exit = interpolate(frame, [durationInFrames - 12, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });\n  return (\n    <AbsoluteFill style={{ backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center', padding: 64 }}>\n      <div style={{ textAlign: 'center', maxWidth: 920, opacity: exit }}>\n        <div style={{\n          width: 80 * a, height: 10, background: accent, borderRadius: 99,\n          margin: '0 auto 36px', opacity: a,\n        }} />\n        <div style={{\n          fontSize: 72, fontWeight: 900, color: textColor, lineHeight: 1.2,\n          opacity: a, transform: `translateY(${(1 - a) * 30}px)`,\n          textShadow: '0 8px 32px #000a',\n        }}>{title}</div>\n        {subtitle ? (\n          <div style={{\n            marginTop: 28, fontSize: 36, fontWeight: 600, color: textColor, opacity: 0.8 * b,\n            transform: `translateY(${(1 - b) * 20}px)`,\n          }}>{subtitle}</div>\n        ) : null}\n      </div>\n    </AbsoluteFill>\n  );\n};"
+  },
+  {
+    "id": "ss-checklist",
+    "name": "Vertical · Checklist",
+    "category": "social-shorts",
+    "description": "Three-item checklist with sequential checkmarks, suitable for pitfall-avoidance / must-do lists.",
+    "tags": [
+      "Vertical",
+      "9:16",
+      "Social media",
+      "Checklist",
+      "Tutorial"
+    ],
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "durationInFrames": 90,
+    "props": {
+      "title": "3 must-do things today",
+      "item1": "Post content with a viewpoint",
+      "item2": "Reply to 10 DMs",
+      "item3": "Review data for 15 minutes",
+      "accentColor": "#4ade80",
+      "textColor": "#f0fdf4"
+    },
+    "propSchema": [
+      {
+        "key": "title",
+        "type": "text",
+        "defaultValue": "3 must-do things today",
+        "label": "Title"
+      },
+      {
+        "key": "item1",
+        "type": "text",
+        "defaultValue": "Post content with a viewpoint",
+        "label": "Item 1"
+      },
+      {
+        "key": "item2",
+        "type": "text",
+        "defaultValue": "Reply to 10 DMs",
+        "label": "Item 2"
+      },
+      {
+        "key": "item3",
+        "type": "text",
+        "defaultValue": "Review data for 15 minutes",
+        "label": "Item 3"
+      },
+      {
+        "key": "accentColor",
+        "type": "color",
+        "defaultValue": "#4ade80",
+        "label": "Check color"
+      },
+      {
+        "key": "textColor",
+        "type": "color",
+        "defaultValue": "#f0fdf4",
+        "label": "Text color"
+      }
+    ],
+    "thumb": "/thumbnails/ss-checklist.jpg",
+    "code": "const ShortsChecklist = ({ item }) => {\n  const frame = useCurrentFrame();\n  const { fps, durationInFrames } = useVideoConfig();\n  const p = item.props || {};\n  const title = p.title || '';\n  const items = [p.item1 || '', p.item2 || '', p.item3 || ''];\n  const accent = p.accentColor || '#4ade80';\n  const textColor = p.textColor || '#f0fdf4';\n  const exit = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });\n  return (\n    <AbsoluteFill style={{ backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center' }}>\n      <div style={{ width: 900, opacity: exit }}>\n        <div style={{ fontSize: 42, fontWeight: 900, color: textColor, marginBottom: 40 }}>{title}</div>\n        {items.map((text, i) => {\n          const enter = spring({ frame: frame - i * 10, fps, config: { damping: 14, stiffness: 120 } });\n          const checked = frame > 18 + i * 12;\n          return (\n            <div key={i} style={{\n              display: 'flex', alignItems: 'center', gap: 22, marginBottom: 28,\n              opacity: enter, transform: `translateY(${(1 - enter) * 24}px)`,\n            }}>\n              <div style={{\n                width: 52, height: 52, borderRadius: 14,\n                border: `3px solid ${accent}`,\n                background: checked ? accent : 'transparent',\n                display: 'flex', alignItems: 'center', justifyContent: 'center',\n                color: '#052e16', fontWeight: 900, fontSize: 28, flexShrink: 0,\n              }}>{checked ? '✓' : ''}</div>\n              <div style={{ fontSize: 34, fontWeight: 700, color: textColor }}>{text}</div>\n            </div>\n          );\n        })}\n      </div>\n    </AbsoluteFill>\n  );\n};"
+  },
+  {
+    "id": "ss-before-after",
+    "name": "Vertical · Before / After",
+    "category": "social-shorts",
+    "description": "Before / After label comparison, suitable for transformation cases.",
+    "tags": [
+      "Vertical",
+      "9:16",
+      "Social media",
+      "Comparison",
+      "Case study"
+    ],
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "durationInFrames": 90,
+    "props": {
+      "beforeLabel": "BEFORE",
+      "afterLabel": "AFTER",
+      "beforeText": "Random cuts · No structure",
+      "afterText": "Steady pace · High completion",
+      "beforeColor": "#f87171",
+      "afterColor": "#4ade80",
+      "textColor": "#fafafa"
+    },
+    "propSchema": [
+      {
+        "key": "beforeLabel",
+        "type": "text",
+        "defaultValue": "BEFORE",
+        "label": "Before label"
+      },
+      {
+        "key": "afterLabel",
+        "type": "text",
+        "defaultValue": "AFTER",
+        "label": "After label"
+      },
+      {
+        "key": "beforeText",
+        "type": "text",
+        "defaultValue": "Random cuts · No structure",
+        "label": "Before text"
+      },
+      {
+        "key": "afterText",
+        "type": "text",
+        "defaultValue": "Steady pace · High completion",
+        "label": "After text"
+      },
+      {
+        "key": "beforeColor",
+        "type": "color",
+        "defaultValue": "#f87171",
+        "label": "Before color"
+      },
+      {
+        "key": "afterColor",
+        "type": "color",
+        "defaultValue": "#4ade80",
+        "label": "After color"
+      },
+      {
+        "key": "textColor",
+        "type": "color",
+        "defaultValue": "#fafafa",
+        "label": "Text color"
+      }
+    ],
+    "thumb": "/thumbnails/ss-before-after.jpg",
+    "code": "const ShortsBeforeAfter = ({ item }) => {\n  const frame = useCurrentFrame();\n  const { fps, durationInFrames } = useVideoConfig();\n  const p = item.props || {};\n  const beforeLabel = p.beforeLabel || 'BEFORE';\n  const afterLabel = p.afterLabel || 'AFTER';\n  const beforeText = p.beforeText || '';\n  const afterText = p.afterText || '';\n  const beforeColor = p.beforeColor || '#f87171';\n  const afterColor = p.afterColor || '#4ade80';\n  const textColor = p.textColor || '#fafafa';\n  const a = spring({ frame, fps, config: { damping: 15, stiffness: 100 } });\n  const b = spring({ frame: frame - 10, fps, config: { damping: 15, stiffness: 100 } });\n  const exit = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });\n  const card = (label, text, color, enter, align) => (\n    <div style={{\n      width: 880, opacity: enter * exit,\n      transform: `translateX(${(1 - enter) * (align === 'left' ? -40 : 40)}px)`,\n      background: 'rgba(15,23,42,0.88)',\n      borderRadius: 24,\n      padding: '28px 32px',\n      borderLeft: `8px solid ${color}`,\n      marginBottom: 24,\n    }}>\n      <div style={{ fontSize: 24, fontWeight: 900, color, letterSpacing: 2, marginBottom: 10 }}>{label}</div>\n      <div style={{ fontSize: 40, fontWeight: 800, color: textColor }}>{text}</div>\n    </div>\n  );\n  return (\n    <AbsoluteFill style={{ backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center' }}>\n      <div>\n        {card(beforeLabel, beforeText, beforeColor, a, 'left')}\n        {card(afterLabel, afterText, afterColor, b, 'right')}\n      </div>\n    </AbsoluteFill>\n  );\n};"
+  },
+  {
+    "id": "ss-note-sticker",
+    "name": "Vertical · Sticky Note",
+    "category": "social-shorts",
+    "description": "Journal sticky note style annotation, suitable for Xiaohongshu / commentary additions.",
+    "tags": [
+      "Vertical",
+      "9:16",
+      "Social media",
+      "Sticker",
+      "Xiaohongshu"
+    ],
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "durationInFrames": 90,
+    "props": {
+      "note": "Key point: Do not spend too long on setup in the first 3 seconds",
+      "rotation": -4,
+      "paperColor": "#fef3c7",
+      "inkColor": "#292524",
+      "tapeColor": "#fbbf24"
+    },
+    "propSchema": [
+      {
+        "key": "note",
+        "type": "text",
+        "defaultValue": "Key point: Do not spend too long on setup in the first 3 seconds",
+        "label": "Note text"
+      },
+      {
+        "key": "rotation",
+        "type": "number",
+        "defaultValue": -4,
+        "label": "Rotation°",
+        "min": -15,
+        "max": 15,
+        "step": 1
+      },
+      {
+        "key": "paperColor",
+        "type": "color",
+        "defaultValue": "#fef3c7",
+        "label": "Paper color"
+      },
+      {
+        "key": "inkColor",
+        "type": "color",
+        "defaultValue": "#292524",
+        "label": "Ink color"
+      },
+      {
+        "key": "tapeColor",
+        "type": "color",
+        "defaultValue": "#fbbf24",
+        "label": "Tape color"
+      }
+    ],
+    "thumb": "/thumbnails/ss-note-sticker.jpg",
+    "code": "const ShortsNoteSticker = ({ item }) => {\n  const frame = useCurrentFrame();\n  const { fps, durationInFrames } = useVideoConfig();\n  const p = item.props || {};\n  const note = p.note || '';\n  const rotation = Number(p.rotation) || 0;\n  const paper = p.paperColor || '#fef3c7';\n  const ink = p.inkColor || '#292524';\n  const tape = p.tapeColor || '#fbbf24';\n  const enter = spring({ frame, fps, config: { damping: 12, stiffness: 120 } });\n  const exit = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });\n  return (\n    <AbsoluteFill style={{ backgroundColor: 'transparent' }}>\n      <div style={{\n        position: 'absolute', right: 60, top: 520, width: 420,\n        opacity: enter * exit,\n        transform: `rotate(${rotation}deg) scale(${0.9 + enter * 0.1})`,\n      }}>\n        <div style={{\n          position: 'absolute', top: -16, left: '50%', marginLeft: -50,\n          width: 100, height: 36, background: tape, opacity: 0.85, borderRadius: 4,\n        }} />\n        <div style={{\n          background: paper, borderRadius: 8, padding: '36px 28px 32px',\n          boxShadow: '0 16px 40px #0006',\n          fontSize: 30, fontWeight: 700, color: ink, lineHeight: 1.45,\n        }}>{note}</div>\n      </div>\n    </AbsoluteFill>\n  );\n};"
+  },
+  {
+    "id": "ss-social-actions",
+    "name": "Vertical · Engagement Prompt",
+    "category": "social-shorts",
+    "description": "Like / Comment / Save triple-action prompt bar.",
+    "tags": [
+      "Vertical",
+      "9:16",
+      "Social media",
+      "Engagement",
+      "CTA"
+    ],
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "durationInFrames": 90,
+    "props": {
+      "likeText": "Like",
+      "commentText": "Comment your thoughts",
+      "saveText": "Save to read later",
+      "accentColor": "#fb7185",
+      "textColor": "#fff1f2"
+    },
+    "propSchema": [
+      {
+        "key": "likeText",
+        "type": "text",
+        "defaultValue": "Like",
+        "label": "Like text"
+      },
+      {
+        "key": "commentText",
+        "type": "text",
+        "defaultValue": "Comment your thoughts",
+        "label": "Comment text"
+      },
+      {
+        "key": "saveText",
+        "type": "text",
+        "defaultValue": "Save to read later",
+        "label": "Save text"
+      },
+      {
+        "key": "accentColor",
+        "type": "color",
+        "defaultValue": "#fb7185",
+        "label": "Accent color"
+      },
+      {
+        "key": "textColor",
+        "type": "color",
+        "defaultValue": "#fff1f2",
+        "label": "Text color"
+      }
+    ],
+    "thumb": "/thumbnails/ss-social-actions.jpg",
+    "code": "const ShortsSocialActions = ({ item }) => {\n  const frame = useCurrentFrame();\n  const { fps, durationInFrames } = useVideoConfig();\n  const p = item.props || {};\n  const rows = [\n    { icon: '♥', text: p.likeText || 'Like' },\n    { icon: '💬', text: p.commentText || 'Comment' },\n    { icon: '★', text: p.saveText || 'Save' },\n  ];\n  const accent = p.accentColor || '#fb7185';\n  const textColor = p.textColor || '#fff1f2';\n  const exit = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });\n  return (\n    <AbsoluteFill style={{ backgroundColor: 'transparent' }}>\n      <div style={{\n        position: 'absolute', right: 36, bottom: 380,\n        opacity: exit, display: 'flex', flexDirection: 'column', gap: 22, alignItems: 'center',\n      }}>\n        {rows.map((row, i) => {\n          const enter = spring({ frame: frame - i * 6, fps, config: { damping: 14, stiffness: 130 } });\n          return (\n            <div key={i} style={{\n              opacity: enter,\n              transform: `translateX(${(1 - enter) * 40}px)`,\n              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,\n            }}>\n              <div style={{\n                width: 72, height: 72, borderRadius: 999,\n                background: 'rgba(15,23,42,0.75)',\n                border: `2px solid ${accent}66`,\n                display: 'flex', alignItems: 'center', justifyContent: 'center',\n                fontSize: 30, color: accent, fontWeight: 900,\n                boxShadow: '0 8px 24px #0006',\n              }}>{row.icon}</div>\n              <div style={{ fontSize: 20, fontWeight: 700, color: textColor, maxWidth: 100, textAlign: 'center' }}>{row.text}</div>\n            </div>\n          );\n        })}\n      </div>\n    </AbsoluteFill>\n  );\n};"
+  },
+  {
+    "id": "ss-episode-badge",
+    "name": "Vertical · Episode Badge",
+    "category": "social-shorts",
+    "description": "Series content episode badge, such as EP.03 / Episode 3.",
+    "tags": [
+      "Vertical",
+      "9:16",
+      "Social media",
+      "Series",
+      "Badge"
+    ],
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "durationInFrames": 90,
+    "props": {
+      "badge": "EP.03",
+      "series": "Growth Experiment Notes",
+      "accentColor": "#94a3b8",
+      "textColor": "#f8fafc",
+      "bgColor": "rgba(15,23,42,0.9)"
+    },
+    "propSchema": [
+      {
+        "key": "badge",
+        "type": "text",
+        "defaultValue": "EP.03",
+        "label": "Episode"
+      },
+      {
+        "key": "series",
+        "type": "text",
+        "defaultValue": "Growth Experiment Notes",
+        "label": "Series name"
+      },
+      {
+        "key": "accentColor",
+        "type": "color",
+        "defaultValue": "#94a3b8",
+        "label": "Accent color"
+      },
+      {
+        "key": "textColor",
+        "type": "color",
+        "defaultValue": "#f8fafc",
+        "label": "Text color"
+      },
+      {
+        "key": "bgColor",
+        "type": "color",
+        "defaultValue": "rgba(15,23,42,0.9)",
+        "label": "Background color"
+      }
+    ],
+    "thumb": "/thumbnails/ss-episode-badge.jpg",
+    "code": "const ShortsEpisodeBadge = ({ item }) => {\n  const frame = useCurrentFrame();\n  const { fps, durationInFrames } = useVideoConfig();\n  const p = item.props || {};\n  const badge = p.badge || 'EP.01';\n  const series = p.series || '';\n  const accent = p.accentColor || '#94a3b8';\n  const textColor = p.textColor || '#f8fafc';\n  const bg = p.bgColor || 'rgba(15,23,42,0.9)';\n  const enter = spring({ frame, fps, config: { damping: 16, stiffness: 110 } });\n  const exit = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });\n  return (\n    <AbsoluteFill style={{ backgroundColor: 'transparent' }}>\n      <div style={{\n        position: 'absolute', top: 100, left: 48,\n        opacity: enter * exit,\n        transform: `translateY(${(1 - enter) * -24}px)`,\n        background: bg,\n        borderRadius: 999,\n        padding: '14px 28px',\n        display: 'flex', alignItems: 'center', gap: 16,\n        border: `1px solid ${accent}44`,\n        boxShadow: '0 8px 28px #0006',\n      }}>\n        <div style={{ fontSize: 26, fontWeight: 900, color: accent, letterSpacing: 1 }}>{badge}</div>\n        {series ? <div style={{ width: 1, height: 20, background: accent, opacity: 0.4 }} /> : null}\n        {series ? <div style={{ fontSize: 24, fontWeight: 700, color: textColor, opacity: 0.9 }}>{series}</div> : null}\n      </div>\n    </AbsoluteFill>\n  );\n};"
+  }
+]

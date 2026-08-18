@@ -1,0 +1,28 @@
+// EN data dictionary: English display name of Chinese key **data** (self-made template name, etc.). tData() looks here in en state.
+// It has nothing to do with UI fragmentation (16 fragments assembled by index.ts) - the data name is not the UI copy and is a separate table.
+export default {
+  'Vertical · Keyword Pop': 'Vertical · Keyword Pop',
+  'Vertical · Big Caption': 'Vertical · Big Caption',
+  'Vertical · Quote Card': 'Vertical · Quote Card',
+  'Vertical · Name Bar': 'Vertical · Name Bar',
+  'Vertical · Follow CTA': 'Vertical · Follow CTA',
+  'Vertical · Step List': 'Vertical · Step List',
+  'Vertical · Big Number': 'Vertical · Big Number',
+  'Vertical · Chapter Progress': 'Vertical · Chapter Progress',
+  'Vertical · Price Tag': 'Vertical · Price Tag',
+  'Vertical · Cover Title': 'Vertical · Cover Title',
+  'Vertical · Checklist': 'Vertical · Checklist',
+  'Vertical · Before / After': 'Vertical · Before / After',
+  'Vertical · Sticky Note': 'Vertical · Sticky Note',
+  'Vertical · Engagement Prompt': 'Vertical · Engagement Prompt',
+  'Vertical · Episode Badge': 'Vertical · Episode Badge',
+  'Talking Head · Beige Grid Paper (16:9)': 'Talking Head · Beige Grid Paper (16:9)',
+  'Talking Head · Latte Ruled Paper (16:9)': 'Talking Head · Latte Ruled Paper (16:9)',
+  'Talking Head · Chalkboard (16:9)': 'Talking Head · Chalkboard (16:9)',
+  'Talking Head · Collage Split (16:9)': 'Talking Head · Collage Split (16:9)',
+  'Talking Head · Sticky Note Split (9:16)': 'Talking Head · Sticky Note Split (9:16)',
+  'Talking Head · Dot Grid Split (9:16)': 'Talking Head · Dot Grid Split (9:16)',
+  'Talking Head · Kraft Corner (9:16)': 'Talking Head · Kraft Corner (9:16)',
+  'Talking Head · Parchment (16:9)': 'Talking Head · Parchment (16:9)',
+  'Talking Head · Cream Polaroid (9:16)': 'Talking Head · Cream Polaroid (9:16)',
+} as Record<string, string>;

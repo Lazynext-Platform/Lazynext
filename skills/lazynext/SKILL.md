@@ -1,0 +1,54 @@
+---
+name: lazynext
+description: Connect an MCP-capable coding agent to Lazynext and edit local video projects. Use when the user asks to install, connect, or set up Lazynext; inspect or edit an Lazynext project; work with its timeline, transcript, captions, media, generation, motion graphics, audio, color, or export tools; or recover from an Lazynext MCP error.
+---
+
+# Lazynext
+
+Lazynext is a local-first, agent-native video editor. This skill is the
+single external entry point; specialized editing guidance remains inside the
+running editor and is loaded on demand with `load_skill`.
+
+## Route the task
+
+- Install, connect, or diagnose the MCP server: read
+  `references/getting-started.md`.
+- Inspect or modify a project: read `references/editing-workflow.md`.
+- Recover from a failed tool call, stale session, or missing editor:
+  read `references/known-errors.md`.
+
+## Essentials
+
+1. Start Lazynext before connecting. The default MCP endpoint is
+   `http://localhost:5199/api/external-mcp/mcp`.
+2. Call `lazynext_status`, then `list_projects`. Select a project only when
+   the user names it or the current context identifies it.
+3. Call `load_skill` before specialized work. It is read-only and requires
+   neither `begin_edit_session` nor `editSessionId`; available names and support
+   files come from the live MCP tool description.
+   With progressive exposure enabled, this call reveals the skill's referenced
+   tools and emits `tools/list_changed`; refresh the list before continuing.
+4. Before project reads or edits, call `begin_edit_session`. Keep its
+   `editSessionId` and pass it to every draft-safe editor tool.
+5. Use `approvalMode: "manual"` unless the user explicitly asks for unattended
+   application. In manual mode, the user approves the complete proposal in
+   Lazynext. In auto mode, `review_edit_session` applies the complete draft.
+6. Finish with `review_edit_session`. Report success only after
+   `get_edit_session` returns `applied`.
+
+## Skill version
+
+`2026-08-10.1`
+
+The Lazynext MCP server announces its required skill baseline. If the server
+baseline is newer, run:
+
+```bash
+npx skills update lazynext
+```
+
+Fallback command:
+
+```bash
+npx skills add lazynext/Lazynext --skill lazynext
+```

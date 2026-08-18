@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "lazynext": {
+      "type": "http",
+      "url": "http://localhost:5199/api/external-mcp/mcp",
+      "headers": {
+        "x-lazynext-mcp-client": "claude-code",
+        "x-lazynext-mcp-surface": "external"
+      }
+    }
+  }
+}

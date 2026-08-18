@@ -1,0 +1,18 @@
+interface:
+  display_name: "Lazynext"
+  short_description: "Connect and edit local Lazynext video projects"
+  brand_color: "#7C3AED"
+  icon_small: "./assets/lazynext-icon.png"
+  icon_large: "./assets/lazynext-icon.png"
+  default_prompt: "Use $lazynext to connect to Lazynext and inspect the selected video project."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "lazynext"
+      description: "Lazynext local editor MCP server"
+      transport: "streamable_http"
+      url: "http://localhost:5199/api/external-mcp/mcp"
+
+policy:
+  allow_implicit_invocation: true

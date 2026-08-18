@@ -1,0 +1,20 @@
+// EN dictionary (field fragmentation, key = Chinese original text). Data files are exempt from the upper limit of row count.
+export default {
+  'Switch UI language': 'Switch UI language',
+  'Back to projects': 'Back to projects',
+  'Double-click to rename': 'Double-click to rename',
+  'Edit keyboard shortcuts': 'Edit keyboard shortcuts',
+  'Undo': 'Undo',
+  'Redo': 'Redo',
+  'Design style (brand)': 'Design style (brand)',
+  'Version History': 'Version History',
+  'Toggle panel layout': 'Toggle panel layout',
+  'Export MP4': 'Export MP4',
+  'Exporting…': 'Exporting…',
+  'Export': 'Export',
+  'Account': 'Account',
+  'Window controls': 'Window controls',
+  'Close window': 'Close window',
+  'Minimize window': 'Minimize window',
+  'Zoom window': 'Zoom window',
+} as Record<string, string>;

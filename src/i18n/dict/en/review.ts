@@ -1,0 +1,18 @@
+export default {
+  'Review comments': 'Review comments',
+  'Comments': 'Comments',
+  'Failed to load comments': 'Failed to load comments',
+  'Failed to save comment': 'Failed to save comment',
+  'Failed to save reply': 'Failed to save reply',
+  'Add a review comment at the current frame': 'Add a review comment at the current frame',
+  'Anchors to this frame and, when available, the clip and source position': 'Anchors to this frame and, when available, the clip and source position',
+  'Add comment': 'Add comment',
+  'No review comments yet': 'No review comments yet',
+  'Clip': 'Clip',
+  'Timeline': 'Timeline',
+  'Write a reply': 'Write a reply',
+  'Reply': 'Reply',
+  'Reopen': 'Reopen',
+  'Resolve': 'Resolve',
+  'Delete comment': 'Delete comment',
+} satisfies Record<string, string>;
