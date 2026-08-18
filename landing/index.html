@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/lazynext-icon.png" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Lazynext — local-first, agent-native AI video editor. Edit video projects with conversational AI agents, multitrack timeline, transcript-driven editing, and production-ready exports." />
+  <title>Lazynext — AI Video Editor</title>
+  <style>
+    :root {
+      --bg: #0a0a0c;
+      --panel: #141418;
+      --panel-alt: #1c1c22;
+      --border: #2a2a32;
+      --text: #e8e8ec;
+      --text-dim: #8a8a94;
+      --accent: #6c5ce7;
+      --accent-bright: #8b7ff0;
+      --radius: 12px;
+      --max-width: 1080px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent-bright); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    /* Nav */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,10,12,0.85); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    nav .container {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 56px;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; }
+    .nav-brand img { width: 28px; height: 28px; border-radius: 6px; }
+    .nav-links { display: flex; gap: 24px; align-items: center; }
+    .nav-links a { color: var(--text-dim); font-size: 14px; }
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 18px; border-radius: 8px; font-size: 14px; font-weight: 600;
+      border: none; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-bright); text-decoration: none; }
+    .btn-secondary { background: var(--panel-alt); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: var(--accent); text-decoration: none; }
+
+    /* Hero */
+    .hero { padding: 80px 0 60px; text-align: center; }
+    .hero h1 { font-size: 48px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 16px; }
+    .hero .tagline { font-size: 20px; color: var(--text-dim); max-width: 640px; margin: 0 auto 32px; }
+    .hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .hero-badges { display: flex; gap: 20px; justify-content: center; margin-top: 28px; flex-wrap: wrap; }
+    .hero-badge { font-size: 13px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; }
+    .hero-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+    /* Sections */
+    section { padding: 60px 0; }
+    section h2 { font-size: 32px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 12px; }
+    section .section-sub { color: var(--text-dim); font-size: 17px; margin-bottom: 40px; }
+
+    /* Feature grid */
+    .feature-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .feature-card {
+      background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 24px;
+    }
+    .feature-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+    .feature-card p { color: var(--text-dim); font-size: 14px; }
+    .feature-icon { font-size: 24px; margin-bottom: 12px; }
+
+    /* Downloads */
+    .download-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+    .download-card {
+      background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 24px; text-align: center; transition: border-color 0.15s;
+    }
+    .download-card:hover { border-color: var(--accent); }
+    .download-card .platform { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+    .download-card .arch { font-size: 13px; color: var(--text-dim); margin-bottom: 16px; }
+    .download-card .btn { width: 100%; justify-content: center; }
+
+    /* Screenshots */
+    .screenshot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 20px; }
+    .screenshot-card {
+      background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .screenshot-card .placeholder {
+      height: 240px; background: var(--panel-alt);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-dim); font-size: 14px;
+    }
+    .screenshot-card .caption { padding: 16px; font-size: 14px; color: var(--text-dim); }
+
+    /* Code block */
+    .code-block {
+      background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px 24px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 14px;
+      overflow-x: auto; margin: 24px 0;
+    }
+    .code-block .comment { color: var(--text-dim); }
+    .code-block .cmd { color: var(--accent-bright); }
+
+    /* MCP section */
+    .mcp-flow {
+      display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+      font-size: 14px; color: var(--text-dim); margin: 20px 0;
+    }
+    .mcp-step {
+      background: var(--panel-alt); border: 1px solid var(--border); border-radius: 8px;
+      padding: 6px 12px; font-family: monospace; font-size: 13px; color: var(--text);
+    }
+    .mcp-arrow { color: var(--accent); }
+
+    /* Footer */
+    footer { border-top: 1px solid var(--border); padding: 40px 0; margin-top: 40px; }
+    footer .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+    footer .copyright { color: var(--text-dim); font-size: 14px; }
+    footer .links { display: flex; gap: 20px; }
+    footer .links a { color: var(--text-dim); font-size: 14px; }
+
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 34px; }
+      .hero .tagline { font-size: 17px; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <div class="nav-brand">
+      <img src="/lazynext-icon.png" alt="Lazynext" />
+      Lazynext
+    </div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#downloads">Downloads</a>
+      <a href="#screenshots">Screenshots</a>
+      <a href="https://github.com/Lazynext-Platform/Lazynext">GitHub</a>
+      <a href="https://github.com/Lazynext-Platform/Lazynext/blob/main/docs/quick-start.md">Docs</a>
+    </div>
+    <a class="btn btn-primary" href="#downloads">Get Started</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="container">
+    <h1>Edit video with AI agents</h1>
+    <p class="tagline">
+      Lazynext is a local-first, agent-native AI video editor. Conversational AI agents
+      read, edit, and export real video projects — every edit lands on actual tracks,
+      clips, and captions that stay fully editable.
+    </p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="#downloads">Download</a>
+      <a class="btn btn-secondary" href="https://github.com/Lazynext-Platform/Lazynext">View on GitHub</a>
+    </div>
+    <div class="hero-badges">
+      <span class="hero-badge">Local-first</span>
+      <span class="hero-badge">MCP-powered</span>
+      <span class="hero-badge">Multitrack timeline</span>
+      <span class="hero-badge">Transcript-driven editing</span>
+      <span class="hero-badge">FCPXML export</span>
+    </div>
+  </div>
+</div>
+
+<section id="features">
+  <div class="container">
+    <h2>Everything in one workspace</h2>
+    <p class="section-sub">Professional timeline editing, AI generation, transcript-driven cuts, and agent automation — without leaving your machine.</p>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🎬</div>
+        <h3>Multitrack timeline</h3>
+        <p>Unlimited video and audio tracks with transitions, effects, LUTs, zoom envelopes, keyframes, and markers. Full undo/redo history.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📝</div>
+        <h3>Transcript-driven editing</h3>
+        <p>Word-level transcription with text-based cuts. Strike through words to delete them. Pause compression, speaker labels, and unified search.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💬</div>
+        <h3>AI captions</h3>
+        <p>Automatic captions from transcript data. TikTok, YouTube, and custom styles with karaoke highlighting. SRT, VTT, and embedded export.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <h3>AI generation</h3>
+        <p>Generate images, video, speech, music, and sound effects from text. Background job queue with live progress and retry.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3>Agent-native</h3>
+        <p>Built-in conversational agent with proposal-based edits. Connect external agents via MCP — Codex, Claude Code, and more.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎵</div>
+        <h3>Audio intelligence</h3>
+        <p>Auto-ducking, vocal isolation, loudness normalization, beat detection, and music-synced cuts. Multiple audio tracks with full mixing.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📐</div>
+        <h3>Visual intelligence</h3>
+        <p>In-browser person segmentation, face-safe caption zones, auto-reframe for aspect ratio conversion, and AI-assisted color grading.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📦</div>
+        <h3>Production-ready export</h3>
+        <p>MP4 with hardware-accelerated H.264, separate audio, captions, FCPXML for DaVinci Resolve and Final Cut Pro, and full project archives.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>Local-first</h3>
+        <p>Projects and media stay on your machine by default. API keys remain server-side. Core editing works fully offline.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="agent" style="background: var(--panel);">
+  <div class="container">
+    <h2>Agents that edit real timelines</h2>
+    <p class="section-sub">Lazynext exposes 118+ editing tools to AI agents through a standard MCP endpoint. No fake previews — every edit is written to the project.</p>
+    <div class="code-block">
+<span class="comment"># Start the dev server</span>
+<span class="cmd">npm run dev</span>
+
+<span class="comment"># Connect an external agent (Codex, Claude Code, etc.)</span>
+<span class="cmd">URL:</span>   http://localhost:5199/api/external-mcp/mcp
+<span class="cmd">Token:</span> &lt;copy from Settings → MCP&gt;
+    </div>
+    <div class="mcp-flow">
+      <span class="mcp-step">lazynext_status</span>
+      <span class="mcp-arrow">→</span>
+      <span class="mcp-step">list_projects</span>
+      <span class="mcp-arrow">→</span>
+      <span class="mcp-step">target_project</span>
+      <span class="mcp-arrow">→</span>
+      <span class="mcp-step">begin_edit_session</span>
+      <span class="mcp-arrow">→</span>
+      <span class="mcp-step">editing tools</span>
+      <span class="mcp-arrow">→</span>
+      <span class="mcp-step">review_edit_session</span>
+    </div>
+  </div>
+</section>
+
+<section id="downloads">
+  <div class="container">
+    <h2>Download</h2>
+    <p class="section-sub">Native installers for macOS, Windows, and Linux. Or build from source.</p>
+    <div class="download-grid">
+      <div class="download-card">
+        <div class="platform">macOS</div>
+        <div class="arch">Apple Silicon (arm64)</div>
+        <a class="btn btn-primary" href="https://github.com/Lazynext-Platform/Lazynext/releases/latest">Download .dmg</a>
+      </div>
+      <div class="download-card">
+        <div class="platform">macOS</div>
+        <div class="arch">Intel (x64)</div>
+        <a class="btn btn-primary" href="https://github.com/Lazynext-Platform/Lazynext/releases/latest">Download .dmg</a>
+      </div>
+      <div class="download-card">
+        <div class="platform">Windows</div>
+        <div class="arch">x64 installer</div>
+        <a class="btn btn-primary" href="https://github.com/Lazynext-Platform/Lazynext/releases/latest">Download .exe</a>
+      </div>
+      <div class="download-card">
+        <div class="platform">Linux</div>
+        <div class="arch">x64 AppImage</div>
+        <a class="btn btn-primary" href="https://github.com/Lazynext-Platform/Lazynext/releases/latest">Download .AppImage</a>
+      </div>
+    </div>
+    <div class="code-block" style="margin-top: 32px;">
+<span class="comment"># Or build from source</span>
+<span class="cmd">git clone</span> https://github.com/Lazynext-Platform/Lazynext.git
+<span class="cmd">cd</span> Lazynext
+<span class="cmd">npm ci</span>
+<span class="cmd">cp</span> .env.example .env
+<span class="cmd">npm run dev</span>
+    </div>
+    <p style="text-align: center; margin-top: 16px;">
+      <a href="https://github.com/Lazynext-Platform/Lazynext/blob/main/docs/quick-start.md">Read the Quick Start guide →</a>
+    </p>
+  </div>
+</section>
+
+<section id="screenshots">
+  <div class="container">
+    <h2>See it in action</h2>
+    <p class="section-sub">A multitrack timeline, transcript-driven editing, AI chat, and caption styling — all in one workspace.</p>
+    <div class="screenshot-grid">
+      <div class="screenshot-card">
+        <div class="placeholder">Timeline view — multitrack editing with clips, transitions, and waveforms</div>
+        <div class="caption">Multitrack timeline with video, audio, and transcript tracks</div>
+      </div>
+      <div class="screenshot-card">
+        <div class="placeholder">AI chat — conversational agent with proposal-based edits</div>
+        <div class="caption">Chat with the built-in agent to edit your project</div>
+      </div>
+      <div class="screenshot-card">
+        <div class="placeholder">Transcript editing — strike words to cut them from the timeline</div>
+        <div class="caption">Text-based editing with word-level precision</div>
+      </div>
+      <div class="screenshot-card">
+        <div class="placeholder">Caption styling — TikTok, YouTube, and custom presets</div>
+        <div class="caption">Automatic captions with karaoke highlighting</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="copyright">© 2026 Lazynext. All rights reserved.</div>
+    <div class="links">
+      <a href="https://github.com/Lazynext-Platform/Lazynext">GitHub</a>
+      <a href="https://github.com/Lazynext-Platform/Lazynext/blob/main/docs/quick-start.md">Docs</a>
+      <a href="https://github.com/Lazynext-Platform/Lazynext/blob/main/docs/faq.md">FAQ</a>
+      <a href="mailto:support@lazynext.com">Support</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
