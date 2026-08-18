@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import { createElement, createRef } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createServer } from 'vite';
-import { tData } from '../../i18n/locale.ts';
 import { TEMPLATES } from '../../editor/initial.ts';
 import type { RefItem } from './ChatComposer.tsx';
 
