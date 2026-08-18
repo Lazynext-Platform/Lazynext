@@ -100,3 +100,9 @@ Connect external agents like Codex or Claude Code:
 ## License
 
 Copyright (c) 2026 Lazynext. All rights reserved.
+
+## Documentation
+
+- [Quick Start](./docs/quick-start.md) — installation, configuration, and first run
+- [Features](./docs/features.md) — full capability reference
+- [FAQ](./docs/faq.md) — common questions and troubleshooting
