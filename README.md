@@ -137,3 +137,4 @@ Copyright (c) 2026 Lazynext. All rights reserved.
 - [Quick Start](./docs/quick-start.md) — installation, configuration, and first run
 - [Features](./docs/features.md) — full capability reference
 - [FAQ](./docs/faq.md) — common questions and troubleshooting
+- [GCP Migration Guide](./docs/gcp-migration-guide.md) — moving Vertex AI setup to a new account
