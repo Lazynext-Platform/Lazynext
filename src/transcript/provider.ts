@@ -59,7 +59,7 @@ export function preferredTranscriptionProvider(): TranscriptionProviderId {
   } catch {
     // SSR / private browsing: fall through to the default.
   }
-  return 'assemblyai';
+  return 'gemini';
 }
 
 export function preferredTranscriptionLanguage(): string {
@@ -69,7 +69,7 @@ export function preferredTranscriptionLanguage(): string {
   } catch {
     // SSR / private browsing: fall through to the default.
   }
-  return 'zh';
+  return 'auto';
 }
 
 export function preferredTranscriptionDiarization(): boolean {

@@ -182,6 +182,7 @@ export const TRANSCRIPTION_SETTINGS_GROUP: SettingsGroup = {
  title: 'Transcription / Script Editing',
  hint: 'transcribe_track · Word-level captions, filler cleanup, word deletion.',
  route: routeSelect('PREFERRED_TRANSCRIPTION_PROVIDER', [
+ { value: 'gemini', label: 'Google Gemini (free · cloud)' },
  { value: 'assemblyai', label: 'AssemblyAI (cloud)' },
  { value: 'local', label: 'Local model (free · offline)' },
  { value: 'openai', label: 'OpenAI (cloud)' },
@@ -190,8 +191,13 @@ export const TRANSCRIPTION_SETTINGS_GROUP: SettingsGroup = {
  { value: 'groq', label: 'Groq (cloud)' },
  { value: 'elevenlabs', label: 'ElevenLabs Scribe (cloud)' },
  { value: 'cartesia', label: 'Cartesia (cloud)' },
- ], 'AssemblyAI (default)'),
+ ], 'Google Gemini (free · default)'),
  vendors: [
+ transcriptionPage('gemini', 'gemini', 'Google Gemini', [
+ secret('GEMINI_API_KEY', 'API Key'),
+ text('GEMINI_BASE_URL', 'Base URL', 'Default https://generativelanguage.googleapis.com'),
+ modelText('GEMINI_TRANSCRIPTION_MODEL', 'Transcription model', 'gemini-3-flash-preview'),
+ ], 'Free tier available — no word-level timestamps.'),
  transcriptionPage('assemblyai', 'assemblyai', 'AssemblyAI', [secret('ASSEMBLYAI_API_KEY', 'API Key')]),
  localAsrPage,
  transcriptionPage('openai', 'openai', 'OpenAI', [
@@ -227,6 +233,7 @@ export const TRANSCRIPTION_SETTINGS_GROUP: SettingsGroup = {
 export const ROUTE_NEEDS: Record<string, readonly (readonly string[])[]> = {
  'gpt-image-2': [['IMAGE_API_KEY'], ['OPENAI_API_KEY']],
  'nano-banana': [['GEMINI_API_KEY']],
+ 'pollinations': [[]],
  'image-01': [['MINIMAX_API_KEY']],
  elevenlabs: [['ELEVENLABS_API_KEY']],
  doubao: [['DOUBAO_TTS_APP_ID', 'DOUBAO_TTS_ACCESS_KEY']],

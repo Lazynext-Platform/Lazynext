@@ -141,7 +141,7 @@ export async function genericCloudTranscribePath(
   const result = await postTranscription(
     provider,
     blob,
-    opts.languageCode ?? 'zh',
+    opts.languageCode ?? 'auto',
     opts.diarize ?? true,
   );
   await onCheckpoint({ providerStatus: 'completed' });

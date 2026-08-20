@@ -5,6 +5,7 @@ import { createElevenLabs } from '@ai-sdk/elevenlabs';
 import { createGroq } from '@ai-sdk/groq';
 import { createOpenAI } from '@ai-sdk/openai';
 
+import { proxyDispatcher } from '../outbound-proxy.ts';
 import { versionedApiBaseUrl } from './media-provider-config.ts';
 
 import type {
@@ -29,7 +30,8 @@ function requireProviderKey(options: TranscriptionOptions, provider: CloudTransc
       : provider === 'deepgram' ? options.deepgramApiKey
         : provider === 'groq' ? options.groqApiKey
           : provider === 'elevenlabs' ? options.elevenApiKey
-            : options.cartesiaApiKey;
+            : provider === 'gemini' ? options.geminiApiKey
+              : options.cartesiaApiKey;
   if (key) return key;
   const label = provider === 'elevenlabs' ? 'ElevenLabs' : provider[0]!.toUpperCase() + provider.slice(1);
   throw new TranscriptionConfigurationError(`${label} API key is not configured`);
@@ -71,6 +73,7 @@ async function runProvider(options: TranscriptionOptions, request: CloudTranscri
     providerOptions: { elevenlabs: { ...(request.language === 'auto' ? {} : { languageCode: request.language }),
       diarize: request.diarize, timestampsGranularity: 'word' } },
   });
+  if (request.provider === 'gemini') return transcribeGemini(options, request, key);
   return transcribe({ ...common,
     model: createCartesia({ apiKey: key }).transcription(options.cartesiaModel),
     providerOptions: { cartesia: { ...(request.language === 'auto' ? {} : { language: request.language }),
@@ -156,6 +159,63 @@ function groupUtterances(words: NormalizedTranscriptWord[]): NormalizedTranscrip
   }
   flush();
   return utterances;
+}
+
+/** Gemini native audio transcription — sends audio as inline data with a
+ * transcription prompt. Returns a TranscriptionResult-compatible shape so
+ * the rest of the pipeline (word normalization, utterance grouping) works
+ * unchanged. Gemini does not provide word-level timestamps, so we return
+ * segment-level data only. */
+async function transcribeGemini(
+  options: TranscriptionOptions,
+  request: CloudTranscriptionRequest,
+  apiKey: string,
+): Promise<TranscriptionResult> {
+  const audioBase64 = Buffer.from(request.audio).toString('base64');
+  const languageInstruction = request.language === 'auto'
+    ? 'Transcribe this audio exactly in whatever language it is spoken. Return only the transcribed text, nothing else.'
+    : `Transcribe this audio exactly in ${request.language}. Return only the transcribed text, nothing else.`;
+
+  const baseUrl = options.geminiBaseUrl.replace(/\/+$/, '');
+  const model = options.geminiModel;
+  type FetchInit = Parameters<typeof fetch>[1] & { dispatcher?: unknown };
+  const fetchWithProxy = (url: RequestInfo | URL, init?: FetchInit): Promise<Response> =>
+    fetch(url, { ...init, dispatcher: proxyDispatcher() } as RequestInit);
+
+  const response = await fetchWithProxy(
+    `${baseUrl}/v1beta/models/${model}:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { text: languageInstruction },
+            { inline_data: { mime_type: 'audio/wav', data: audioBase64 } },
+          ],
+        }],
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    const errorBody = await response.text().catch(() => '');
+    throw new Error(`Gemini transcription failed (${response.status}): ${errorBody.slice(0, 300)}`);
+  }
+
+  const result = await response.json() as {
+    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+  };
+  const text = result.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+  if (!text.trim()) throw new Error('Gemini returned an empty transcription');
+
+  // Gemini doesn't provide timestamps — return a single segment spanning the
+  // full audio. The caller will use this as segment-level data.
+  return {
+    text,
+    segments: [{ text: text.trim(), startSecond: 0, endSecond: 0 }],
+    responses: [{ body: { words: [], segments: [{ text: text.trim(), start: 0, end: 0 }] } }] as unknown as TranscriptionResult['responses'],
+  } satisfies TranscriptionResult;
 }
 
 export async function transcribeCloudAudio(

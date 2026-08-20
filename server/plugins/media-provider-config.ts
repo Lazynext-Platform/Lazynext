@@ -40,7 +40,10 @@ export function transcriptionOptions(): TranscriptionOptions {
     get elevenModel() { return getKey('ELEVENLABS_TRANSCRIPTION_MODEL') || 'scribe_v2'; },
     get cartesiaApiKey() { return getKey('CARTESIA_API_KEY'); },
     get cartesiaModel() { return getKey('CARTESIA_TRANSCRIPTION_MODEL') || 'ink-whisper'; },
-    get language() { return getKey('TRANSCRIPTION_LANGUAGE') || 'zh'; },
+    get geminiBaseUrl() { return getKey('GEMINI_BASE_URL') || 'https://generativelanguage.googleapis.com'; },
+    get geminiApiKey() { return getKey('GEMINI_API_KEY'); },
+    get geminiModel() { return getKey('GEMINI_TRANSCRIPTION_MODEL') || 'gemini-3-flash-preview'; },
+    get language() { return getKey('TRANSCRIPTION_LANGUAGE') || 'auto'; },
     get diarization() { return getKey('TRANSCRIPTION_DIARIZATION') !== '0'; },
   };
 }

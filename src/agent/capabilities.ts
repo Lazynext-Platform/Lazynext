@@ -58,6 +58,7 @@ export function applyLiveModels(models: Record<string, string>): void {
 interface ProviderRow { label: string; arg: string; argKey: 'model' | 'provider'; need: string[][] }
 const CAP_PROVIDERS: Partial<Record<CapabilityKey, ProviderRow[]>> = {
   image: [
+    { label: 'Pollinations (free)', arg: 'pollinations', argKey: 'model', need: [[]] },
     { label: 'gpt-image', arg: 'gpt-image-2', argKey: 'model', need: [['IMAGE_API_KEY'], ['OPENAI_API_KEY']] },
     { label: 'Nano Banana', arg: 'nano-banana', argKey: 'model', need: [['GEMINI_API_KEY']] },
     { label: 'MiniMax', arg: 'image-01', argKey: 'model', need: [['MINIMAX_API_KEY']] },
@@ -93,6 +94,7 @@ const CAP_PROVIDERS: Partial<Record<CapabilityKey, ProviderRow[]>> = {
     { label: 'Freesound', arg: 'freesound', argKey: 'provider', need: [['FREESOUND_API_KEY']] },
   ],
   transcription: [
+    { label: 'Gemini (free)', arg: 'gemini', argKey: 'provider', need: [['GEMINI_API_KEY']] },
     { label: 'AssemblyAI', arg: 'assemblyai', argKey: 'provider', need: [['ASSEMBLYAI_API_KEY']] },
     { label: 'Local Whisper', arg: 'local', argKey: 'provider', need: [[]] },
     { label: 'OpenAI', arg: 'openai', argKey: 'provider', need: [['OPENAI_API_KEY']] },
@@ -126,7 +128,7 @@ function providerSuffix(cap: CapabilityKey, mode: ApprovalMode): string {
   if (on.length === 0) return '';
   const prefKey = PREFERRED_KEY[cap];
   const savedPref = prefKey ? (liveModels?.[prefKey] ?? '').trim() : '';
-  const pref = savedPref || (cap === 'transcription' ? 'assemblyai' : '');
+  const pref = savedPref || (cap === 'transcription' ? 'gemini' : '');
   const chosen = pref ? on.find((r) => r.arg === pref) : undefined;
   if (chosen) {
     const source = savedPref ? 'user default' : 'default';

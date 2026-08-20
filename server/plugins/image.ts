@@ -39,6 +39,7 @@ interface ImagePluginOptions {
   byteplusBaseUrl: string;
   byteplusApiKey: string;
   byteplusModel: string;
+  pollinationsApiKey: string;
 }
 
 interface ImageRequest {
@@ -63,7 +64,7 @@ interface ImageRequest {
 }
 
 export interface ValidImageRequest {
-  model: 'gpt-image-2' | 'nano-banana' | 'image-01' | 'wavespeed' | 'byteplus';
+  model: 'gpt-image-2' | 'nano-banana' | 'image-01' | 'wavespeed' | 'byteplus' | 'pollinations';
   prompt: string;
   aspectRatio?: string;
   imageSize: string;
@@ -129,7 +130,7 @@ function rejectForeignImageOptions(input: ImageRequest, model: ValidImageRequest
 /** Pure request validation — exported for unit checks. */
 export function validateImageRequest(input: ImageRequest): ValidImageRequest {
   const model = String(input.model ?? 'gpt-image-2');
-  if (model !== 'gpt-image-2' && model !== 'nano-banana' && model !== 'image-01' && model !== 'wavespeed' && model !== 'byteplus') {
+  if (model !== 'gpt-image-2' && model !== 'nano-banana' && model !== 'image-01' && model !== 'wavespeed' && model !== 'byteplus' && model !== 'pollinations') {
     throw new Error(`unsupported model ${model}`);
   }
   const prompt = String(input.prompt ?? '').trim();
@@ -353,7 +354,7 @@ async function callGeminiProvider(baseUrl: string, apiKey: string, model: string
         input,
         response_format: {
           type: 'image',
-          mime_type: 'image/png',
+          mime_type: 'image/jpeg',
           aspect_ratio: body.aspectRatio,
           image_size: body.imageSize,
         },
@@ -473,7 +474,7 @@ async function callWaveSpeedProvider(baseUrl: string, apiKey: string, model: str
 /** BytePlus ModelArk (Seedream): OpenAI-images-compatible, but the endpoint hangs directly off
  * the Ark base URL (no /v1 segment) unlike the default OpenAI path. */
 async function callByteplusImageProvider(baseUrl: string, apiKey: string, model: string, body: {
-  prompt: string;
+  prompt: number;
   count: number;
   width: number;
   height: number;
@@ -489,6 +490,42 @@ async function callByteplusImageProvider(baseUrl: string, apiKey: string, model:
   const result = await response.json() as { data?: ProviderImage[] };
   if (!result.data?.length) throw new Error('BytePlus returned no images');
   return result.data;
+}
+
+/** Pollinations.ai — free image generation via FLUX. No API key required for
+ * basic usage (with watermark). With a free registered API key, the watermark
+ * is removed and rate limits improve. Uses the legacy GET endpoint which is
+ * the most reliable path. */
+async function callPollinationsProvider(apiKey: string, body: {
+  prompt: string;
+  count: number;
+  width: number;
+  height: number;
+}): Promise<ProviderImage[]> {
+  const encodedPrompt = encodeURIComponent(body.prompt);
+  const params = new URLSearchParams({
+    width: String(body.width),
+    height: String(body.height),
+    model: 'flux',
+    nologo: 'true',
+  });
+  const headers: Record<string, string> = {};
+  if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
+
+  return Promise.all(Array.from({ length: body.count }, async () => {
+    // Add a random seed for each image to get variety when count > 1
+    const seed = Math.floor(Math.random() * 1_000_000);
+    const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?${params.toString()}&seed=${seed}`;
+    const response = await fetchWithProxy(url, { method: 'GET', headers });
+    if (!response.ok) {
+      const text = await response.text().catch(() => '');
+      throw new Error(`Pollinations image generation failed (${response.status}): ${text.slice(0, 200)}`);
+    }
+    const arrayBuffer = await response.arrayBuffer();
+    const b64 = Buffer.from(arrayBuffer).toString('base64');
+    if (!b64.length) throw new Error('Pollinations returned an empty image');
+    return { b64_json: b64 };
+  }));
 }
 
 async function minimaxSubjectUrl(path: string): Promise<string> {
@@ -563,6 +600,10 @@ export function imageGenerationPlugin(options: ImagePluginOptions): Plugin {
           } else if (model === 'byteplus') {
             if (!options.byteplusApiKey) throw new Error('BytePlus is not configured. Set BYTEPLUS_API_KEY in .env.local.');
             images = await callByteplusImageProvider(options.byteplusBaseUrl, options.byteplusApiKey, options.byteplusModel, {
+              prompt, count, width, height,
+            });
+          } else if (model === 'pollinations') {
+            images = await callPollinationsProvider(options.pollinationsApiKey, {
               prompt, count, width, height,
             });
           } else {

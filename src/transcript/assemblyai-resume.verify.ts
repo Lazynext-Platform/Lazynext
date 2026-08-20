@@ -19,8 +19,21 @@ import {
   untranscribedTimelineItemIdsForRevision,
 } from './transcribe-jobs';
 import type { TranscriptWord } from './types';
+import { TRANSCRIPTION_PROVIDER_KEY } from './provider';
 
 const originalFetch = globalThis.fetch;
+
+// This verifier exercises the AssemblyAI resume path; pin the provider so the
+// default change (gemini) does not reroute the test's mocked jobs.
+class FakeStorage {
+  private store = new Map<string, string>();
+  getItem(key: string): string | null { return this.store.get(key) ?? null; }
+  setItem(key: string, value: string): void { this.store.set(key, value); }
+  removeItem(key: string): void { this.store.delete(key); }
+}
+const storage = new FakeStorage();
+storage.setItem(TRANSCRIPTION_PROVIDER_KEY, 'assemblyai');
+(globalThis as unknown as { localStorage: FakeStorage }).localStorage = storage;
 const projectId = 'project-asr-verify';
 const providerStatus = (status: AssemblyAiProviderStatus | undefined): TranscriptionProviderStatus => {
   if (status === 'uploaded') return 'uploaded';

@@ -138,6 +138,9 @@ export function serverPlugins(options: { projectStoreHttp?: boolean } = {}): Plu
       get byteplusModel() {
         return getKey("BYTEPLUS_IMAGE_MODEL") || "seedream-4-5-251128";
       },
+      get pollinationsApiKey() {
+        return getKey("POLLINATIONS_API_KEY");
+      },
     }),
     voiceGenerationPlugin({
       get elevenBaseUrl() {

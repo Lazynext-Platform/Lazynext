@@ -434,6 +434,7 @@
           "provider": {
             "type": "string",
             "enum": [
+              "gemini",
               "assemblyai",
               "local",
               "openai",
@@ -1105,7 +1106,7 @@
     },
     {
       "name": "submit_image",
-      "description": "Generate one or more AI images (gpt-image-2, nano-banana, MiniMax image-01, WaveSpeed, or BytePlus Seedream), save them to the project media pool, and optionally propose adding them to the active timeline. Call only when the user explicitly requested the generation.",
+      "description": "Generate one or more AI images (gpt-image-2, nano-banana, MiniMax image-01, WaveSpeed, BytePlus Seedream, or Pollinations FLUX), save them to the project media pool, and optionally propose adding them to the active timeline. Call only when the user explicitly requested the generation.",
       "input_schema": {
         "type": "object",
         "properties": {
@@ -1116,9 +1117,10 @@
               "nano-banana",
               "image-01",
               "wavespeed",
-              "byteplus"
+              "byteplus",
+              "pollinations"
             ],
-            "description": "gpt-image-2 is the default; nano-banana is best for reference-heavy work; image-01 is MiniMax (at most 9 outputs; one subject reference when R2 is configured); wavespeed is WaveSpeed AI (fast generic image models, no references); byteplus is BytePlus ModelArk Seedream (no references yet)."
+            "description": "gpt-image-2 is the default; nano-banana is best for reference-heavy work; image-01 is MiniMax (at most 9 outputs; one subject reference when R2 is configured); wavespeed is WaveSpeed AI (fast generic image models, no references); byteplus is BytePlus ModelArk Seedream (no references yet); pollinations is free FLUX via Pollinations.ai (no API key required, no references)."
           },
           "prompt": {
             "type": "string",
