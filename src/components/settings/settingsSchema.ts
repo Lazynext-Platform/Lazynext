@@ -183,6 +183,8 @@ export const SETTINGS_CATEGORIES: readonly SettingsCategory[] = [
  route: routeSelect('PREFERRED_IMAGE_VENDOR', [
  { value: 'gpt-image-2', label: 'OpenAI gpt-image' },
  { value: 'nano-banana', label: 'Gemini Nano Banana' },
+ { value: 'vertex-imagen', label: 'Google Vertex AI (Imagen)' },
+ { value: 'pollinations', label: 'Pollinations (free)' },
  { value: 'image-01', label: 'MiniMax' },
  { value: 'wavespeed', label: 'WaveSpeed' },
  { value: 'byteplus', label: 'BytePlus · Seedream' },
@@ -197,6 +199,14 @@ export const SETTINGS_CATEGORIES: readonly SettingsCategory[] = [
  text('GEMINI_BASE_URL', 'Base URL', 'Default https://generativelanguage.googleapis.com'),
  modelText('GEMINI_IMAGE_MODEL', 'Image model', 'gemini-3.1-flash-image'),
  ] },
+ { key: 'image/vertex', vendor: 'google', title: 'Google Vertex AI', note: 'Uses Application Default Credentials (run gcloud auth application-default login). Requires a billed GCP project with the Vertex AI API enabled.', fields: [
+ text('GCP_PROJECT_ID', 'GCP Project ID', 'e.g. lazynext-ai'),
+ text('GCP_REGION', 'GCP Region', 'e.g. us-central1'),
+ modelText('GEMINI_IMAGE_MODEL', 'Image model', 'gemini-2.5-flash-image'),
+ ] },
+ { key: 'image/pollinations', vendor: 'pollinations', title: 'Pollinations (free)', note: 'Free text-to-image with no API key required. Set POLLINATIONS_API_KEY for higher rate limits.', fields: [
+ secret('POLLINATIONS_API_KEY', 'API Key (optional)'),
+ ] },
  minimaxPage('image', modelSelect('MINIMAX_IMAGE_MODEL', 'Image model', 'image-01', ['image-01', 'image-01-live'])),
  { key: 'image/wavespeed', vendor: 'wavespeed', title: 'WaveSpeed', fields: [
  secret('WAVESPEED_API_KEY', 'API Key'),
@@ -209,12 +219,17 @@ export const SETTINGS_CATEGORIES: readonly SettingsCategory[] = [
  VOICE_SETTINGS_GROUP,
  { key: 'video', title: 'Video', hint: 'submit_video · / Video',
  route: routeSelect('PREFERRED_VIDEO_VENDOR', [
+ { value: 'veo', label: 'Google Veo (Vertex AI)' },
  { value: 'seedance2', label: 'Seedance' },
  { value: 'kling', label: 'Kling' },
  { value: 'hailuo', label: 'MiniMax Hailuo' },
  { value: 'byteplus', label: 'BytePlus · Seedance' },
  ]),
  vendors: [
+ { key: 'video/veo', vendor: 'google', title: 'Google Veo (Vertex AI)', note: 'Uses Application Default Credentials (run gcloud auth application-default login). Veo 3.1 Lite generates short video clips from text prompts.', fields: [
+ text('GCP_PROJECT_ID', 'GCP Project ID', 'e.g. lazynext-ai'),
+ text('GCP_REGION', 'GCP Region', 'e.g. us-central1'),
+ ] },
  { key: 'video/seedance', vendor: 'seedance', title: 'Seedance · Volcano', fields: [
  secret('SEEDANCE_API_KEY', 'API Key'),
  text('SEEDANCE_BASE_URL', 'Base URL', 'Default https://ark.cn-beijing.volces.com/api/v3'),

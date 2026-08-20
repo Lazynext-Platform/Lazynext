@@ -43,6 +43,7 @@ export type VendorId =
  | 'seedance' | 'kling' | 'mureka' | 'pexels' | 'pixabay' | 'unsplash' | 'freesound'
  | 'assemblyai' | 'deepgram' | 'groq' | 'cartesia' | 'e2b' | 'firecrawl' | 'r2' | 'localdisk' | 'localasr'
  | 'stepfun' | 'byteplus' | 'inworld' | 'fishaudio' | 'speechify' | 'wavespeed'
+ | 'google' | 'pollinations'
  | 'vision' | 'proxy';
 
 interface SvgIcon {

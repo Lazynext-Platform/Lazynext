@@ -255,6 +255,37 @@ export const PROBES: Record<string, ProbeDef> = {
     }),
   },
   'image/gemini': geminiMediaProbe,
+  'image/vertex': {
+    needs: [[]],
+    run: async (get) => {
+      const projectId = get('GCP_PROJECT_ID');
+      const region = get('GCP_REGION') || 'us-central1';
+      if (!projectId) {
+        return new Response(JSON.stringify({ error: 'GCP_PROJECT_ID is not set' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+      }
+      // Use gcloud to get an access token (ADC)
+      const { execSync } = await import('node:child_process');
+      let token: string;
+      try {
+        token = execSync('gcloud auth print-access-token', { timeout: 10_000, encoding: 'utf8' }).trim();
+      } catch {
+        return new Response(JSON.stringify({ error: 'Run: gcloud auth application-default login' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+      }
+      return fetch(`https://${region}-aiplatform.googleapis.com/v1beta1/projects/${projectId}/locations/${region}/publishers/google/models/gemini-2.5-flash-image`, {
+        signal: t(),
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    },
+    postCheck: (bodyText: string) => {
+      try { const d = JSON.parse(bodyText); if (d.error) return d.error.message?.slice(0, 200) ?? 'Vertex AI error'; } catch { /* empty */ }
+      return null;
+    },
+  },
+  'image/pollinations': {
+    needs: [[]],
+    run: async () => fetch('https://image.pollinations.ai/prompt/test?width=64&height=64&nologo=true', { signal: t() }),
+    postCheck: () => null,
+  },
   'image/minimax': minimaxProbe,
   'image/byteplus': byteplusProbe,
   'image/wavespeed': {
@@ -306,6 +337,31 @@ export const PROBES: Record<string, ProbeDef> = {
       headers: { 'Content-Type': 'application/json', ...bearer(get('SPEECHIFY_TTS_API_KEY')) },
       body: JSON.stringify({ input: 'test', voice_id: 'george', audio_format: 'mp3', model: get('SPEECHIFY_TTS_MODEL') || 'simba-multilingual' }),
     }),
+  },
+  'video/veo': {
+    needs: [[]],
+    run: async (get) => {
+      const projectId = get('GCP_PROJECT_ID');
+      const region = get('GCP_REGION') || 'us-central1';
+      if (!projectId) {
+        return new Response(JSON.stringify({ error: 'GCP_PROJECT_ID is not set' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+      }
+      const { execSync } = await import('node:child_process');
+      let token: string;
+      try {
+        token = execSync('gcloud auth print-access-token', { timeout: 10_000, encoding: 'utf8' }).trim();
+      } catch {
+        return new Response(JSON.stringify({ error: 'Run: gcloud auth application-default login' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+      }
+      return fetch(`https://${region}-aiplatform.googleapis.com/v1beta1/projects/${projectId}/locations/${region}/publishers/google/models/veo-3.1-lite-generate-001`, {
+        signal: t(),
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    },
+    postCheck: (bodyText: string) => {
+      try { const d = JSON.parse(bodyText); if (d.error) return d.error.message?.slice(0, 200) ?? 'Vertex AI error'; } catch { /* empty */ }
+      return null;
+    },
   },
   'video/seedance': {
     needs: [['SEEDANCE_API_KEY']],
