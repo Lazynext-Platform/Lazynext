@@ -26,10 +26,12 @@ assert.ok(!onLine.includes('submit_voice'), 'unconfigured cap NOT in ✅ section
 assert.ok(mixed.slice(offIdx).includes('submit_voice'), 'unconfigured cap in ⬜ section');
 
 // ── vendor granularity + routing semantics ──
-// single configured vendor → named with its tool arg and ""
+// With Veo (GCP) always available (no key needed) + Kling configured,
+// there are 2 vendors → agent must ask before first use.
 applyLiveKeyStatus({ KLING_API_KEY: { configured: true } });
 const vendored = capabilitiesPrompt({ ...ALL_OFF, video: true });
-assert.ok(vendored.includes('Kling(model=kling) — use it directly'), 'single vendor → use directly');
+assert.ok(vendored.includes('Kling(model=kling)'), 'configured vendor listed');
+assert.ok(vendored.includes('Veo'), 'veo (always available) listed');
 assert.ok(!vendored.includes('seedance2'), 'unconfigured vendor NOT listed');
 
 // one minimax key lights all its vendor rows

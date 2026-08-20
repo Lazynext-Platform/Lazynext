@@ -1869,9 +1869,10 @@
               "seedance2",
               "kling",
               "hailuo",
-              "byteplus"
+              "byteplus",
+              "veo"
             ],
-            "description": "hailuo is MiniMax: 6 or 10s; firstFrame optional; lastFrame allowed with firstFrame; no multi-ref or multi-shot. 1080p is 6s only. byteplus is BytePlus ModelArk Seedance — same request shape/limits as seedance2."
+            "description": "hailuo is MiniMax: 6 or 10s; firstFrame optional; lastFrame allowed with firstFrame; no multi-ref or multi-shot. 1080p is 6s only. byteplus is BytePlus ModelArk Seedance — same request shape/limits as seedance2. veo is Google Veo 3.1 Lite via Vertex AI (text-to-video only, 4/6/8 seconds, uses GCP credits)."
           },
           "prompt": {
             "type": "string",

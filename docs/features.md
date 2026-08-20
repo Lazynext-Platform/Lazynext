@@ -12,7 +12,7 @@
 
 ## Transcript-driven editing
 
-- **Word-level transcription**: cloud (AssemblyAI) or local (whisper.cpp) transcription
+- **Word-level transcription**: cloud (AssemblyAI, Gemini) or local (whisper.cpp) transcription
 - **Text-based cuts**: strike through words in the script view to delete them from the timeline
 - **Pause handling**: automatic silence detection and compression
 - **Speakers**: speaker diarization and labeled speaker tracks
@@ -30,9 +30,26 @@
 
 ## AI generation
 
-- **Image generation**: text-to-image with provider-specific models
-- **Video generation**: text-to-video and image-to-video (Seedance, Kling, Hailuo)
-- **Speech synthesis**: text-to-speech with multiple voices (ElevenLabs)
+- **Image generation**: text-to-image with multiple providers:
+  - **Vertex Imagen** (`vertex-imagen`): Google `gemini-2.5-flash-image` via Vertex AI — premium quality, uses GCP credits, supports reference images
+  - **Pollinations** (`pollinations`): free FLUX model, no API key required
+  - **GPT Image** (`gpt-image-2`): OpenAI image generation
+  - **Nano Banana** (`nano-banana`): Google Gemini image generation via API key
+  - **MiniMax** (`image-01`): MiniMax image generation
+  - **WaveSpeed** (`wavespeed`): WaveSpeed AI fast image models
+  - **BytePlus** (`byteplus`): BytePlus ModelArk Seedream
+- **Video generation**: text-to-video and image-to-video:
+  - **Veo** (`veo`): Google Veo 3.1 Lite via Vertex AI — uses GCP credits
+  - **Seedance** (`seedance2`): ByteDance Seedance via WaveSpeed
+  - **Kling** (`kling`): Kuaishou Kling
+  - **Hailuo** (`hailuo`): MiniMax Hailuo
+  - **BytePlus** (`byteplus`): BytePlus ModelArk Seedance
+- **Speech synthesis**: text-to-speech with multiple voices:
+  - **Gemini TTS** (`gemini`): Google `gemini-3.1-flash-tts-preview` — free with Gemini API key
+  - **ElevenLabs** (`elevenlabs`): premium voice library
+  - **OpenAI** (`openai`): OpenAI TTS
+  - **Cartesia** (`cartesia`): low-latency voice generation
+  - **MiniMax** (`minimax`), **Doubao** (`doubao`), **Inworld** (`inworld`), **Fish Audio** (`fishaudio`), **Speechify** (`speechify`)
 - **Music generation**: text-to-music with structure control (Mureka)
 - **Sound effects**: text-to-SFX with semantic matching
 - **Progress tracking**: background job queue with live status and retry

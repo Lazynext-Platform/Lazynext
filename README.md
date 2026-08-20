@@ -59,6 +59,37 @@ Edit `.env` to add API keys for the features you want to enable:
 - **Stock media**: `PEXELS_API_KEY`, `PIXABAY_API_KEY`, `UNSPLASH_ACCESS_KEY`
 - **Cloud transcription**: `ASSEMBLYAI_API_KEY`
 
+### Google Cloud Vertex AI (optional)
+
+Lazynext supports Google Cloud Vertex AI for premium image and video generation using GCP credits. Setup:
+
+```bash
+# 1. Install gcloud CLI and authenticate
+gcloud auth login
+gcloud auth application-default login
+
+# 2. Create a project and enable billing
+gcloud projects create lazynext-ai
+gcloud billing projects link lazynext-ai --billing-account=YOUR_BILLING_ACCOUNT
+
+# 3. Enable Vertex AI
+gcloud services enable aiplatform.googleapis.com
+
+# 4. Set project and region in .env
+GCP_PROJECT_ID=lazynext-ai
+GCP_REGION=us-central1
+```
+
+Available Vertex AI providers:
+
+| Feature | Model | Provider ID |
+|---|---|---|
+| Image generation | `gemini-2.5-flash-image` | `vertex-imagen` |
+| Video generation | `veo-3.1-lite-generate-001` | `veo` |
+| TTS | `gemini-2.5-flash-tts` | `gemini` (voice) |
+
+Free alternatives: Pollinations.ai for images (`pollinations`), Gemini API for chat/transcription/TTS.
+
 The editor runs without any API keys — you just won't have AI chat, generation, or stock media features until you add them.
 
 ## Desktop app

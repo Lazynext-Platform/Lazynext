@@ -1,4 +1,5 @@
 import { proxyDispatcher } from '../outbound-proxy.ts';
+import { startVideoGenerationViaVertex, checkVideoOperation } from './vertex-ai.ts';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Plugin } from 'vite';
 import {
@@ -391,6 +392,36 @@ async function saveVideoResults(
   }];
 }
 
+async function generateVeo(
+  input: ValidVideoRequest,
+  registerProviderTask: RegisterGenerationProviderTask,
+  providerTaskId?: string,
+): Promise<string> {
+  // Veo uses long-running operations. If we have a providerTaskId, poll it.
+  // Otherwise, start a new operation.
+  let operationName = providerTaskId;
+  if (!operationName) {
+    const op = await startVideoGenerationViaVertex(input.prompt || '', {
+      durationSeconds: typeof input.durationSeconds === 'number' ? input.durationSeconds : undefined,
+      sampleCount: 1,
+    });
+    operationName = op.operationName;
+    await registerProviderTask('veo', operationName);
+  }
+  // Poll until done (with timeout)
+  const maxAttempts = 120; // 10 minutes at 5s intervals
+  for (let i = 0; i < maxAttempts; i++) {
+    const status = await checkVideoOperation(operationName);
+    if (status.done) {
+      if (status.error) throw new Error(`Veo generation failed: ${status.error}`);
+      if (!status.videoUri) throw new Error('Veo generation completed but no video URI returned');
+      return status.videoUri;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+  }
+  throw new Error('Veo generation timed out after 10 minutes');
+}
+
 async function runVideoOperation(
   operationId: string,
   name: string,
@@ -405,7 +436,10 @@ async function runVideoOperation(
   const checkpoint = generationResultCheckpoint(storedResultUrls, expectedResultCount, providerTaskId);
   let urls = checkpoint.urls;
   if (!checkpoint.complete) {
-    if (input.model === 'seedance2' || input.model === 'byteplus') {
+    if (input.model === 'veo') {
+      const url = await generateVeo(input, registerProviderTask, providerTaskId);
+      urls = requireGenerationResultUrls([url], expectedResultCount);
+    } else if (input.model === 'seedance2' || input.model === 'byteplus') {
       const generated = await generateSeedance(input, seedanceConfig(input.model, options), registerProviderTask, providerTaskId);
       if (input.returnLastFrame && !generated.lastFrameUrl) {
         throw new IncompleteGenerationResultError(expectedResultCount, 1);
@@ -433,7 +467,7 @@ async function runVideoOperation(
 }
 
 export function videoGenerationPlugin(options: VideoOptions): Plugin {
-  for (const provider of ['seedance2', 'kling', 'hailuo', 'byteplus'] as const) {
+  for (const provider of ['seedance2', 'kling', 'hailuo', 'byteplus', 'veo'] as const) {
     registerGenerationJobResumer('submit_video', provider, async (
       snapshot: GenerationJobSnapshot,
       _update,

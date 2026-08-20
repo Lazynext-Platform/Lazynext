@@ -4,7 +4,7 @@ export type KlingVideoReferType = 'feature' | 'base';
 
 export interface VideoRequest {
   operationId?: string;
-  model?: 'seedance2' | 'kling' | 'hailuo' | 'byteplus';
+  model?: 'seedance2' | 'kling' | 'hailuo' | 'byteplus' | 'veo';
   prompt?: string;
   name?: string;
   durationSeconds?: number | string;
@@ -34,7 +34,7 @@ export interface VideoRequest {
 }
 
 export interface ValidVideoRequest extends Omit<VideoRequest, 'model' | 'prompt' | 'durationSeconds' | 'ratio' | 'refImagePaths' | 'refVideoPaths' | 'refAudioPaths'> {
-  model: 'seedance2' | 'kling' | 'hailuo' | 'byteplus';
+  model: 'seedance2' | 'kling' | 'hailuo' | 'byteplus' | 'veo';
   prompt: string;
   durationSeconds: number;
   durationSpecified: boolean;
@@ -171,11 +171,12 @@ function validateKling(input: ValidVideoRequest): ValidVideoRequest {
 }
 
 export function validateVideoRequest(input: VideoRequest): ValidVideoRequest {
-  if (input.model !== 'seedance2' && input.model !== 'kling' && input.model !== 'hailuo' && input.model !== 'byteplus') {
-    throw new Error('model must be seedance2, kling, hailuo, or byteplus');
+  if (input.model !== 'seedance2' && input.model !== 'kling' && input.model !== 'hailuo' && input.model !== 'byteplus' && input.model !== 'veo') {
+    throw new Error('model must be seedance2, kling, hailuo, byteplus, or veo');
   }
   if (input.model === 'hailuo' && input.ratio !== undefined) throw new Error('hailuo does not accept ratio; framing follows the first frame when present');
   const normalized = common(input, input.model);
+  if (normalized.model === 'veo') return normalized; // Veo: text-to-video, minimal validation
   if (normalized.model === 'hailuo') return validateHailuo(normalized);
   if (normalized.model === 'kling') return validateKling(normalized);
   return validateSeedance(normalized);
