@@ -33,10 +33,12 @@ The service account `lazynext-ai-sa@lazynext-ai.iam.gserviceaccount.com` has:
 
 ## Authentication
 
-Lazynext uses Application Default Credentials (ADC):
+Lazynext uses Application Default Credentials (ADC) for all Google Cloud services:
 - ADC file: `~/.config/gcloud/application_default_credentials.json`
 - No service account JSON key is downloaded (org policy blocks key creation)
 - The app reads `GCP_PROJECT_ID` and `GCP_REGION` from `.env`
+- The Vertex AI LLM provider (`LLM_PROVIDER=vertex`) uses ADC bearer tokens obtained via `gcloud auth print-access-token` — no API key required
+- Image generation (Imagen), video generation (Veo), and TTS also use ADC through the same GCP project
 
 ## Migration Steps
 
@@ -96,6 +98,8 @@ GCP_PROJECT_ID=lazynext-ai-prod
 GCP_REGION=us-central1
 ```
 
+The Vertex AI LLM provider automatically constructs the correct regional endpoint from these values. No `LLM_VERTEX_BASE_URL` or `LLM_VERTEX_API_KEY` is needed — ADC handles authentication.
+
 ### 7. Set up billing budget alerts
 
 Go to https://console.cloud.google.com/billing → Budgets → Create Budget:
@@ -122,15 +126,15 @@ curl -s -X POST \
 ## What Does NOT Need Migration
 
 - **Application code**: No code changes needed — the app reads project ID from env
-- **Gemini API key**: The Gemini API key (for chat/transcription/TTS) is separate from Vertex AI and works across accounts
+- **Vertex AI LLM provider**: The `vertex` provider uses ADC and reads `GCP_PROJECT_ID`/`GCP_REGION` from `.env`. After updating those values, the LLM chat path automatically uses the new project.
 - **Pollinations**: Free image generation, no GCP dependency
 - **Repository**: GitHub repo is independent of GCP account
 
 ## Security Checklist
 
-- [ ] Rotate the Gemini API key (if exposed)
 - [ ] Do not commit `.env` to git
 - [ ] Do not commit ADC files or service account JSON keys
 - [ ] Verify `.gitignore` excludes all credential files
 - [ ] Set up billing budget alerts
 - [ ] Use workload identity for production deployments (not downloaded keys)
+- [ ] Run `gcloud auth application-default login` on each developer machine

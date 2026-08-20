@@ -59,6 +59,7 @@ Edit `.env` to enable AI features. The editor runs without any keys — you just
 |---|---|---|
 | AI Chat | `LLM_ANTHROPIC_API_KEY` | Anthropic (Claude) |
 | AI Chat | `LLM_OPENAI_API_KEY` | OpenAI (GPT) |
+| AI Chat | `LLM_VERTEX_MODEL` + ADC | Google Vertex AI (Gemini) |
 | Image generation | `IMAGE_API_KEY` | Provider-dependent |
 | Voice synthesis | `ELEVENLABS_API_KEY` | ElevenLabs |
 | Music generation | `MUREKA_API_KEY` | Mureka |
@@ -67,6 +68,24 @@ Edit `.env` to enable AI features. The editor runs without any keys — you just
 | Stock photos | `PIXABAY_API_KEY` | Pixabay |
 | Stock photos | `UNSPLASH_ACCESS_KEY` | Unsplash |
 | Cloud transcription | `ASSEMBLYAI_API_KEY` | AssemblyAI |
+
+### Using Google Vertex AI (recommended for GCP users)
+
+Vertex AI uses Application Default Credentials (ADC) — no API key needed. This routes LLM chat, image generation, video generation, and TTS through your GCP project billing/credits.
+
+```bash
+# Install gcloud CLI, then authenticate:
+gcloud auth login
+gcloud auth application-default login
+
+# Set the project and region in .env:
+GCP_PROJECT_ID=your-gcp-project
+GCP_REGION=us-central1
+LLM_PROVIDER=vertex
+LLM_VERTEX_MODEL=gemini-2.5-flash
+```
+
+See the [GCP Migration Guide](./gcp-migration-guide.md) for full setup details.
 
 ## 5. Build the desktop app (optional)
 
