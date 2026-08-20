@@ -196,7 +196,7 @@ export const TRANSCRIPTION_SETTINGS_GROUP: SettingsGroup = {
  transcriptionPage('gemini', 'gemini', 'Google Gemini', [
  secret('GEMINI_API_KEY', 'API Key'),
  text('GEMINI_BASE_URL', 'Base URL', 'Default https://generativelanguage.googleapis.com'),
- modelText('GEMINI_TRANSCRIPTION_MODEL', 'Transcription model', 'gemini-3-flash-preview'),
+ modelText('GEMINI_TRANSCRIPTION_MODEL', 'Transcription model', 'gemini-3.7-flash'),
  ], 'Free tier available — no word-level timestamps.'),
  transcriptionPage('assemblyai', 'assemblyai', 'AssemblyAI', [secret('ASSEMBLYAI_API_KEY', 'API Key')]),
  localAsrPage,
