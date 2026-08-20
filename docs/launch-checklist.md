@@ -31,19 +31,28 @@ manual configuration) and cannot be completed from the codebase alone.
 
 ## Requires External Action
 
-### 1. GitHub Social Preview Image (Manual upload)
+### 1. GitHub Social Preview Image (Uploaded via Playwright automation)
 
-The OG image has been created at `assets/og-image.png` (1280x640).
-Upload it manually:
+The OG image at `assets/og-image.png` (1280x640) has been uploaded to GitHub
+via Playwright browser automation.
 
-1. Go to https://github.com/Lazynext-Platform/Lazynext/settings
-2. Scroll to "Social preview" section
-3. Click "Edit" and upload `assets/og-image.png`
-4. Save
+**Status**: Uploaded successfully. GitHub GraphQL API confirms:
+- `usesCustomOpenGraphImage: true`
+- `openGraphImageUrl` is set to a `repository-images.githubusercontent.com` URL
+- The `og:image` meta tag on the repo page points to the uploaded image
 
-This makes links to the repo look professional on Twitter, LinkedIn, Slack, etc.
+The image may take time to propagate through GitHub's CDN cache. If the
+thumbnail doesn't appear immediately on the settings page, wait a few hours
+and refresh. The API-level metadata is already set correctly.
 
 ### 2. Code Signing Certificates (Paid, required for production distribution)
+
+**Playwright automation status**: Navigated to both purchase pages:
+- Apple Developer enrollment: https://developer.apple.com/programs/enroll/
+- DigiCert code signing: https://www.digicert.com/signing/code-signing-certificates
+
+Both require account creation, identity verification, and payment —
+cannot be completed via automation.
 
 #### macOS — Apple Developer ID Certificate
 - **Cost**: $99/year (Apple Developer Program)
@@ -115,9 +124,24 @@ by `avaspatel99@gmail.com` (insufficient permissions).
 
 ### 6. Social Media & Marketing
 
-- [ ] Create `@lazynext` accounts on Twitter/X, LinkedIn, YouTube
+**Account creation status (attempted via Playwright automation)**:
+
+- [x] Navigated to Twitter/X signup page — blocked by anti-bot detection.
+      Requires manual signup with email/phone verification.
+      Bio and profile content ready in `docs/social-media-profiles.md`.
+- [x] Navigated to LinkedIn company page creation — requires personal
+      LinkedIn account with email verification first.
+      Company page content ready in `docs/social-media-profiles.md`.
+- [x] Navigated to YouTube channel creation — requires Google account
+      sign-in first.
+      Channel description ready in `docs/social-media-profiles.md`.
+
+**All three platforms require email/phone verification that cannot be
+automated. Use the ready-made bios in `docs/social-media-profiles.md`.**
+
 - [ ] Record a demo video showing AI chat → video editing workflow
-- [ ] Write a launch blog post
+      (script ready in `docs/demo-video-script.md`)
+- [x] Write a launch blog post (docs/blog/launch-announcement.md)
 - [ ] Submit to product directories (Product Hunt, etc.)
 
 ### 7. Optional: Analytics
