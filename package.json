@@ -1,7 +1,7 @@
 {
   "name": "lazynext",
   "private": true,
-  "version": "0.2.6",
+  "version": "0.3.0",
   "description": "Lazynext — local-first, agent-native AI video editor with MCP.",
   "author": "Lazynext",
   "type": "module",
