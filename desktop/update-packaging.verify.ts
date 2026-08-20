@@ -25,7 +25,7 @@ async function configFor(target: string): Promise<BuilderConfig> {
 const arm64 = await configFor('darwin-arm64');
 assert.deepEqual(arm64.publish, [{
   provider: 'github',
-  owner: 'lazynext',
+  owner: 'Lazynext-Platform',
   repo: 'Lazynext',
   channel: 'latest-arm64',
 }]);
