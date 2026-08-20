@@ -214,7 +214,11 @@ async function transcribeGemini(
   return {
     text,
     segments: [{ text: text.trim(), startSecond: 0, endSecond: 0 }],
+    language: undefined,
+    durationInSeconds: undefined,
+    warnings: [],
     responses: [{ body: { words: [], segments: [{ text: text.trim(), start: 0, end: 0 }] } }] as unknown as TranscriptionResult['responses'],
+    providerMetadata: {},
   } satisfies TranscriptionResult;
 }
 

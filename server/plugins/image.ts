@@ -475,7 +475,7 @@ async function callWaveSpeedProvider(baseUrl: string, apiKey: string, model: str
 /** BytePlus ModelArk (Seedream): OpenAI-images-compatible, but the endpoint hangs directly off
  * the Ark base URL (no /v1 segment) unlike the default OpenAI path. */
 async function callByteplusImageProvider(baseUrl: string, apiKey: string, model: string, body: {
-  prompt: number;
+  prompt: string;
   count: number;
   width: number;
   height: number;
