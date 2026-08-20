@@ -237,7 +237,7 @@ export default {
   'Presents a numbered plan first; acts after you confirm.': 'Presents a numbered plan first; acts after you confirm.',
   // ── ChatComposer: Reference / Skill / Action Bar ──
   'Selection mode: click clips / drag canvas / select transcript as references': 'Selection mode: click clips / drag canvas / select transcript as references',
-  '': 'Reference media-pool assets',  'No assets in the media pool yet': 'No assets in the media pool yet',
+  'Reference media-pool assets': 'Reference media-pool assets',  'No assets in the media pool yet': 'No assets in the media pool yet',
   'Reference template library': 'Reference template library',
   'Reference': 'Reference',
   'Timeline': 'Timeline',
@@ -246,7 +246,7 @@ export default {
   'Creative mode': 'Creative mode',
   'Creative mode: {name}': 'Creative mode: {name}',
   'Choose a creative workflow': 'Choose a creative workflow',
-  '': "The workflow guides the Agent's planning and tool use.",
+  "The workflow guides the Agent's planning and tool use.": "The workflow guides the Agent's planning and tool use.",
   'Freeform': 'Freeform',
   'Work flexibly from the current goal without a fixed workflow.': 'Work flexibly from the current goal without a fixed workflow.',
   'Specialized workflows': 'Specialized workflows',

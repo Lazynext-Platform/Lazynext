@@ -23,14 +23,14 @@ export default {
   'Loading editor…': 'Loading editor…',
   'Loading…': 'Loading…',
   'Project not found, going back…': 'Project not found, going back…',
-  '': 'Exported "{name}"; {n} asset(s) unavailable on both ends, not bundled',
-  '': 'Exported "{name}" ({n} assets included)',
+  'Exported "{name}"; {n} asset(s) unavailable on both ends, not bundled': 'Exported "{name}"; {n} asset(s) unavailable on both ends, not bundled',
+  'Exported "{name}" ({n} assets included)': 'Exported "{name}" ({n} assets included)',
   'Import failed: {error}': 'Import failed: {error}',
-  '': 'Imported "{name}"; {n} asset(s) missing ({list})',
-  '': 'Imported "{name}" (assets {a}/{b})',
+  'Imported "{name}"; {n} asset(s) missing ({list})': 'Imported "{name}"; {n} asset(s) missing ({list})',
+  'Imported "{name}" (assets {a}/{b})': 'Imported "{name}" (assets {a}/{b})',
 
   // ---- Editor.tsx ("Generated with AI" chat pre-fill) ----
-  '':
+  'Using template "{name}" as a style reference, generate a similar animation with create_motion_graphic: @{name} ':
     'Using template "{name}" as a style reference, generate a similar animation with create_motion_graphic: @{name} ',
   'Project save failed. Retry before closing or switching projects.': 'Project save failed. Retry before closing or switching projects.',
   'The project is still unsaved, so navigation was blocked. Keep editing to retry.': 'The project is still unsaved, so navigation was blocked. Keep editing to retry.',
@@ -200,7 +200,7 @@ export default {
   'On-screen text is baked in — only move/scale the whole clip': 'On-screen text is baked in — only move/scale the whole clip',
   'Template': 'Template',
   'Ask AI to rewrite this on-screen text': 'Ask AI to rewrite this on-screen text',
-  '': 'Improve this on-screen text (keep layout): "{text}"',
+  'Improve this on-screen text (keep layout): "{text}"': 'Improve this on-screen text (keep layout): "{text}"',
   '(empty)': '(empty)',
   'Cancel preview': 'Cancel preview',
   'No usable color-correction result was returned': 'No usable color-correction result was returned',

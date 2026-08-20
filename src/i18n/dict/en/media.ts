@@ -44,7 +44,7 @@ export default {
   'Rename': 'Rename',
   'Rename folder': 'Rename folder',
   'Delete empty folder': 'Delete empty folder',
-  '': 'Delete empty folder "{name}"?',
+  'Delete empty folder "{name}"?': 'Delete empty folder "{name}"?',
   'Delete': 'Delete',
   'Importing media…': 'Importing media…',
   'Clear selection': 'Clear selection',
@@ -74,7 +74,7 @@ export default {
   'This media is used in the edit. Delete it?': 'This media is used in the edit. Delete it?',
   'Deleting “{name}” will also remove its clips from every timeline.': 'Deleting “{name}” will also remove its clips from every timeline.',
   'Unfavorite': 'Unfavorite',
-  '': 'Confirm Delete', // Same key and same value as components.ts
+  'Confirm Delete': 'Confirm Delete', // Same key and same value as components.ts
   'Cancel': 'Cancel',
   'OK': 'OK',
   'Close': 'Close',

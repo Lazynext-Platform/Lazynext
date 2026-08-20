@@ -65,7 +65,7 @@ try {
  const second = pageText(['你好', '世界', '今天', '天气', '好'], 2, undefined, 4, 1);
  assert.deepEqual(first, second, 'Intl-unavailable fallback is deterministic');
  assert.equal(first.join(''), '你好世界今天天气好', 'fallback preserves every token');
- assert.ok(first.every((page) => !/^[]/u.test(page)), 'fallback never opens with punctuation');
+ assert.ok(first.every((page) => !/^[\p{P}]/u.test(page)), 'fallback never opens with punctuation');
 } finally {
  Object.defineProperty(Intl, 'Segmenter', { configurable: true, value: segmenter });
 }

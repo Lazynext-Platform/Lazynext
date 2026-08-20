@@ -7,7 +7,7 @@ export default {
   'Video': 'Video',
   'Audio': 'Audio',
   'Motion Graphics': 'Motion Graphics',
-  '': 'Captions', // Same key and same value as captions.ts (merge and remove order dependencies)
+  'Captions': 'Captions', // Same key and same value as captions.ts (merge and remove order dependencies)
   'Final video': 'Final video',
   'Audio mix': 'Audio mix',
   'Motion layers': 'Motion layers',

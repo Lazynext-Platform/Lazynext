@@ -263,7 +263,7 @@ export default {
   'Brand guide (optional)': 'Brand guide (optional)',
   'Project editing guide (optional)': 'Project editing guide (optional)',
   'Describe color, captions, pacing, transition preferences, and anything the Agent should avoid.': 'Describe color, captions, pacing, transition preferences, and anything the Agent should avoid.',
-  '': "Describe the brand's visual direction in one sentence; AI generation will follow it.",
+  "Describe the brand's visual direction in one sentence; AI generation will follow it.": "Describe the brand's visual direction in one sentence; AI generation will follow it.",
   'Preview': 'Preview',
   'Heading Sample': 'Heading Sample',
   'Body sample: this text shows the body font paired with the text color.': 'Body sample: this text shows the body font paired with the text color.',
@@ -442,7 +442,7 @@ export default {
   'Default app data folder': 'Default app data folder',
   'Where projects and media are stored locally, plus optional R2 cloud backup.': 'Where projects and media are stored locally, plus optional R2 cloud backup.',
   'Where projects, version history and media are kept. Defaults to the app data folder; point it at a folder of your own (external drive, synced folder) and uninstalling or reinstalling the app never touches your work. Saving copies the existing data to the new folder (the old one is kept, not deleted); takes effect after a restart.': 'Where projects, version history and media are kept. Defaults to the app data folder; point it at a folder of your own (external drive, synced folder) and uninstalling or reinstalling the app never touches your work. Saving copies the existing data to the new folder (the old one is kept, not deleted); takes effect after a restart.',
-  '': 'On desktop, click "Choose folder"; you can also type an absolute path (~/ accepted). Clear it to return to the default folder.',
+  'On desktop, click "Choose folder"; you can also type an absolute path (~/ accepted). Clear it to return to the default folder.': 'On desktop, click "Choose folder"; you can also type an absolute path (~/ accepted). Clear it to return to the default folder.',
   'Saved · the new project storage folder takes effect after a restart': 'Saved · the new project storage folder takes effect after a restart',
   'This model is not in the built-in catalog, so these values are estimates (context {context} / output {output}). If they do not match the real model, expand and adjust them manually.': 'This model is not in the built-in catalog, so these values are estimates (context {context} / output {output}). If they do not match the real model, expand and adjust them manually.',
 } as Record<string, string>;

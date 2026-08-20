@@ -1,7 +1,7 @@
 // Playhead drawing machine (translated verbatim from Timeline.tsx):frameupdate → rAF frame-drawn playhead line
 // (GPU transform) timecode text with ~12fps throttling; Player instance watchdog (preview re-hang and re-subscribe monitoring,
 // Repair the root cause of needle freezing); resume playback at breakpoint (throttle persistence + one-time recovery after project attachment).
-import { useEffect, useRef, useState, type RefObject } from 'react';
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import type { CallbackListener, PlayerRef } from '@remotion/player';
 import { loadTimelineView, saveTimelineView } from '../../persist/sessionPrefs';
 import { HEADER_W, fmt, fmtClock } from './timelineUtil';
@@ -129,7 +129,7 @@ export function usePlayheadPaint({ playerRef, projectId, timelineId, fps, total,
   // frameupdate then only feeds the fallback/resume reference.
   const lastAudioFrameRef = useRef<number | null>(null);
   const lastAudioHeadSaveRef = useRef(0);
-  const findAudibleMediaElement = (item: AudibleAudioItem | null): HTMLMediaElement | null => {
+  const findAudibleMediaElement = useCallback((item: AudibleAudioItem | null): HTMLMediaElement | null => {
     const player = playerRef.current;
     const container = (player as unknown as { getContainerNode?: () => EventTarget | null })?.getContainerNode?.();
     if (!container || !(container instanceof HTMLElement)) return null;
@@ -142,7 +142,7 @@ export function usePlayheadPaint({ playerRef, projectId, timelineId, fps, total,
       if (match) return match;
     }
     return media.find((el) => !el.paused && el.readyState >= 2) ?? null;
-  };
+  }, [playerRef]);
   // coalesce frameupdate → one paint per animation frame (smoother playhead)
   const pendingFrameRef = useRef<number | null>(null);
   const paintRafRef = useRef(0);
@@ -320,7 +320,7 @@ export function usePlayheadPaint({ playerRef, projectId, timelineId, fps, total,
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [playing, getAudibleItem]);
+  }, [playing, getAudibleItem, findAudibleMediaElement]);
   useEffect(() => {
     const player = playerRef.current;
     if (player) restorePlayerRef.current(player);

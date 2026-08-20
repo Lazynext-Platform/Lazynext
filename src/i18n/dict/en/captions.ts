@@ -58,15 +58,15 @@ export default {
   // CaptionsControls — Create/display switches
   'Generate captions': 'Generate captions',
   'Add captions manually': 'Add captions manually',
-  '': 'Open "Caption styles" from Transcript, or add independent captions manually here.',
-  '': 'Finish "Transcribe" above first, then generate captions.',
+  'Open "Caption styles" from Transcript, or add independent captions manually here.': 'Open "Caption styles" from Transcript, or add independent captions manually here.',
+  'Finish "Transcribe" above first, then generate captions.': 'Finish "Transcribe" above first, then generate captions.',
   'Captions showing in preview': 'Captions showing in preview',
   'Captions hidden': 'Captions hidden',
   'Show': 'Show',
   'Hide': 'Hide',
   'Remove captions from the project': 'Remove captions from the project',
   'Remove': 'Remove',
-  '': 'Captions are off — neither preview nor export will burn them in. Click "Show" or tick the box to bring them back.',
+  'Captions are off — neither preview nor export will burn them in. Click "Show" or tick the box to bring them back.': 'Captions are off — neither preview nor export will burn them in. Click "Show" or tick the box to bring them back.',
   // CaptionsControls — Style/Rhythm
   'Style': 'Style',
   'Caption styles': 'Caption styles',
@@ -155,7 +155,7 @@ export default {
   'Text': 'Text',
   'Smaller text': 'Smaller text',
   'Bigger text': 'Bigger text',
-  '': 'Improve this caption line (at {time}, keep its timing): "{text}"',
+  'Improve this caption line (at {time}, keep its timing): "{text}"': 'Improve this caption line (at {time}, keep its timing): "{text}"',
   // Sentence-by-sentence editing (CaptionCueEditor)
   'Edit lines': 'Edit lines',
   ' ({n} lines)': ' ({n} lines)',
