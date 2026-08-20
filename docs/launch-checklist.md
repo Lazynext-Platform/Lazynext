@@ -23,6 +23,11 @@ manual configuration) and cannot be completed from the codebase alone.
 - [x] Vertex AI integration with ADC
 - [x] AI Studio key deleted
 - [x] GCP account cleanup (8 projects deleted from avaspatel99@gmail.com)
+- [x] Launch blog post written (docs/blog/launch-announcement.md)
+- [x] Social media profile content prepared (docs/social-media-profiles.md)
+- [x] Code signing setup guide (docs/code-signing-setup.md)
+- [x] Demo video script (docs/demo-video-script.md)
+- [x] Email DNS verified — lazynext.com MX record points to smtp.google.com (Gmail forwarding active)
 
 ## Requires External Action
 
@@ -75,10 +80,15 @@ The email `support@lazynext.com` is referenced in:
 - Landing page footer
 - Git commit identity
 
-**What to do**:
-1. Set up email forwarding or a mailbox for `support@lazynext.com`
-2. Options: Google Workspace ($6/mo), Cloudflare Email Routing (free),
-   or a helpdesk tool like Linear/Zendesk
+**DNS status (verified)**: `lazynext.com` MX record is `1 smtp.google.com` —
+email is already routed through Gmail forwarding. Emails sent to
+`@lazynext.com` addresses are forwarded to a configured Gmail account.
+
+**What to verify**:
+1. Confirm which Gmail account receives forwarded `@lazynext.com` emails
+   (check Gmail forwarding settings or Spaceship/Namecheap DNS control panel)
+2. If `support@lazynext.com` isn't already an alias, add it in the DNS control panel
+3. For a professional mailbox (instead of forwarding), consider Google Workspace ($6/mo)
 
 ### 4. GCP Account Migration (When ready)
 
