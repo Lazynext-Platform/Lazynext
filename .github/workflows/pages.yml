@@ -28,10 +28,11 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
-      - name: Copy landing page, screenshots, and icon
+      - name: Copy landing page, screenshots, CNAME, and icon
         run: |
           mkdir -p _site/screenshots
           cp landing/index.html _site/
+          cp landing/CNAME _site/
           cp landing/screenshots/*.png _site/screenshots/
           cp public/lazynext-icon.png _site/
       - uses: actions/configure-pages@v5
