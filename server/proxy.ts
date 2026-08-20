@@ -23,9 +23,14 @@ const HOP_BY_HOP = new Set(['host', 'connection', 'keep-alive', 'proxy-authoriza
 // Browser-only headers that must never reach upstream. Cookies are shared across
 // every localhost port, so a large accumulated cookie jar on a dev machine would
 // otherwise be forwarded verbatim and rejected by provider gateways (431/400).
+// Auth headers are stripped because the proxy injects the correct upstream auth
+// via route.headers() — the client's API key must never leak to the provider.
 const NEVER_FORWARD: Record<string, true> = {
   'x-lazynext-provider': true,
   cookie: true,
+  'x-goog-api-key': true,
+  authorization: true,
+  'x-api-key': true,
 };
 
 export interface ProxyRoute {

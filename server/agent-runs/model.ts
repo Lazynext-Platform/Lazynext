@@ -38,7 +38,9 @@ function providerFactory(
   const options = proxyOptions(provider, origin);
   switch (provider) {
     case 'anthropic': return createAnthropic(options);
-    case 'gemini': return createGoogleGenerativeAI(options);
+    case 'gemini':
+    case 'vertex':
+      return createGoogleGenerativeAI(options);
     case 'kimi': return createMoonshotAI(options);
     case 'qwen': return createAlibaba(options);
     case 'deepseek': return createDeepSeek(options);

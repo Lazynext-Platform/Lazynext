@@ -1,5 +1,6 @@
 import type { IncomingMessage } from 'node:http';
 import type { Plugin } from 'vite';
+import { spawnSync } from 'node:child_process';
 import { getKey, type KeyName } from '../keystore.ts';
 import {
   normalizeLlmProvider,
@@ -20,13 +21,54 @@ export function llmProviderForRequest(req?: IncomingMessage): LlmProvider {
 }
 
 export function llmTarget(req?: IncomingMessage): string {
-  return resolveLlmProviderConfig(llmProviderForRequest(req), keyReader).baseUrl;
+  const provider = llmProviderForRequest(req);
+  const protocol = protocolForProvider(provider);
+  if (protocol === 'google-vertex') {
+    // Construct Vertex AI base URL dynamically from GCP project/region.
+    const project = getKey('GCP_PROJECT_ID') || process.env.GCP_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT || '';
+    const region = getKey('GCP_REGION') || process.env.GCP_REGION || process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
+    if (!project) {
+      // Fall back to preset default if project is not configured
+      return resolveLlmProviderConfig(provider, keyReader).baseUrl;
+    }
+    return `https://${region}-aiplatform.googleapis.com/v1beta1/projects/${project}/locations/${region}/publishers/google`;
+  }
+  return resolveLlmProviderConfig(provider, keyReader).baseUrl;
+}
+
+// Synchronous ADC token retrieval for the Vertex AI proxy path.
+// Uses gcloud CLI (spawnSync) with an in-memory cache. In production,
+// GOOGLE_APPLICATION_CREDENTIALS can point to a service account key.
+let vertexTokenCache: { token: string; expiresAt: number } | null = null;
+
+function getVertexAccessToken(): string {
+  if (vertexTokenCache && Date.now() < vertexTokenCache.expiresAt - 60_000) {
+    return vertexTokenCache.token;
+  }
+  try {
+    const result = spawnSync('gcloud', ['auth', 'print-access-token'], {
+      encoding: 'utf-8',
+      timeout: 10_000,
+    });
+    if (result.status === 0 && result.stdout.trim()) {
+      const token = result.stdout.trim();
+      vertexTokenCache = { token, expiresAt: Date.now() + 50 * 60 * 1000 };
+      return token;
+    }
+  } catch { /* fall through */ }
+  return '';
 }
 
 export function llmHeaders(req?: IncomingMessage): Record<string, string> {
   const config = resolveLlmProviderConfig(llmProviderForRequest(req), keyReader);
-  if (!config.apiKey) return {};
   const protocol = protocolForProvider(config.provider);
+  if (protocol === 'google-vertex') {
+    // Vertex AI uses OAuth bearer tokens from ADC, not API keys.
+    const token = getVertexAccessToken();
+    if (!token) return {};
+    return { authorization: `Bearer ${token}` };
+  }
+  if (!config.apiKey) return {};
   if (protocol === 'anthropic') return { 'x-api-key': config.apiKey, 'anthropic-version': '2023-06-01' };
   if (protocol === 'google') return { 'x-goog-api-key': config.apiKey };
   return { authorization: `Bearer ${config.apiKey}` };

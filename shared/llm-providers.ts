@@ -1,6 +1,7 @@
 /** wire protocol the SERVER proxy speaks upstream: auth header + path family.
- * 'google' = Gemini native API (x-goog-api-key, /models/{id}:generateContent). */
-export type LlmProtocol = 'anthropic' | 'openai' | 'google' | 'openai-compatible';
+ * 'google' = Gemini native API (x-goog-api-key, /models/{id}:generateContent).
+ * 'google-vertex' = Vertex AI (Authorization: Bearer ADC token, /publishers/google/models/{id}:generateContent). */
+export type LlmProtocol = 'anthropic' | 'openai' | 'google' | 'google-vertex' | 'openai-compatible';
 export type OpenAiApiMode = 'responses' | 'chat';
 export const DEFAULT_OPENAI_API_MODE: OpenAiApiMode = 'responses';
 
@@ -33,6 +34,15 @@ export const LLM_PROVIDER_PRESETS = [
     protocol: 'google',
     baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
     defaultModel: 'gemini-3.5-flash',
+  },
+  {
+    id: 'vertex',
+    label: 'Google · Vertex AI',
+    protocol: 'google-vertex',
+    // Base URL is constructed dynamically from GCP_PROJECT_ID and GCP_REGION.
+    // The proxy appends /models/{model}:generateContent to this prefix.
+    baseUrl: 'https://us-central1-aiplatform.googleapis.com/v1beta1/projects/lazynext-ai/locations/us-central1/publishers/google',
+    defaultModel: 'gemini-2.5-flash',
   },
   {
     id: 'kimi',
@@ -182,7 +192,7 @@ export function providerApiPath(
 ): string {
   const protocol = protocolForProvider(provider);
   if (protocol === 'anthropic') return '/messages';
-  if (protocol === 'google') return '/models'; // Native API path according to model:/models/{id}:generateContent
+  if (protocol === 'google' || protocol === 'google-vertex') return '/models'; // Native API path according to model:/models/{id}:generateContent
   if (protocol === 'openai') {
     return normalizeOpenAiApiMode(openAiApiMode) === 'chat'
       ? '/chat/completions'
