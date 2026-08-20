@@ -118,13 +118,20 @@ jobs:
 
       - name: Package
         env:
-          # macOS code signing (activated when secrets are set)
-          CSC_LINK: ${{ secrets.MACOS_CERTIFICATE }}
-          CSC_KEY_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          # macOS code signing — only active when Apple Developer ID secrets
+          # are configured in the repository. When absent, CSC_IDENTITY_AUTO_DISCOVERY
+          # is set to false so electron-builder skips signing entirely instead of
+          # interpreting an empty CSC_LINK as a file path (which causes "not a file").
+          CSC_IDENTITY_AUTO_DISCOVERY: ${{ (runner.os == 'macOS' && secrets.MACOS_CERTIFICATE == '') && 'false' || 'true' }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: npm run ${{ matrix.script }}
+        run: |
+          if [[ "${{ runner.os }}" == "macOS" && -n "${{ secrets.MACOS_CERTIFICATE }}" ]]; then
+            export CSC_LINK="${{ secrets.MACOS_CERTIFICATE }}"
+            export CSC_KEY_PASSWORD="${{ secrets.MACOS_CERTIFICATE_PWD }}"
+          fi
+          npm run ${{ matrix.script }}
 
       - name: Smoke test macOS distribution
         if: runner.os == 'macOS'
