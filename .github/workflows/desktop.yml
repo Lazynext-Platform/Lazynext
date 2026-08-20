@@ -100,7 +100,30 @@ jobs:
       - name: Ensure Remotion browser
         run: node -e "import('@remotion/renderer').then(m => m.ensureBrowser()).then(() => console.log('browser ready'))"
 
+      # ── macOS code signing ──────────────────────────────────────────────
+      # When Apple Developer ID secrets are present, import the certificate
+      # and pass signing/notarization env to electron-builder. Without secrets
+      # the app is ad-hoc signed (users right-click → Open on first launch).
+      - name: Import macOS signing certificate
+        if: runner.os == 'macOS' && env.MACOS_CERTIFICATE != ''
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+        run: |
+          echo "$MACOS_CERTIFICATE" | base64 --decode > /tmp/certificate.p12
+          security create-keychain -p build build.keychain
+          security import /tmp/certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PWD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k build build.keychain
+          rm -f /tmp/certificate.p12
+
       - name: Package
+        env:
+          # macOS code signing (activated when secrets are set)
+          CSC_LINK: ${{ secrets.MACOS_CERTIFICATE }}
+          CSC_KEY_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: npm run ${{ matrix.script }}
 
       - name: Smoke test macOS distribution
