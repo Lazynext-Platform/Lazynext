@@ -6,6 +6,10 @@ import { TranscriptWindowRoot } from './media/TranscriptWindowRoot';
 import { loadProjectFonts } from './fonts/googleFonts';
 import { hydratePlugins } from './plugins/store';
 import { initSkins } from './skins';
+import { installGlobalErrorHandlers } from './telemetry/errorReporter';
+
+// Install global error handlers for opt-in error reporting (disabled by default).
+installGlobalErrorHandlers();
 
 // Inject skin variables and apply persistent skin before rendering to avoid flashing the default color in the first frame.
 initSkins();

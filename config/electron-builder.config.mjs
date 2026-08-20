@@ -73,7 +73,7 @@ export default {
   compression: 'maximum',
   publish: [{
     provider: 'github',
-    owner: 'lazynext',
+    owner: 'Lazynext-Platform',
     repo: 'Lazynext',
     channel: updateChannel,
   }],
