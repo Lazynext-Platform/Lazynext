@@ -263,7 +263,7 @@ export async function buildProjectExport(id: string, name: string): Promise<Proj
   }).blob();
   const safeName = sanitizeFileName(name, 'project');
   return {
-    filename: `${safeName}.ccproj`,
+    filename: `${safeName}.lnproj`,
     blob,
     mediaTotal: srcs.length,
     mediaMissing,
@@ -433,7 +433,7 @@ async function stageStreamPackage(
 }
 
 /**
- * Legacy envelope import is kept for old .ccproj.json files, but publication now
+ * Legacy envelope import is kept for old .lnproj.json files, but publication now
  * happens only after every carried media entry has decoded and staged.
  */
 export async function applyProjectImport(

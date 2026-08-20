@@ -84,8 +84,8 @@ function ProjectToolbar({ projects, model }: { projects: ProjectMeta[]; model: D
       <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 10 }}>
         <ProjectSearch value={model.query} onChange={model.setQuery} />
         <button onClick={() => model.setDialog('cleanup', true)} style={importBtn} title={t('Clean up uploaded assets no project references (leftovers from tests/deleted projects)')}><Icon name="trash" size={13} /> {t('Clean Up Media')}</button>
-        <button onClick={() => model.transfer.fileRef.current?.click()} disabled={model.transfer.busy} style={importBtn} title={t('Import a .ccproj project file (legacy .ccproj.json is also supported)')}><Icon name="upload" size={13} /> {t('Import Project')}</button>
-        <input ref={model.transfer.fileRef} type="file" accept=".ccproj,.json,application/json,application/x-lazynext-project" onChange={model.transfer.pickImport} style={{ display: 'none' }} />
+        <button onClick={() => model.transfer.fileRef.current?.click()} disabled={model.transfer.busy} style={importBtn} title={t('Import a .lnproj project file (legacy .lnproj.json is also supported)')}><Icon name="upload" size={13} /> {t('Import Project')}</button>
+        <input ref={model.transfer.fileRef} type="file" accept=".lnproj,.json,application/json,application/x-lazynext-project" onChange={model.transfer.pickImport} style={{ display: 'none' }} />
         <span style={{ color: theme.textDim, fontSize: 12.5 }}>
           {model.normalizedQuery
             ? t('{n} of {total}', { n: model.visibleProjects.length, total: projects.length })
@@ -131,7 +131,7 @@ function ProjectActions({ project, props, model }: { project: ProjectMeta; props
     <>
       <button onClick={() => model.rename.start(project)} style={miniBtn} title={t('Rename')}><Icon name="pencil" size={13} /></button>
       <button onClick={() => props.onDuplicate(project.id)} style={miniBtn} title={t('Duplicate')}><Icon name="copy" size={13} /></button>
-      <button onClick={() => void model.transfer.run(props.onExport(project.id, project.name))} disabled={model.transfer.busy} style={miniBtn} title={t('Export as streaming .ccproj (with assets; importable on another machine)')}><Icon name="download" size={13} /></button>
+      <button onClick={() => void model.transfer.run(props.onExport(project.id, project.name))} disabled={model.transfer.busy} style={miniBtn} title={t('Export as streaming .lnproj (with assets; importable on another machine)')}><Icon name="download" size={13} /></button>
       <button onClick={() => model.rename.setConfirmId(project.id)} style={miniBtn} title={t('Delete')}><Icon name="trash" size={13} /></button>
     </>
   );

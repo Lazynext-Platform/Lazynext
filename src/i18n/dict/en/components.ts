@@ -75,7 +75,7 @@ export default {
   'Projects': 'Projects',
   'Clean up uploaded assets no project references (leftovers from tests/deleted projects)': 'Clean up uploaded assets no project references (leftovers from tests/deleted projects)',
   'Clean Up Media': 'Clean Up Media',
-  'Import a .ccproj project file (legacy .ccproj.json is also supported)': 'Import a .ccproj project file (legacy .ccproj.json is also supported)',
+  'Import a .lnproj project file (legacy .lnproj.json is also supported)': 'Import a .lnproj project file (legacy .lnproj.json is also supported)',
   'Import Project': 'Import Project',
   '{n} total': '{n} total',
   '{n} of {total}': '{n} of {total}',
@@ -90,7 +90,7 @@ export default {
   'Permanently deleted “{name}”': 'Permanently deleted “{name}”',
   'Rename': 'Rename',
   'Duplicate': 'Duplicate',
-  'Export as streaming .ccproj (with assets; importable on another machine)': 'Export as streaming .ccproj (with assets; importable on another machine)',
+  'Export as streaming .lnproj (with assets; importable on another machine)': 'Export as streaming .lnproj (with assets; importable on another machine)',
   'Delete': 'Delete',
   // ---- ExportHistory ----
   'Export History': 'Export History',

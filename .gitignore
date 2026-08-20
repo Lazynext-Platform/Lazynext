@@ -33,7 +33,7 @@ test-results/
 # export output
 /out.*
 /exports/
-/*.ccproj.json
+/*.lnproj.json
 /*.fcpxml
 
 # secrets
