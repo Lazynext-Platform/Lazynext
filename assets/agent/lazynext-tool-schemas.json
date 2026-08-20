@@ -1118,9 +1118,10 @@
               "image-01",
               "wavespeed",
               "byteplus",
-              "pollinations"
+              "pollinations",
+              "vertex-imagen"
             ],
-            "description": "gpt-image-2 is the default; nano-banana is best for reference-heavy work; image-01 is MiniMax (at most 9 outputs; one subject reference when R2 is configured); wavespeed is WaveSpeed AI (fast generic image models, no references); byteplus is BytePlus ModelArk Seedream (no references yet); pollinations is free FLUX via Pollinations.ai (no API key required, no references)."
+            "description": "gpt-image-2 is the default; nano-banana is best for reference-heavy work; image-01 is MiniMax (at most 9 outputs; one subject reference when R2 is configured); wavespeed is WaveSpeed AI (fast generic image models, no references); byteplus is BytePlus ModelArk Seedream (no references yet); pollinations is free FLUX via Pollinations.ai (no API key required, no references); vertex-imagen is Google Vertex AI gemini-2.5-flash-image (requires GCP credentials, supports reference images)."
           },
           "prompt": {
             "type": "string",

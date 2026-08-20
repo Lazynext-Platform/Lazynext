@@ -7,6 +7,7 @@ import type { Plugin } from 'vite';
 import { generateImage } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 
+import { generateImageViaVertex } from './vertex-ai.ts';
 import { isSafeUploadName, resolveUploadFile, uploadDir } from '../media-dir.ts';
 import { presignGetUpload, putUploadFile } from '../r2.ts';
 import { fetchGeneratedResult } from './result-download.ts';
@@ -64,7 +65,7 @@ interface ImageRequest {
 }
 
 export interface ValidImageRequest {
-  model: 'gpt-image-2' | 'nano-banana' | 'image-01' | 'wavespeed' | 'byteplus' | 'pollinations';
+  model: 'gpt-image-2' | 'nano-banana' | 'image-01' | 'wavespeed' | 'byteplus' | 'pollinations' | 'vertex-imagen';
   prompt: string;
   aspectRatio?: string;
   imageSize: string;
@@ -130,7 +131,7 @@ function rejectForeignImageOptions(input: ImageRequest, model: ValidImageRequest
 /** Pure request validation — exported for unit checks. */
 export function validateImageRequest(input: ImageRequest): ValidImageRequest {
   const model = String(input.model ?? 'gpt-image-2');
-  if (model !== 'gpt-image-2' && model !== 'nano-banana' && model !== 'image-01' && model !== 'wavespeed' && model !== 'byteplus' && model !== 'pollinations') {
+  if (model !== 'gpt-image-2' && model !== 'nano-banana' && model !== 'image-01' && model !== 'wavespeed' && model !== 'byteplus' && model !== 'pollinations' && model !== 'vertex-imagen') {
     throw new Error(`unsupported model ${model}`);
   }
   const prompt = String(input.prompt ?? '').trim();
@@ -606,6 +607,14 @@ export function imageGenerationPlugin(options: ImagePluginOptions): Plugin {
             images = await callPollinationsProvider(options.pollinationsApiKey, {
               prompt, count, width, height,
             });
+          } else if (model === 'vertex-imagen') {
+            // Google Cloud Vertex AI — gemini-2.5-flash-image (uses GCP credits via ADC)
+            const refs: Buffer[] = [];
+            for (const refPath of referencePaths) {
+              try { refs.push(await readFile(refPath)); } catch { /* skip missing */ }
+            }
+            const vertexResults = await generateImageViaVertex(prompt, aspectRatio, refs.length ? refs : undefined);
+            images = vertexResults.map((r) => ({ b64_json: r.data.toString('base64') }));
           } else {
             if (!options.apiKey) throw new Error('Image generation is not configured. Set IMAGE_API_KEY or OPENAI_API_KEY in .env.local.');
             images = await callProvider(options.baseUrl, options.apiKey, {

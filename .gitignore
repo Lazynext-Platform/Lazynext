@@ -91,3 +91,5 @@ public/whisper-cli/
 # Local npm cache
 .npm-cache/
 .playwright-mcp/
+config/gcp-service-account.json
+**/application_default_credentials.json

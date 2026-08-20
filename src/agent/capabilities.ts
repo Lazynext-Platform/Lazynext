@@ -58,6 +58,7 @@ export function applyLiveModels(models: Record<string, string>): void {
 interface ProviderRow { label: string; arg: string; argKey: 'model' | 'provider'; need: string[][] }
 const CAP_PROVIDERS: Partial<Record<CapabilityKey, ProviderRow[]>> = {
   image: [
+    { label: 'Vertex Imagen (GCP)', arg: 'vertex-imagen', argKey: 'model', need: [[]] },
     { label: 'Pollinations (free)', arg: 'pollinations', argKey: 'model', need: [[]] },
     { label: 'gpt-image', arg: 'gpt-image-2', argKey: 'model', need: [['IMAGE_API_KEY'], ['OPENAI_API_KEY']] },
     { label: 'Nano Banana', arg: 'nano-banana', argKey: 'model', need: [['GEMINI_API_KEY']] },
