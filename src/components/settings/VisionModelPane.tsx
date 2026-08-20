@@ -31,6 +31,7 @@ const PROVIDER_LABELS: Record<LlmProvider, string> = {
  anthropic: 'Anthropic',
  openai: 'OpenAI',
  gemini: 'Google Gemini',
+ vertex: 'Google Vertex AI',
  kimi: 'Kimi',
  qwen: 'Qwen',
  glm: 'GLM',
