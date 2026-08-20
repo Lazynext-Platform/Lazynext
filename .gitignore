@@ -93,3 +93,4 @@ public/whisper-cli/
 .playwright-mcp/
 config/gcp-service-account.json
 **/application_default_credentials.json
+lazynext-landing-v0.4.png
