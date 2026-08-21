@@ -180,6 +180,10 @@ export const KEY_NAMES = [
   "AUTO_TRANSCRIBE_INGEST",
   "UI_SCALE",
   "LAZYNEXT_SKILLS_DIR",
+  // ── API Gateway (central REST API for apps, CLI, extension, mobile) ──
+  "LAZYNEXT_API_KEY",
+  "LAZYNEXT_API_RATE_LIMIT",
+  "LAZYNEXT_API_CORS_ORIGIN",
 ] as const;
 export type KeyName = (typeof KEY_NAMES)[number];
 const SETTABLE = new Set<string>(KEY_NAMES);

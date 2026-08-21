@@ -51,6 +51,7 @@ import { getKey } from "../keystore.ts";
 
 import { installSystemProxy } from '../net.ts';
 import { requestShapeGatePlugin } from './request-shape-gate';
+import { apiGatewayPlugin } from './api-gateway';
 
 export function serverPlugins(options: { projectStoreHttp?: boolean } = {}): Plugin[] {
   installSystemProxy();
@@ -71,6 +72,7 @@ export function serverPlugins(options: { projectStoreHttp?: boolean } = {}): Plu
     projectStorePlugin({ http: options.projectStoreHttp }),
     extensionStorePlugin(),
     externalAgentPlugin(),
+    apiGatewayPlugin(),
     codexAgentPlugin(),
     settingsPlugin(),
     exportStagePlugin(),

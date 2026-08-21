@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Plugin } from 'vite';
 import { projectStoreHttpAuthorized } from '../project-store-http-auth.ts';
 import { externalMcpAuthorized } from '../editor-auth.ts';
+import { apiGatewayAuthorized, isApiGatewayPath } from '../api-gateway-auth.ts';
 
 /**
  * Whether a state-changing request may proceed under the local-device trust
@@ -14,6 +15,9 @@ export function requestShapeAllowed(req: IncomingMessage): boolean {
   if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') return true;
   const url = new URL(req.url ?? '/', 'http://localhost');
   if (url.pathname === '/api/external-mcp/mcp' && externalMcpAuthorized(req)) return true;
+  // API Gateway: authenticated external clients (CLI, mobile, browser extension,
+  // third-party services) carry an API key instead of a same-origin Origin.
+  if (isApiGatewayPath(req) && apiGatewayAuthorized(req)) return true;
   // Upload slots carry a single-use, short-lived handoff token that the
   // /upload endpoint verifies itself (scope-bound filename/size/content-type);
   // external MCP clients upload without an Origin header, so the token is
