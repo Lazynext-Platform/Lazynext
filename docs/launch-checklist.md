@@ -99,18 +99,28 @@ email is already routed through Gmail forwarding. Emails sent to
 2. If `support@lazynext.com` isn't already an alias, add it in the DNS control panel
 3. For a professional mailbox (instead of forwarding), consider Google Workspace ($6/mo)
 
-### 4. GCP Account Migration (When ready)
+### 4. GCP Account Plan (Current: support@devinedesk.com → Future: support@lazynext.com)
 
-Currently using `support@devinedesk.com` for GCP/Vertex AI.
-The migration guide is at `docs/gcp-migration-guide.md`.
+**Current setup**: Using `support@devinedesk.com` for all GCP/Vertex AI models.
+Project: `lazynext-ai` | Region: `us-central1` | Billing: `0109DF-FA3450-4B5459`
 
-**When you have `support@lazynext.com` as a Google account**:
-1. Create a new GCP project (e.g., `lazynext-ai-prod`)
-2. Enable Vertex AI API
-3. Set up billing
-4. Run: `gcloud auth application-default login` with the new account
-5. Update `.env`: `GCP_PROJECT_ID=new-project-id`
-6. Restart the dev server
+**Only two GCP accounts are used for this project**:
+- `support@devinedesk.com` — current, active now
+- `support@lazynext.com` — future, will migrate in 1-2 months
+
+**No other GCP accounts are used.** The old `avaspatel99@gmail.com` account
+has been cleaned up (8 projects deleted). Only `concrete-drake-spwwt` remains
+but is owned by another organization (AIDA) and is not used by Lazynext.
+
+**Migration plan (in 1-2 months)**:
+1. Create `support@lazynext.com` as a Google account
+2. Create a new GCP project (e.g., `lazynext-ai-prod`)
+3. Enable Vertex AI API
+4. Set up billing
+5. Run: `gcloud auth application-default login` with the new account
+6. Update `.env`: `GCP_PROJECT_ID=lazynext-ai-prod`
+7. Restart the dev server
+8. Full migration guide: `docs/gcp-migration-guide.md`
 
 ### 5. concrete-drake-spwwt Project (avaspatel99@gmail.com)
 

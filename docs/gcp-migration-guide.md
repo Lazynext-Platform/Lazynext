@@ -2,12 +2,24 @@
 
 This guide explains how to migrate the Lazynext Google Cloud setup from the current account to a new account.
 
+## Account Plan
+
+| Phase | Account | Status | Timeline |
+|---|---|---|---|
+| **Current (now)** | `support@devinedesk.com` | Active — all models, Vertex AI, billing | Now |
+| **Future (migration)** | `support@lazynext.com` | Not yet created — will replace devinedesk | In 1-2 months |
+| **Retired** | `avaspatel99@gmail.com` | 8 projects already deleted; 1 inaccessible project (`concrete-drake-spwwt`) remains under AIDA org | N/A |
+
+**Rule**: Only `support@devinedesk.com` and `support@lazynext.com` are used for this project.
+No other GCP account is used. The old `avaspatel99@gmail.com` account has been cleaned up
+and is no longer used for Lazynext.
+
 ## Current Setup
 
 | Item | Value |
 |---|---|
 | Current account | `support@devinedesk.com` |
-| Target account | `support@lazynext.com` |
+| Target account (future) | `support@lazynext.com` |
 | Project ID | `lazynext-ai` |
 | Project number | `1016776851172` |
 | Region | `us-central1` |
