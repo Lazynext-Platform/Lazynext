@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>Lazynext</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <img src="icon.png" alt="" class="logo" onerror="this.style.display='none'">
+    <h1>Lazynext</h1>
+    <span id="status-dot" class="dot dot-unknown"></span>
+  </header>
+
+  <nav class="tabs">
+    <button data-tab="projects" class="tab active">Projects</button>
+    <button data-tab="media" class="tab">Media</button>
+    <button data-tab="agent" class="tab">Agent</button>
+    <button data-tab="settings" class="tab">Settings</button>
+  </nav>
+
+  <!-- Projects -->
+  <section id="tab-projects" class="tab-panel active">
+    <div class="toolbar">
+      <button id="new-project" class="btn">＋ New project</button>
+      <button id="refresh-projects" class="btn ghost">↻</button>
+    </div>
+    <ul id="projects" class="list"></ul>
+  </section>
+
+  <!-- Media -->
+  <section id="tab-media" class="tab-panel">
+    <div class="toolbar">
+      <button id="capture-photo" class="btn">📷 Take photo</button>
+      <button id="pick-file" class="btn ghost">Choose file</button>
+      <input id="file-input" type="file" accept="image/*,video/*,audio/*" hidden>
+      <button id="refresh-media" class="btn ghost">↻</button>
+    </div>
+    <ul id="media" class="list"></ul>
+  </section>
+
+  <!-- Agent -->
+  <section id="tab-agent" class="tab-panel">
+    <div id="agent-mcp" class="card"></div>
+    <h2>Tools</h2>
+    <ul id="agent-tools" class="list"></ul>
+  </section>
+
+  <!-- Settings -->
+  <section id="tab-settings" class="tab-panel">
+    <label class="field">
+      <span>Server URL</span>
+      <input id="set-url" type="url" placeholder="http://localhost:5199">
+    </label>
+    <label class="field">
+      <span>API key</span>
+      <input id="set-key" type="password" placeholder="LAZYNEXT_API_KEY">
+    </label>
+    <button id="save-settings" class="btn">Save</button>
+    <button id="test-connection" class="btn ghost">Test connection</button>
+    <div id="settings-msg" class="msg"></div>
+  </section>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Lazynext</string>
+    <string name="title_activity_main">Lazynext</string>
+    <string name="package_name">com.lazynext.app</string>
+    <string name="custom_url_scheme">com.lazynext.app</string>
+</resources>

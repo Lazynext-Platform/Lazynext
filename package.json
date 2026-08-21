@@ -6,6 +6,9 @@
   "author": "Lazynext",
   "type": "module",
   "main": "desktop-dist/main.mjs",
+  "bin": {
+    "lazynext": "cli/bin/lazynext.cjs"
+  },
   "desktopName": "lazynext.desktop",
   "engines": {
     "node": ">=24 <25"
@@ -23,6 +26,14 @@
     "dev:shared": "vite --config config/vite.config.ts",
     "prebuild": "npm run sync:mediapipe && npm run sync:whisper-cli && npm run verify:server-tool-catalog",
     "build": "tsc -b && vite build --config config/vite.config.ts",
+    "cli:build": "tsc -p cli/tsconfig.json && node -e \"require('fs').writeFileSync('cli/dist/package.json','{\\\"type\\\":\\\"commonjs\\\"}\\n')\"",
+    "cli:dev": "tsx cli/src/index.ts",
+    "mobile:sync": "cap sync",
+    "mobile:copy": "cap copy",
+    "mobile:open:ios": "cap open ios",
+    "mobile:open:android": "cap open android",
+    "mobile:run:ios": "cap run ios",
+    "mobile:run:android": "cap run android",
     "update:model-capabilities": "node --use-env-proxy scripts/update-llm-model-capabilities.mjs",
     "verify:affected": "node scripts/run-affected-verifies.mjs",
     "verify:media-drag": "tsx src/media/drag.verify.ts",
@@ -94,6 +105,13 @@
     "@aws-sdk/client-s3": "^3.1089.0",
     "@aws-sdk/s3-request-presigner": "^3.1090.0",
     "@babel/standalone": "^8.0.4",
+    "@capacitor/android": "8.5.0",
+    "@capacitor/camera": "8.2.3",
+    "@capacitor/cli": "8.5.0",
+    "@capacitor/core": "8.5.0",
+    "@capacitor/filesystem": "8.1.3",
+    "@capacitor/ios": "8.5.0",
+    "@capacitor/preferences": "8.0.1",
     "@e2b/code-interpreter": "^2.6.1",
     "@ffprobe-installer/ffprobe": "^2.1.2",
     "@huggingface/transformers": "^3.8.1",
