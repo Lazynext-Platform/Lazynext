@@ -78,8 +78,11 @@ MODEL-OPT-PLAN.md
 !server/external-agent/broker.check.ts
 
 # Local development and verification scripts
-/scripts/
+/scripts/*
 !/scripts/sync-mediapipe.mjs
+!/scripts/publish-cli.mjs
+!/scripts/package-extension.mjs
+!/scripts/mobile-production-https.sh
 
 # Local marketing assets and drafts
 /marketing/

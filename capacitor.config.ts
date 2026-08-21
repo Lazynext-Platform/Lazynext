@@ -1,22 +1,26 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
+// Production hardening: set LAZYNEXT_MOBILE_HTTPS=1 when the app connects to an
+// HTTPS-fronted server to disable cleartext HTTP and enforce secure transport.
+const ENFORCE_HTTPS = process.env.LAZYNEXT_MOBILE_HTTPS === '1';
+
 const config: CapacitorConfig = {
   appId: 'com.lazynext.app',
   appName: 'Lazynext',
   webDir: 'mobile/web',
   backgroundColor: '#0b0b0c',
   android: {
-    // Allow HTTP to LAN/desktop servers (the editor runs on http://<lan-ip>:5199).
-    allowMixedContent: true,
+    // Allow HTTP to LAN/desktop servers in dev; disabled when ENFORCE_HTTPS.
+    allowMixedContent: !ENFORCE_HTTPS,
     captureInput: true,
   },
   ios: {
-    // Allow HTTP loads to LAN/desktop servers via ATS exception (Info.plist).
+    // ATS exceptions are in Info.plist; remove them for HTTPS production builds.
     contentInset: 'always',
   },
   server: {
-    // The companion app is bundled; it connects to a user-configured server at runtime.
-    cleartext: true,
+    // Cleartext HTTP for LAN dev; disabled for HTTPS production builds.
+    cleartext: !ENFORCE_HTTPS,
   },
 };
 

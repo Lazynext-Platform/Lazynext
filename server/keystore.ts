@@ -184,6 +184,7 @@ export const KEY_NAMES = [
   "LAZYNEXT_API_KEY",
   "LAZYNEXT_API_RATE_LIMIT",
   "LAZYNEXT_API_CORS_ORIGIN",
+  "LAZYNEXT_ANALYTICS_KEY",
 ] as const;
 export type KeyName = (typeof KEY_NAMES)[number];
 const SETTABLE = new Set<string>(KEY_NAMES);

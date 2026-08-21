@@ -49,6 +49,47 @@ In the app, open the **Settings** tab and enter:
   when testing the web app in a desktop browser).
 - **API key** — the gateway key (`LAZYNEXT_API_KEY` set on the server).
 
+### Android setup (one-time)
+
+The Android build requires the Android SDK + JDK 17. If you don't have them:
+
+```bash
+# Install JDK 17 (requires sudo password)
+brew install --cask temurin@17
+
+# Install Android Studio (includes the SDK)
+brew install --cask android-studio
+
+# Or install just the command-line SDK (no IDE)
+brew install --cask android-commandlinetools
+export ANDROID_HOME="$HOME/Library/Android/sdk"
+echo 'export ANDROID_HOME="$HOME/Library/Android/sdk"' >> ~/.zshrc
+
+# Accept SDK licenses and install platform tools + build tools
+yes | sdkmanager --licenses
+sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+# Then sync and build
+npm run mobile:sync
+npm run mobile:open:android    # opens in Android Studio
+# or: cd android && ./gradlew assembleDebug
+```
+
+The generated APK will be at `android/app/build/outputs/apk/debug/app-debug.apk`.
+
+### iOS physical device setup
+
+The simulator build works without a paid account. To build for a physical device:
+
+1. Open `npm run mobile:open:ios` in Xcode.
+2. Select the **App** target → **Signing & Capabilities**.
+3. Set **Team** to your Apple Developer team (requires Apple Developer Program, $99/yr).
+4. Connect your iPhone/iPad via USB and select it as the run destination.
+5. Build and run (Cmd+R). Trust the developer certificate on the device under
+   Settings → General → VPN & Device Management.
+
+For App Store distribution: Product → Archive → Distribute App → App Store Connect.
+
 ## App icons & splash screen
 
 Generate native icons/splash from a source image:
@@ -70,8 +111,24 @@ cleartext HTTP to local/private hosts:
 - **Android**: `network_security_config.xml` permits cleartext for local/private
   hosts, plus `android:usesCleartextTraffic="true"` (`android/app/src/main/AndroidManifest.xml`).
 
-For production distribution over the public internet, point the app at an
-HTTPS-fronted Lazynext server and remove the cleartext exceptions.
+### Production HTTPS mode
+
+For production distribution over the public internet, switch to HTTPS-only:
+
+```bash
+npm run mobile:https        # enable HTTPS-only (removes cleartext exceptions)
+npm run mobile:sync         # sync the config into native projects
+npm run mobile:open:ios     # rebuild
+
+# To restore LAN cleartext for development later:
+npm run mobile:https:dev
+```
+
+This removes `NSAllowsArbitraryLoads` from iOS Info.plist, sets
+`android:usesCleartextTraffic="false"`, and tightens the Android network security
+config to deny cleartext except for `localhost` and private IP ranges. The
+Capacitor config also respects `LAZYNEXT_MOBILE_HTTPS=1` to disable
+`allowMixedContent` and `server.cleartext`.
 
 ## Permissions
 

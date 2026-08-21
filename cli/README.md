@@ -7,6 +7,9 @@ server from the terminal. The CLI uses the [API Gateway](../docs/api-gateway.md)
 ## Install
 
 ```bash
+# From npm (when published)
+npm install -g lazynext-cli
+
 # From the repo (builds the CLI to cli/dist)
 npm run cli:build
 
@@ -15,6 +18,20 @@ npm link
 ```
 
 Or run without building via tsx: `npm run cli:dev -- <command>`.
+
+## Publish to npm
+
+The CLI has zero runtime dependencies and publishes as a tiny standalone package.
+
+```bash
+npm login                    # one-time: authenticate to npmjs.org
+npm run cli:publish:dry-run  # preview the package (no upload)
+npm run cli:publish          # build + publish to npm
+```
+
+The publish script builds the CLI, writes a publishable `package.json` into
+`cli/dist/`, copies the bin loader, and runs `npm publish` from there. The
+package name is `lazynext-cli` (the root package stays `private: true`).
 
 ## Configure
 

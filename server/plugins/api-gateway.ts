@@ -199,6 +199,7 @@ window.onload=()=>SwaggerUIBundle({url:${JSON.stringify(specUrl)},dom_id:'#swagg
 // ── Handlers ────────────────────────────────────────────────────────────────
 
 async function handleStatus(res: ServerResponse, origin: string): Promise<void> {
+  const analyticsKey = (process.env.LAZYNEXT_ANALYTICS_KEY?.trim() || getKey('LAZYNEXT_ANALYTICS_KEY')).trim();
   sendJson(res, 200, {
     app: 'lazynext',
     version: APP_VERSION,
@@ -207,6 +208,7 @@ async function handleStatus(res: ServerResponse, origin: string): Promise<void> 
     capabilities: computeCaps(),
     mcpEndpoint: `${origin}/api/external-mcp/mcp`,
     mcpTokenConfigured: externalMcpToken().length > 0,
+    analyticsKey: analyticsKey || undefined,
   });
 }
 

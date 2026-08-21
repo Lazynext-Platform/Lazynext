@@ -43,6 +43,27 @@ open ./safari/Lazynext.xcodeproj
 ```
 (Apple Developer account + signing required for distribution outside your own Mac.)
 
+## Package for stores
+
+```bash
+npm run extension:package
+```
+
+Produces:
+- `dist/extension/lazynext-chrome.zip` — Chrome Web Store + Edge Add-ons
+- `dist/extension/lazynext-firefox.zip` — Firefox AMO (manifest patched with
+  `browser_specific_settings.gecko.id` and `background.scripts`)
+- `dist/extension/lazynext-safari/` — source for `xcrun safari-web-extension-converter`
+
+### Submit
+
+| Store | URL | Requirements |
+|---|---|---|
+| Chrome Web Store | https://chrome.google.com/webstore/devconsole | $5 one-time developer fee |
+| Edge Add-ons | https://partner.microsoft.com/dashboard/microsoftedge | Microsoft account |
+| Firefox AMO | https://addons.mozilla.org/developers/ | Mozilla account (free) |
+| Safari | `xcrun safari-web-extension-converter` → Xcode | Apple Developer Program ($99/yr) |
+
 ## Configuration
 
 Open the extension **Settings** (gear icon → Settings, or the popup footer link)

@@ -2,6 +2,7 @@
 // Uses Capacitor plugins when running natively (Camera, Preferences) and web
 // fallbacks when running in a browser, so the same page is testable on desktop.
 import { getConfig, setConfig, status, listProjects, createProject, deleteProject, listMedia, uploadMediaBlob, agentTools, agentMcp, editorUrl } from './api.js';
+import { initAnalytics, trackScreen, trackAction, trackError } from './analytics.js';
 
 const $ = (id) => document.getElementById(id);
 const Capacitor = window.Capacitor;
@@ -16,6 +17,7 @@ document.querySelectorAll('.tab').forEach((tab) => {
     document.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
     tab.classList.add('active');
     $(`tab-${tab.dataset.tab}`).classList.add('active');
+    trackScreen(tab.dataset.tab);
     if (tab.dataset.tab === 'projects') loadProjects();
     if (tab.dataset.tab === 'media') loadMedia();
     if (tab.dataset.tab === 'agent') loadAgent();
@@ -69,7 +71,7 @@ async function loadProjects() {
 $('new-project').addEventListener('click', async () => {
   const name = prompt('Project name?');
   if (name === null) return;
-  try { await createProject(config, { name }); loadProjects(); } catch (e) { alert(e.message); }
+  try { await createProject(config, { name }); trackAction('project_create'); loadProjects(); } catch (e) { trackError(e.message); alert(e.message); }
 });
 $('refresh-projects').addEventListener('click', loadProjects);
 
@@ -104,10 +106,12 @@ $('refresh-media').addEventListener('click', loadMedia);
 async function uploadBlob(blob, filename) {
   try {
     const rec = await uploadMediaBlob(config, blob, filename);
+    trackAction('media_upload', { type: blob.type, bytes: blob.size });
     alert(`Uploaded ${filename} (${formatBytes(blob.size)})`);
     loadMedia();
     return rec;
   } catch (e) {
+    trackError(e.message);
     alert(`Upload failed: ${e.message}`);
   }
 }
@@ -183,6 +187,11 @@ function relTime(ms) { const d = Date.now() - ms; if (d < 3600000) return `${Mat
 // ── Init ────────────────────────────────────────────────────────────────────
 (async () => {
   config = await getConfig();
+  // Opt-in analytics: initialize if a PostHog key is set in the server env
+  try {
+    const s = await status(config);
+    if (s && s.analyticsKey) initAnalytics(s.analyticsKey);
+  } catch { /* analytics is best-effort */ }
   await loadSettings();
   await checkStatus();
   await loadProjects();
