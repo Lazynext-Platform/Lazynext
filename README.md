@@ -103,6 +103,57 @@ npm run desktop:dist:win      # Windows
 npm run desktop:dist:linux    # Linux
 ```
 
+## Distribution formats
+
+Lazynext ships across every surface, all backed by the same local server:
+
+| Format | Location | Notes |
+|---|---|---|
+| **Website** (browser web app) | `src/`, `dist/`, `landing/` | The editor at `http://localhost:5199` |
+| **Desktop app** (Win/macOS/Linux) | `desktop/`, `desktop-dist/` | Electron native installers |
+| **AI Agent (MCP Server)** | `server/plugins/external-agent.ts` | Streamable HTTP at `/api/external-mcp/mcp` |
+| **API Gateway** | `server/plugins/api-gateway.ts` | Central REST API at `/api/v1/*` — see [docs/api-gateway.md](./docs/api-gateway.md) |
+| **CLI** | `cli/` | `lazynext` command — see [cli/README.md](./cli/README.md) |
+| **Browser Extension** | `extension/` | Chrome/Edge/Firefox/Safari — see [extension/README.md](./extension/README.md) |
+| **Mobile App** (Android + iOS) | `mobile/`, `ios/`, `android/` | Capacitor companion — see [mobile/README.md](./mobile/README.md) |
+
+### API Gateway (central API layer)
+
+Enable the versioned REST API consumed by the CLI, extension, and mobile app:
+
+```bash
+# .env
+LAZYNEXT_API_KEY=your-secret-key
+```
+
+```bash
+curl -H "Authorization: Bearer your-secret-key" http://localhost:5199/api/v1/status
+# Interactive docs: http://localhost:5199/api/v1/docs
+```
+
+### CLI
+
+```bash
+npm run cli:build && npm link
+lazynext config set --url http://localhost:5199 --key your-secret-key
+lazynext projects list
+lazynext media upload ./clip.mp4
+```
+
+### Browser extension
+
+Load `extension/` as an unpacked extension (Chrome/Edge) or temporary add-on
+(Firefox), set the server URL + API key on the options page, then right-click
+any image/video/audio on the web → "Send to Lazynext".
+
+### Mobile app
+
+```bash
+npm run mobile:sync
+npm run mobile:open:ios        # Xcode
+npm run mobile:open:android    # Android Studio
+```
+
 ## Agent / MCP
 
 Lazynext exposes a Streamable HTTP MCP endpoint at `http://localhost:5199/api/external-mcp/mcp`.
