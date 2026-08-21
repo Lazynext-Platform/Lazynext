@@ -12,6 +12,7 @@ test-results/
 .vite/
 *.tsbuildinfo
 ios/build/
+ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/
 
 # OS / editor / temporary files
 *.log
