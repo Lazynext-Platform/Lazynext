@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Lazynext</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <img src="icons/icon-32.png" alt="" class="logo">
+    <h1>Lazynext</h1>
+    <span id="status-dot" class="dot dot-unknown" title="Connection status"></span>
+  </header>
+
+  <section id="connection">
+    <div id="status-line" class="status-line">Checking connection…</div>
+  </section>
+
+  <section id="actions">
+    <button id="refresh" class="btn btn-ghost" title="Refresh">↻</button>
+    <button id="new-project" class="btn">＋ New project</button>
+    <button id="open-editor" class="btn btn-ghost">Open editor</button>
+  </section>
+
+  <section id="projects-section">
+    <h2>Projects <span id="project-count" class="muted"></span></h2>
+    <ul id="projects" class="projects"></ul>
+  </section>
+
+  <footer>
+    <a id="options-link" href="#">Settings</a>
+    <span class="muted" id="version"></span>
+  </footer>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
